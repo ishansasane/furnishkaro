@@ -12,6 +12,15 @@ import Tasks from "./assets/pages/Tasks";
 import Reports from "./assets/pages/Reports";
 import SettingsPage from "./assets/pages/SettingsPage";
 import FormPage from "./assets/pages/FormPage";
+import Store from "./assets/compoonents/Store.tsx";
+import Items from "./assets/compoonents/Items.tsx";
+import ProductGroup from "./assets/compoonents/ProductGroup.tsx";
+import Brands from "./assets/compoonents/Brands.tsx";
+import Catalogues from "./assets/compoonents/Catalogues.tsx";
+import Interiors from "./assets/compoonents/Interiors.tsx";
+import Tailors from "./assets/compoonents/Tailors.tsx";
+import SalesAssociate from "./assets/compoonents/SalesAssociate.tsx";
+
 import { useState } from "react";
 
 function App() {
@@ -35,6 +44,14 @@ function App() {
               <Route path="/reports" element={<Reports />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/add-project" element={<FormPage />} />
+              <Route path="/masters/stores" element={<Store />} />
+              <Route path="/masters/items" element={<Items />} />
+              <Route path="/masters/product-groups" element={<ProductGroup />} />
+              <Route path="/masters/brands" element={<Brands />} />
+              <Route path="/masters/catalogues" element={<Catalogues />} />
+              <Route path="/masters/interiors" element={<Interiors />} />
+              <Route path="/masters/tailors" element={<Tailors />} />
+              <Route path="/masters/sales-associate" element={<SalesAssociate />} />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </div>

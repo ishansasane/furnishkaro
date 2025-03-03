@@ -1,5 +1,5 @@
-import { MoreVertical, ChevronLast, ChevronFirst, LayoutDashboard, Briefcase, Users, ClipboardList, ListChecks, FileText, Settings } from "lucide-react";
-import { createContext, useContext, ReactNode } from "react";
+import { MoreVertical, ChevronLast, ChevronFirst, LayoutDashboard, Briefcase, Users, ClipboardList, ListChecks, FileText, Settings, ChevronDown } from "lucide-react";
+import { createContext, useContext, ReactNode, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 interface SidebarContextType {
@@ -16,6 +16,7 @@ export default function Sidebar() {
   }
 
   const { expanded, toggleSidebar } = context;
+  const [mastersOpen, setMastersOpen] = useState(false);
 
   return (
     <aside className={`h-screen bg-white border-r shadow-sm transition-all duration-300 ${expanded ? "w-64" : "w-20"} fixed`}>
@@ -33,7 +34,25 @@ export default function Sidebar() {
           <SidebarItem icon={<LayoutDashboard size={20} />} text="Dashboard" path="/" />
           <SidebarItem icon={<Briefcase size={20} />} text="Projects" path="/projects" />
           <SidebarItem icon={<Users size={20} />} text="Customers" path="/customers" />
-          <SidebarItem icon={<ClipboardList size={20} />} text="Masters" path="/masters" />
+          <li className="relative">
+            <button onClick={() => setMastersOpen(!mastersOpen)} className="flex items-center w-full py-2 px-3 my-1 font-medium rounded-md transition-all text-gray-600 hover:bg-gray-200">
+              <ClipboardList size={20} />
+              <span className={`flex justify-start overflow-hidden transition-all ${expanded ? "ml-3 w-40" : "w-0"}`}>Masters</span>
+              <ChevronDown className={`ml-auto transform transition-transform ${mastersOpen ? "rotate-180" : "rotate-0"}`} />
+            </button>
+            {mastersOpen && (
+              <ul className="ml-8 mt-1 space-y-1">
+                <SidebarItem icon={null} text="Stores" path="/masters/stores" />
+                <SidebarItem icon={null} text="Items" path="/masters/items" />
+                <SidebarItem icon={null} text="Product Groups" path="/masters/product-groups" />
+                <SidebarItem icon={null} text="Brands" path="/masters/brands" />
+                <SidebarItem icon={null} text="Catalogues" path="/masters/catalogues" />
+                <SidebarItem icon={null} text="Interiors" path="/masters/interiors" />
+                <SidebarItem icon={null} text="Tailors" path="/masters/tailors" />
+                <SidebarItem icon={null} text="Sales Associate" path="/masters/sales-associate" />
+              </ul>
+            )}
+          </li>
           <SidebarItem icon={<ListChecks size={20} />} text="Tasks" path="/tasks" />
           <SidebarItem icon={<FileText size={20} />} text="Reports" path="/reports" />
           <SidebarItem icon={<Settings size={20} />} text="Settings" path="/settings" />
@@ -56,7 +75,7 @@ export default function Sidebar() {
 }
 
 interface SidebarItemProps {
-  icon: ReactNode;
+  icon: ReactNode | null;
   text: string;
   path: string;
 }
@@ -70,10 +89,10 @@ export function SidebarItem({ icon, text, path }: SidebarItemProps) {
   const location = useLocation();
 
   return (
-    <Link to={path} className="block">
+    <Link to={path} className="block no-underline">
       <li className={`relative flex items-center py-2 px-3 my-1 font-medium rounded-md cursor-pointer transition-all group
-        ${location.pathname === path ? "bg-indigo-100 text-indigo-800" : "hover:bg-indigo-50 text-gray-600"}`}>
-        {icon}
+        ${location.pathname === path ? "bg-indigo-100 text-indigo-800" : "hover:bg-gray-200 text-gray-600"}`}>
+        {icon && icon}
         <span className={`overflow-hidden transition-all ${expanded ? "ml-3 w-40" : "w-0"}`}>
           {expanded && text}
         </span>
