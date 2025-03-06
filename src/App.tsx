@@ -22,6 +22,11 @@ import Tailors from "./assets/compoonents/Tailors.tsx";
 import SalesAssociate from "./assets/compoonents/SalesAssociate.tsx";
 
 import { useState } from "react";
+import Login from "./assets/compoonents/Login.tsx";
+import PassReset from "./assets/compoonents/ForgotPage.tsx";
+import NewPass from "./assets/compoonents/NewPass.tsx";
+import Register from "./assets/compoonents/Register.tsx";
+import VerifyMail from "./assets/compoonents/VerifyMail.tsx";
 
 function App() {
   const [expanded, setExpanded] = useState(true);  // ✅ Sidebar state in App.tsx
@@ -37,6 +42,11 @@ function App() {
           <div className={`flex-1 overflow-y-auto h-screen p-6 transition-all ${expanded ? "ml-64" : "ml-20"}`}>
             <Routes>
               <Route path="/" element={<Dashboard />} />
+              <Route path="/login" element={ <Login /> } />
+              <Route path="/forgotpass" element={ <PassReset />} />
+              <Route path="/forgotpass/reset/:token" element={ <NewPass /> } />
+              <Route path="/register" element={ <Register /> } />
+              <Route path="/verify" element={ <VerifyMail /> } />
               <Route path="/projects" element={<Projects />} />
               <Route path="/customers" element={<Customers />} />
               <Route path="/masters" element={<Masters />} />
