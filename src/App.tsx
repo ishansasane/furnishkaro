@@ -1,9 +1,6 @@
 import "./App.css";
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import {
-  LayoutDashboard, Briefcase, Users, ClipboardList, ListChecks, FileText, Settings
-} from "lucide-react";
-import Sidebar, { SidebarItem, SidebarContext } from "./assets/compoonents/Sidebar";
+import Sidebar, { SidebarContext } from "./assets/compoonents/Sidebar";
 import Dashboard from "./assets/pages/Dashboard";
 import Projects from "./assets/pages/Projects";
 import Customers from "./assets/pages/Customers";

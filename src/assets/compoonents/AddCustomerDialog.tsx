@@ -25,6 +25,28 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({ setDialogOpen, se
     setDialogOpen(false);
   };
 
+
+  async function sendcustomerData(){
+
+    const phonenumber = mobile;
+
+    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/sendcustomerdata", {
+        method : "POST",
+        headers : {
+          "content-type" : "application/json"
+        },
+        credentials : "include",
+        body : JSON.stringify({ name, phonenumber, address }),
+      });
+
+      if(response.status === 200){
+        alert("Customer added successfully");
+      }else{
+        alert("Error in adding customer");
+      }
+      setDialogOpen(false);
+  }
+
   return (
     <div className="absolute top-0 left-1/2 transform -translate-x-1/2 mt-10 z-50 w-full max-w-md">
       <div className="bg-white p-6 rounded shadow-md w-full border">
@@ -51,7 +73,7 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({ setDialogOpen, se
           <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => setDialogOpen(false)}>
             Cancel
           </button>
-          <button className="bg-green-500 text-white px-4 py-2 rounded" onClick={handleSubmit}>
+          <button className="bg-green-500 text-white px-4 py-2 rounded" onClick={sendcustomerData}>
             Save
           </button>
         </div>
