@@ -29,10 +29,34 @@ async function fetchCustomers(): Promise<Customer[]> {
   }
 }
 
+async function deleteCustomer(name, setreset, reset){
+  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletecustomerdata", {
+    method : "POST",
+    headers : {
+      "content-type" : "application/json",
+    },
+    credentials : "include",
+    body : JSON.stringify({name}),
+
+  });
+
+  if(response.status === 200){
+    alert("Customer deleted");
+    if(reset){
+      setreset(false);
+    }else{
+      setreset(true);
+    }
+  }else{
+    alert("Error in customer deletion");
+  }
+}
+
 export default function Customers() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [search, setSearch] = useState("");
   const [isDialogOpen, setDialogOpen] = useState(false);
+  const [reset, setreset] = useState(false);
 
   // Fetch customers when the component mounts
   useEffect(() => {
@@ -41,7 +65,8 @@ export default function Customers() {
       setCustomers(Array.isArray(data.body) ? data.body : []); // ✅ Ensure it's always an array
     }
     getCustomers();
-  }, [isDialogOpen]);
+  }, [isDialogOpen, reset]);
+
 
   return (
     <div className="p-6">
@@ -74,7 +99,8 @@ export default function Customers() {
             <th className="border px-4 py-2">Customer Name</th>
             <th className="border px-4 py-2">Mobile</th>
             <th className="border px-4 py-2">Address</th>
-            <th className="border px-4 py-2">Actions</th>
+            <th className="border px-4 py-2">Edit</th>
+            <th className="border px-4 py-2">Delete</th>
           </tr>
         </thead>
         <tbody>
@@ -85,22 +111,17 @@ export default function Customers() {
                 <td className="border px-4 py-2">{customer[2]}</td>
                 <td className="border px-4 py-2">{customer[3]}</td>
                 <td className="border px-4 py-2">
-                  <div className="flex gap-2">
-                    <button className="border px-2 py-1 rounded-md bg-gray-300">
+                <button className="border px-2 py-1 rounded-md bg-gray-300">
                       <Edit size={16} />
-                    </button>
-                    <button
-                      className="border px-2 py-1 rounded-md bg-red-500 text-white"
-                      onClick={() =>
-                        setCustomers((prev) =>
-                          prev.filter((c) => c.phonenumber !== customer.phonenumber)
-                        )
-                      }
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
+                </button>
                 </td>
+                <td className="border px-4 py-2">
+                    <button
+                      className={`border px-2 py-1 rounded-md bg-red-500 text-white`}
+                      onClick={() => {deleteCustomer(customer[1], setreset, reset)}}
+                    >
+                    <Trash2 size={16} />
+                    </button></td>
               </tr>
             ))
           ) : (
