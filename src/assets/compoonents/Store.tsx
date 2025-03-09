@@ -7,11 +7,20 @@ interface Store {
   address: string;
 }
 
+async function getStoreData(): Promise<Store[]>{
+  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getallstores", {
+    credentials : "include",
+  });
+
+  const data = await response.json();
+  
+  return Array.isArray(data.body) ? data : [];
+}
+
 const Store: React.FC = () => {
-  const [stores, setStores] = useState<Store>([
-    { name: 'Sheela Decor', phone: '-', email: '-', address: '-' },
-    { name: 'Dense', phone: '-', email: '-', address: '-' },
-  ]);
+
+  const [stores, setStores] = useState<Store[]>([]);
+
   const [isAddStoreOpen, setIsAddStoreOpen] = useState(false);
   const [newStoreName, setNewStoreName] = useState('');
   const [newStorePhone, setNewStorePhone] = useState(''); // Added phone state
@@ -20,10 +29,20 @@ const Store: React.FC = () => {
   const [dropdownOpen, setDropdownOpen] = useState<number | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [editingStore, setEditingStore] = useState<Store | null>(null);
+  const [refresh, setRefresh] = useState(true);
 
   const handleAddStoreClick = () => {
     setIsAddStoreOpen(true);
   };
+
+  useEffect(() => {
+    async function fetchData(){
+      const storedata = await getStoreData();
+      setStores(Array.isArray(storedata.body) ? storedata.body : []);
+    }
+    fetchData();
+  }, [dropdownOpen, refresh])
+
 
   const handleCloseAddStore = () => {
     setIsAddStoreOpen(false);
@@ -35,29 +54,36 @@ const Store: React.FC = () => {
     setEditingStore(null);
   };
 
-  const handleSaveStore = () => {
+  const handleSaveStore = async () => {
     if (editingStore) {
-      const updatedStores = stores.map((store) =>
-        store.name === editingStore.name
-          ? {
-              ...store,
-              name: newStoreName,
-              phone: newStorePhone, // Update phone
-              email: newStoreEmail, // Update email
-              address: newStoreAddress,
-            }
-          : store
-      );
-      setStores(updatedStores);
+      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/updatestore", {
+        method : "POST",
+        headers : {
+          "content-type" : "application/json"
+        },
+        credentials : "include",
+        body : JSON.stringify({storeName : newStoreName, storeAddress : newStoreAddress, email : newStoreEmail, phonenumber : newStorePhone})
+      });
       setEditingStore(null);
+      if(refresh){
+        setRefresh(false);
+      }else{
+        setRefresh(true);
+      }
     } else {
-      const newStore: Store = {
-        name: newStoreName,
-        phone: newStorePhone,
-        email: newStoreEmail,
-        address: newStoreAddress,
-      };
-      setStores([...stores, newStore]);
+      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/addstore", {
+        method : "POST",
+        headers : {
+          "content-type" : "application/json"
+        },
+        credentials : "include",
+        body : JSON.stringify({storeName : newStoreName, storeAddress : newStoreAddress, email : newStoreEmail, phonenumber : newStorePhone})
+      });
+      if(refresh){
+        setRefresh(false);
+      }else{
+        setRefresh(true);
+      }
     }
     handleCloseAddStore();
   };
@@ -66,19 +92,35 @@ const Store: React.FC = () => {
     setDropdownOpen(dropdownOpen === index ? null : index);
   };
 
-  const handleEdit = (store: Store) => {
+  const handleEdit = async (store: Store) => {
     setEditingStore(store);
-    setNewStoreName(store.name);
+    setNewStoreName(store[0]);
     setNewStorePhone(store.phone); // Set phone
     setNewStoreEmail(store.email); // Set email
     setNewStoreAddress(store.address);
     setIsAddStoreOpen(true);
     setDropdownOpen(null);
+
   };
 
-  const handleDelete = (store: Store) => {
-    const updatedStores = stores.filter((s) => s.name !== store.name);
-    setStores(updatedStores);
+  const handleDelete = async (store) => {
+
+    const storeName = store[0];
+
+    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletestore", {
+      method : "POSt",
+      headers : {
+        "content-type" : "application/json",
+      },
+      credentials : "include",
+      body : JSON.stringify({storeName})
+    });
+    if(refresh){
+      setRefresh(false);
+    }else{
+      setRefresh(true);
+    }
+
     setDropdownOpen(null);
   };
 
@@ -139,10 +181,10 @@ const Store: React.FC = () => {
         <tbody>
           {stores.map((store, index) => (
             <tr key={index}>
-              <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{store.name}</td>
-              <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{store.phone}</td>
-              <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{store.email}</td>
-              <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{store.address}</td>
+              <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{store[0]}</td>
+              <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{store[2]}</td>
+              <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{store[3]}</td>
+              <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{store[1]}</td>
               <td style={{ padding: '8px', borderBottom: '1px solid #eee', position: 'relative' }}>
                 <button onClick={() => toggleDropdown(index)} style={{ border: 'none', background: 'none', cursor: 'pointer' }}>
                 ⋮ 
@@ -195,7 +237,7 @@ const Store: React.FC = () => {
         <h3 style={{ marginBottom: '15px', textAlign: 'center' }}> {/* Centered title */}
           {editingStore ? 'Edit Store' : 'Add Store'}
         </h3>
-        <div style={{ marginBottom: '10px' }}>
+        <div style={{ marginBottom: '10px' }} className={`${editingStore ? "hidden" : "none"}`}>
           <label style={{ display: 'block', marginBottom: '5px' }}>Store Name:</label>
           <input
             type="text"
