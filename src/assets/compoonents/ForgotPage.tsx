@@ -51,7 +51,7 @@ const PassReset: React.FC = () => {
     <div className="flex items-center justify-center h-screen font-serif">
       <div className="flex flex-col items-center gap-2 md:gap-3 rounded-2xl border border-gray-400 w-[60vw] md:w-[30vw] lg:w-[28vw]">
         <div className="flex flex-col items-center mt-2 md:mt-4 px-2">
-          <p className="text-[5.8vw] md:text-[3vw] lg:text-[2.4vw] font-semibold text-green-400">
+          <p className="text-[5.8vw] md:text-[3vw] lg:text-[2.4vw] font-semibold text-sky-600">
             Forgot Password?
           </p>
           <p className="text-[2.8vw] md:text-[1.3vw] lg:text-[1.1vw] text-center mt-1">
@@ -69,7 +69,7 @@ const PassReset: React.FC = () => {
           <p className="text-red-700 md:text-[12px] text-[8px] -my-2 pl-1 py-1">{emailError}</p>
           <button
             onClick={forgotPassword}
-            className="lg:h-[3vw] md:h-8 h-8 text-[3.3vw] md:text-[2vw] lg:text-[1.5vw] rounded-xl bg-green-400 hover:bg-green-500"
+            className="lg:h-[3vw] md:h-8 h-8 text-[3.3vw] md:text-[2vw] lg:text-[1.5vw] rounded-xl bg-sky-400 hover:bg-sky-500"
           >
             Send Instructions
           </button>

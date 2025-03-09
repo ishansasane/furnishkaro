@@ -28,6 +28,7 @@ function VerifyMail() {
         alert("Email verified successfully!");
         navigate("/login");
       } else {
+        console.log(response);
         setError("Invalid or expired code. Please try again.");
       }
     } catch (error) {
@@ -41,7 +42,7 @@ function VerifyMail() {
     <div className="flex font-serif items-center justify-center h-screen">
       <div className="flex items-center flex-col w-[70vw] md:w-[40vw] lg:w-[30vw] rounded-2xl gap-4 border border-gray-400 p-4">
         <div className="flex flex-col items-center gap-2">
-          <p className="text-[6vw] md:text-[3vw] lg:text-[2.3vw] text-green-400 font-semibold">
+          <p className="text-[6vw] md:text-[3vw] lg:text-[2.3vw] text-sky-600 font-semibold">
             Verify Email
           </p>
           <p className="text-sm md:text-[1.2vw] lg:text-[1vw] text-center px-4">
@@ -63,7 +64,7 @@ function VerifyMail() {
 
         <button
           onClick={verifyCode}
-          className="lg:h-10 h-8 w-[60vw] md:w-[35vw] lg:w-[24vw] rounded-xl bg-green-400 hover:bg-green-500 md:text-lg disabled:bg-gray-300"
+          className="lg:h-10 h-8 w-[60vw] md:w-[35vw] lg:w-[24vw] rounded-xl bg-sky-400 hover:bg-sky-500 md:text-lg disabled:bg-gray-300"
           disabled={loading}
         >
           {loading ? "Verifying..." : "Submit"}

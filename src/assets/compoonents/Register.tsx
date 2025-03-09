@@ -70,7 +70,7 @@ function Register() {
   return (
     <div className='flex items-center justify-center h-screen font-serif'>
       <div className='flex flex-col items-center justify-center px-2 lg:px-4 lg:w-[28vw] border border-gray-400 rounded-2xl gap-3 lg:gap-4'>
-        <p className='text-[6vw] md:text-[3vw] lg:text-[2.6vw] mt-2 lg:mt-4 font-semibold text-green-400'>Register Account</p>
+        <p className='text-[6vw] md:text-[3vw] lg:text-[2.6vw] mt-2 lg:mt-4 font-semibold text-sky-600'>Register Account</p>
         <div className='flex flex-col w-full mt-3 lg:mt-4 gap-3 lg:gap-4'>
           <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder='Full Name' className='pl-2 text-[3.3vw] md:text-[2vw] lg:text-[1.2vw] h-8 lg:h-10 rounded-xl border border-gray-400' />
           <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder='Email Address' className='pl-2 text-[3.3vw] md:text-[2vw] lg:text-[1.2vw] h-8 lg:h-10 rounded-xl border border-gray-400' />
@@ -81,7 +81,7 @@ function Register() {
           <p className='pl-1 text-[8px] md:text-[12px] text-red-700 -my-2'>{confirmPassError}</p>
         </div>
         <p className='text-center text-[2.8vw] px-1 mt-3 lg:mt-4 md:text-[1.4vw] lg:text-[1.1vw]'>Click register and we will send you a verification email</p>
-        <button onClick={registerAccount} className='lg:h-12 h-8 rounded-xl text-sm md:text-[1.8vw] lg:text-[1.2vw] bg-green-400 w-full hover:bg-green-500 mb-2 lg:mb-4'>Register</button>
+        <button onClick={registerAccount} className='lg:h-12 h-8 rounded-xl text-sm md:text-[1.8vw] lg:text-[1.2vw] bg-sky-400 w-full hover:bg-sky-500 mb-2 lg:mb-4'>Register</button>
         <Link to="/login" className='-mt-4 underline mb-2 text-gray-500 hover:text-black text-sm md:text-[1.1vw] lg:text-[1vw]'>Back to Login</Link>
       </div>
     </div>

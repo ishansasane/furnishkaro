@@ -63,7 +63,7 @@ const Login: React.FC = () => {
     <div className="flex items-center justify-center font-serif h-screen">
       <div className="flex flex-col w-[75vw] md:w-[30vw] lg:w-[28vw] rounded-2xl border border-gray-300 gap-3">
         <div className="flex flex-col items-center gap-2 md:mt-2">
-          <p className="text-[7.5vw] md:text-[3.2vw] lg:text-[3vw] mt-2 px-2 md:px-4 lg:px-6 leading-tight text-center text-green-500 font-semibold">
+          <p className="text-[7.5vw] md:text-[3.2vw] lg:text-[3vw] mt-2 px-2 md:px-4 lg:px-6 leading-tight text-center text-sky-600 font-semibold">
             Login to your account
           </p>
           <p className="text-[3vw] md:text-[1.2vw] lg:text-[1.1vw] text-gray-500">
@@ -95,7 +95,7 @@ const Login: React.FC = () => {
         </div>
         <button
           onClick={sendLoginData}
-          className="rounded-xl bg-green-400 lg:h-10 hover:bg-green-500 h-8 md:text-md md:mt-2 md:mb-2 mb-2 mx-2 md:mx-2 md:h-8 text-sm lg:text-lg lg:mt-4 lg:mb-4 lg:mx-4"
+          className="rounded-xl bg-sky-400 lg:h-10 hover:bg-sky-500 h-8 md:text-md md:mt-2 md:mb-2 mb-2 mx-2 md:mx-2 md:h-8 text-sm lg:text-lg lg:mt-4 lg:mb-4 lg:mx-4"
         >
           Login
         </button>
