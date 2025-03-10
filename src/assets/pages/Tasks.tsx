@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Edit, Trash2, Plus } from "lucide-react";
 import TaskDialog from "../compoonents/TaskDialog";
 
@@ -34,14 +34,51 @@ const initialTasks: Task[] = [
   },
 ];
 
+const fetchTaskData = async () => {
+  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks");
+
+  const data = await response.json();
+
+  return data.body;
+}
+
+const deleteTask = async (name, setdeleted, deleted) => {
+  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletetask", {
+    method : "POST",
+    headers : {
+      "content-type" : "application/json",
+    },
+    credentials : "include",
+    body : JSON.stringify({title : name})
+  });
+  if(deleted){
+    setdeleted(false);
+  }else{
+    setdeleted(true);
+  }
+}
+
 export default function Tasks() {
-  const [tasks] = useState<Task[]>(initialTasks);
+  const [tasks, settasks] = useState<Task[]>(initialTasks);
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setDialogOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [editing, setediting] = useState(false);
+  const [deleted, setdeleted] = useState(false);
 
-  const filteredTasks = tasks.filter((task) =>
-    task.task.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    async function getTasks(){
+      const data = await fetchTaskData();
+      settasks(data);
+    }
+    getTasks();
+  }, [isDialogOpen, deleted]);
+
+  const editData = (n) => {
+    setName(n);
+    setediting(true);
+    setDialogOpen(true);
+  }
 
   return (
     <div className="p-6">
@@ -80,20 +117,20 @@ export default function Tasks() {
           </tr>
         </thead>
         <tbody>
-          {filteredTasks.map((task, index) => (
+          {tasks.map((task, index) => (
             <tr key={index} className="border">
-              <td className="border px-4 py-2">{task.task}</td>
-              <td className="border px-4 py-2">{task.description}</td>
-              <td className="border px-4 py-2">{task.date}</td>
-              <td className="border px-4 py-2">{task.time}</td>
-              <td className="border px-4 py-2">{task.assignee}</td>
-              <td className="border px-4 py-2">{task.priority}</td>
-              <td className="border px-4 py-2">{task.status}</td>
+              <td className="border px-4 py-2">{task[0]}</td>
+              <td className="border px-4 py-2">{task[1]}</td>
+              <td className="border px-4 py-2">{task[2]}</td>
+              <td className="border px-4 py-2">{task[4]}</td>
+              <td className="border px-4 py-2">{task[5]}</td>
+              <td className="border px-4 py-2">{task[6]}</td>
+              <td className="border px-4 py-2">{task[7]}</td>
               <td className="border px-4 py-2 flex gap-2">
-                <button className="border px-2 py-1 rounded-md bg-gray-300">
+                <button className="border px-2 py-1 rounded-md bg-gray-300" onClick={() => editData(task[0])}>
                   <Edit size={16} />
                 </button>
-                <button className="border px-2 py-1 rounded-md bg-red-500 text-white">
+                <button className="border px-2 py-1 rounded-md bg-red-500 text-white" onClick={() => deleteTask(task[0], setdeleted, deleted)}>
                   <Trash2 size={16} />
                 </button>
               </td>
@@ -103,7 +140,7 @@ export default function Tasks() {
       </table>
 
       {/* Add Task Dialog */}
-      {isDialogOpen && <TaskDialog onClose={() => setDialogOpen(false)} />}
+      {isDialogOpen && <TaskDialog onClose={() => setDialogOpen(false)} isEditing={editing} setediting = {() => setediting(false) } name = {name} />}
     </div>
   );
 }
