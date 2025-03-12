@@ -57,6 +57,7 @@ export default function Customers() {
   const [search, setSearch] = useState("");
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [reset, setreset] = useState(false);
+  const [editing, setEditing] = useState(null);
 
   // Fetch customers when the component mounts
   useEffect(() => {
@@ -107,18 +108,18 @@ export default function Customers() {
           {customers.length > 0 ? (
             customers.map((customer, index) => (
               <tr key={index} className="border">
+                <td className="border px-4 py-2">{customer[0]}</td>
                 <td className="border px-4 py-2">{customer[1]}</td>
                 <td className="border px-4 py-2">{customer[2]}</td>
-                <td className="border px-4 py-2">{customer[3]}</td>
                 <td className="border px-4 py-2">
-                <button className="border px-2 py-1 rounded-md bg-gray-300">
+                <button className="border px-2 py-1 rounded-md bg-gray-300" onClick={() => {setEditing(customer); setDialogOpen(true)}}>
                       <Edit size={16} />
                 </button>
                 </td>
                 <td className="border px-4 py-2">
                     <button
                       className={`border px-2 py-1 rounded-md bg-red-500 text-white`}
-                      onClick={() => {deleteCustomer(customer[1], setreset, reset)}}
+                      onClick={() => {deleteCustomer(customer[0], setreset, reset)}}
                     >
                     <Trash2 size={16} />
                     </button></td>
@@ -136,7 +137,7 @@ export default function Customers() {
 
       {/* Add Customer Dialog */}
       {isDialogOpen && (
-        <AddCustomerDialog setDialogOpen={setDialogOpen} setCustomers={setCustomers} />
+        <AddCustomerDialog setDialogOpen={setDialogOpen} editing={editing} setEditing = {setEditing}/>
       )}
     </div>
   );
