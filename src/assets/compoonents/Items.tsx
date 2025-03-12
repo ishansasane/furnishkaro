@@ -76,7 +76,7 @@ const Items = () => {
     setOpenMenu(-1);
   }
 
-  const groupOptions = [
+  const groupOptions : string[] = [
     "Fabric",
     "Area Based",
     "Running length based",
@@ -96,7 +96,7 @@ const Items = () => {
     "Tailoring": ["Parts", "Sq. feet"]
   };
 
-  const additionalFields = {
+  const additionalFields : object = {
     "Fabric": ["Coverage in Width", "Wastage in Height", "Threshold For Parts Calculation"],
     "Area Based": ["Coverage in Area"],
     "Running length based": [],
@@ -106,7 +106,7 @@ const Items = () => {
     "Tailoring": []
   };
 
-  const sideDropdownOptions = {
+  const sideDropdownOptions : object = {
     "Fabric": ["Inch", "Centimeter", "Meter"],
     "Area Based": ["Sq. Feet", "Sq. Meter"],
     "Running length based": [],
@@ -130,7 +130,7 @@ const Items = () => {
   });
 
   const handleGroupChange = (e) => {
-    const selectedGroup = e.target.value;
+    const selectedGroup : string = e.target.value;
     setFormData({
       ...formData,
       groupType: selectedGroup,
