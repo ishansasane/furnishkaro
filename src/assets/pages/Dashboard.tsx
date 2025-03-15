@@ -7,7 +7,7 @@ import TaskDialog from "../compoonents/TaskDialog";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/Store.ts";
-import { setTasks, setProjects, setStoreData, setItemData } from "../Redux/dataSlice.ts";
+import { setTasks, setProjects, setStoreData, setItemData, setProducts, setBrands, setCatalogs, setInteriors, setTailors, setSalesAssociates } from "../Redux/dataSlice.ts";
 
 
 const Dashboard: React.FC = () => {
@@ -17,7 +17,6 @@ const Dashboard: React.FC = () => {
     const dispatch = useDispatch();
     const tasks  = useSelector((state: RootState) => state.data.tasks);
     const projects  = useSelector((state: RootState) => state.data.projects);
-    const stores = useSelector((state : RootState) => state.data.stores);
 
   useEffect(() => {
     const fetchdata = async () => {
@@ -36,6 +35,31 @@ const Dashboard: React.FC = () => {
       data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts", {credentials : "include",});
       const itemData = await data.json();
       dispatch(setItemData(itemData.body));
+
+      data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getallproductgroup", {credentials: "include",});
+      const productData = await data.json();
+      dispatch(setProducts(productData.body));
+
+      data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getbrands", {credentials: "include",});
+      const brandData = await data.json();
+      dispatch(setBrands(brandData.body));
+
+      data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getbrands", {credentials: "include",});
+      const catalogData = await data.json();
+      dispatch(setCatalogs(catalogData.body));
+
+      data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getinteriordata", {credentials: "include",});
+      const interiorData = await data.json();
+      dispatch(setInteriors(interiorData.body));
+
+      data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettailors", {credentials: "include",});
+      const tailorData = await data.json();
+      dispatch(setTailors(tailorData.body));
+
+      data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsalesassociatedata", {credentials: "include",});
+      const salesAssociateData = await data.json();
+      dispatch(setSalesAssociates(salesAssociateData.body));
+  
     }
     fetchdata();
 

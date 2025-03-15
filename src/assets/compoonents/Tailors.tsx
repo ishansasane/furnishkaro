@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import TailorDialog from "../compoonents/TailorDialog";
+import { RootState } from "../Redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { setTailors } from "../Redux/dataSlice";
 
 interface Tailor {
   tailorName: string;
@@ -52,10 +55,12 @@ export default function Tailors() {
   const [editingTailor, setEditingTailor] = useState<Tailor | null>(null);
   const [refresh, setRefresh] = useState(false);
 
+  const dispatch = useDispatch();
+  const tailorData = useSelector((state : RootState) => state.data.tailors);
+
   useEffect(() => {
     async function getTailors() {
-      const data = await fetchTailors();
-      setTailors(Array.isArray(data) ? data : []);
+      setTailors(tailorData);
     }
     getTailors();
   }, [refresh]);

@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import BrandDialog from "../compoonents/BrandDialog";
+import { useDispatch, useSelector } from "react-redux";
+import { setBrands } from "../Redux/dataSlice";
+import { RootState } from "../Redux/Store";
 
 interface Brand {
   brandName: string;
@@ -50,10 +53,12 @@ export default function Brands() {
   const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
   const [refresh, setRefresh] = useState(false);
 
+  const dispatch = useDispatch();
+  const brandData = useSelector((state : RootState) => state.data.brands);
+
   useEffect(() => {
     async function getBrands() {
-      const data = await fetchBrands();
-      setBrands(Array.isArray(data) ? data : []);
+      setBrands(brandData);
     }
     getBrands();
   }, [refresh]);

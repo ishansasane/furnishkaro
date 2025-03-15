@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import InteriorDialog from "../compoonents/InteriorDialog";
+import { RootState } from "../Redux/Store";
+import { useDispatch, useSelector } from "react-redux"
+import { setInteriors } from "../Redux/dataSlice";
 
 interface Interior {
   name: string;
@@ -52,10 +55,12 @@ export default function Interiors() {
   const [editingInterior, setEditingInterior] = useState<Interior | null>(null);
   const [refresh, setRefresh] = useState(false);
 
+  const dispatch = useDispatch();
+  const interiorData = useSelector((state : RootState) => state.data.interiors);
+
   useEffect(() => {
     async function getInteriors() {
-      const data = await fetchInteriors();
-      setInteriors(Array.isArray(data) ? data : []);
+      setInteriors(interiorData);
     }
     getInteriors();
   }, [refresh]);

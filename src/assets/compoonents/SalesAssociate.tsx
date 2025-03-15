@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import SalesAssociateDialog from "../compoonents/SalesAssociateDialog";
+import { RootState } from "../Redux/Store";
+import { useSelector, useDispatch } from "react-redux";
+import { setSalesAssociates } from "../Redux/dataSlice";
 
 interface SalesAssociate {
   name: string;
@@ -52,10 +55,12 @@ export default function SalesAssociates() {
   const [editingSalesAssociate, setEditingSalesAssociate] = useState<SalesAssociate | null>(null);
   const [refresh, setRefresh] = useState(false);
 
+  const dispatch = useDispatch();
+  const salesAssociateData = useSelector((state : RootState) => state.data.salesAssociates);
+
   useEffect(() => {
     async function getSalesAssociates() {
-      const data = await fetchSalesAssociates();
-      setSalesAssociates(Array.isArray(data) ? data : []);
+      setSalesAssociates(salesAssociateData);
     }
     getSalesAssociates();
   }, [refresh]);

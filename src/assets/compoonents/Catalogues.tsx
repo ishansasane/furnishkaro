@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import CatalogueDialog from "../compoonents/CatalogueDialog";
+import { useDispatch, useSelector } from "react-redux";
+import { setCatalogs } from "../Redux/dataSlice";
+import { RootState } from "../Redux/Store";
 
 interface Catalogue {
   catalogueName: string;
@@ -50,10 +53,12 @@ export default function Catalogues() {
   const [editingCatalogue, setEditingCatalogue] = useState<Catalogue | null>(null);
   const [refresh, setRefresh] = useState(false);
 
+  const dispatch = useDispatch();
+  const catalogueData = useSelector((state : RootState) => state.data.catalogs);
+
   useEffect(() => {
     async function getCatalogues() {
-      const data = await fetchCatalogues();
-      setCatalogues(Array.isArray(data) ? data : []);
+      setCatalogues(catalogueData);
     }
     getCatalogues();
   }, [refresh]);

@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import ProductGroupDialog from "../compoonents/AddProductGroupDialog";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../Redux/Store.ts";
 
 interface ProductGroup {
   groupName: string;
@@ -53,10 +55,12 @@ export default function ProductGroups() {
   const [editingGroup, setEditingGroup] = useState<ProductGroup | null>(null);
   const [refresh, setRefresh] = useState(false);
 
+  const dispatch = useDispatch();
+  const products = useSelector((state : RootState) => state.data.products);
+
   useEffect(() => {
     async function getProductGroups() {
-      const data = await fetchProductGroups();
-      setProductGroups(Array.isArray(data) ? data : []);
+      setProductGroups(products);
     }
     getProductGroups();
   }, [refresh]);
