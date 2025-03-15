@@ -1,6 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { SetStateAction, useEffect, useState } from "react";
 import { ChevronFirst } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../Redux/Store.ts";
+import { setItemData } from "../Redux/dataSlice.ts";
 
 const getItemsData = async () => {
   const response  = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts");
@@ -19,6 +22,9 @@ const Items = () => {
   const [editing, setediting] = useState(false);
   const [name, setname] = useState("");
 
+  const dispatch = useDispatch();
+  const itemData = useSelector((state : RootState) => state.data.items);
+
   const [openMenu, setOpenMenu] = useState(-1); // Track which dropdown is open
 
   const toggleMenu = (index : number) => {
@@ -33,8 +39,7 @@ const Items = () => {
 
   useEffect(() => {
     async function getData(){
-      const data = await getItemsData();
-      setItems(data);
+      setItems(itemData);
     }
     getData();
   }, [isFormOpen, deleted])
@@ -247,7 +252,7 @@ const Items = () => {
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-5">
           {isFormOpen && (
-            <button onClick={() => setIsFormOpen(false)} className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100">
+            <button onClick={() => {setIsFormOpen(false); setediting(false)}} className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100">
               <ChevronFirst />
             </button>
           )}
@@ -275,8 +280,10 @@ const Items = () => {
           <div className="bg-white shadow rounded-lg p-4">
             <h1 className="text-xl font-semibold mb-4">{editing ? "Edit Task" : "Add Task"}</h1>
             <form>
-              <label className={`${editing ? "hidden" : "none"} block mb-2`}>Product Name</label>
-              <input type="text" className={`${editing ? "hidden" : "none"} w-full p-2 border rounded mb-4`} value={formData.productName} onChange={(e) => setFormData({ ...formData, productName: e.target.value })} />
+              <div className={`${editing ? "hidden" : "none"}`}>
+              <label className={`block mb-2`}>Product Name</label>
+              <input type="text" className={`w-full p-2 border rounded mb-4`} value={formData.productName} onChange={(e) => setFormData({ ...formData, productName: e.target.value })} />
+              </div>
               
               <label className="block mb-2">Product Details</label>
               <textarea className="w-full p-2 border rounded mb-4" value={formData.productDetails} onChange={(e) => setFormData({ ...formData, productDetails: e.target.value })}></textarea>

@@ -1,4 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, store } from "../Redux/Store.ts";
+import { setStoreData } from "../Redux/dataSlice.ts";
 
 interface Store {
   name: string;
@@ -21,6 +24,9 @@ const Store: React.FC = () => {
 
   const [stores, setStores] = useState<Store[]>([]);
 
+  const dispatch = useDispatch();
+  const storeData = useSelector((state : RootState) => state.data.stores);
+
   const [isAddStoreOpen, setIsAddStoreOpen] = useState(false);
   const [newStoreName, setNewStoreName] = useState('');
   const [newStorePhone, setNewStorePhone] = useState(''); // Added phone state
@@ -37,11 +43,10 @@ const Store: React.FC = () => {
 
   useEffect(() => {
     async function fetchData(){
-      const storedata = await getStoreData();
-      setStores(Array.isArray(storedata.body) ? storedata.body : []);
+      setStores(Array.isArray(storeData) ? storeData : []);
     }
     fetchData();
-  }, [dropdownOpen, refresh])
+  }, [dropdownOpen, refresh, dispatch])
 
 
   const handleCloseAddStore = () => {
