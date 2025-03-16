@@ -1,14 +1,69 @@
-import { useState } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import Card from "./CardPage";
 import DeadlineCard from "../compoonents/DeadlineCard";
 import TaskCard from "../compoonents/TaskCard";
 import InquiryCard from "../compoonents/InquiryCard";
 import TaskDialog from "../compoonents/TaskDialog";
 import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../Redux/Store.ts";
+import { setTasks, setProjects, setStoreData, setItemData, setProducts, setBrands, setCatalogs, setInteriors, setTailors, setSalesAssociates } from "../Redux/dataSlice.ts";
 
 
 const Dashboard: React.FC = () => {
   const [isTaskDialogOpen, setTaskDialogOpen] = useState<boolean>(false);
+  const [refresh, setRefresh] = useState(false);
+
+    const dispatch = useDispatch();
+    const tasks  = useSelector((state: RootState) => state.data.tasks);
+    const projects  = useSelector((state: RootState) => state.data.projects);
+
+  useEffect(() => {
+    const fetchdata = async () => {
+      let data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks", {credentials : "include"});
+      const taskData = await data.json();
+      dispatch(setTasks(taskData.body));
+
+      data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata", {credentials : "include"});
+      const projectData = await data.json();
+      dispatch(setProjects(projectData.body));
+
+      data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getallstores", {credentials : "include"});
+      const storeData = await data.json();
+      dispatch(setStoreData(storeData.body));
+
+      data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts", {credentials : "include",});
+      const itemData = await data.json();
+      dispatch(setItemData(itemData.body));
+
+      data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getallproductgroup", {credentials: "include",});
+      const productData = await data.json();
+      dispatch(setProducts(productData.body));
+
+      data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getbrands", {credentials: "include",});
+      const brandData = await data.json();
+      dispatch(setBrands(brandData.body));
+
+      data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getbrands", {credentials: "include",});
+      const catalogData = await data.json();
+      dispatch(setCatalogs(catalogData.body));
+
+      data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getinteriordata", {credentials: "include",});
+      const interiorData = await data.json();
+      dispatch(setInteriors(interiorData.body));
+
+      data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettailors", {credentials: "include",});
+      const tailorData = await data.json();
+      dispatch(setTailors(tailorData.body));
+
+      data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsalesassociatedata", {credentials: "include",});
+      const salesAssociateData = await data.json();
+      dispatch(setSalesAssociates(salesAssociateData.body));
+  
+    }
+    fetchdata();
+
+  }, [dispatch, refresh]);
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -36,16 +91,19 @@ const Dashboard: React.FC = () => {
         <div className="bg-white shadow-lg rounded-xl p-6">
           <h2 className="text-xl font-semibold mb-4 text-gray-800">📅 Project Deadlines</h2>
           <div className="space-y-4">
-            <DeadlineCard project="Website Redesign" date="March 10, 2025" />
-            <DeadlineCard project="Mobile App Development" date="April 5, 2025" />
-            <DeadlineCard project="Backend API" date="May 20, 2025" />
+            {projects.map((project, index) => (
+              <DeadlineCard project={project[0]} date={project[4]} key={index} />
+            ))}
           </div>
         </div>
 
         {/* Task List */}
         <div className="bg-white shadow-lg rounded-xl p-6 col-span-2">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-800">📝 Tasks</h2>
+          <Link to="/tasks" className="!no-underline">
+            <h1 className="text-xl font-semibold text-gray-800 no-underline">📝 Tasks</h1>
+          </Link>
+
             <button
               onClick={() => setTaskDialogOpen(true)}
               className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition-transform transform hover:scale-105"
@@ -56,51 +114,18 @@ const Dashboard: React.FC = () => {
 
           {/* Scrollable Task List */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto h-96 pr-2">
-            <TaskCard
-              task="Fix Login Bug"
-              description="Users unable to log in after password reset."
-              date="Feb 25, 2025"
-              time="10:30 AM"
-              assignee="John Doe"
-              priority="High"
-              status="Pending"
-            />
-            <TaskCard
-              task="Design Landing Page"
-              description="Create a responsive landing page."
-              date="March 2, 2025"
-              time="2:00 PM"
-              assignee="Jane Smith"
-              priority="Moderate"
-              status="In Progress"
-            />
-            <TaskCard
-              task="API Optimization"
-              description="Improve API response time by 30%."
-              date="March 5, 2025"
-              time="3:00 PM"
-              assignee="Alex Brown"
-              priority="High"
-              status="Pending"
-            />
-            <TaskCard
-              task="Database Cleanup"
-              description="Remove redundant data from DB."
-              date="March 8, 2025"
-              time="11:00 AM"
-              assignee="Chris Evans"
-              priority="Low"
-              status="Completed"
-            />
-            <TaskCard
-              task="Update Documentation"
-              description="Add latest API changes."
-              date="March 10, 2025"
-              time="4:00 PM"
-              assignee="Emma Watson"
-              priority="Moderate"
-              status="Pending"
-            />
+              {tasks.map((task, index) => (
+                            <TaskCard
+                            key={index}
+                            task={task[0]}
+                            description={task[1]}
+                            date={task[2]}
+                            time={task[3]}
+                            assignee={task[4]}
+                            priority={task[5]}
+                            status={task[6]}
+                          />
+              ))}
           </div>
         </div>
       </div>
@@ -139,7 +164,7 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Task Dialog Modal */}
-      {isTaskDialogOpen && <TaskDialog onClose={() => setTaskDialogOpen(false)} />}
+      {isTaskDialogOpen && <TaskDialog onClose={() => {setTaskDialogOpen(false); if(refresh){setRefresh(false);}else{setRefresh(true)}}} />}
     </div>
   );
 };

@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AddCustomerDialog from "./AddCustomerDialog";
+
 
 interface Customer {
   name: string;
@@ -17,6 +18,7 @@ interface CustomerDetailsProps {
 const CustomerDetails: React.FC<CustomerDetailsProps> = ({ selectedCustomer, setSelectedCustomer, customers, setCustomers }) => {
   const [isDialogOpen, setDialogOpen] = useState(false);
 
+
   return (
     <div className="mb-6 bg-white p-4 rounded shadow">
       <h2 className="text-xl font-semibold mb-4">Customer Details</h2>
@@ -29,7 +31,7 @@ const CustomerDetails: React.FC<CustomerDetailsProps> = ({ selectedCustomer, set
           <option value="">Select Customer</option>
           {customers.map((customer, index) => (
             <option key={index} value={customer.name}>
-              {customer.name}
+              {customer[0]}
             </option>
           ))}
         </select>
@@ -38,7 +40,7 @@ const CustomerDetails: React.FC<CustomerDetailsProps> = ({ selectedCustomer, set
         </button>
       </div>
 
-      {isDialogOpen && <AddCustomerDialog setDialogOpen={setDialogOpen} setCustomers={setCustomers} />}
+      {isDialogOpen && <AddCustomerDialog setDialogOpen={setDialogOpen} setCustomers={setCustomers} editing={editing} setEditing={setEditing}/>}
     </div>
   );
 };

@@ -1,5 +1,9 @@
-import { useEffect, useState } from "react";
-import { MoreVertical, ChevronLast, ChevronFirst, LayoutDashboard, Briefcase, Users, ClipboardList, ListChecks, FileText, Settings, ChevronDown } from "lucide-react";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { SetStateAction, useEffect, useState } from "react";
+import { ChevronFirst } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../Redux/Store.ts";
+import { setItemData } from "../Redux/dataSlice.ts";
 
 const getItemsData = async () => {
   const response  = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts");
@@ -18,13 +22,16 @@ const Items = () => {
   const [editing, setediting] = useState(false);
   const [name, setname] = useState("");
 
-  const [openMenu, setOpenMenu] = useState(null); // Track which dropdown is open
+  const dispatch = useDispatch();
+  const itemData = useSelector((state : RootState) => state.data.items);
 
-  const toggleMenu = (index) => {
-    setOpenMenu(openMenu === index ? null : index); // Toggle menu for the clicked row
+  const [openMenu, setOpenMenu] = useState(-1); // Track which dropdown is open
+
+  const toggleMenu = (index : number) => {
+    setOpenMenu(openMenu === index ? -1 : index); // Toggle menu for the clicked row
   };
 
-  const editmenu = (name) => {
+  const editmenu = (name : string) => {
     setIsFormOpen(true);
     setediting(true);
     setname(name);
@@ -32,14 +39,13 @@ const Items = () => {
 
   useEffect(() => {
     async function getData(){
-      const data = await getItemsData();
-      setItems(data);
+      setItems(itemData);
     }
     getData();
   }, [isFormOpen, deleted])
 
 
-  const deleteItem = async (name) => {
+  const deleteItem = async (name: string) => {
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletesingleproduct", {
       method : "POST",
       headers : {
@@ -48,6 +54,7 @@ const Items = () => {
       credentials : "include",
       body : JSON.stringify({ productName : name })
     });
+    
     if(deleted){
       setdeleted(false);
     }else{
@@ -56,7 +63,7 @@ const Items = () => {
     setOpenMenu(-1);
   }
 
-  const duplicateItem = async (item) => {
+  const duplicateItem = async (item : Array<string>) => {
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct", {
       method : "POSt",
       headers : {
@@ -74,7 +81,7 @@ const Items = () => {
     setOpenMenu(-1);
   }
 
-  const groupOptions = [
+  const groupOptions : string[] = [
     "Fabric",
     "Area Based",
     "Running length based",
@@ -94,7 +101,7 @@ const Items = () => {
     "Tailoring": ["Parts", "Sq. feet"]
   };
 
-  const additionalFields = {
+  const additionalFields : object = {
     "Fabric": ["Coverage in Width", "Wastage in Height", "Threshold For Parts Calculation"],
     "Area Based": ["Coverage in Area"],
     "Running length based": [],
@@ -104,7 +111,7 @@ const Items = () => {
     "Tailoring": []
   };
 
-  const sideDropdownOptions = {
+  const sideDropdownOptions : object = {
     "Fabric": ["Inch", "Centimeter", "Meter"],
     "Area Based": ["Sq. Feet", "Sq. Meter"],
     "Running length based": [],
@@ -128,7 +135,7 @@ const Items = () => {
   });
 
   const handleGroupChange = (e) => {
-    const selectedGroup = e.target.value;
+    const selectedGroup : string = e.target.value;
     setFormData({
       ...formData,
       groupType: selectedGroup,
@@ -140,7 +147,7 @@ const Items = () => {
     });
   };
 
-  const handleAdditionalInputChange = (field, value) => {
+  const handleAdditionalInputChange = (field : string, value : string) => {
     setFormData({
       ...formData,
       additionalInputs: { ...formData.additionalInputs, [field]: value }
@@ -245,7 +252,7 @@ const Items = () => {
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-5">
           {isFormOpen && (
-            <button onClick={() => setIsFormOpen(false)} className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100">
+            <button onClick={() => {setIsFormOpen(false); setediting(false)}} className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100">
               <ChevronFirst />
             </button>
           )}
@@ -273,8 +280,10 @@ const Items = () => {
           <div className="bg-white shadow rounded-lg p-4">
             <h1 className="text-xl font-semibold mb-4">{editing ? "Edit Task" : "Add Task"}</h1>
             <form>
-              <label className={`${editing ? "hidden" : "none"} block mb-2`}>Product Name</label>
-              <input type="text" className={`${editing ? "hidden" : "none"} w-full p-2 border rounded mb-4`} value={formData.productName} onChange={(e) => setFormData({ ...formData, productName: e.target.value })} />
+              <div className={`${editing ? "hidden" : "none"}`}>
+              <label className={`block mb-2`}>Product Name</label>
+              <input type="text" className={`w-full p-2 border rounded mb-4`} value={formData.productName} onChange={(e) => setFormData({ ...formData, productName: e.target.value })} />
+              </div>
               
               <label className="block mb-2">Product Details</label>
               <textarea className="w-full p-2 border rounded mb-4" value={formData.productDetails} onChange={(e) => setFormData({ ...formData, productDetails: e.target.value })}></textarea>
@@ -289,7 +298,7 @@ const Items = () => {
               
               <label className="block mb-2">Selling Unit</label>
               <select className="w-full p-2 border rounded mb-4" value={formData.sellingUnit} onChange={(e) => setFormData({ ...formData, sellingUnit: e.target.value })} disabled={!formData.groupType}>
-                {formData.groupType && sellingUnits[formData.groupType]?.map((unit) => (
+                {formData.groupType && sellingUnits[formData.groupType]?.map((unit : number) => (
                   <option key={unit} value={unit}>{unit}</option>
                 ))}
               </select>
@@ -297,7 +306,7 @@ const Items = () => {
               {formData.groupType && additionalFields[formData.groupType] && (
                 <>
                   <h3 className="text-lg font-semibold mt-4">Additional Information</h3>
-                  {additionalFields[formData.groupType].map((field) => (
+                  {additionalFields[formData.groupType].map((field : string) => (
                   <div key={field} className="flex space-x-4">
                     <div className={`w-${field === "Threshold For Parts Calculation" && formData.groupType === "Fabric" ? "full" : "1/2"}`}>
                       <label className="block mb-2">{field}</label>
@@ -318,7 +327,7 @@ const Items = () => {
                         value={formData.sideDropdown}
                         onChange={(e) => setFormData({ ...formData, sideDropdown: e.target.value })}
                       >
-                        {sideDropdownOptions[formData.groupType]?.map((option) => (
+                        {sideDropdownOptions[formData.groupType]?.map((option : number) => (
                           <option key={option} value={option}>{option}</option>
                         ))}
                       </select>

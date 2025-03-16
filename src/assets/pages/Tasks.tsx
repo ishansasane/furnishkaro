@@ -13,27 +13,6 @@ interface Task {
   status: "Pending" | "In Progress" | "Completed";
 }
 
-const initialTasks: Task[] = [
-  {
-    task: "Design UI",
-    description: "Create homepage wireframe",
-    date: "2025-02-23",
-    time: "10:00 AM",
-    assignee: "John Doe",
-    priority: "High",
-    status: "Pending",
-  },
-  {
-    task: "Backend Setup",
-    description: "Initialize database schema",
-    date: "2025-02-24",
-    time: "12:30 PM",
-    assignee: "Jane Smith",
-    priority: "Moderate",
-    status: "In Progress",
-  },
-];
-
 const fetchTaskData = async () => {
   const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks");
 
@@ -59,7 +38,7 @@ const deleteTask = async (name, setdeleted, deleted) => {
 }
 
 export default function Tasks() {
-  const [tasks, settasks] = useState<Task[]>(initialTasks);
+  const [tasks, settasks] = useState<Task[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState("");
