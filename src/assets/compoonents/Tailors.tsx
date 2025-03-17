@@ -3,17 +3,10 @@ import { Plus, Edit, Trash2 } from "lucide-react";
 import TailorDialog from "../compoonents/TailorDialog";
 import { RootState } from "../Redux/store";
 import { useDispatch, useSelector } from "react-redux";
-import { setTailors } from "../Redux/dataSlice";
-
-interface Tailor {
-  tailorName: string;
-  phoneNumber: string;
-  email: string;
-  address: string;
-}
+import { setTailorData } from "../Redux/dataSlice";
 
 // Fetch Tailors
-async function fetchTailors(): Promise<Tailor[]> {
+async function fetchTailors(){
   try {
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettailors", {
       credentials: "include",
@@ -49,10 +42,10 @@ async function deleteTailor(tailorName: string, setRefresh: (state: boolean) => 
 }
 
 export default function Tailors() {
-  const [tailors, setTailors] = useState<Tailor[]>([]);
+  const [tailors, setTailors] = useState([]);
   const [search, setSearch] = useState("");
   const [isDialogOpen, setDialogOpen] = useState(false);
-  const [editingTailor, setEditingTailor] = useState<Tailor | null>(null);
+  const [editingTailor, setEditingTailor] = useState(null);
   const [refresh, setRefresh] = useState(false);
 
   const dispatch = useDispatch();
@@ -60,10 +53,28 @@ export default function Tailors() {
 
   useEffect(() => {
     async function getTailors() {
+      const data = await fetchTailors();
+      dispatch(setTailorData(data));
       setTailors(tailorData);
     }
-    getTailors();
-  }, [refresh]);
+    if(tailorData.length == 0){
+      getTailors();
+    }else{
+      setTailors(tailorData);
+    }
+  }, [dispatch, tailorData]);
+
+  useEffect(() => {
+    async function getTailors() {
+      const data = await fetchTailors();
+      dispatch(setTailorData(data));
+      setTailors(tailorData);
+    }
+    if(refresh){
+      getTailors();
+      setRefresh(false);
+    }
+  }, [refresh])
 
   return (
     <div className="p-6">

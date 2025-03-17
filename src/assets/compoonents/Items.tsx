@@ -5,6 +5,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/Store.ts";
 import { setItemData } from "../Redux/dataSlice.ts";
 
+
+
 const getItemsData = async () => {
   const response  = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts");
 
@@ -38,11 +40,22 @@ const Items = () => {
   }
 
   useEffect(() => {
-    async function getData(){
+    async function fetchData(){
+      const data = await getItemsData();
+      dispatch(setItemData(data));
       setItems(itemData);
     }
-    getData();
-  }, [isFormOpen, deleted])
+    if(itemData != undefined){
+      if(itemData.length == 0){
+        fetchData();
+      }else{
+        setItems(itemData);
+      }
+    }else{
+      setItemData([]);
+      setItems([]);
+    }
+  }, [isFormOpen, deleted, itemData, dispatch])
 
 
   const deleteItem = async (name: string) => {
@@ -54,6 +67,9 @@ const Items = () => {
       credentials : "include",
       body : JSON.stringify({ productName : name })
     });
+    const data = await getItemsData();
+    dispatch(setItemData(data));
+    setItems(itemData);
     
     if(deleted){
       setdeleted(false);
@@ -72,7 +88,9 @@ const Items = () => {
       credentials : "include",
       body : JSON.stringify({ productName : item[0], description : item[1], groupTypes : item[2], sellingUnit : item[3], mrp : item[4], taxRate : item[5] })
     });
-
+    const data = await getItemsData();
+    dispatch(setItemData(data));
+    setItems(itemData);
     if(deleted){
       setdeleted(false);
     }else{
@@ -176,13 +194,15 @@ const Items = () => {
       credentials : "include",
       body : JSON.stringify({ productName : name, description : newItem.description, groupTypes : newItem.groupType, sellingUnit : newItem.costingType, mrp : newItem.mrp, taxRate : newItem.taxrate })
     });
-
     if(response.status === 200){
       alert("Item Updated");
       setIsFormOpen(false);
     }else{
       alert("Error");
     }
+    const data = await getItemsData();
+    dispatch(setItemData(data));
+    setItems(itemData);
     
     setIsFormOpen(false);
     setediting(false);
@@ -223,6 +243,9 @@ const Items = () => {
       credentials : "include",
       body : JSON.stringify({ productName : newItem.name, description : newItem.description, groupTypes : newItem.groupType, sellingUnit : newItem.costingType, mrp : newItem.mrp, taxRate : newItem.taxrate })
     });
+    const data = await getItemsData();
+    dispatch(setItemData(data));
+    setItems(itemData);
 
     if(response.status === 200){
       alert("Item Added");

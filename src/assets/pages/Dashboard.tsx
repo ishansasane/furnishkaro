@@ -27,38 +27,6 @@ const Dashboard: React.FC = () => {
       data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata", {credentials : "include"});
       const projectData = await data.json();
       dispatch(setProjects(projectData.body));
-
-      data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getallstores", {credentials : "include"});
-      const storeData = await data.json();
-      dispatch(setStoreData(storeData.body));
-
-      data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts", {credentials : "include",});
-      const itemData = await data.json();
-      dispatch(setItemData(itemData.body));
-
-      data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getallproductgroup", {credentials: "include",});
-      const productData = await data.json();
-      dispatch(setProducts(productData.body));
-
-      data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getbrands", {credentials: "include",});
-      const brandData = await data.json();
-      dispatch(setBrands(brandData.body));
-
-      data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getbrands", {credentials: "include",});
-      const catalogData = await data.json();
-      dispatch(setCatalogs(catalogData.body));
-
-      data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getinteriordata", {credentials: "include",});
-      const interiorData = await data.json();
-      dispatch(setInteriors(interiorData.body));
-
-      data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettailors", {credentials: "include",});
-      const tailorData = await data.json();
-      dispatch(setTailors(tailorData.body));
-
-      data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsalesassociatedata", {credentials: "include",});
-      const salesAssociateData = await data.json();
-      dispatch(setSalesAssociates(salesAssociateData.body));
   
     }
     fetchdata();

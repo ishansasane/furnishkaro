@@ -2,16 +2,16 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface DataState {
   products: any[];  // Change 'any' to the appropriate type
-  brands: any[];
+  brands: [];
   catalogs: any[];
   interiors: any[];
-  tailors: any[];
-  salesAssociates: any[];
+  tailors: [];
+  salesAssociates: [];
   tasks : any[];
   projects : any[];
   customers : any[];
   stores : any[];
-  items : any[];
+  items : [];
 }
 
 const initialState: DataState = {
@@ -35,19 +35,19 @@ const dataSlice = createSlice({
     setProducts: (state, action: PayloadAction<any[]>) => {
       state.products = action.payload;
     },
-    setBrands: (state, action: PayloadAction<any[]>) => {
+    setBrandData: (state, action: PayloadAction<[]>) => {
       state.brands = action.payload;
     },
     setCatalogs: (state, action: PayloadAction<any[]>) => {
       state.catalogs = action.payload;
     },
-    setInteriors: (state, action: PayloadAction<any[]>) => {
+    setInteriorData: (state, action: PayloadAction<any[]>) => {
       state.interiors = action.payload;
     },
-    setTailors: (state, action: PayloadAction<any[]>) => {
+    setTailorData: (state, action: PayloadAction<[]>) => {
       state.tailors = action.payload;
     },
-    setSalesAssociates: (state, action: PayloadAction<any[]>) => {
+    setSalesAssociateData: (state, action: PayloadAction<[]>) => {
       state.salesAssociates = action.payload;
     },
     setTasks : (state, action : PayloadAction<any[]> ) => {
@@ -62,7 +62,7 @@ const dataSlice = createSlice({
     setStoreData: (state, action : PayloadAction<any[]> ) => {
         state.stores = action.payload;
     },
-    setItemData : (state, action : PayloadAction<any[]> ) => {
+    setItemData : (state, action : PayloadAction<[]> ) => {
         state.items = action.payload;
     },
   },
@@ -70,11 +70,11 @@ const dataSlice = createSlice({
 
 export const {
   setProducts,
-  setBrands,
+  setBrandData,
   setCatalogs,
-  setInteriors,
-  setTailors,
-  setSalesAssociates,
+  setInteriorData,
+  setTailorData,
+  setSalesAssociateData,
   setTasks,
   setProjects,
   setCustomerData,

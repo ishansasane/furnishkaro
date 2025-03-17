@@ -58,10 +58,28 @@ export default function Catalogues() {
 
   useEffect(() => {
     async function getCatalogues() {
+      const data = await fetchCatalogues();
+      dispatch(setCatalogs(data));
       setCatalogues(catalogueData);
     }
-    getCatalogues();
-  }, [refresh]);
+    if(catalogueData.length === 0){
+      getCatalogues();
+    }else{
+      setCatalogues(catalogueData);
+    }
+  }, [catalogueData, dispatch]);
+
+  useEffect(() => {
+    async function getCatalogues() {
+      const data = await fetchCatalogues();
+      dispatch(setCatalogs(data));
+      setCatalogues(catalogueData);
+    }
+    if(refresh){
+      getCatalogues();
+      setRefresh(false);
+    }
+  }, [refresh])
 
   return (
     <div className="p-6">

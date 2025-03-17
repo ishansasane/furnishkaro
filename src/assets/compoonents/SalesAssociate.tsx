@@ -3,17 +3,10 @@ import { Plus, Edit, Trash2 } from "lucide-react";
 import SalesAssociateDialog from "../compoonents/SalesAssociateDialog";
 import { RootState } from "../Redux/Store";
 import { useSelector, useDispatch } from "react-redux";
-import { setSalesAssociates } from "../Redux/dataSlice";
-
-interface SalesAssociate {
-  name: string;
-  email: string;
-  phonenumber: string;
-  address: string;
-}
+import { setSalesAssociateData } from "../Redux/dataSlice";
 
 // Fetch Sales Associates
-async function fetchSalesAssociates(): Promise<SalesAssociate[]> {
+async function fetchSalesAssociates() {
   try {
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsalesassociatedata", {
       credentials: "include",
@@ -49,10 +42,10 @@ async function deleteSalesAssociate(name: string, setRefresh: (state: boolean) =
 }
 
 export default function SalesAssociates() {
-  const [salesAssociates, setSalesAssociates] = useState<SalesAssociate[]>([]);
+  const [salesAssociates, setSalesAssociates] = useState([]);
   const [search, setSearch] = useState("");
   const [isDialogOpen, setDialogOpen] = useState(false);
-  const [editingSalesAssociate, setEditingSalesAssociate] = useState<SalesAssociate | null>(null);
+  const [editingSalesAssociate, setEditingSalesAssociate] = useState(null);
   const [refresh, setRefresh] = useState(false);
 
   const dispatch = useDispatch();
@@ -60,11 +53,28 @@ export default function SalesAssociates() {
 
   useEffect(() => {
     async function getSalesAssociates() {
+      const data = await fetchSalesAssociates();
+      dispatch(setSalesAssociateData(data));
       setSalesAssociates(salesAssociateData);
     }
-    getSalesAssociates();
-  }, [refresh]);
+    if(salesAssociateData.length == 0){
+      getSalesAssociates();
+    }else{
+      setSalesAssociates(salesAssociateData);
+    }
+  }, [dispatch, salesAssociateData]);
 
+  useEffect(() => {
+    async function getSalesAssociates() {
+      const data = await fetchSalesAssociates();
+      dispatch(setSalesAssociateData(data));
+      setSalesAssociates(salesAssociateData);
+    }
+    if(refresh){
+      getSalesAssociates();
+      setRefresh(false);
+    }
+  }, [refresh])
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
