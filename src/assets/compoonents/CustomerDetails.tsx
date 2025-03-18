@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import AddCustomerDialog from "./AddCustomerDialog";
 
+import { RootState } from "../Redux/store";
+import { useSelector, useDispatch } from "react-redux";
+import { setCustomerData } from "../Redux/dataSlice";
 interface Customer {
   name: string;
   mobile: string;
@@ -10,12 +13,48 @@ interface Customer {
 interface CustomerDetailsProps {
   selectedCustomer: string | null;
   setSelectedCustomer: (customer: string | null) => void;
-  customers: Customer[];
-  setCustomers: (callback: (prev: Customer[]) => Customer[]) => void;
 }
 
-const CustomerDetails: React.FC<CustomerDetailsProps> = ({ selectedCustomer, setSelectedCustomer, customers, setCustomers }) => {
+const CustomerDetails: React.FC<CustomerDetailsProps> = ({ selectedCustomer, setSelectedCustomer, editing, setEditing }) => {
   const [isDialogOpen, setDialogOpen] = useState(false);
+
+  const [ customers, setcustomers ] = useState<[]>([]);
+
+  const customerData = useSelector((state : RootState) => state.data.customers);
+  const dispatch = useDispatch();
+
+  async function fetchCustomers(){
+    try {
+      const response = await fetch(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/getcustomerdata",
+        { credentials: "include" }
+      );
+  
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const data = await response.json(); // ✅ Ensure JSON is properly parsed
+      return Array.isArray(data.body) ? data.body : []; // ✅ Ensure we return an array
+    } catch (error) { 
+      console.error("Error fetching customer data:", error);
+      return [];
+    }
+  }
+
+  useEffect(() => {
+    async function fetchData(){
+      const data = await fetchCustomers();
+      dispatch(setCustomerData(data));
+      setcustomers(customerData);
+    }
+    if(customerData.length == 0){
+      fetchData();
+    }else{
+      setcustomers(customerData);
+    }
+  }, [customerData, dispatch])
 
   return (
     <div className="mb-6 bg-white p-4 rounded shadow">
@@ -27,9 +66,9 @@ const CustomerDetails: React.FC<CustomerDetailsProps> = ({ selectedCustomer, set
           onChange={(e) => setSelectedCustomer(e.target.value)}
         >
           <option value="">Select Customer</option>
-          {customers.map((customer, index) => (
-            <option key={index} value={customer.name}>
-              {customer.name}
+          { Array.isArray(customers) && customers.map((customer, index) => (
+            <option key={index} value={customer[0]}>
+              {customer[0]}
             </option>
           ))}
         </select>
@@ -38,7 +77,7 @@ const CustomerDetails: React.FC<CustomerDetailsProps> = ({ selectedCustomer, set
         </button>
       </div>
 
-      {isDialogOpen && <AddCustomerDialog setDialogOpen={setDialogOpen} setCustomers={setCustomers} />}
+      {isDialogOpen && <AddCustomerDialog setDialogOpen={setDialogOpen} setCustomers={setcustomers} editing={editing} setEditing={setEditing}/>}
     </div>
   );
 };

@@ -1,16 +1,13 @@
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import InteriorDialog from "../compoonents/InteriorDialog";
+import { RootState } from "../Redux/Store";
+import { useDispatch, useSelector } from "react-redux"
+import { setInteriorData } from "../Redux/dataSlice";
 
-interface Interior {
-  name: string;
-  email: string;
-  phoneNumber: string;
-  address: string;
-}
 
 // Fetch interiors from the server
-async function fetchInteriors(): Promise<Interior[]> {
+async function fetchInteriors(){
   try {
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getinteriordata", {
       credentials: "include",
@@ -21,7 +18,7 @@ async function fetchInteriors(): Promise<Interior[]> {
     }
 
     const data = await response.json();
-    return Array.isArray(data.body) ? data.body : [];
+    return data.body;
   } catch (error) {
     console.error("Error fetching interiors:", error);
     return [];
@@ -46,19 +43,39 @@ async function deleteInterior(name: string, setRefresh: (state: boolean) => void
 }
 
 export default function Interiors() {
-  const [interiors, setInteriors] = useState<Interior[]>([]);
+  const [interiors, setInteriors] = useState([]);
   const [search, setSearch] = useState("");
   const [isDialogOpen, setDialogOpen] = useState(false);
-  const [editingInterior, setEditingInterior] = useState<Interior | null>(null);
+  const [editingInterior, setEditingInterior] = useState(null);
   const [refresh, setRefresh] = useState(false);
+
+  const dispatch = useDispatch();
+  const interiorData = useSelector((state : RootState) => state.data.interiors);
 
   useEffect(() => {
     async function getInteriors() {
-      const data = await fetchInteriors();
-      setInteriors(Array.isArray(data) ? data : []);
+      const interiorData = await fetchInteriors();
+      dispatch(setInteriorData(interiorData));
+      setInteriors(interiorData);
     }
-    getInteriors();
-  }, [refresh]);
+    if(interiorData.length === 0){
+      getInteriors();
+    }else{
+      setInteriors(interiorData);
+    }
+  }, [dispatch, interiorData]);
+
+  useEffect(() => {
+    async function getInteriors() {
+      const interiorData = await fetchInteriors();
+      dispatch(setInteriorData(interiorData));
+      setInteriors(interiorData);
+    }
+    if(refresh){
+      getInteriors();
+      setRefresh(false);
+    }    
+  }, [refresh])
 
   return (
     <div className="p-6">

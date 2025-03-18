@@ -1,4 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, store } from "../Redux/Store.ts";
+import { setStoreData } from "../Redux/dataSlice.ts";
 
 interface Store {
   name: string;
@@ -21,6 +24,9 @@ const Store: React.FC = () => {
 
   const [stores, setStores] = useState<Store[]>([]);
 
+  const dispatch = useDispatch();
+  const storeData = useSelector((state : RootState) => state.data.stores);
+
   const [isAddStoreOpen, setIsAddStoreOpen] = useState(false);
   const [newStoreName, setNewStoreName] = useState('');
   const [newStorePhone, setNewStorePhone] = useState(''); // Added phone state
@@ -35,22 +41,13 @@ const Store: React.FC = () => {
     setIsAddStoreOpen(true);
   };
 
-  useEffect(() => {
-    async function fetchData(){
-      const storedata = await getStoreData();
-      setStores(Array.isArray(storedata.body) ? storedata.body : []);
-    }
-    fetchData();
-  }, [dropdownOpen, refresh])
-
-
   const handleCloseAddStore = () => {
     setIsAddStoreOpen(false);
     setNewStoreName('');
     setNewStorePhone(''); // Reset phone
     setNewStoreEmail(''); // Reset email
     setNewStoreAddress('');
-    setDropdownOpen(null);
+    setDropdownOpen(-1);
     setEditingStore(null);
   };
 
@@ -65,6 +62,9 @@ const Store: React.FC = () => {
         body : JSON.stringify({storeName : newStoreName, storeAddress : newStoreAddress, email : newStoreEmail, phonenumber : newStorePhone})
       });
       setEditingStore(null);
+      const data = await getStoreData();
+      dispatch(setStoreData(data.body));
+      setStores(storeData);
       if(refresh){
         setRefresh(false);
       }else{
@@ -79,6 +79,9 @@ const Store: React.FC = () => {
         credentials : "include",
         body : JSON.stringify({storeName : newStoreName, storeAddress : newStoreAddress, email : newStoreEmail, phonenumber : newStorePhone})
       });
+      const data = await getStoreData();
+      dispatch(setStoreData(data.body));
+      setStores(storeData);
       if(refresh){
         setRefresh(false);
       }else{
@@ -94,14 +97,14 @@ const Store: React.FC = () => {
 
   const handleEdit = async (store: Store) => {
     setEditingStore(store);
-    setNewStoreName(store[0]);
-    setNewStorePhone(store.phone); // Set phone
-    setNewStoreEmail(store.email); // Set email
-    setNewStoreAddress(store.address);
+    setNewStoreName(store ? store[0] : '');  // Ensure a fallback value
+    setNewStorePhone(store ? store[1] : '');
+    setNewStoreEmail(store? store[2] : '');
+    setNewStoreAddress(store? store[3] : '');
     setIsAddStoreOpen(true);
     setDropdownOpen(null);
-
   };
+  
 
   const handleDelete = async (store) => {
 
@@ -115,6 +118,9 @@ const Store: React.FC = () => {
       credentials : "include",
       body : JSON.stringify({storeName})
     });
+    const data = await getStoreData();
+    dispatch(setStoreData(data.body));
+    setStores(storeData);
     if(refresh){
       setRefresh(false);
     }else{
@@ -125,17 +131,22 @@ const Store: React.FC = () => {
   };
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownOpen(null);
+    async function fetchData(){
+      const data = await getStoreData();
+      dispatch(setStoreData(data.body));
+      setStores(Array.isArray(data.body) ? data.body : []);
+    }
+    if(storeData != undefined){
+      if(storeData.length == 0){
+        fetchData();
+      }else{
+        setStores(storeData);
       }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  },);
+    }else{
+      setStoreData([]);
+      setStores([]);
+    }
+  }, [dropdownOpen, refresh, dispatch, storeData])
 
   return (
     <div style={{ padding: '20px' , backgroundColor: '#f0f2f5' , borderRadius: '20px'}}>
@@ -179,7 +190,7 @@ const Store: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {stores.map((store, index) => (
+          {stores == undefined ? <div></div> : stores.map((store, index) => (
             <tr key={index}>
               <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{store[0]}</td>
               <td style={{ padding: '8px', borderBottom: '1px solid #eee' }}>{store[2]}</td>

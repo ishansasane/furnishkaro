@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { Edit, Trash2, Plus } from "lucide-react";
 import TaskDialog from "../compoonents/TaskDialog";
+import { setTasks } from "../Redux/dataSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../Redux/Store";
 
 
 interface Task {
@@ -12,27 +15,6 @@ interface Task {
   priority: "High" | "Moderate" | "Low";
   status: "Pending" | "In Progress" | "Completed";
 }
-
-const initialTasks: Task[] = [
-  {
-    task: "Design UI",
-    description: "Create homepage wireframe",
-    date: "2025-02-23",
-    time: "10:00 AM",
-    assignee: "John Doe",
-    priority: "High",
-    status: "Pending",
-  },
-  {
-    task: "Backend Setup",
-    description: "Initialize database schema",
-    date: "2025-02-24",
-    time: "12:30 PM",
-    assignee: "Jane Smith",
-    priority: "Moderate",
-    status: "In Progress",
-  },
-];
 
 const fetchTaskData = async () => {
   const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks");
@@ -59,20 +41,42 @@ const deleteTask = async (name, setdeleted, deleted) => {
 }
 
 export default function Tasks() {
-  const [tasks, settasks] = useState<Task[]>(initialTasks);
+  const [tasks, settasks] = useState<Task[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState("");
   const [editing, setediting] = useState(false);
   const [deleted, setdeleted] = useState(false);
 
+  const dispatch = useDispatch();
+  const taskData = useSelector((state : RootState) => state.data.tasks);
+
   useEffect(() => {
     async function getTasks(){
       const data = await fetchTaskData();
-      settasks(data);
+      dispatch(setTasks(data));
+      settasks(taskData)
     }
-    getTasks();
-  }, [isDialogOpen, deleted]);
+    if(taskData.length == 0){
+      getTasks();
+    }else{
+      settasks(taskData);
+    }
+  }, [dispatch, taskData]);
+
+  useEffect(() => {
+    async function getTasks(){
+      const data = await fetchTaskData();
+      dispatch(setTasks(data));
+      settasks(taskData)
+    }
+    if(deleted || editing){
+      getTasks();
+      setdeleted(false);
+      setediting(false);
+    }
+    
+  }, [deleted, editing]);
 
   const editData = (n) => {
     setName(n);

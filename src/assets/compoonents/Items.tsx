@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { SetStateAction, useEffect, useState } from "react";
 import { ChevronFirst } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../Redux/Store.ts";
+import { setItemData } from "../Redux/dataSlice.ts";
+
+
 
 const getItemsData = async () => {
   const response  = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts");
@@ -19,6 +24,9 @@ const Items = () => {
   const [editing, setediting] = useState(false);
   const [name, setname] = useState("");
 
+  const dispatch = useDispatch();
+  const itemData = useSelector((state : RootState) => state.data.items);
+
   const [openMenu, setOpenMenu] = useState(-1); // Track which dropdown is open
 
   const toggleMenu = (index : number) => {
@@ -32,12 +40,22 @@ const Items = () => {
   }
 
   useEffect(() => {
-    async function getData(){
+    async function fetchData(){
       const data = await getItemsData();
-      setItems(data);
+      dispatch(setItemData(data));
+      setItems(itemData);
     }
-    getData();
-  }, [isFormOpen, deleted])
+    if(itemData != undefined){
+      if(itemData.length == 0){
+        fetchData();
+      }else{
+        setItems(itemData);
+      }
+    }else{
+      setItemData([]);
+      setItems([]);
+    }
+  }, [isFormOpen, deleted, itemData, dispatch])
 
 
   const deleteItem = async (name: string) => {
@@ -49,6 +67,9 @@ const Items = () => {
       credentials : "include",
       body : JSON.stringify({ productName : name })
     });
+    const data = await getItemsData();
+    dispatch(setItemData(data));
+    setItems(itemData);
     
     if(deleted){
       setdeleted(false);
@@ -67,7 +88,9 @@ const Items = () => {
       credentials : "include",
       body : JSON.stringify({ productName : item[0], description : item[1], groupTypes : item[2], sellingUnit : item[3], mrp : item[4], taxRate : item[5] })
     });
-
+    const data = await getItemsData();
+    dispatch(setItemData(data));
+    setItems(itemData);
     if(deleted){
       setdeleted(false);
     }else{
@@ -171,13 +194,15 @@ const Items = () => {
       credentials : "include",
       body : JSON.stringify({ productName : name, description : newItem.description, groupTypes : newItem.groupType, sellingUnit : newItem.costingType, mrp : newItem.mrp, taxRate : newItem.taxrate })
     });
-
     if(response.status === 200){
       alert("Item Updated");
       setIsFormOpen(false);
     }else{
       alert("Error");
     }
+    const data = await getItemsData();
+    dispatch(setItemData(data));
+    setItems(itemData);
     
     setIsFormOpen(false);
     setediting(false);
@@ -218,6 +243,9 @@ const Items = () => {
       credentials : "include",
       body : JSON.stringify({ productName : newItem.name, description : newItem.description, groupTypes : newItem.groupType, sellingUnit : newItem.costingType, mrp : newItem.mrp, taxRate : newItem.taxrate })
     });
+    const data = await getItemsData();
+    dispatch(setItemData(data));
+    setItems(itemData);
 
     if(response.status === 200){
       alert("Item Added");
@@ -247,7 +275,7 @@ const Items = () => {
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-5">
           {isFormOpen && (
-            <button onClick={() => setIsFormOpen(false)} className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100">
+            <button onClick={() => {setIsFormOpen(false); setediting(false)}} className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100">
               <ChevronFirst />
             </button>
           )}
@@ -275,8 +303,10 @@ const Items = () => {
           <div className="bg-white shadow rounded-lg p-4">
             <h1 className="text-xl font-semibold mb-4">{editing ? "Edit Task" : "Add Task"}</h1>
             <form>
-              <label className={`${editing ? "hidden" : "none"} block mb-2`}>Product Name</label>
-              <input type="text" className={`${editing ? "hidden" : "none"} w-full p-2 border rounded mb-4`} value={formData.productName} onChange={(e) => setFormData({ ...formData, productName: e.target.value })} />
+              <div className={`${editing ? "hidden" : "none"}`}>
+              <label className={`block mb-2`}>Product Name</label>
+              <input type="text" className={`w-full p-2 border rounded mb-4`} value={formData.productName} onChange={(e) => setFormData({ ...formData, productName: e.target.value })} />
+              </div>
               
               <label className="block mb-2">Product Details</label>
               <textarea className="w-full p-2 border rounded mb-4" value={formData.productDetails} onChange={(e) => setFormData({ ...formData, productDetails: e.target.value })}></textarea>

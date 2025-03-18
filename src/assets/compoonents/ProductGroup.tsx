@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import ProductGroupDialog from "../compoonents/AddProductGroupDialog";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../Redux/Store.ts";
+import { setProducts } from "../Redux/dataSlice.ts";
 
 interface ProductGroup {
   groupName: string;
@@ -30,21 +33,6 @@ async function fetchProductGroups(): Promise<ProductGroup[]> {
 }
 
 // Delete a product group
-async function deleteProductGroup(groupName: string, setRefresh: (state: boolean) => void, refresh: boolean) {
-  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deleteproductgroup", {
-    method: "POST",
-    headers: { "content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ groupName }),
-  });
-
-  if (response.status === 200) {
-    alert("Product group deleted");
-    setRefresh(!refresh);
-  } else {
-    alert("Error deleting product group");
-  }
-}
 
 export default function ProductGroups() {
   const [productGroups, setProductGroups] = useState<ProductGroup[]>([]);
@@ -53,13 +41,56 @@ export default function ProductGroups() {
   const [editingGroup, setEditingGroup] = useState<ProductGroup | null>(null);
   const [refresh, setRefresh] = useState(false);
 
+  const dispatch = useDispatch();
+  const products = useSelector((state : RootState) => state.data.products);
+
   useEffect(() => {
-    async function getProductGroups() {
+    async function fetchData() {
       const data = await fetchProductGroups();
-      setProductGroups(Array.isArray(data) ? data : []);
+      dispatch(setProducts(data)); // Update Redux state
+      setProductGroups(data); // Update local state
     }
-    getProductGroups();
-  }, [refresh]);
+  
+    if (products.length === 0) {
+      // Fetch only when the page is opened for the first time
+      fetchData();
+    } else {
+      // Use Redux state directly for subsequent renders
+      setProductGroups(products);
+    }
+  
+  }, [dispatch]);// Re-fetch only when refresh changes
+
+  useEffect(() => {
+    async function fetchData() {
+      const data = await fetchProductGroups();
+      dispatch(setProducts(data)); // Update Redux state
+      setProductGroups(data); // Update local state
+    }
+    if(refresh){
+      fetchData();
+      setRefresh(false);
+    }
+  }, [refresh])
+  
+
+  async function deleteProductGroup(groupName: string, setRefresh: (state: boolean) => void, refresh: boolean) {
+    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deleteproductgroup", {
+      method: "POST",
+      headers: { "content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ groupName }),
+    });
+    const data = await fetchProductGroups();
+    dispatch(setProducts(data));
+    setProductGroups(products);
+    if (response.status === 200) {
+      alert("Product group deleted");
+      setRefresh(!refresh);
+    } else {
+      alert("Error deleting product group");
+    }
+  }
 
   return (
     <div className="p-6">

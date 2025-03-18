@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import BrandDialog from "../compoonents/BrandDialog";
+import { useDispatch, useSelector } from "react-redux";
+import { setBrandData } from "../Redux/dataSlice";
+import { RootState } from "../Redux/Store";
 
-interface Brand {
-  brandName: string;
-  description: string;
-}
 
 // Fetch brands from the server
-async function fetchBrands(): Promise<Brand[]> {
+async function fetchBrands(){
   try {
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getbrands", {
       credentials: "include",
@@ -19,7 +18,7 @@ async function fetchBrands(): Promise<Brand[]> {
     }
 
     const data = await response.json();
-    return Array.isArray(data.body) ? data.body : [];
+    return data.body;
   } catch (error) {
     console.error("Error fetching brands:", error);
     return [];
@@ -44,19 +43,41 @@ async function deleteBrand(brandName: string, setRefresh: (state: boolean) => vo
 }
 
 export default function Brands() {
-  const [brands, setBrands] = useState<Brand[]>([]);
+  const [brands, setBrands] = useState([]);
   const [search, setSearch] = useState("");
   const [isDialogOpen, setDialogOpen] = useState(false);
-  const [editingBrand, setEditingBrand] = useState<Brand | null>(null);
+  const [editingBrand, setEditingBrand] = useState(null);
   const [refresh, setRefresh] = useState(false);
+
+  const dispatch = useDispatch();
+  const brandData = useSelector((state : RootState) => state.data.brands);
 
   useEffect(() => {
     async function getBrands() {
-      const data = await fetchBrands();
-      setBrands(Array.isArray(data) ? data : []);
+      const data = await fetchBrands()
+      dispatch(setBrandData(data));
+      setBrands(brandData);
     }
-    getBrands();
-  }, [refresh]);
+    if (brandData.length === 0) {
+      // Fetch only when the page is opened for the first time
+      getBrands();
+    } else {
+      // Use Redux state directly for subsequent renders
+      setBrands(brandData);
+    }
+  }, [brandData, dispatch]);
+
+  useEffect(() => {
+    async function getBrands() {
+      const data = await fetchBrands()
+      dispatch(setBrandData(data));
+      setBrands(brandData);
+    }
+    if(refresh){
+      getBrands();
+      setRefresh(false);
+    }
+  }, [refresh])
 
   return (
     <div className="p-6">

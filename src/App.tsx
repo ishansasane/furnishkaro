@@ -21,13 +21,12 @@ import SaleSummery from "./assets/compoonents/SaleSummery.tsx";
 import CustomerWise from "./assets/compoonents/CustomerWise.tsx";
 import ProductGroupWise from "./assets/compoonents/ProductGroupWise.tsx";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Login from "./assets/compoonents/Login.tsx";
 import PassReset from "./assets/compoonents/ForgotPage.tsx";
 import NewPass from "./assets/compoonents/NewPass.tsx";
 import Register from "./assets/compoonents/Register.tsx";
 import VerifyMail from "./assets/compoonents/VerifyMail.tsx";
-
 function App() {
   const [expanded, setExpanded] = useState(true);  // ✅ Sidebar state in App.tsx
 
