@@ -17,6 +17,9 @@ import Catalogues from "./assets/compoonents/Catalogues.tsx";
 import Interiors from "./assets/compoonents/Interiors.tsx";
 import Tailors from "./assets/compoonents/Tailors.tsx";
 import SalesAssociate from "./assets/compoonents/SalesAssociate.tsx";
+import SaleSummery from "./assets/compoonents/SaleSummery.tsx";
+import CustomerWise from "./assets/compoonents/CustomerWise.tsx";
+import ProductGroupWise from "./assets/compoonents/ProductGroupWise.tsx";
 
 import { useState } from "react";
 import Login from "./assets/compoonents/Login.tsx";
@@ -59,6 +62,9 @@ function App() {
               <Route path="/masters/interiors" element={<Interiors />} />
               <Route path="/masters/tailors" element={<Tailors />} />
               <Route path="/masters/sales-associate" element={<SalesAssociate />} />
+              {/* <Route path="/table1" element={<SaleSummery />} />
+              <Route path="/table2" element={<CustomerWise />} />
+              <Route path="/table3" element={<ProductGroupWise />} /> */}
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </div>
