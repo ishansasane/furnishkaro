@@ -27,23 +27,37 @@ const FormPage = () => {
   const customerData  = useSelector((state: RootState) => state.data.customers);
   const [editing, setEditing] = useState(null);
 
-  useEffect(() => {
-    async function fetchData(){
+  async function fetchCustomers() {
+    try {
       const response = await fetch(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getcustomerdata",
         { credentials: "include" }
       );
-
-      const data = await response.json();
-
-      if(response.status === 200){
-        dispatch(setCustomerData(data.body));
-        setCustomers(customerData);
+  
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
-
+  
+      const data = await response.json(); // ✅ Ensure JSON is properly parsed
+      return Array.isArray(data.body) ? data.body : []; // ✅ Ensure we return an array
+    } catch (error) { 
+      console.error("Error fetching customer data:", error);
+      return [];
     }
-    fetchData();
-  }, [dispatch]);
+  }
+  useEffect(() => {
+    async function fetchData(){
+      const data = await fetchCustomers();
+      dispatch(setCustomerData(data));
+      setCustomers(customerData);
+    }
+    if(customerData.length == 0){
+      fetchData();
+    }else{
+      setCustomers(customerData);
+    }
+  }, [dispatch, customerData]);
 
   return (
     <div className="container mx-auto p-6 bg-white rounded-lg shadow-lg">
@@ -55,6 +69,8 @@ const FormPage = () => {
         setSelectedCustomer={setSelectedCustomer}
         customers={customers}
         setCustomers={setCustomers}
+        editing={editing}
+        setEditing={setEditing}
       />
 
       {/* Show Project Details only if Customer is selected */}

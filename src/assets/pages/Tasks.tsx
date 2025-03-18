@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { Edit, Trash2, Plus } from "lucide-react";
 import TaskDialog from "../compoonents/TaskDialog";
+import { setTasks } from "../Redux/dataSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../Redux/Store";
 
 
 interface Task {
@@ -45,13 +48,35 @@ export default function Tasks() {
   const [editing, setediting] = useState(false);
   const [deleted, setdeleted] = useState(false);
 
+  const dispatch = useDispatch();
+  const taskData = useSelector((state : RootState) => state.data.tasks);
+
   useEffect(() => {
     async function getTasks(){
       const data = await fetchTaskData();
-      settasks(data);
+      dispatch(setTasks(data));
+      settasks(taskData)
     }
-    getTasks();
-  }, [isDialogOpen, deleted]);
+    if(taskData.length == 0){
+      getTasks();
+    }else{
+      settasks(taskData);
+    }
+  }, [dispatch, taskData]);
+
+  useEffect(() => {
+    async function getTasks(){
+      const data = await fetchTaskData();
+      dispatch(setTasks(data));
+      settasks(taskData)
+    }
+    if(deleted || editing){
+      getTasks();
+      setdeleted(false);
+      setediting(false);
+    }
+    
+  }, [deleted, editing]);
 
   const editData = (n) => {
     setName(n);

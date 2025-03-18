@@ -1,6 +1,8 @@
 import { EditIcon } from "lucide-react";
 import { useState } from "react";
-
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../Redux/store";
+import { setCustomerData } from "../Redux/dataSlice";
 interface Customer {
   name: string;
   mobile: string;
@@ -12,11 +14,34 @@ interface AddCustomerDialogProps {
   setCustomers: (callback: (prev: Customer[]) => Customer[]) => void;
 }
 
+async function fetchCustomers(){
+  try {
+    const response = await fetch(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/getcustomerdata",
+      { credentials: "include" }
+    );
+
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json(); // ✅ Ensure JSON is properly parsed
+    return Array.isArray(data.body) ? data.body : []; // ✅ Ensure we return an array
+  } catch (error) { 
+    console.error("Error fetching customer data:", error);
+    return [];
+  }
+}
+
+
 const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({ setDialogOpen, editing, setEditing }) => {
   const [name, setName] = useState(editing ? editing[0] : "");
   const [mobile, setMobile] = useState(editing ? editing[1] : "");
   const [address, setAddress] = useState(editing ? editing[2] : "");
 
+  const dispatch = useDispatch();
+  const customerData = useSelector((state : RootState) => state.data.customers);
 
   async function sendcustomerData(){
 
@@ -40,6 +65,8 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({ setDialogOpen, ed
       });
 
       if(response.status === 200){
+        const data = await fetchCustomers();
+        dispatch(setCustomerData(data));
         alert(editing ? "Customer Updated Successfully" : "Customer added successfully");
       }else{
         alert(editing ?"Error in updating customer" : "Error in adding customer");

@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import AddCustomerDialog from "../compoonents/AddCustomerDialog";
-
+import { RootState } from "../Redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { setCustomerData } from "../Redux/dataSlice";
 interface Customer {
   name: string;
   phonenumber: string;
@@ -29,28 +31,6 @@ async function fetchCustomers(): Promise<Customer[]> {
   }
 }
 
-async function deleteCustomer(name, setreset, reset){
-  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletecustomerdata", {
-    method : "POST",
-    headers : {
-      "content-type" : "application/json",
-    },
-    credentials : "include",
-    body : JSON.stringify({name}),
-
-  });
-
-  if(response.status === 200){
-    alert("Customer deleted");
-    if(reset){
-      setreset(false);
-    }else{
-      setreset(true);
-    }
-  }else{
-    alert("Error in customer deletion");
-  }
-}
 
 export default function Customers() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -58,6 +38,34 @@ export default function Customers() {
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [reset, setreset] = useState(false);
   const [editing, setEditing] = useState(null);
+
+  const dispatch = useDispatch();
+  const customerData = useSelector((state : RootState) => state.data.customers);
+
+  async function deleteCustomer(name, setreset, reset){
+    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletecustomerdata", {
+      method : "POST",
+      headers : {
+        "content-type" : "application/json",
+      },
+      credentials : "include",
+      body : JSON.stringify({name}),
+  
+    });
+  
+    if(response.status === 200){
+      const data = await fetchCustomers();
+      dispatch(setCustomerData(data));
+      alert("Customer deleted");
+      if(reset){
+        setreset(false);
+      }else{
+        setreset(true);
+      }
+    }else{
+      alert("Error in customer deletion");
+    }
+  }
 
   // Fetch customers when the component mounts
   useEffect(() => {

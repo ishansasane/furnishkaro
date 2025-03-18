@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Edit, Trash2, Plus,  } from "lucide-react";
 import { Link } from "react-router-dom";
+import { RootState } from "../Redux/store";
+import { useDispatch, useSelector } from "react-redux";
+import { setProjects, setTasks } from "../Redux/dataSlice";
+import { Root } from "react-dom/client";
 
 // Define the type for a project
 interface Project {
@@ -16,33 +20,6 @@ interface Project {
   quote: string;
 }
 
-// Sample project data
-const projectsData: Project[] = [
-  {
-    id: 1,
-    projectName: "Project Alpha",
-    customerName: "John Doe",
-    status: "approved",
-    amount: "₹50,000",
-    received: "₹30,000",
-    due: "₹20,000",
-    createdBy: "Admin",
-    date: "2025-02-23",
-    quote: "Quote123",
-  },
-  {
-    id: 2,
-    projectName: "Project Beta",
-    customerName: "Jane Smith",
-    status: "good pending",
-    amount: "₹70,000",
-    received: "₹40,000",
-    due: "₹30,000",
-    createdBy: "Sales Team",
-    date: "2025-02-22",
-    quote: "Quote456",
-  },
-];
 
 // Status filter options
 const statusFilters = [
@@ -55,8 +32,34 @@ const statusFilters = [
 ] as const;
 
 export default function Projects() {
-  const [projects] = useState<Project[]>(projectsData);
+  const [projects, setprojects] = useState<Project[]>([]);
   const [filter, setFilter] = useState<(typeof statusFilters)[number]>("all");
+
+  const dispatch = useDispatch();
+  const projectData = useSelector((state : RootState) => state.data.projects);
+
+  const fetchProjectData = async () => {
+    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata", {
+      credentials : "include",
+    });
+
+    const data = await response.json();
+
+    return data.body;
+  }
+
+  useEffect(() => {
+    async function getData(){
+      const data = await fetchProjectData();
+      dispatch(setProjects(data));
+      setprojects(projectData);
+    }
+    if(projectData.length == 0){
+      getData();
+    }else{
+      setprojects(projectData);
+    }
+  } ,[dispatch, projectData]);
 
   // Filter projects based on selected status
   const filteredProjects =
@@ -102,17 +105,17 @@ export default function Projects() {
           </tr>
         </thead>
         <tbody>
-          {filteredProjects.map((project) => (
-            <tr key={project.id} className="border">
-              <td className="border px-4 py-2">{project.projectName}</td>
-              <td className="border px-4 py-2">{project.customerName}</td>
-              <td className="border px-4 py-2">{project.status}</td>
-              <td className="border px-4 py-2">{project.amount}</td>
-              <td className="border px-4 py-2">{project.received}</td>
-              <td className="border px-4 py-2">{project.due}</td>
-              <td className="border px-4 py-2">{project.createdBy}</td>
-              <td className="border px-4 py-2">{project.date}</td>
-              <td className="border px-4 py-2">{project.quote}</td>
+          {filteredProjects.map((project, index) => (
+            <tr key={index} className="border">
+              <td className="border px-4 py-2">{project[0]}</td>
+              <td className="border px-4 py-2">{project[1]}</td>
+              <td className="border px-4 py-2">{project[4]}</td>
+              <td className="border px-4 py-2">{project[5]}</td>
+              <td className="border px-4 py-2">{project[6]}</td>
+              <td className="border px-4 py-2">{project[7]}</td>
+              <td className="border px-4 py-2">{project[8]}</td>
+              <td className="border px-4 py-2">{project[14]}</td>
+              <td className="border px-4 py-2">{project[12]}</td>
               <td className="border px-4 py-2">
                 <div className="flex gap-2">
                   <button className="border px-2 py-1 rounded-md bg-gray-300">

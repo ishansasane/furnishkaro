@@ -1,4 +1,4 @@
-import { useState, useEffect, useSyncExternalStore } from "react";
+import { useState, useEffect } from "react";
 import Card from "./CardPage";
 import DeadlineCard from "../compoonents/DeadlineCard";
 import TaskCard from "../compoonents/TaskCard";
@@ -6,9 +6,8 @@ import InquiryCard from "../compoonents/InquiryCard";
 import TaskDialog from "../compoonents/TaskDialog";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../Redux/Store.ts";
-import { setTasks, setProjects, setStoreData, setItemData, setProducts, setBrands, setCatalogs, setInteriors, setTailors, setSalesAssociates } from "../Redux/dataSlice.ts";
-
+import { RootState } from "../Redux/store.ts";
+import { setTasks, setProjects } from "../Redux/dataSlice.ts";
 
 const Dashboard: React.FC = () => {
   const [isTaskDialogOpen, setTaskDialogOpen] = useState<boolean>(false);
@@ -27,9 +26,13 @@ const Dashboard: React.FC = () => {
       data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata", {credentials : "include"});
       const projectData = await data.json();
       dispatch(setProjects(projectData.body));
-  
     }
-    fetchdata();
+    if(tasks.length == 0 || projects.length == 0){
+      fetchdata();
+    }else{
+      setTasks(tasks);
+      setProjects(projects);
+    }
 
   }, [dispatch, refresh]);
 
@@ -60,7 +63,7 @@ const Dashboard: React.FC = () => {
           <h2 className="text-xl font-semibold mb-4 text-gray-800">📅 Project Deadlines</h2>
           <div className="space-y-4">
             {projects.map((project, index) => (
-              <DeadlineCard project={project[0]} date={project[4]} key={index} />
+              <DeadlineCard project={project[0]} date={project[5]} key={index} />
             ))}
           </div>
         </div>
