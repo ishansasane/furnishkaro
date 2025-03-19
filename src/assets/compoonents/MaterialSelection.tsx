@@ -1,12 +1,12 @@
-import { useState } from "react";
-import { FaPlus, FaTrash } from "react-icons/fa"; // Icons for buttons
+import { useState, useEffect } from "react";
+import { FaPlus, FaTrash } from "react-icons/fa";
 
 interface AreaSelection {
   area: string;
   productGroups: string[];
 }
 
-const MaterialSelection = () => {
+const MaterialSelection = ({ setMaterials }) => {
   const [selections, setSelections] = useState<AreaSelection[]>([]);
 
   const availableAreas = ["Living Room", "Kitchen", "Bedroom", "Bathroom"];
@@ -39,6 +39,11 @@ const MaterialSelection = () => {
 
     setSelections(updatedSelections);
   };
+
+  // ✅ Update `materials` in `FormPage.tsx` when selections change
+  useEffect(() => {
+    setMaterials(selections.filter((selection) => selection.area && selection.productGroups.length > 0));
+  }, [selections, setMaterials]);
 
   return (
     <div className="mb-6 bg-white p-6 rounded-lg shadow-lg">
@@ -78,26 +83,27 @@ const MaterialSelection = () => {
         {/* Right Column: Product Group Selection */}
         <div>
           <h3 className="text-lg font-semibold mb-4 text-gray-600">Select Product Groups</h3>
-          {selections.map((selection, index) => (
-            selection.area && (
-              <div key={index} className="mb-4 border p-4 rounded-lg shadow-sm bg-gray-50">
-                <h4 className="text-md font-semibold mb-2 text-gray-700">{selection.area}</h4>
-                <div className="grid grid-cols-2 gap-3">
-                  {availableProductGroups.map((product) => (
-                    <label key={product} className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="form-checkbox h-4 w-4 text-blue-500"
-                        checked={selection.productGroups.includes(product)}
-                        onChange={() => handleProductGroupChange(index, product)}
-                      />
-                      {product}
-                    </label>
-                  ))}
+          {selections.map(
+            (selection, index) =>
+              selection.area && (
+                <div key={index} className="mb-4 border p-4 rounded-lg shadow-sm bg-gray-50">
+                  <h4 className="text-md font-semibold mb-2 text-gray-700">{selection.area}</h4>
+                  <div className="grid grid-cols-2 gap-3">
+                    {availableProductGroups.map((product) => (
+                      <label key={product} className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="form-checkbox h-4 w-4 text-blue-500"
+                          checked={selection.productGroups.includes(product)}
+                          onChange={() => handleProductGroupChange(index, product)}
+                        />
+                        {product}
+                      </label>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )
-          ))}
+              )
+          )}
         </div>
       </div>
     </div>
