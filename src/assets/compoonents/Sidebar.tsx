@@ -42,7 +42,7 @@ export default function Sidebar() {
             </button>
             {mastersOpen && (
               <ul className="ml-8 mt-1 space-y-1">
-                <SidebarItem icon={null} text="Stores" path="/masters/stores" />
+                
                 <SidebarItem icon={null} text="Items" path="/masters/items" />
                 <SidebarItem icon={null} text="Product Groups" path="/masters/product-groups" />
                 <SidebarItem icon={null} text="Brands" path="/masters/brands" />
@@ -50,6 +50,7 @@ export default function Sidebar() {
                 <SidebarItem icon={null} text="Interiors" path="/masters/interiors" />
                 <SidebarItem icon={null} text="Tailors" path="/masters/tailors" />
                 <SidebarItem icon={null} text="Sales Associate" path="/masters/sales-associate" />
+                <SidebarItem icon={null} text="Stores" path="/masters/stores" />
               </ul>
             )}
           </li>
