@@ -11,7 +11,7 @@ interface Customer {
 }
 
 // Fetch customers correctly
-async function fetchCustomers(): Promise<Customer[]> {
+async function fetchCustomers(){
   try {
     const response = await fetch(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getcustomerdata",
@@ -54,8 +54,6 @@ export default function Customers() {
     });
   
     if(response.status === 200){
-      const data = await fetchCustomers();
-      dispatch(setCustomerData(data));
       alert("Customer deleted");
       if(reset){
         setreset(false);
@@ -71,10 +69,28 @@ export default function Customers() {
   useEffect(() => {
     async function getCustomers() {
       const data = await fetchCustomers();
-      setCustomers(Array.isArray(data.body) ? data.body : []); // ✅ Ensure it's always an array
+      dispatch(setCustomerData(data.body));
+      setCustomers(customerData); // ✅ Ensure it's always an array
     }
-    getCustomers();
-  }, [isDialogOpen, reset]);
+    if(customerData.length == 0){
+      getCustomers();
+    }else{
+      setCustomers(customerData);
+    }
+  }, [customerData, dispatch]);
+
+  useEffect(() => {
+    async function getCustomers() {
+      const data = await fetchCustomers();
+      dispatch(setCustomerData(data.body));
+      setCustomers(customerData); // ✅ Ensure it's always an array
+    }
+    if(isDialogOpen || reset){
+      getCustomers();
+      setDialogOpen(false);
+      setreset(false);
+    }
+  }, [reset])
 
 
   return (

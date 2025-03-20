@@ -2,62 +2,95 @@ import { useState } from "react";
 
 interface TaskDialogProps {
   onClose: () => void;
-  isEditing : boolean;
-  setediting : () => void;
-  name : string;
+  name: string;
+  setrefresh: (val: boolean) => void;
 }
 
-const TaskDialog: React.FC<TaskDialogProps> = ({ onClose, isEditing, setediting, name }) => {
-  const [taskName, setTaskName] = useState("");
-  const [description, setDescription] = useState("");
-  const [dateTime, setDateTime] = useState("");
-  const [assignee, setAssignee] = useState("");
-  const [project, setProject] = useState("");
+const TaskDialog: React.FC<TaskDialogProps> = ({ onClose, isEditing, setediting, name, setrefresh }) => {
+  const [taskName, setTaskName] = useState(undefined);
+  const [description, setDescription] = useState(undefined);
+  const [dateTime, setDateTime] = useState(undefined);
+  const [assignee, setAssignee] = useState(undefined);
+  const [project, setProject] = useState(undefined);
   const [priority, setPriority] = useState("Moderate");
-  const [status, setStatus] = useState("Pending");
+  const [status, setStatus] = useState("To Do");
 
   const addTask = async () => {
+    if (!dateTime) {
+      alert("Please select a date and time");
+      return;
+    }
+
+    // Splitting Date & Time
+    const [date, time] = dateTime.split("T");
+
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/addtask", {
-      method : "POST",
-      headers : {
-        "content-type" : "application/json",
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
       },
-      credentials : "include",
-      body : JSON.stringify({ title : taskName, description, date : dateTime, time : dateTime, assigneeLink : assignee, projectLink : project, priority, status })
+      credentials: "include",
+      body: JSON.stringify({
+        title: taskName,
+        description,
+        date, // Sending only date
+        time, // Sending only time
+        assigneeLink: assignee,
+        projectLink: project,
+        priority,
+        status,
+      }),
     });
 
-    if(response.status === 200){
+    if (response.status === 200) {
       alert("Task Added");
-    }else{
-      alert("Error");
+    } else {
+      alert("Error adding task");
     }
+    setrefresh(true);
     onClose();
-  }
+  };
 
   const editTask = async () => {
+    let date = undefined;
+    let time = undefined
+    // Splitting Date & Time
+    if(dateTime){
+      [date, time] = dateTime.split("T");
+    }
 
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/updatetask", {
-      method : "POST",
-      headers : {
-        "content-type" : "application/json",
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
       },
-      credentials : "include",
-      body : JSON.stringify({ title : name, description, date : dateTime, time : dateTime, assigneeLink : assignee, projectLink : project, priority, status })
+      credentials: "include",
+      body: JSON.stringify({
+        title: name,
+        description,
+        date, // Sending only date
+        time, // Sending only time
+        assigneeLink: assignee,
+        projectLink: project,
+        priority,
+        status,
+      }),
     });
 
-    if(response.status === 200){
-      alert("Task updates");
-    }else{
-      alert("error");
+    if (response.status === 200) {
+      alert("Task updated");
+    } else {
+      alert("Error updating task");
     }
-    setediting();
+    setediting(null);
+    setrefresh(true);
     onClose();
-  }
+  };
 
   const cancel = () => {
-    setediting();
+    setediting(null);
     onClose();
-  }
+  };
 
   return (
     <div className="absolute top-10 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-lg">
@@ -66,18 +99,20 @@ const TaskDialog: React.FC<TaskDialogProps> = ({ onClose, isEditing, setediting,
         <h2 className="text-xl font-semibold text-gray-800 mb-4">📝 {isEditing ? "Edit Task" : "Add Task"}</h2>
 
         {/* Task Name */}
-        <input
-          type="text"
-          placeholder="Task Name"
-          value={taskName}
-          onChange={(e) => setTaskName(e.target.value)}
-          className={`w-full border p-2 rounded mb-3 ${isEditing ? "hidden" : "none" }`}
-        />
+        {!isEditing && (
+          <input
+            type="text"
+            placeholder="Task Name"
+            value={isEditing ? isEditing[0] : taskName}
+            onChange={(e) => setTaskName(e.target.value)}
+            className="w-full border p-2 rounded mb-3"
+          />
+        )}
 
         {/* Description */}
         <textarea
           placeholder="Description (optional)"
-          value={description}
+          value={isEditing && description == null ? isEditing[1] : description}
           onChange={(e) => setDescription(e.target.value)}
           className="w-full border p-2 rounded mb-3"
         ></textarea>
@@ -85,7 +120,7 @@ const TaskDialog: React.FC<TaskDialogProps> = ({ onClose, isEditing, setediting,
         {/* Date & Time */}
         <input
           type="datetime-local"
-          value={dateTime}
+          value={isEditing && dateTime == null ? isEditing[2] : dateTime}
           onChange={(e) => setDateTime(e.target.value)}
           className="w-full border p-2 rounded mb-3"
         />
@@ -94,14 +129,14 @@ const TaskDialog: React.FC<TaskDialogProps> = ({ onClose, isEditing, setediting,
         <input
           type="text"
           placeholder="Assignee"
-          value={assignee}
+          value={isEditing && assignee == null ? isEditing[4] : assignee}
           onChange={(e) => setAssignee(e.target.value)}
           className="w-full border p-2 rounded mb-3"
         />
 
         {/* Project Selection */}
         <select
-          value={project}
+          value={isEditing && project == null ? isEditing[5] : project}
           onChange={(e) => setProject(e.target.value)}
           className="w-full border p-2 rounded mb-3"
         >
@@ -113,7 +148,7 @@ const TaskDialog: React.FC<TaskDialogProps> = ({ onClose, isEditing, setediting,
 
         {/* Priority Selection */}
         <select
-          value={priority}
+          value={isEditing && priority == null ? isEditing[6] : priority}
           onChange={(e) => setPriority(e.target.value)}
           className="w-full border p-2 rounded mb-3"
         >
@@ -124,11 +159,11 @@ const TaskDialog: React.FC<TaskDialogProps> = ({ onClose, isEditing, setediting,
 
         {/* Status Selection */}
         <select
-          value={status}
+          value={isEditing && status == null ? isEditing[7] : status}
           onChange={(e) => setStatus(e.target.value)}
           className="w-full border p-2 rounded mb-3"
         >
-          <option value="Pending">Pending</option>
+          <option value="To Do">To Do</option>
           <option value="In Progress">In Progress</option>
           <option value="Completed">Completed</option>
         </select>
