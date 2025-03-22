@@ -27,6 +27,7 @@ import NewPass from "./assets/compoonents/NewPass.tsx";
 import Register from "./assets/compoonents/Register.tsx";
 import VerifyMail from "./assets/compoonents/VerifyMail.tsx";
 import ProductFormPage from "./assets/pages/ProductFormPage.tsx";
+import ProductGroupForm from "./assets/pages/ProductGroupForm.tsx";
 
 function App() {
   const [expanded, setExpanded] = useState(true);
@@ -50,6 +51,7 @@ function App() {
               <Route path="/projects" element={<Projects />} />
               <Route path="/customers" element={<Customers />} />
               <Route path="/add-product" element={<ProductFormPage />} />
+              <Route path="/product-group-form" element={<ProductGroupForm />} />
               <Route path="/masters" element={<Masters />} />
               <Route path="/tasks" element={<Tasks />} />
               <Route path="/reports" element={<Reports />} />

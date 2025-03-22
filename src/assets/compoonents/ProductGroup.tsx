@@ -4,6 +4,7 @@ import ProductGroupDialog from "../compoonents/AddProductGroupDialog";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/Store.ts";
 import { setProducts } from "../Redux/dataSlice.ts";
+import { useNavigate } from "react-router-dom";
 
 interface ProductGroup {
   groupName: string;
@@ -35,6 +36,7 @@ async function fetchProductGroups(): Promise<ProductGroup[]> {
 // Delete a product group
 
 export default function ProductGroups() {
+   const navigate = useNavigate();
   const [productGroups, setProductGroups] = useState<ProductGroup[]>([]);
   const [search, setSearch] = useState("");
   const [isDialogOpen, setDialogOpen] = useState(false);
@@ -96,9 +98,12 @@ export default function ProductGroups() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">📦 Product Groups</h1>
-        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md" onClick={() => setDialogOpen(true)}>
-          <Plus size={18} /> Add Product Group
-        </button>
+        <button
+      className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+      onClick={() => navigate("/product-group-form")}
+    >
+      <Plus size={18} /> Add Product Group
+    </button>
       </div>
 
       <div className="mb-4">
