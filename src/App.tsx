@@ -20,15 +20,16 @@ import SalesAssociate from "./assets/compoonents/SalesAssociate.tsx";
 import SaleSummery from "./assets/compoonents/SaleSummery.tsx";
 import CustomerWise from "./assets/compoonents/CustomerWise.tsx";
 import ProductGroupWise from "./assets/compoonents/ProductGroupWise.tsx";
-
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Login from "./assets/compoonents/Login.tsx";
 import PassReset from "./assets/compoonents/ForgotPage.tsx";
 import NewPass from "./assets/compoonents/NewPass.tsx";
 import Register from "./assets/compoonents/Register.tsx";
 import VerifyMail from "./assets/compoonents/VerifyMail.tsx";
+import ProductFormPage from "./assets/pages/ProductFormPage.tsx";
+
 function App() {
-  const [expanded, setExpanded] = useState(true);  // ✅ Sidebar state in App.tsx
+  const [expanded, setExpanded] = useState(true);
 
   return (
     <SidebarContext.Provider value={{ expanded, toggleSidebar: () => setExpanded((prev) => !prev) }}>
@@ -37,22 +38,25 @@ function App() {
           {/* Sidebar */}
           <Sidebar />
 
-          {/* Main Content - Adjusts based on sidebar */}
+          {/* Main Content */}
           <div className={`flex-1 overflow-y-auto h-screen p-6 transition-all ${expanded ? "ml-64" : "ml-20"}`}>
             <Routes>
               <Route path="/" element={<Dashboard />} />
-              <Route path="/login" element={ <Login /> } />
-              <Route path="/forgotpass" element={ <PassReset />} />
-              <Route path="/forgotpass/reset/:token" element={ <NewPass /> } />
-              <Route path="/register" element={ <Register /> } />
-              <Route path="/verify" element={ <VerifyMail /> } />
+              <Route path="/login" element={<Login />} />
+              <Route path="/forgotpass" element={<PassReset />} />
+              <Route path="/forgotpass/reset/:token" element={<NewPass />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/verify" element={<VerifyMail />} />
               <Route path="/projects" element={<Projects />} />
               <Route path="/customers" element={<Customers />} />
+              <Route path="/add-product" element={<ProductFormPage />} />
               <Route path="/masters" element={<Masters />} />
               <Route path="/tasks" element={<Tasks />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/add-project" element={<FormPage />} />
+              
+              {/* Masters Subroutes */}
               <Route path="/masters/stores" element={<Store />} />
               <Route path="/masters/items" element={<Items />} />
               <Route path="/masters/product-groups" element={<ProductGroup />} />
@@ -61,9 +65,13 @@ function App() {
               <Route path="/masters/interiors" element={<Interiors />} />
               <Route path="/masters/tailors" element={<Tailors />} />
               <Route path="/masters/sales-associate" element={<SalesAssociate />} />
+
+              {/* Uncomment if needed */}
               {/* <Route path="/table1" element={<SaleSummery />} />
               <Route path="/table2" element={<CustomerWise />} />
               <Route path="/table3" element={<ProductGroupWise />} /> */}
+
+              {/* Redirect unknown routes to home */}
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </div>

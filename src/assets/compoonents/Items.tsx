@@ -4,10 +4,12 @@ import { ChevronFirst } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/Store.ts";
 import { setItemData } from "../Redux/dataSlice.ts";
+import { useNavigate } from "react-router-dom";
 
 
 
 const getItemsData = async () => {
+ 
   const response  = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts");
 
   const data = await response.json();
@@ -23,6 +25,7 @@ const Items = () => {
   const [deleted, setdeleted] = useState(false);
   const [editing, setediting] = useState(false);
   const [name, setname] = useState("");
+  const navigate = useNavigate();
 
   const dispatch = useDispatch();
   const itemData = useSelector((state : RootState) => state.data.items);
@@ -292,9 +295,12 @@ const Items = () => {
              </ul>
           </div>
 
-          <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" onClick={() => setIsFormOpen(true)}>
-            <i className="fas fa-plus"></i> + Add Item
-          </button>
+          <button
+      className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+      onClick={() => navigate("/add-product")}
+    >
+      <i className="fas fa-plus"></i> + Add Item
+    </button>
         </div>
           </div>
           
