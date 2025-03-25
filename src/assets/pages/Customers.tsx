@@ -41,6 +41,9 @@ export default function Customers() {
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [reset, setreset] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [openDropdown, setOpenDropdown] = useState<number | null>(null); 
+
+  let count = 0;
 
   const dispatch = useDispatch();
   const customerData = useSelector((state: RootState) => state.data.customers);
@@ -71,10 +74,13 @@ export default function Customers() {
   useEffect(() => {
     async function getCustomers() {
       const data = await fetchCustomers();
-      setCustomers(Array.isArray(data.body) ? data.body : []);
+      dispatch(setCustomerData(data));
+      setCustomers(customerData);
+      count = 0;
     }
-    if(customerData.length == 0){
+    if(customerData.length == 0 && count <= 2){
       getCustomers();
+      count++;
     }else{
       setCustomers(customerData);
     }
@@ -83,7 +89,7 @@ export default function Customers() {
   useEffect(() => {
     async function getCustomers() {
       const data = await fetchCustomers();
-      dispatch(setCustomerData(data.body));
+      dispatch(setCustomerData(data));
       setCustomers(customerData); // ✅ Ensure it's always an array
     }
     if(isDialogOpen || reset){
@@ -91,18 +97,13 @@ export default function Customers() {
       setDialogOpen(false);
       setreset(false);
     }
-  }, [reset])
+  }, [reset, editing])
 
   return (
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">👥 Customers</h1>
-        <button
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md"
-          onClick={() => setDialogOpen(true)}
-        >
-          <Plus size={18} /> Add Customer
-        </button>
+        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2" style={{ borderRadius : "8px" }} onClick={() => setDialogOpen(true)}><Plus size={18} /> Add Customer</button>
       </div>
 
       <div className="mb-4">
@@ -111,51 +112,62 @@ export default function Customers() {
           placeholder="Search customers..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border px-3 py-2 rounded-md w-full"
+          className="border px-3 py-2 rounded-md w-[20vw]"
         />
       </div>
 
       <table className="w-full border-collapse border border-gray-300">
-        <thead className="bg-gray-200">
-          <tr>
-            <th className="border px-4 py-2">Customer Name</th>
-            <th className="border px-4 py-2">Mobile</th>
-            <th className="border px-4 py-2">Alternate Number</th>
-            <th className="border px-4 py-2">Email</th>
-            <th className="border px-6 py-2 w-1/4">Address</th>
-            <th className="border px-4 py-2">Added Date</th>
-            <th className="border px-4 py-2">Action</th>
+        <thead className="bg-sky-50">
+          <tr className="text-gray-600">
+            <th className="px-4 py-2">Customer Name</th>
+            <th className="px-4 py-2">Mobile</th>
+            <th className="px-4 py-2">Alternate Number</th>
+            <th className="px-4 py-2">Email</th>
+            <th className="px-6 py-2 w-1/5">Address</th>
+            <th className="px-4 py-2">Added Date</th>
+            <th className="px-4 py-2">Action</th>
           </tr>
         </thead>
         <tbody>
           {customers.length > 0 ? (
             customers.map((customer, index) => (
-              <tr key={index} className="border">
-                <td className="border px-4 py-2">{customer[0]}</td>
-                <td className="border px-4 py-2">{customer[1]}</td>
-                <td className="border px-4 py-2">{customer[2]}</td>
-                <td className="border px-4 py-2">{customer[3]}</td>
-                <td className="border px-6 py-2">{customer[4]}</td>
-                <td className="border px-4 py-2">{customer[5]}</td>
-                <td className="border px-4 py-2">
-                  <div className="flex items-center gap-2">
+              <tr key={index} className="hover:bg-sky-50">
+                <td className="px-4 py-2">{customer[0]}</td>
+                <td className="px-4 py-2">{customer[1]}</td>
+                <td className="px-6 py-2">{customer[4]}</td>
+                <td className="px-4 py-2">{customer[2]}</td>
+                <td className="px-4 py-2">{customer[3]}</td>
+                <td className="px-4 py-2">{customer[5]}</td>
+                <td className="px-4 py-2 relative">
+              {/* Three Dots Menu */}
+              <button
+                className="p-2 hover:bg-gray-200 rounded-full"
+                onClick={() => setOpenDropdown(openDropdown === index ? null : index)}
+              >
+                <MoreVertical size={18} />
+              </button>
+
+              {/* Dropdown Menu */}
+              {openDropdown === index && (
+                <div className="absolute bg-white shadow-md rounded-md z-[50] border flex flex-col">
                     <button
-                      className="border px-2 py-1 rounded-md bg-gray-300"
+                      className="w-full text-left px-3 py-2 hover:bg-gray-100 flex items-center gap-2"
                       onClick={() => {
                         setEditing(customer);
                         setDialogOpen(true);
                       }}
                     >
-                      <Edit size={16} />
+                      <Edit size={16} /> edit
                     </button>
                     <button
-                      className="border px-2 py-1 rounded-md bg-red-500 text-white"
+                      className="w-full text-left px-3 py-2 hover:bg-red-100 text-red-600 flex items-center gap-2"
                       onClick={() => deleteCustomer(customer[0])}
                     >
-                      <Trash2 size={16} />
+                      <Trash2 size={16} /> delete
                     </button>
-                  </div>
-                </td>
+                </div>
+              )}
+            </td>
               </tr>
             ))
           ) : (

@@ -38,7 +38,9 @@ async function fetchCustomers(){
 const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({ setDialogOpen, editing, setEditing }) => {
   const [name, setName] = useState(editing ? editing[0] : "");
   const [mobile, setMobile] = useState(editing ? editing[1] : "");
-  const [address, setAddress] = useState(editing ? editing[2] : "");
+  const [address, setAddress] = useState(editing ? editing[3] : "");
+  const [alternateNumber, setAlternateNumber] = useState(editing ? editing[4] : "");
+  const [email, setEmail] = useState(editing ? editing[2] : "");
 
   const dispatch = useDispatch();
   const customerData = useSelector((state : RootState) => state.data.customers);
@@ -46,6 +48,11 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({ setDialogOpen, ed
   async function sendcustomerData(){
 
     const phonenumber = mobile;
+    let date = undefined;
+    if(!editing){
+      const now = new Date();
+      date = now.toISOString().slice(0, 16);
+    }
 
     if(editing){
       setName(editing[0]);
@@ -53,7 +60,7 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({ setDialogOpen, ed
 
     const api = editing ? "https://sheeladecor.netlify.app/.netlify/functions/server/updatecustomerdata" : "https://sheeladecor.netlify.app/.netlify/functions/server/sendcustomerdata";
 
-    console.log(api);
+    console.log(date);
 
     const response = await fetch(api, {
         method : "POST",
@@ -61,7 +68,7 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({ setDialogOpen, ed
           "content-type" : "application/json"
         },
         credentials : "include",
-        body : JSON.stringify({ name, phonenumber, address }),
+        body : JSON.stringify({ name, phonenumber, email, address, alternatenumber : alternateNumber, addedDate : date }),
       });
 
       if(response.status === 200){
@@ -87,6 +94,12 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({ setDialogOpen, ed
         />
         <input
           className="border p-2 rounded w-full mb-2"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
+                <input
+          className="border p-2 rounded w-full mb-2"
           placeholder="Mobile Number"
           value={mobile}
           onChange={(e) => setMobile(e.target.value)}
@@ -96,6 +109,12 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({ setDialogOpen, ed
           placeholder="Address"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
+        />
+        <input
+          className="border p-2 rounded w-full mb-2"
+          placeholder="Alternate Number"
+          value={alternateNumber}
+          onChange={(e) => setAlternateNumber(e.target.value)}
         />
         <div className="flex justify-end gap-2">
           <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => {setEditing(null); setDialogOpen(false)}}>

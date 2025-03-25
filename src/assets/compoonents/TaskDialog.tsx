@@ -12,8 +12,8 @@ const TaskDialog: React.FC<TaskDialogProps> = ({ onClose, isEditing, setediting,
   const [dateTime, setDateTime] = useState(undefined);
   const [assignee, setAssignee] = useState(undefined);
   const [project, setProject] = useState(undefined);
-  const [priority, setPriority] = useState("Moderate");
-  const [status, setStatus] = useState("To Do");
+  const [priority, setPriority] = useState(isEditing ? isEditing[6] : "Moderate");
+  const [status, setStatus] = useState(isEditing ? isEditing[7] : "To Do");
 
   const addTask = async () => {
     if (!dateTime) {
@@ -21,8 +21,10 @@ const TaskDialog: React.FC<TaskDialogProps> = ({ onClose, isEditing, setediting,
       return;
     }
 
+    let date = undefined;
+    const now = new Date();
+    date = now.toISOString().slice(0,16);
     // Splitting Date & Time
-    const [date, time] = dateTime.split("T");
 
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/addtask", {
       method: "POST",
@@ -33,8 +35,8 @@ const TaskDialog: React.FC<TaskDialogProps> = ({ onClose, isEditing, setediting,
       body: JSON.stringify({
         title: taskName,
         description,
-        date, // Sending only date
-        time, // Sending only time
+        dateTime, // Sending only date
+        date, // Sending only time
         assigneeLink: assignee,
         projectLink: project,
         priority,
@@ -52,12 +54,8 @@ const TaskDialog: React.FC<TaskDialogProps> = ({ onClose, isEditing, setediting,
   };
 
   const editTask = async () => {
-    let date = undefined;
-    let time = undefined
     // Splitting Date & Time
-    if(dateTime){
-      [date, time] = dateTime.split("T");
-    }
+    const date = isEditing[3]
 
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/updatetask", {
       method: "POST",
@@ -68,8 +66,8 @@ const TaskDialog: React.FC<TaskDialogProps> = ({ onClose, isEditing, setediting,
       body: JSON.stringify({
         title: name,
         description,
-        date, // Sending only date
-        time, // Sending only time
+        dateTime, // Sending only date
+        date, // Sending only time
         assigneeLink: assignee,
         projectLink: project,
         priority,
@@ -112,7 +110,7 @@ const TaskDialog: React.FC<TaskDialogProps> = ({ onClose, isEditing, setediting,
         {/* Description */}
         <textarea
           placeholder="Description (optional)"
-          value={isEditing && description == null ? isEditing[1] : description}
+          value={isEditing && description == undefined ? isEditing[1] : description}
           onChange={(e) => setDescription(e.target.value)}
           className="w-full border p-2 rounded mb-3"
         ></textarea>
@@ -120,7 +118,7 @@ const TaskDialog: React.FC<TaskDialogProps> = ({ onClose, isEditing, setediting,
         {/* Date & Time */}
         <input
           type="datetime-local"
-          value={isEditing && dateTime == null ? isEditing[2] : dateTime}
+          value={isEditing && dateTime == undefined ? isEditing[2] : dateTime}
           onChange={(e) => setDateTime(e.target.value)}
           className="w-full border p-2 rounded mb-3"
         />
@@ -129,14 +127,14 @@ const TaskDialog: React.FC<TaskDialogProps> = ({ onClose, isEditing, setediting,
         <input
           type="text"
           placeholder="Assignee"
-          value={isEditing && assignee == null ? isEditing[4] : assignee}
+          value={isEditing && assignee == undefined ? isEditing[4] : assignee}
           onChange={(e) => setAssignee(e.target.value)}
           className="w-full border p-2 rounded mb-3"
         />
 
         {/* Project Selection */}
         <select
-          value={isEditing && project == null ? isEditing[5] : project}
+          value={isEditing && project == undefined ? isEditing[5] : project}
           onChange={(e) => setProject(e.target.value)}
           className="w-full border p-2 rounded mb-3"
         >
@@ -148,7 +146,7 @@ const TaskDialog: React.FC<TaskDialogProps> = ({ onClose, isEditing, setediting,
 
         {/* Priority Selection */}
         <select
-          value={isEditing && priority == null ? isEditing[6] : priority}
+          value={isEditing && priority == undefined ? isEditing[6] : priority}
           onChange={(e) => setPriority(e.target.value)}
           className="w-full border p-2 rounded mb-3"
         >
@@ -159,7 +157,7 @@ const TaskDialog: React.FC<TaskDialogProps> = ({ onClose, isEditing, setediting,
 
         {/* Status Selection */}
         <select
-          value={isEditing && status == null ? isEditing[7] : status}
+          value={isEditing && status == undefined ? isEditing[7] : status}
           onChange={(e) => setStatus(e.target.value)}
           className="w-full border p-2 rounded mb-3"
         >

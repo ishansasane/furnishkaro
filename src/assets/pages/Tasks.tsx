@@ -126,13 +126,13 @@ export default function Tasks() {
         className="border px-3 py-2 rounded-md w-[20vw] mb-4"
       />
       <table className="w-full border-collapse border border-gray-300">
-        <thead className="bg-gray-200">
+        <thead className="bg-sky-50">
           <tr>
             <th className="px-4 py-2">Task</th>
             <th className="px-4 py-2">Priority</th>
             <th className="px-4 py-2">Project</th>
-            <th className="px-4 py-2">Date</th>
-            <th className="px-4 py-2">Time</th>
+            <th className="px-4 py-2">Due Date</th>
+            <th className="px-4 py-2">Created At</th>
             <th className="px-4 py-2">Assignee</th>
             <th className="px-4 py-2">Status</th>
             <th className="px-4 py-2">Actions</th>
@@ -140,9 +140,9 @@ export default function Tasks() {
         </thead>
         <tbody>
           {tasks.map((task, index) => (
-            task[7] == `${filter}` || filter == "All Tasks" ?  <tr key={index}>
+            task[7] == `${filter}` || filter == "All Tasks" ?  <tr key={index} className="hover:bg-sky-50">
             <td className="px-4 py-2">{task[0]}</td>
-            <td className="px-4 py-2">{task[6]}</td>
+            <td className={`${task[6] == "High" ? "text-red-600" : ""} ${task[6] == "Low" ? "text-green-600" : ""} ${task[6] == "Moderate" ? "text-yellow-400" : ""} font-bold px-4`}>{task[6]}</td>
             <td className="px-4 py-2">{task[5]}</td>
             <td className="px-4 py-2">{task[2]}</td>
             <td className="px-4 py-2">{task[3]}</td>
