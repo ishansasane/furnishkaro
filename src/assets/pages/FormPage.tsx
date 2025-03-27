@@ -83,7 +83,7 @@ const FormPage = () => {
 
       {/* Show Measurement Section only if Materials are selected */}
       {isCustomerSelected && isProjectDetailsFilled && isMaterialSelected && (
-        <MeasurementSection setMeasurements={setMeasurements} />
+        <MeasurementSection />
       )}
 
       {/* Show Quotation Section only if Measurements are added */}

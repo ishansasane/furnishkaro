@@ -116,27 +116,27 @@ export default function ProductGroups() {
         />
       </div>
 
-      <table className="w-full border-collapse border border-gray-300">
-        <thead className="bg-gray-200">
-          <tr>
-            <th className="border px-4 py-2">Group Name</th>
-            <th className="border px-4 py-2">Main Products</th>
-            <th className="border px-4 py-2">Addon Products</th>
-            <th className="border px-4 py-2">Color</th>
-            <th className="border px-4 py-2">Needs Tailoring</th>
-            <th className="border px-4 py-2">Actions</th>
+      <table className="w-full">
+        <thead className="bg-sky-50">
+          <tr className="">
+            <th className="px-4 py-3">Group Name</th>
+            <th className="px-4 py-3">Main Products</th>
+            <th className="px-4 py-3">Addon Products</th>
+            <th className="px-4 py-3">Color</th>
+            <th className="px-4 py-3">Needs Tailoring</th>
+            <th className="px-4 py-3">Actions</th>
           </tr>
         </thead>
         <tbody>
           {productGroups.length > 0 ? (
             productGroups.map((group, index) => (
-              <tr key={index} className="border">
-                <td className="border px-4 py-2">{group[0]}</td>
-                <td className="border px-4 py-2">{group[1]}</td>
-                <td className="border px-4 py-2">{group[2]}</td>
-                <td className="border px-4 py-2">{group[3]}</td>
-                <td className="border px-4 py-2">{group[4] == "true" ? "Yes" : "No"}</td>
-                <td className="border px-4 py-2 flex gap-2">
+              <tr key={index} className="hover:bg-sky-50">
+                <td className="px-4 py-2">{group[0]}</td>
+                <td className="px-4 py-2">{group[1]}</td>
+                <td className="px-4 py-2">{group[2]}</td>
+                <td className="px-4 py-2">{group[3]}</td>
+                <td className="px-4 py-2">{group[4] == "true" ? "Yes" : "No"}</td>
+                <td className="px-4 py-2 flex gap-2">
                   <button className="border px-2 py-1 rounded-md bg-gray-300" onClick={() => { setEditingGroup(group); setDialogOpen(true); }}>
                     <Edit size={16} />
                   </button>

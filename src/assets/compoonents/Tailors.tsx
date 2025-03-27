@@ -95,25 +95,25 @@ export default function Tailors() {
         />
       </div>
 
-      <table className="w-full border-collapse border border-gray-300">
-        <thead className="bg-gray-200">
+      <table className="w-full">
+        <thead className="bg-sky-50">
           <tr>
-            <th className="border px-4 py-2">Tailor Name</th>
-            <th className="border px-4 py-2">Phone Number</th>
-            <th className="border px-4 py-2">Email</th>
-            <th className="border px-4 py-2">Address</th>
-            <th className="border px-4 py-2">Actions</th>
+            <th className="px-4 py-3">Tailor Name</th>
+            <th className="px-4 py-3">Phone Number</th>
+            <th className="px-4 py-3">Email</th>
+            <th className="px-4 py-3">Address</th>
+            <th className="px-4 py-3">Actions</th>
           </tr>
         </thead>
         <tbody>
           {tailors.length > 0 ? (
             tailors.map((tailor, index) => (
-              <tr key={index} className="border">
-                <td className="border px-4 py-2">{tailor[0]}</td>
-                <td className="border px-4 py-2">{tailor[1]}</td>
-                <td className="border px-4 py-2">{tailor[2]}</td>
-                <td className="border px-4 py-2">{tailor[3]}</td>
-                <td className="border px-4 py-2 flex gap-2">
+              <tr key={index} className="hover:bg-sky-50">
+                <td className="px-4 py-2">{tailor[0]}</td>
+                <td className="px-4 py-2">{tailor[1]}</td>
+                <td className="px-4 py-2">{tailor[2]}</td>
+                <td className="px-4 py-2">{tailor[3]}</td>
+                <td className="px-4 py-2 flex gap-2">
                   <button className="border px-2 py-1 rounded-md bg-gray-300" onClick={() => { setEditingTailor(tailor); setDialogOpen(true); }}>
                     <Edit size={16} />
                   </button>

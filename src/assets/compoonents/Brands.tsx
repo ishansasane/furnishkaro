@@ -98,21 +98,21 @@ export default function Brands() {
         />
       </div>
 
-      <table className="w-full border-collapse border border-gray-300">
-        <thead className="bg-gray-200">
+      <table className="w-full">
+        <thead className="bg-sky-50">
           <tr>
-            <th className="border px-4 py-2">Brand Name</th>
-            <th className="border px-4 py-2">Description</th>
-            <th className="border px-4 py-2">Actions</th>
+            <th className="px-4 py-3">Brand Name</th>
+            <th className="px-4 py-3">Description</th>
+            <th className="px-4 py-3">Actions</th>
           </tr>
         </thead>
         <tbody>
           {brands.length > 0 ? (
             brands.map((brand, index) => (
-              <tr key={index} className="border">
-                <td className="border px-4 py-2">{brand[0]}</td>
-                <td className="border px-4 py-2">{brand[1]}</td>
-                <td className="border px-4 py-2 flex gap-2">
+              <tr key={index} className="hover:bg-sky-50">
+                <td className="px-4 py-2">{brand[0]}</td>
+                <td className="px-4 py-2">{brand[1]}</td>
+                <td className="px-4 py-2 flex gap-2">
                   <button className="border px-2 py-1 rounded-md bg-gray-300" onClick={() => { setEditingBrand(brand); setDialogOpen(true); }}>
                     <Edit size={16} />
                   </button>

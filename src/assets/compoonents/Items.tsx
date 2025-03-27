@@ -391,17 +391,17 @@ const Items = () => {
       />
       <table className="w-full text-left border-collapse">
         <thead>
-          <tr className="text-gray-500">
-            <th className="py-2 px-4">Item Name</th>
-            <th className="py-2 px-4">Description</th>
-            <th className="py-2 px-4">Costing Type</th>
-            <th className="py-2 px-4">Group Type</th>
-            <th className="py-2 px-4">Actions</th>
+          <tr className="text-gray-500 bg-sky-50">
+            <th className="py-3 px-4">Item Name</th>
+            <th className="py-3 px-4">Description</th>
+            <th className="py-3 px-4">Costing Type</th>
+            <th className="py-3 px-4">Group Type</th>
+            <th className="py-3 px-4">Actions</th>
           </tr>
         </thead>
         <tbody>
           {items.map((item, index) => (
-            <tr key={index} className="border-t relative">
+            <tr key={index} className="border-t relative hover:bg-sky-50">
               <td className="py-2 px-4">{item[0]}</td>
               <td className="py-2 px-4">{item[1]}</td>
               <td className="py-2 px-4">{item[3]}</td>
