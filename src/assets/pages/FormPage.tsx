@@ -12,7 +12,7 @@ import QuotationSection from "../compoonents/QuotationSection";
 const FormPage = () => {
   const dispatch = useDispatch();
   const customerData = useSelector((state: RootState) => state.data.customers);
-  
+
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
   const [customers, setCustomers] = useState<{ name: string; mobile: string; address: string }[]>([]);
   const [materials, setMaterials] = useState<{ area: string; productGroups: string[] }[]>([]);
@@ -24,7 +24,6 @@ const FormPage = () => {
   const isCustomerSelected = !!selectedCustomer;
   const isProjectDetailsFilled = true; // Replace with actual validation logic
   const isMaterialSelected = materials.length > 0;
-  const isMeasurementAdded = measurements.length > 0;
 
   const fetchCustomers = async () => {
     try {
@@ -50,14 +49,39 @@ const FormPage = () => {
       const data = await fetchCustomers();
       dispatch(setCustomerData(data));
       setCustomers(data);
+      console.log("Fetched Customers:", data);
     };
-    
+
     if (customerData.length === 0) {
       fetchData();
     } else {
       setCustomers(customerData);
+      console.log("Using Redux Customer Data:", customerData);
     }
   }, [dispatch]);
+
+  useEffect(() => {
+    console.log("Selected Customer:", selectedCustomer);
+  }, [selectedCustomer]);
+
+  useEffect(() => {
+    console.log("Materials Selected:", materials);
+  }, [materials]);
+
+  useEffect(() => {
+    console.log("Quotation Data:", quotation);
+  }, [quotation]);
+
+  const handleSubmit = () => {
+    const formData = {
+      selectedCustomer,
+      materials,
+      measurements,
+      quotation,
+    };
+    console.log("Form Submitted with data:", formData);
+    // You can replace this with an API call to submit the form data
+  };
 
   return (
     <div className="container mx-auto p-6 bg-white rounded-lg shadow-lg">
@@ -76,19 +100,19 @@ const FormPage = () => {
       {/* Show Project Details only if Customer is selected */}
       {isCustomerSelected && <ProjectDetails />}
 
-      {/* Show Material Selection only if Project Details are filled */}
+      {/* Show Material Selection */}
       {isCustomerSelected && isProjectDetailsFilled && (
-        <MaterialSelection setMaterials={setMaterials} />
-      )}
-
-      {/* Show Measurement Section only if Materials are selected */}
-      {isCustomerSelected && isProjectDetailsFilled && isMaterialSelected && (
-        <MeasurementSection />
-      )}
-
-      {/* Show Quotation Section only if Measurements are added */}
-      {isCustomerSelected && isProjectDetailsFilled && isMaterialSelected && isMeasurementAdded && (
-        <QuotationSection materials={materials} measurements={measurements} />
+        <>
+          <MaterialSelection setMaterials={setMaterials} />
+          <QuotationSection materials={materials} measurements={measurements} setQuotation={setQuotation} />
+          {/* Submit Button */}
+          <button
+            onClick={handleSubmit}
+            className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+          >
+            Submit
+          </button>
+        </>
       )}
     </div>
   );
