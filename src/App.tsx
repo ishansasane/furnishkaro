@@ -28,6 +28,7 @@ import Register from "./assets/compoonents/Register.tsx";
 import VerifyMail from "./assets/compoonents/VerifyMail.tsx";
 import ProductFormPage from "./assets/pages/ProductFormPage.tsx";
 import ProductGroupForm from "./assets/pages/ProductGroupForm.tsx";
+import AddProjectForm from "./assets/pages/AddProjectForm.tsx";
 
 function App() {
   const [expanded, setExpanded] = useState(true);
@@ -56,7 +57,7 @@ function App() {
               <Route path="/tasks" element={<Tasks />} />
               <Route path="/reports" element={<Reports />} />
               <Route path="/settings" element={<SettingsPage />} />
-              <Route path="/add-project" element={<FormPage />} />
+              <Route path="/add-project" element={<AddProjectForm />} />
               
               {/* Masters Subroutes */}
               <Route path="/masters/stores" element={<Store />} />

@@ -89,34 +89,34 @@ export default function Projects() {
         <input type="text" placeholder="Search projects..." className="border px-3 py-2 rounded-md" />
       </div>
 
-      <table className="w-full border-collapse border border-gray-300">
-        <thead className="bg-gray-200">
+      <table className="w-full">
+        <thead className="bg-sky-50">
           <tr>
-            <th className="border px-4 py-2">Project Name</th>
-            <th className="border px-4 py-2">Customer Name</th>
-            <th className="border px-4 py-2">Status</th>
-            <th className="border px-4 py-2">Amount</th>
-            <th className="border px-4 py-2">Received</th>
-            <th className="border px-4 py-2">Due</th>
-            <th className="border px-4 py-2">Created By</th>
-            <th className="border px-4 py-2">Date</th>
-            <th className="border px-4 py-2">Quote</th>
-            <th className="border px-4 py-2">Actions</th>
+            <th className="px-4 py-2">Project Name</th>
+            <th className="px-4 py-2">Customer Name</th>
+            <th className="px-4 py-2">Status</th>
+            <th className="px-4 py-2">Amount</th>
+            <th className="px-4 py-2">Received</th>
+            <th className="px-4 py-2">Due</th>
+            <th className="px-4 py-2">Created By</th>
+            <th className="px-4 py-2">Date</th>
+            <th className="px-4 py-2">Quote</th>
+            <th className="px-4 py-2">Actions</th>
           </tr>
         </thead>
         <tbody>
           {filteredProjects.map((project, index) => (
-            <tr key={index} className="border">
-              <td className="border px-4 py-2">{project[0]}</td>
-              <td className="border px-4 py-2">{project[1]}</td>
-              <td className="border px-4 py-2">{project[4]}</td>
-              <td className="border px-4 py-2">{project[5]}</td>
-              <td className="border px-4 py-2">{project[6]}</td>
-              <td className="border px-4 py-2">{project[7]}</td>
-              <td className="border px-4 py-2">{project[8]}</td>
-              <td className="border px-4 py-2">{project[14]}</td>
-              <td className="border px-4 py-2">{project[12]}</td>
-              <td className="border px-4 py-2">
+            <tr key={index} className="hover:bg-sky-50">
+              <td className="px-4 py-2">{project[0]}</td>
+              <td className="px-4 py-2">{project[1]}</td>
+              <td className="px-4 py-2">{project[4]}</td>
+              <td className="px-4 py-2">{project[5]}</td>
+              <td className="px-4 py-2">{project[6]}</td>
+              <td className="px-4 py-2">{project[7]}</td>
+              <td className="px-4 py-2">{project[8]}</td>
+              <td className="px-4 py-2">{project[14]}</td>
+              <td className="px-4 py-2">{project[12]}</td>
+              <td className="px-4 py-2">
                 <div className="flex gap-2">
                   <button className="border px-2 py-1 rounded-md bg-gray-300">
                     <Edit size={16} />

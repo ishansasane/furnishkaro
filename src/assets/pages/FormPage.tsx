@@ -14,7 +14,7 @@ const FormPage = () => {
   const customerData = useSelector((state: RootState) => state.data.customers);
 
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
-  const [customers, setCustomers] = useState<{ name: string; mobile: string; address: string }[]>([]);
+  const [customers, setCustomers] = useState([]);
   const [materials, setMaterials] = useState<{ area: string; productGroups: string[] }[]>([]);
   const [measurements, setMeasurements] = useState<{ area: string; size: string }[]>([]);
   const [quotation, setQuotation] = useState<any[]>([]);

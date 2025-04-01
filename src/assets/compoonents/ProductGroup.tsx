@@ -61,7 +61,7 @@ export default function ProductGroups() {
       setProductGroups(products);
     }
   
-  }, [dispatch]);// Re-fetch only when refresh changes
+  }, [dispatch, products]);// Re-fetch only when refresh changes
 
   useEffect(() => {
     async function fetchData() {
