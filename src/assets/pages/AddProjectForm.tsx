@@ -5,6 +5,7 @@ import { RootState } from "../Redux/store";
 import { setSalesAssociateData, setInteriorData, setCustomerData, setProducts, setCatalogs } from "../Redux/dataSlice";
 import { Plus } from "lucide-react";
 import { FaPlus, FaTrash } from "react-icons/fa";
+import addCustomerDetails from "./addCustomerDetails.tsx";
 
 function AddProjectForm() {
 
@@ -28,7 +29,7 @@ function AddProjectForm() {
     const availableAreas = ["Living Room", "Kitchen", "Bedroom", "Bathroom"];
     const [availableProductGroups, setAvailableProductGroups] = useState([]);
 
-    const catalogueData = useSelector((state : RootState) => state.data.catalogs);
+    const   catalogueData = useSelector((state : RootState) => state.data.catalogs);
 
     let availableCompanies = ["D Decor", "Asian Paints", "ZAMAN"];
 
@@ -245,6 +246,7 @@ function AddProjectForm() {
     
 
     const handleProductGroupChange = (mainindex: number, product) => {
+      console.log(product);
       const updatedSelections = [...selections];
     
       // Ensure areacollection exists before accessing the index
@@ -257,7 +259,7 @@ function AddProjectForm() {
         updatedSelections[mainindex].areacollection[count] = { productGroup: null, catalogue: null, company: null, designNo : null, reference : null };
       }
     
-      updatedSelections[mainindex].areacollection[count][0] = product;
+      updatedSelections[mainindex].areacollection[count].productGroup = product;
       setSelections(updatedSelections);
     };
     
@@ -272,7 +274,7 @@ function AddProjectForm() {
         updatedSelections[mainindex].areacollection[count] = { productGroup: null, catalogue: null, company: null, designNo : null, reference : null };
       }
     
-      updatedSelections[mainindex].areacollection[count][2] = catalogue;
+      updatedSelections[mainindex].areacollection[count].catalogue = catalogue;
       setSelections(updatedSelections);
     };
     
@@ -287,7 +289,7 @@ function AddProjectForm() {
         updatedSelections[mainindex].areacollection[count] = { productGroup: null, catalogue: null, company: null, designNo : null, reference : null };
       }
     
-      updatedSelections[mainindex].areacollection[count][1] = company;
+      updatedSelections[mainindex].areacollection[count].company = company;
       setSelections(updatedSelections);
 
       console.log(updatedSelections);
@@ -304,7 +306,7 @@ function AddProjectForm() {
         updatedSelections[mainindex].areacollection[count] = { productGroup : null, catalogue : null, company : null, designNo : null, reference : null };
       }
 
-      updatedSelections[mainindex].areacollection[count][3] = designNo;
+      updatedSelections[mainindex].areacollection[count].designNo = designNo;
       setSelections(updatedSelections);
 
       console.log(updatedSelections);
@@ -321,7 +323,7 @@ function AddProjectForm() {
         updatedSelection[mainindex].areacollection[count] = { productGroup : null, catalogue : null, company : null, designNo : null, reference : null }
       }
 
-      updatedSelection[mainindex].areacollection[count][4] = reference;
+      updatedSelection[mainindex].areacollection[count].reference = reference;
 
       setSelections(updatedSelection);
     }
@@ -486,198 +488,198 @@ function AddProjectForm() {
                 <div className="flex flex-row items-center justify-between">
                   <p className="text-[1.1vw]">Select Product Groups</p>
                 </div>
-{selections.map((selection, mainindex) => (
-  selection.area && selection.areacollection.length > 0 ? (
-    selection.areacollection.map((element, i) => (
-      <div key={i} className="mb-4 border p-3 rounded-lg shadow-sm bg-gray-50">
-        <div className="flex flex-row justify-between">
-          <p className="text-[1.1vw]">{selection.area}</p>
-          <button
-            className="mb-3 text-lg px-2 py-2 text-white bg-sky-600"
-            style={{ borderRadius: "10px" }}
-            onClick={() => handleAddNewGroup(mainindex)} // Ensure handleAddNewGroup is called
-          >
-            Add New Group
-          </button>
-        </div>
-        <div className="gap-3">
-          <div className="flex justify-between items-center gap-2">
-            {/* Product Group */}
-            <div>
-              <p>Product Group</p>
-              <select
-                className="border p-2 rounded w-full"
-                value={element.productGroup || ""}
-                onChange={(e) => handleProductGroupChange(mainindex, i, e.target.value)}
-              >
-                <option value="">Select Product Group</option>
-                {availableProductGroups.map((product, index) => (
-                  <option key={index} value={product[0]}>
-                    {product[0]}
-                  </option>
+                {selections.map((selection, mainindex) => (
+                  selection.area && selection.areacollection.length > 0 ? (
+                    selection.areacollection.map((element, i) => (
+                      <div key={i} className="mb-4 border p-3 rounded-lg shadow-sm bg-gray-50">
+                        <div className="flex flex-row justify-between">
+                          <p className="text-[1.1vw]">{selection.area}</p>
+                          <button
+                            className="mb-3 text-lg px-2 py-2 text-white bg-sky-600"
+                            style={{ borderRadius: "10px" }}
+                            onClick={() => handleAddNewGroup(mainindex)} // Ensure handleAddNewGroup is called
+                          >
+                            Add New Group
+                          </button>
+                        </div>
+                        <div className="gap-3">
+                          <div className="flex justify-between items-center gap-2">
+                            {/* Product Group */}
+                            <div>
+                              <p>Product Group</p>
+                              <select
+                                className="border p-2 rounded w-full"
+                                value={element.productGroup}
+                                onChange={(e) => handleProductGroupChange(mainindex, e.target.value)}
+                              >
+                                <option value="">Select Product Group</option>
+                                {availableProductGroups.map((product, index) => (
+                                  <option key={index} value={product}>
+                                    {product[0]}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            {/* Company */}
+                            <div>
+                              <p>Company</p>
+                              <select
+                                className="border p-2 rounded w-full"
+                                value={element.company}
+                                onChange={(e) => handleCompanyChange(mainindex, e.target.value)}
+                              >
+                                <option value="">Select Company</option>
+                                {availableCompanies.map((company, index) => (
+                                  <option key={index} value={company}>
+                                    {company}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            {/* Catalogue */}
+                            <div>
+                              <p>Catalogue</p>
+                              <select
+                                className="border p-2 rounded w-full"
+                                value={element.catalogue}
+                                onChange={(e) => handleCatalogueChange(mainindex, e.target.value)}
+                              >
+                                <option value="">Select Catalogue</option>
+                                {catalogueData.map((catalogue, index) => (
+                                  <option key={index} value={catalogue}>
+                                    {catalogue[0]}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            {/* Design No */}
+                            <div>
+                              <p>Design No</p>
+                              <select
+                                className="border p-2 rounded w-full"
+                                value={element.designNo}
+                                onChange={(e) => handleDesignNoChange(mainindex, e.target.value)}
+                              >
+                                <option value="">Select Design No</option>
+                                {designNo.map((design, index) => (
+                                  <option key={index} value={design}>
+                                    {design}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+
+                            {/* Reference */}
+                            <div>
+                              <p>Reference/Notes</p>
+                              <input
+                                type="text"
+                                value={element.reference || ""}
+                                placeholder="Enter reference..."
+                                onChange={(e) => handleReferenceChange(mainindex, e.target.value)}
+                                className="pl-2 w-[10vw] h-[2.6vw] border-2 border-gray-300 rounded-md"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div key={mainindex} className="mb-4 border p-3 rounded-lg shadow-sm bg-gray-50">
+                      <div className="flex flex-row justify-between">
+                        <p className="text-[1.1vw]">{selection.area}</p>
+                        <button
+                          className="mb-3 text-lg px-2 py-2 text-white bg-sky-600"
+                          style={{ borderRadius: "10px" }}
+                          onClick={() => handleAddNewGroup(mainindex)} // Ensure handleAddNewGroup is called
+                        >
+                          Add New Group
+                        </button>
+                      </div>
+                      <div className="gap-3">
+                        <div className="flex justify-between items-center gap-2">
+                          {/* Product Group */}
+                          <div>
+                            <p>Product Group</p>
+                            <select
+                              className="border p-2 rounded w-full"
+                              onChange={(e) => handleProductGroupChange(mainindex, 0, e.target.value)}
+                            >
+                              <option value="">Select Product Group</option>
+                              {availableProductGroups.map((product, index) => (
+                                <option key={index} value={product[0]}>
+                                  {product[0]}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* Company */}
+                          <div>
+                            <p>Company</p>
+                            <select
+                              className="border p-2 rounded w-full"
+                              onChange={(e) => handleCompanyChange(mainindex, 0, e.target.value)}
+                            >
+                              <option value="">Select Company</option>
+                              {availableCompanies.map((company, index) => (
+                                <option key={index} value={company}>
+                                  {company}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* Catalogue */}
+                          <div>
+                            <p>Catalogue</p>
+                            <select
+                              className="border p-2 rounded w-full"
+                              onChange={(e) => handleCatalogueChange(mainindex, 0, e.target.value)}
+                            >
+                              <option value="">Select Catalogue</option>
+                              {catalogueData.map((catalogue, index) => (
+                                <option key={index} value={catalogue}>
+                                  {catalogue}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* Design No */}
+                          <div>
+                            <p>Design No</p>
+                            <select
+                              className="border p-2 rounded w-full"
+                              onChange={(e) => handleDesignNoChange(mainindex, 0, e.target.value)}
+                            >
+                              <option value="">Select Design No</option>
+                              {designNo.map((design, index) => (
+                                <option key={index} value={design}>
+                                  {design}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+
+                          {/* Reference */}
+                          <div>
+                            <p>Reference/Notes</p>
+                            <input
+                              type="text"
+                              placeholder="Enter reference..."
+                              onChange={(e) => handleReferenceChange(mainindex, 0, e.target.value)}
+                              className="pl-2 w-[10vw] h-[2.6vw] border-2 border-gray-300 rounded-md"
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )
                 ))}
-              </select>
-            </div>
-
-            {/* Company */}
-            <div>
-              <p>Company</p>
-              <select
-                className="border p-2 rounded w-full"
-                value={element.company || ""}
-                onChange={(e) => handleCompanyChange(mainindex, i, e.target.value)}
-              >
-                <option value="">Select Company</option>
-                {availableCompanies.map((company, index) => (
-                  <option key={index} value={company}>
-                    {company}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Catalogue */}
-            <div>
-              <p>Catalogue</p>
-              <select
-                className="border p-2 rounded w-full"
-                value={element.catalogue || ""}
-                onChange={(e) => handleCatalogueChange(mainindex, i, e.target.value)}
-              >
-                <option value="">Select Catalogue</option>
-                {catalogueData.map((catalogue, index) => (
-                  <option key={index} value={catalogue}>
-                    {catalogue}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Design No */}
-            <div>
-              <p>Design No</p>
-              <select
-                className="border p-2 rounded w-full"
-                value={element.designNo || ""}
-                onChange={(e) => handleDesignNoChange(mainindex, i, e.target.value)}
-              >
-                <option value="">Select Design No</option>
-                {designNo.map((design, index) => (
-                  <option key={index} value={design}>
-                    {design}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Reference */}
-            <div>
-              <p>Reference/Notes</p>
-              <input
-                type="text"
-                value={element.reference || ""}
-                placeholder="Enter reference..."
-                onChange={(e) => handleReferenceChange(mainindex, i, e.target.value)}
-                className="pl-2 w-[10vw] h-[2.6vw] border-2 border-gray-300 rounded-md"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    ))
-  ) : (
-    <div key={mainindex} className="mb-4 border p-3 rounded-lg shadow-sm bg-gray-50">
-      <div className="flex flex-row justify-between">
-        <p className="text-[1.1vw]">{selection.area}</p>
-        <button
-          className="mb-3 text-lg px-2 py-2 text-white bg-sky-600"
-          style={{ borderRadius: "10px" }}
-          onClick={() => handleAddNewGroup(mainindex)} // Ensure handleAddNewGroup is called
-        >
-          Add New Group
-        </button>
-      </div>
-      <div className="gap-3">
-        <div className="flex justify-between items-center gap-2">
-          {/* Product Group */}
-          <div>
-            <p>Product Group</p>
-            <select
-              className="border p-2 rounded w-full"
-              onChange={(e) => handleProductGroupChange(mainindex, 0, e.target.value)}
-            >
-              <option value="">Select Product Group</option>
-              {availableProductGroups.map((product, index) => (
-                <option key={index} value={product[0]}>
-                  {product[0]}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Company */}
-          <div>
-            <p>Company</p>
-            <select
-              className="border p-2 rounded w-full"
-              onChange={(e) => handleCompanyChange(mainindex, 0, e.target.value)}
-            >
-              <option value="">Select Company</option>
-              {availableCompanies.map((company, index) => (
-                <option key={index} value={company}>
-                  {company}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Catalogue */}
-          <div>
-            <p>Catalogue</p>
-            <select
-              className="border p-2 rounded w-full"
-              onChange={(e) => handleCatalogueChange(mainindex, 0, e.target.value)}
-            >
-              <option value="">Select Catalogue</option>
-              {catalogueData.map((catalogue, index) => (
-                <option key={index} value={catalogue}>
-                  {catalogue}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Design No */}
-          <div>
-            <p>Design No</p>
-            <select
-              className="border p-2 rounded w-full"
-              onChange={(e) => handleDesignNoChange(mainindex, 0, e.target.value)}
-            >
-              <option value="">Select Design No</option>
-              {designNo.map((design, index) => (
-                <option key={index} value={design}>
-                  {design}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Reference */}
-          <div>
-            <p>Reference/Notes</p>
-            <input
-              type="text"
-              placeholder="Enter reference..."
-              onChange={(e) => handleReferenceChange(mainindex, 0, e.target.value)}
-              className="pl-2 w-[10vw] h-[2.6vw] border-2 border-gray-300 rounded-md"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-))}
 
 
 
@@ -686,6 +688,7 @@ function AddProjectForm() {
           </div>
         <br />
     </div>
+    
   )
 }
 
