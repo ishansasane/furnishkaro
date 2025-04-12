@@ -5,11 +5,6 @@ import { RootState } from "../Redux/store";
 import { setSalesAssociateData, setInteriorData, setCustomerData, setProducts, setCatalogs, setProjects, setItemData } from "../Redux/dataSlice";
 import { Plus, Upload } from "lucide-react";
 import { FaPlus, FaTrash } from "react-icons/fa";
-import CustomerDetails from "./CustomerDetails";
-import ProjectDetails from "./ProjectDetails";
-import MaterialSelectionComponent from "./MaterialSelectionComponent";
-import React from "react";
-import MeasurementSection from "./MeasurementSections";
 
 function AddProjectForm() {
 
@@ -36,7 +31,7 @@ function AddProjectForm() {
     const availableAreas = ["Living Room", "Kitchen", "Bedroom", "Bathroom"];
     const [availableProductGroups, setAvailableProductGroups] = useState([]);
 
-    const catalogueData = useSelector((state : RootState) => state.data.catalogs);
+    const   catalogueData = useSelector((state : RootState) => state.data.catalogs);
 
     let availableCompanies = ["D Decor", "Asian Paints", "ZAMAN"];
 
@@ -273,9 +268,12 @@ function AddProjectForm() {
         // Update the state with the new selections array
         setSelections(updatedSelections);
       };
-         
+      
+      
+      
+    
 
-    const handleProductGroupChange = (mainindex: number,i : number, product) => {
+    const handleProductGroupChange = (mainindex: number, product) => {
       const updatedSelections = [...selections];
     
       // Ensure areacollection exists before accessing the index
@@ -287,14 +285,8 @@ function AddProjectForm() {
       if (!updatedSelections[mainindex].areacollection[i]) {
         updatedSelections[mainindex].areacollection[i] = { productGroup: null, items : [""], catalogue: null, company: null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : 0, totalTax : 0 };
       }
-      
-      const newproduct = product.split(",");
-
-      const items = newproduct.slice(1, -2);
-      console.log(items);
-
-      updatedSelections[mainindex].areacollection[i].productGroup = newproduct;
-      updatedSelections[mainindex].areacollection[i].items = items;
+    
+      updatedSelections[mainindex].areacollection[count][0] = product;
       setSelections(updatedSelections);
     };
     
@@ -309,7 +301,7 @@ function AddProjectForm() {
         updatedSelections[mainindex].areacollection[i] = { productGroup: null, items : [""],  catalogue: null, company: null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : 0, totalTax : 0 };
       }
     
-      updatedSelections[mainindex].areacollection[i].catalogue = catalogue;
+      updatedSelections[mainindex].areacollection[count][2] = catalogue;
       setSelections(updatedSelections);
     };
     
@@ -324,7 +316,7 @@ function AddProjectForm() {
         updatedSelections[mainindex].areacollection[i] = { productGroup: null, items : [""], catalogue: null, company: null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : 0, totalTax : 0 };
       }
     
-      updatedSelections[mainindex].areacollection[i].company = company;
+      updatedSelections[mainindex].areacollection[count][1] = company;
       setSelections(updatedSelections);
 
       console.log(updatedSelections);
@@ -341,7 +333,7 @@ function AddProjectForm() {
         updatedSelections[mainindex].areacollection[i] = { productGroup : null, items : [""], catalogue : null, company : null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : 0, totalTax : 0 };
       }
 
-      updatedSelections[mainindex].areacollection[i].designNo = designNo;
+      updatedSelections[mainindex].areacollection[count][3] = designNo;
       setSelections(updatedSelections);
 
       console.log(updatedSelections);
@@ -358,7 +350,7 @@ function AddProjectForm() {
         updatedSelection[mainindex].areacollection[i] = { productGroup : null, items : [""], catalogue : null, company : null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : 0, totalTax : 0 }
       }
 
-      updatedSelection[mainindex].areacollection[i].reference = reference;
+      updatedSelection[mainindex].areacollection[count][4] = reference;
 
       setSelections(updatedSelection);
     }
@@ -528,195 +520,336 @@ function AddProjectForm() {
                 <Link to="/projects" className="text-[1vw] text-black !no-underline">All Projects</Link>
             </div>
         </div>
-        <CustomerDetails
-          customers={customers}
-          selectedCustomer={selectedCustomer}
-          setSelectedCustomer={setSelectedCustomer}
-          projectData={projectData}
-        />
-        <ProjectDetails
-          selectedCustomer={selectedCustomer}
-          interior={interior}
-          salesdata={salesdata}
-        />
+        <div className="flex flex-col gap-3 px-3 py-3 rounded-xl shadow-xl w-full border-gray-200 border-2 mt-3">
+            <p className="text-[1.2vw]">Customer Details</p>
+            <div className="flex flex-row justify-between gap-2">
+              <div className="flex flex-col w-1/2">
+                    <p className="text-[1vw]">Select Customer</p>
+                    <select
+                      className="border p-2 rounded w-full"
+                      value={selectedCustomer ? JSON.stringify(selectedCustomer) : ""}
+                      onChange={(e) => {setSelectedCustomer(e.target.value=="" ? null : JSON.parse(e.target.value)); projectData[0] = e.target.value; }}
+                      >
+                      <option value="">Select Customer</option>
+                      {Array.isArray(customers) &&
+                          customers.map((customer, index) => (
+                              <option key={index} value={JSON.stringify(customer)}>
+                                  {customer[0]}
+                              </option>
+                      ))}
+                    </select>
+                </div>
+                {selectedCustomer ? <div className="flex flex-col w-1/2">
+                    <p className="text-[1vw]">Email (optional)</p>
+                    <input type="text" className="border p-2 rounded w-full" value={selectedCustomer[2]}/>
+                </div> : undefined}
+            </div>
+            {selectedCustomer ? <div className="flex flex-row justify-between gap-2">
+              <div className="flex flex-col w-1/2">
+                    <p className="text-[1vw]">Phone Number</p>
+                    <input type="text" className="border p-2 rounded w-full" value={selectedCustomer[1]}/>
+                </div>
+                <div className="flex flex-col w-1/2">
+                    <p className="text-[1vw]">Alternate Phone Number (optional)</p>
+                    <input type="text" className="border p-2 rounded w-full" value={selectedCustomer[4 ]}/>
+                </div>
+            </div> : undefined}
+        </div>
+        <div className="flex flex-col gap-3 w-full rounded-xl shadow-2xl border-2 border-gray-200 px-3 py-3">
+            <p className="text-[1.2vw]">Project Details</p>
+            <div className="flex flex-row w-full gap-2">
+                <div className="flex flex-col w-1/2">
+                    <p className="text-[1vw]">Reference (optional)</p>
+                    <input type="text" className="border p-2 rounded w-full" />
+                </div>
+                <div className="flex flex-col w-1/2">
+                    <p className="text-[1vw]">Project Name (type a unique name)</p>
+                    <input type="text" className="border p-2 rounded w-full" />
+                </div>
+            </div>
+            <div className="flex flex-row w-full gap-2">
+                {selectedCustomer ? <div className="flex flex-col w-full">
+                    <p className="text-[1vw]">Address</p>
+                    <input type="text" className="border p-2 rounded w-full" value={selectedCustomer[3]}/>
+                </div> : undefined}
+            </div>
+            <div className="flex flex-row w-full gap-2">
+                {selectedCustomer ? <div className="flex flex-col w-full">
+                    <p className="text-[1vw]">Any Additional Requests (optional)</p>
+                    <input type="text" className="border p-2 rounded w-full"/>
+                </div> : undefined}
+            </div>
+            <div className="flex flex-row w-full gap-2">
+              {/* Interior Name Dropdown */}
+              <div className="flex flex-col w-1/2">
+                  <p className="text-[1vw]">Interior Name (optional)</p>
+                  <select className="border p-2 rounded w-full">
+                      <option value="">Select Interior Name (optional)</option>
+                      {interior.map((data, index) => (
+                          <option value={data[0]} key={index}>{data[0]}</option>
+                      ))}
+                  </select>
+              </div>
 
-        <MaterialSelectionComponent
-          selections={selections}
-          availableAreas={availableAreas}
-          availableProductGroups={availableProductGroups}
-          availableCompanies={availableCompanies}
-          catalogueData={catalogueData}
-          designNo={designNo}
-          handleAddArea={handleAddArea}
-          handleRemoveArea={handleRemoveArea}
-          handleAreaChange={handleAreaChange}
-          handleAddNewGroup={handleAddNewGroup}
-          handleProductGroupChange={handleProductGroupChange}
-          handleCompanyChange={handleCompanyChange}
-          handleCatalogueChange={handleCatalogueChange}
-          handleDesignNoChange={handleDesignNoChange}
-          handleReferenceChange={handleReferenceChange}
-          handleGroupDelete = {handleGroupDelete}
-        />
-        
-        <MeasurementSection
-          selections={selections}
-          units={units}
-          handleRemoveArea={handleRemoveArea}
-          handleReferenceChange={handleReferenceChange}
-          handleunitchange={handleunitchange}
-          handlewidthchange={handlewidthchange}
-          handleheightchange={handleheightchange}
-          handlequantitychange={handlequantitychange}
-        />
-        <div className="flex flex-col p-6 border rounded-lg w-full shadow-2xl">
-      <p className="text-[1.1vw]">Quotation</p>
-      <div className="flex flex-col gap-3 w-full">
-        {selections.map((selection, mainindex) => (
-          <div key={mainindex} className="w-full">
-            <p className="text-[1.1vw] font-semibold mb-2">{selection.area}</p>
-            <table className="w-full border-collapse mb-6 text-[0.95vw]">
-              <thead>
-                <tr className="flex justify-between w-full bg-gray-100 p-2 border-b font-semibold">
-                  <td className="w-[10%]">Sr. No.</td>
-                  <td className="w-[45%]">Product Name</td>
-                  <td className="w-[45%]">Size</td>
-                  <td className="w-[20%]">MRP</td>
-                  <td className="w-[20%]">Quantity</td>
-                  <td className="w-[20%]">Subtotal</td>
-                  <td className="w-[20%]">Tax Rate (%)</td>
-                  <td className="w-[20%]">Tax Amount</td>
-                  <td className="w-[20%]">Total</td>
-                </tr>
-              </thead>
-              <tbody>
-                {selection.areacollection && selection.areacollection.length > 0 ? (
-                  selection.areacollection.map((collection, collectionIndex) => {
-                    const pg = collection.productGroup;
+              {/* Sales Associate Dropdown */}
+              <div className="flex flex-col w-1/2">
+                  <p className="text-[1vw]">Sales Associate (optional)</p>
+                  <select className="border p-2 rounded w-full">
+                      <option value="">Select Sales Associate (optional)</option>
+                      {salesdata.map((data, index) => (
+                          <option value={data[0]} key={index}>{data[0]}</option>
+                      ))}
+                  </select>
+              </div>
+            </div>
 
-                    if (!Array.isArray(pg) || pg.length < 2) return null;
+            <div className="flex flex-row w-full gap-2">
+                <div className="flex flex-col w-1/2">
+                    <p className="text-[1vw]">Select User</p>
+                    <input type="text" className="border p-2 rounded w-full"/>
+                </div>
+            </div>
+        </div>
+        <div className="flex flex-col bg-white p-6 rounded-lg shadow-lg">
+            <p className="text-[1.2vw] text-gray-700">Material Selection</p>
 
-                    const second = pg[1];
-                    const secondLast = pg[pg.length - 2];
-
-                    const matchedItems = items.filter(
-                      (item) => item[0] === second || item[0] === secondLast
-                    );
-
-                    return matchedItems.map((item, itemIndex) => {
-                      const key = `${mainindex}-${collectionIndex}-${itemIndex}`;
-                      const qty = quantities[key] || 0;
-                      const subtotal = (item.mrp || 0) * qty;
-
-                      return (
-                        <tr key={key} className="flex justify-between w-full border-b p-2">
-                          <td className="w-[10%]">{itemIndex + 1}</td>
-                          <td className="w-[45%]">{item[0]+" * "+collection.measurement.quantity}</td>
-                          <td className="w-[45%]">{
-                            collection.measurement.width+"*"+collection.measurement.height+" "+
-                            collection.measurement.unit
-                            }
-                          </td>
-                          <td className="w-[20%]">{item[4]*collection.measurement.quantity}</td>
-                          <td className="w-[20%]">
-                            <div className="flex flex-col">
-                              <input
-                                type="text"
-                                value={quantities[key]}
-                                onChange={(e) => handleQuantityChange(key, e.target.value, mainindex, collectionIndex, collection.measurement.quantity, item[4], item[5])}
-                                className="border w-[40%] px-2 py-1 rounded"
-                              />
-                              <p className=" text-[0.8vw] text-gray-600">{item[3]}</p>
-                            </div>
-                          </td>
-                          <td className="w-[20%]">{item[4]*collection.measurement.quantity*quantities[key]}</td>
-                          <td className="w-[20%]">{item[5]}</td>
-                          <td className="w-[20%]">{collection.totalTax}</td>
-                          <td className="w-[20%]">{collection.totalAmount}</td>
-                        </tr>
-                      );
-                    });
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan="7" className="text-center py-2 text-gray-500">
-                      No product data available.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        ))}
-      </div>
-      <div className="border p-6 rounded-lg w-full flex flex-col">
-      <p className="text-[1.1vw] font-semibold">Miscellaneous</p>
-      <div className="flex w-full flex-col">
-        <table className="mt-3 w-full">
-          <thead>
-            <tr className="ml-3 flex text-[1.1vw] w-full justify-between">
-              <td className="w-[3vw]">SR</td>
-              <td className="w-[6vw]">Item Name</td>
-              <td className="w-[6vw]">Quantity</td>
-              <td className="w-[6vw]">Rate</td>
-              <td className="w-[6vw]">Net Rate</td>
-              <td className="w-[6vw]">Tax (%)</td>
-              <td className="w-[6vw]">Tax Amount</td>
-              <td className="w-[6vw]">Total Amount</td>
-              <td className="w-[6vw]">Remark</td>
-              <td className="w-[6vw]">Actions</td>
-            </tr>
-          </thead>
-
-          {selections.map((selection, mainindex) => (
-            <React.Fragment key={mainindex}>
-              {selection.areacollection.map((collection, index) => (
-                <React.Fragment key={index}>
-                  <div className="flex flex-row justify-between items-center mt-4">
-                    <button
-                      className="flex flex-row gap-2 rounded-xl bg-sky-50 hover:bg-sky-100 items-center px-2 py-1"
-                      onClick={() => handleAddMiscItem(mainindex, index)}
+            <div className="flex flex-row gap-5">
+              {/* Left Column: Area Selection */}
+              <div className="w-[20vw]">
+                <p className="text-[1.1vw]">Area</p>
+                {selections.map((selection, index) => (
+                  <div key={index} className="flex items-center gap-2 mb-4">
+                    <select
+                      className="border border-gray-300 p-2 rounded-lg w-full focus:ring-2 focus:ring-blue-400"
+                      value={selection.area}
+                      onChange={(e) => handleAreaChange(index, e.target.value)}
                     >
-                      <FaPlus className="text-sky-500 mt-1" />
-                      Add Item
+                      <option value="">Select Area</option>
+                      {availableAreas.map((area) => (
+                        <option key={area} value={area}>
+                          {area}
+                        </option>
+                      ))}
+                    </select>
+                    <button className="text-red-500 hover:text-red-700" onClick={() => handleRemoveArea(index)}>
+                      <FaTrash size={18} />
                     </button>
                   </div>
+                ))}
+                <button
+                  className="flex items-center gap-2 bg-blue-500 text-white px-3 py-1 hover:bg-blue-600 transition"
+                  onClick={handleAddArea}
+                >
+                  <FaPlus /> Add Area
+                </button>
+              </div>
 
-                  <table className="flex flex-col w-full">
-                    {collection.additionalItems.map((item, i) => {
+              {/* Right Column: Product Group Selection */}
+              <div className="w-[80vw]">
+                <div className="flex flex-row items-center justify-between">
+                  <p className="text-[1.1vw]">Select Product Groups</p>
+                </div>
+{selections.map((selection, mainindex) => (
+  selection.area && selection.areacollection.length > 0 ? (
+    selection.areacollection.map((element, i) => (
+      <div key={i} className="mb-4 border p-3 rounded-lg shadow-sm bg-gray-50">
+        <div className="flex flex-row justify-between">
+          <p className="text-[1.1vw]">{selection.area}</p>
+          <button
+            className="mb-3 text-lg px-2 py-2 text-white bg-sky-600"
+            style={{ borderRadius: "10px" }}
+            onClick={() => handleAddNewGroup(mainindex)} // Ensure handleAddNewGroup is called
+          >
+            Add New Group
+          </button>
+        </div>
+        <div className="gap-3">
+          <div className="flex justify-between items-center gap-2">
+            {/* Product Group */}
+            <div>
+              <p>Product Group</p>
+              <select
+                className="border p-2 rounded w-full"
+                value={element.productGroup || ""}
+                onChange={(e) => handleProductGroupChange(mainindex, i, e.target.value)}
+              >
+                <option value="">Select Product Group</option>
+                {availableProductGroups.map((product, index) => (
+                  <option key={index} value={product[0]}>
+                    {product[0]}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-                      return (
-                        <tr key={i} className="w-full flex flex-row justify-between mt-2">
-                          <td className="text-center w-[3vw]">{i + 1}</td>
-                          <td><input onChange={(e) => handleitemnamechange(index, mainindex, i, e.target.value)} className="pl-2 w-[6vw] border rounded-lg" value={item[0] || ""} type="text" /></td>
-                          <td><input onChange={(e) => handleitemquantitychange(index, mainindex, i, e.target.value)} className="pl-2 w-[6vw] border rounded-lg" value={item[1] || ""} type="text" /></td>
-                          <td><input onChange={(e) => handleitemratechange(index, mainindex, i, e.target.value)} className="pl-2 w-[6vw] border rounded-lg" value={item[2] || ""} type="text" /></td>
-                          <td className="w-[6vw] text-center">{item[3]}</td>
-                          <td><input onChange={(e) => handleitemtaxchange(index, mainindex, i , e.target.value)} className="pl-2 w-[6vw] border rounded-lg" value={item[4] || ""} type="text" /></td>
-                          <td className="w-[6vw] text-center">{item[5] || 0}</td>
-                          <td className="w-[6vw] text-center">{item[6] || 0}</td>
-                          <td><input onChange={(e) => handleitemremarkchange(index, mainindex, i, e.target.value)} className="pl-2 w-[6vw] border rounded-lg" value={item[7] || ""} type="text" /></td>
-                          <td className="w-[6vw] text-center">
-                          <button onClick={() => handleDeleteMiscItem(mainindex, index, i)}>
-                            <FaTrash className="text-red-500 hover:text-red-600" />
-                          </button>
+            {/* Company */}
+            <div>
+              <p>Company</p>
+              <select
+                className="border p-2 rounded w-full"
+                value={element.company || ""}
+                onChange={(e) => handleCompanyChange(mainindex, i, e.target.value)}
+              >
+                <option value="">Select Company</option>
+                {availableCompanies.map((company, index) => (
+                  <option key={index} value={company}>
+                    {company}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </table>
-                </React.Fragment>
+            {/* Catalogue */}
+            <div>
+              <p>Catalogue</p>
+              <select
+                className="border p-2 rounded w-full"
+                value={element.catalogue || ""}
+                onChange={(e) => handleCatalogueChange(mainindex, i, e.target.value)}
+              >
+                <option value="">Select Catalogue</option>
+                {catalogueData.map((catalogue, index) => (
+                  <option key={index} value={catalogue}>
+                    {catalogue}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Design No */}
+            <div>
+              <p>Design No</p>
+              <select
+                className="border p-2 rounded w-full"
+                value={element.designNo || ""}
+                onChange={(e) => handleDesignNoChange(mainindex, i, e.target.value)}
+              >
+                <option value="">Select Design No</option>
+                {designNo.map((design, index) => (
+                  <option key={index} value={design}>
+                    {design}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Reference */}
+            <div>
+              <p>Reference/Notes</p>
+              <input
+                type="text"
+                value={element.reference || ""}
+                placeholder="Enter reference..."
+                onChange={(e) => handleReferenceChange(mainindex, i, e.target.value)}
+                className="pl-2 w-[10vw] h-[2.6vw] border-2 border-gray-300 rounded-md"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    ))
+  ) : (
+    <div key={mainindex} className="mb-4 border p-3 rounded-lg shadow-sm bg-gray-50">
+      <div className="flex flex-row justify-between">
+        <p className="text-[1.1vw]">{selection.area}</p>
+        <button
+          className="mb-3 text-lg px-2 py-2 text-white bg-sky-600"
+          style={{ borderRadius: "10px" }}
+          onClick={() => handleAddNewGroup(mainindex)} // Ensure handleAddNewGroup is called
+        >
+          Add New Group
+        </button>
+      </div>
+      <div className="gap-3">
+        <div className="flex justify-between items-center gap-2">
+          {/* Product Group */}
+          <div>
+            <p>Product Group</p>
+            <select
+              className="border p-2 rounded w-full"
+              onChange={(e) => handleProductGroupChange(mainindex, 0, e.target.value)}
+            >
+              <option value="">Select Product Group</option>
+              {availableProductGroups.map((product, index) => (
+                <option key={index} value={product[0]}>
+                  {product[0]}
+                </option>
               ))}
-            </React.Fragment>
-          ))}
-        </table>
+            </select>
+          </div>
+
+          {/* Company */}
+          <div>
+            <p>Company</p>
+            <select
+              className="border p-2 rounded w-full"
+              onChange={(e) => handleCompanyChange(mainindex, 0, e.target.value)}
+            >
+              <option value="">Select Company</option>
+              {availableCompanies.map((company, index) => (
+                <option key={index} value={company}>
+                  {company}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Catalogue */}
+          <div>
+            <p>Catalogue</p>
+            <select
+              className="border p-2 rounded w-full"
+              onChange={(e) => handleCatalogueChange(mainindex, 0, e.target.value)}
+            >
+              <option value="">Select Catalogue</option>
+              {catalogueData.map((catalogue, index) => (
+                <option key={index} value={catalogue}>
+                  {catalogue}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Design No */}
+          <div>
+            <p>Design No</p>
+            <select
+              className="border p-2 rounded w-full"
+              onChange={(e) => handleDesignNoChange(mainindex, 0, e.target.value)}
+            >
+              <option value="">Select Design No</option>
+              {designNo.map((design, index) => (
+                <option key={index} value={design}>
+                  {design}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Reference */}
+          <div>
+            <p>Reference/Notes</p>
+            <input
+              type="text"
+              placeholder="Enter reference..."
+              onChange={(e) => handleReferenceChange(mainindex, 0, e.target.value)}
+              className="pl-2 w-[10vw] h-[2.6vw] border-2 border-gray-300 rounded-md"
+            />
+          </div>
+        </div>
       </div>
     </div>
-    </div>
+  )
+))}
 
+
+
+              </div>
+            </div>
+          </div>
         <br />
     </div>
+    
   )
 }
 
