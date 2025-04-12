@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const ProductGroupForm: React.FC = () => {
+  const navigate = useNavigate();
   const [groupName, setGroupName] = useState("");
   const [mainProduct, setMainProduct] = useState("");
   const [addonProduct, setAddonProduct] = useState("");
@@ -127,7 +129,7 @@ const ProductGroupForm: React.FC = () => {
 
         {/* Buttons */}
         <div className="flex justify-end gap-3 mt-4">
-          <button className="border px-4 py-2 rounded text-gray-700 hover:bg-gray-100">
+          <button onClick={() => navigate("/masters/product-groups")} className="border px-4 py-2 rounded text-gray-700 hover:bg-gray-100">
             Cancel
           </button>
           <button

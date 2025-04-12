@@ -397,6 +397,7 @@ const Items = () => {
             <th className="py-3 px-4">Costing Type</th>
             <th className="py-3 px-4">Group Type</th>
             <th className="py-3 px-4">Actions</th>
+
           </tr>
         </thead>
         <tbody>
