@@ -5,6 +5,7 @@ import { RootState } from "../Redux/store";
 import { setSalesAssociateData, setInteriorData, setCustomerData, setProducts, setCatalogs, setProjects, setItemData } from "../Redux/dataSlice";
 import { Plus, Upload } from "lucide-react";
 import { FaPlus, FaTrash } from "react-icons/fa";
+import CustomerDetails from "./CustomerDetails";
 
 function AddProjectForm() {
 
@@ -520,41 +521,17 @@ function AddProjectForm() {
                 <Link to="/projects" className="text-[1vw] text-black !no-underline">All Projects</Link>
             </div>
         </div>
-        <div className="flex flex-col gap-3 px-3 py-3 rounded-xl shadow-xl w-full border-gray-200 border-2 mt-3">
-            <p className="text-[1.2vw]">Customer Details</p>
-            <div className="flex flex-row justify-between gap-2">
-              <div className="flex flex-col w-1/2">
-                    <p className="text-[1vw]">Select Customer</p>
-                    <select
-                      className="border p-2 rounded w-full"
-                      value={selectedCustomer ? JSON.stringify(selectedCustomer) : ""}
-                      onChange={(e) => {setSelectedCustomer(e.target.value=="" ? null : JSON.parse(e.target.value)); projectData[0] = e.target.value; }}
-                      >
-                      <option value="">Select Customer</option>
-                      {Array.isArray(customers) &&
-                          customers.map((customer, index) => (
-                              <option key={index} value={JSON.stringify(customer)}>
-                                  {customer[0]}
-                              </option>
-                      ))}
-                    </select>
-                </div>
-                {selectedCustomer ? <div className="flex flex-col w-1/2">
-                    <p className="text-[1vw]">Email (optional)</p>
-                    <input type="text" className="border p-2 rounded w-full" value={selectedCustomer[2]}/>
-                </div> : undefined}
-            </div>
-            {selectedCustomer ? <div className="flex flex-row justify-between gap-2">
-              <div className="flex flex-col w-1/2">
-                    <p className="text-[1vw]">Phone Number</p>
-                    <input type="text" className="border p-2 rounded w-full" value={selectedCustomer[1]}/>
-                </div>
-                <div className="flex flex-col w-1/2">
-                    <p className="text-[1vw]">Alternate Phone Number (optional)</p>
-                    <input type="text" className="border p-2 rounded w-full" value={selectedCustomer[4 ]}/>
-                </div>
-            </div> : undefined}
-        </div>
+        <CustomerDetails
+          selections={selections}
+          units={units}
+          handleRemoveArea={handleRemoveArea}
+          handleReferenceChange={handleReferenceChange}
+          handleunitchange={handleunitchange}
+          handlewidthchange={handlewidthchange}
+          handleheightchange={handleheightchange}
+          handlequantitychange={handlequantitychange}
+        />
+
         <div className="flex flex-col gap-3 w-full rounded-xl shadow-2xl border-2 border-gray-200 px-3 py-3">
             <p className="text-[1.2vw]">Project Details</p>
             <div className="flex flex-row w-full gap-2">
