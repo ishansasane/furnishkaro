@@ -10,6 +10,41 @@ const ProductGroupForm: React.FC = () => {
   const [status, setStatus] = useState(true);
   const [needsTailoring, setNeedsTailoring] = useState(false);
 
+  const handleAddGroup = async () => {
+    const groupData = {
+      groupName,
+      mainProduct,
+      addonProduct,
+      color,
+      status,
+      needsTailoring,
+    };
+
+    console.log("Group Data to Submit:", groupData); // for debugging
+
+    try {
+      const response = await fetch("https://your-backend-api.com/product-groups", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(groupData),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save product group");
+      }
+
+      const result = await response.json();
+      console.log("Saved Group:", result);
+      alert("Product Group saved successfully!");
+      navigate("/masters/product-groups");
+    } catch (error) {
+      console.error("Error saving product group:", error);
+      alert("Failed to save product group. Please try again.");
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
       {/* Header */}
@@ -31,6 +66,7 @@ const ProductGroupForm: React.FC = () => {
             onChange={(e) => setGroupName(e.target.value)}
             placeholder="Enter Product Name"
             className="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+            required
           />
         </div>
 
@@ -40,13 +76,14 @@ const ProductGroupForm: React.FC = () => {
             Main Products <span className="text-red-500">*</span>
           </label>
           <div className="flex items-center gap-2 mt-1">
-            <button className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
+            <button onClick={() => navigate("/add-product")} className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
               + Product
             </button>
             <select
               value={mainProduct}
               onChange={(e) => setMainProduct(e.target.value)}
               className="w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              required
             >
               <option value="">Select Main Product</option>
               <option value="Product1">Product 1</option>
@@ -61,7 +98,7 @@ const ProductGroupForm: React.FC = () => {
             Addon Products
           </label>
           <div className="flex items-center gap-2 mt-1">
-            <button className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
+            <button onClick={() => navigate("/add-product")} className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
               + Product
             </button>
             <select
@@ -95,7 +132,7 @@ const ProductGroupForm: React.FC = () => {
               Status
             </label>
             <div
-              className={`w-12 h-6 flex items-center bg-gray-300 rounded-full p-1 cursor-pointer ${
+              className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer ${
                 status ? "bg-blue-500" : "bg-gray-300"
               }`}
               onClick={() => setStatus(!status)}
@@ -113,7 +150,7 @@ const ProductGroupForm: React.FC = () => {
               Needs Tailoring
             </label>
             <div
-              className={`w-12 h-6 flex items-center bg-gray-300 rounded-full p-1 cursor-pointer ${
+              className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer ${
                 needsTailoring ? "bg-blue-500" : "bg-gray-300"
               }`}
               onClick={() => setNeedsTailoring(!needsTailoring)}
@@ -133,8 +170,8 @@ const ProductGroupForm: React.FC = () => {
             Cancel
           </button>
           <button
-            className="bg-gray-300 px-4 py-2 rounded text-gray-500 cursor-not-allowed"
-            disabled
+            onClick={handleAddGroup}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
           >
             Add Group
           </button>

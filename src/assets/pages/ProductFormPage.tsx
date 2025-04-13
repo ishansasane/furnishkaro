@@ -60,7 +60,7 @@ const ProductFormPage: React.FC = () => {
   };
 
   const handleCancel = () => {
-    navigate("/masters/items"); // cancel and go back
+    navigate(-1); // cancel and go back
   };
 
   if (!showForm) {
