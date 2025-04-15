@@ -42,6 +42,12 @@ function AddProjectForm() {
 
     const designNo = [ "514", "98", "123" ];
 
+    const [Amount, setAmount] = useState(0);
+    const [Tax, setTax] = useState(0);
+    const [Paid, setPaid] = useState(0);
+    const [Discount, setDiscount] = useState(0);
+
+    const [additionalItems, setAdditionaItems] = useState([]);
     interface AreaSelection {
       area: string;
       areacollection : collectionArea[];
@@ -63,7 +69,6 @@ function AddProjectForm() {
       designNo;
       reference;
       measurement : measurements;
-      additionalItems : [];
       totalAmount : number;
       totalTax : number;
     }
@@ -285,7 +290,7 @@ function AddProjectForm() {
     
       // Ensure the specific index exists
       if (!updatedSelections[mainindex].areacollection[i]) {
-        updatedSelections[mainindex].areacollection[i] = { productGroup: null, items : [""], catalogue: null, company: null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : 0, totalTax : 0 };
+        updatedSelections[mainindex].areacollection[i] = { productGroup: null, items : [""], catalogue: null, company: null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : []};
       }
       
       const newproduct = product.split(",");
@@ -306,7 +311,7 @@ function AddProjectForm() {
       }
     
       if (!updatedSelections[mainindex].areacollection[i]) {
-        updatedSelections[mainindex].areacollection[i] = { productGroup: null, items : [""],  catalogue: null, company: null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : 0, totalTax : 0 };
+        updatedSelections[mainindex].areacollection[i] = { productGroup: null, items : [""],  catalogue: null, company: null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] };
       }
     
       updatedSelections[mainindex].areacollection[i].catalogue = catalogue;
@@ -321,7 +326,7 @@ function AddProjectForm() {
       }
     
       if (!updatedSelections[mainindex].areacollection[i]) {
-        updatedSelections[mainindex].areacollection[i] = { productGroup: null, items : [""], catalogue: null, company: null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : 0, totalTax : 0 };
+        updatedSelections[mainindex].areacollection[i] = { productGroup: null, items : [""], catalogue: null, company: null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] };
       }
     
       updatedSelections[mainindex].areacollection[i].company = company;
@@ -338,7 +343,7 @@ function AddProjectForm() {
       }
 
       if(!updatedSelections[mainindex].areacollection[i]){
-        updatedSelections[mainindex].areacollection[i] = { productGroup : null, items : [""], catalogue : null, company : null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : 0, totalTax : 0 };
+        updatedSelections[mainindex].areacollection[i] = { productGroup : null, items : [""], catalogue : null, company : null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] };
       }
 
       updatedSelections[mainindex].areacollection[i].designNo = designNo;
@@ -355,7 +360,7 @@ function AddProjectForm() {
       }
 
       if(!updatedSelection[mainindex].areacollection[i]){
-        updatedSelection[mainindex].areacollection[i] = { productGroup : null, items : [""], catalogue : null, company : null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : 0, totalTax : 0 }
+        updatedSelection[mainindex].areacollection[i] = { productGroup : null, items : [""], catalogue : null, company : null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] }
       }
 
       updatedSelection[mainindex].areacollection[i].reference = reference;
@@ -379,8 +384,8 @@ function AddProjectForm() {
           measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"},
           items : [""],
           additionalItems : [],
-          totalAmount : 0,
-          totalTax : 0
+          totalAmount : [],
+          totalTax : []
         });
     
         // Update the state with the new selections array
@@ -421,104 +426,188 @@ function AddProjectForm() {
     }
     const [quantities, setQuantities] = useState({});
 
-    const handleQuantityChange = async (key, value, mainIndex, collectionIndex, quantity, num1, num2) => {
+    const handleQuantityChange = async (key, value, mainIndex, collectionIndex, quantity, num1, num2, itemIndex) => {
       setQuantities((prev) => ({
         ...prev,
         [key]: value,
       }));
-
-      console.log(value);
-      console.log(num1);
-      console.log(num2);
-      console.log(quantity);
-
+    
       const updatedSelections = [...selections];
-      
-      updatedSelections[mainIndex].areacollection[collectionIndex].totalTax = (num1*quantity*value)*(num2/100);
-      updatedSelections[mainIndex].areacollection[collectionIndex].totalAmount = (updatedSelections[mainIndex].areacollection[collectionIndex].totalTax)+(num1*quantity*value);
+      const cost = num1 * quantity * value;
+      const taxAmount = cost * (num2 / 100);
+      const totalWithTax = cost + taxAmount;
+    
+      updatedSelections[mainIndex].areacollection[collectionIndex].totalTax[itemIndex] = taxAmount;
+      updatedSelections[mainIndex].areacollection[collectionIndex].totalAmount[itemIndex] = totalWithTax;
       setSelections(updatedSelections);
-      console.log(selections[mainIndex].areacollection[collectionIndex].totalAmount);
-      console.log(selections[mainIndex].areacollection[collectionIndex].totalTax);
-    };
-
-    const handleAddMiscItem = (mainIndex: number, collectionIndex: number) => {
-      setSelections(prevSelections => 
-        prevSelections.map((selection, sIdx) => {
-          if (sIdx !== mainIndex) return selection;
     
-          return {
-            ...selection,
-            areacollection: selection.areacollection.map((collection, cIdx) => {
-              if (cIdx !== collectionIndex) return collection;
-    
-              return {
-                ...collection,
-                additionalItems: [...(collection.additionalItems || []), ["", "", "", "", "", "", "", "", ""]],
-              };
-            }),
-          };
-        })
+      // ✅ Get tax and amount from selections
+      const selectionTaxArray = updatedSelections.flatMap(selection =>
+        selection.areacollection.flatMap(col => col.totalTax || [])
       );
-    };
-
-    const handleDeleteMiscItem = (mainIndex: number, collectionIndex: number, itemIndex: number) => {
-      setSelections(prevSelections =>
-        prevSelections.map((selection, sIdx) => {
-          if (sIdx !== mainIndex) return selection;
-    
-          return {
-            ...selection,
-            areacollection: selection.areacollection.map((collection, cIdx) => {
-              if (cIdx !== collectionIndex) return collection;
-    
-              return {
-                ...collection,
-                additionalItems: collection.additionalItems
-                  ? collection.additionalItems.filter((_, i) => i !== itemIndex)
-                  : [],
-              };
-            }),
-          };
-        })
+      const selectionAmountArray = updatedSelections.flatMap(selection =>
+        selection.areacollection.flatMap(col => col.totalAmount || [])
       );
+    
+      // ✅ Get tax and amount from additionalItems
+      const additionalTaxArray = additionalItems.map(item => parseFloat(item[5]) || 0);
+      const additionalAmountArray = additionalItems.map(item => parseFloat(item[6]) || 0);
+    
+      // ✅ Combine all arrays
+      const totalTax = [...selectionTaxArray, ...additionalTaxArray].reduce((acc, curr) => acc + curr, 0);
+      const totalAmount = [...selectionAmountArray, ...additionalAmountArray].reduce((acc, curr) => acc + curr, 0);
+    
+      setTax(totalTax);
+      setAmount(totalAmount);
+    };
+    
+
+    // Add a new empty item
+const handleAddMiscItem = () => {
+  setAdditionaItems(prev => [...prev, ["", "", "", "", "", "", "", ""]]);
+};
+
+// Delete item by index
+const handleDeleteMiscItem = (itemIndex) => {
+  const updated = [...additionalItems];
+  updated.splice(itemIndex, 1);
+  setAdditionaItems(updated);
+};
+
+// Update item name
+const handleItemNameChange = (i, value) => {
+  const updated = [...additionalItems];
+  updated[i][0] = value;
+  setAdditionaItems(updated);
+};
+
+// Update quantity and auto-update net rate, tax amount, and total amount
+const handleItemQuantityChange = (i, quantity) => {
+  const updated = [...additionalItems];
+  updated[i][1] = quantity;
+  updated[i][3] = quantity * updated[i][2]; // Net Rate
+  updated[i][5] = updated[i][3] * (updated[i][4] / 100); // Tax Amount
+  updated[i][6] = Number(updated[i][3]) + Number(updated[i][5]); // Total Amount
+  setAdditionaItems(updated);
+};
+
+const [itemTax, setItemTax] = useState(0);
+const [itemTotal, setItemTotal] = useState(0);
+
+const recalculateItemTotals = (items) => {
+  const totalTax = items.reduce((acc, item) => acc + (parseFloat(item[5]) || 0), 0);
+  const totalAmount = items.reduce((acc, item) => acc + (parseFloat(item[6]) || 0), 0);
+
+  setItemTax(totalTax);
+  setItemTotal(totalAmount);
+};
+
+// Update rate and auto-update net rate, tax amount, and total amount
+const handleItemRateChange = (i, rate) => {
+  const updated = [...additionalItems];
+  updated[i][2] = rate;
+  updated[i][3] = rate * updated[i][1]; // Net Rate
+  updated[i][5] = updated[i][3] * (updated[i][4] / 100); // Tax Amount
+  updated[i][6] = Number(updated[i][3]) + Number(updated[i][5]); // Total Amount
+  setAdditionaItems(updated);
+};
+
+// Update tax and auto-update tax amount and total amount
+const handleItemTaxChange = (i, tax) => {
+  const updated = [...additionalItems];
+
+  // Ensure numeric values
+  const rate = parseFloat(updated[i][2]) || 0;
+  const quantity = parseFloat(updated[i][1]) || 0;
+  const netRate = rate * quantity;
+
+  updated[i][3] = netRate; // Net rate
+  updated[i][4] = parseFloat(tax) || 0; // Tax %
+  updated[i][5] = netRate * (updated[i][4] / 100); // Tax Amount
+  updated[i][6] = netRate + updated[i][5]; // Total Amount
+
+  setAdditionaItems(updated);
+
+  // 🧮 Sum from additionalItems
+  const additionalTax = updated.reduce((acc, item) => acc + (parseFloat(item[5]) || 0), 0);
+  const additionalAmount = updated.reduce((acc, item) => acc + (parseFloat(item[6]) || 0), 0);
+
+  // 🧮 Sum from selections.areacollection totalTax and totalAmount
+  const selectionTax = selections.flatMap(sel =>
+    sel.areacollection.flatMap(col => col.totalTax || [])
+  ).reduce((acc, val) => acc + (parseFloat(val) || 0), 0);
+
+  const selectionAmount = selections.flatMap(sel =>
+    sel.areacollection.flatMap(col => col.totalAmount || [])
+  ).reduce((acc, val) => acc + (parseFloat(val) || 0), 0);
+
+  // 💡 Combine both
+  const totalTax = additionalTax + selectionTax;
+  const totalAmount = additionalAmount + selectionAmount;
+
+  setTax(totalTax);
+  setAmount(totalAmount);
+};
+
+
+const [status, changeStatus] = useState("approved");
+const [interiorArray, setInteriorArray] = useState([]);
+const [salesAssociateArray, setSalesAssociateArray] = useState([]);
+const [projectName, setProjectName] = useState("");
+const [projectReference, setProjectReference] = useState("");
+const [user, setUser] = useState("");
+const [projectDate, setPRojectDate] = useState("");
+// Update remark
+const handleItemRemarkChange = (i, remark) => {
+  const updated = [...additionalItems];
+  updated[i][7] = remark;
+  setAdditionaItems(updated);
+};
+
+    const [selectedMainIndex, setSelectedMainIndex] = useState(null);
+    const [selectedCollectionIndex, setSelectedCollectionIndex] = useState(null);
+
+    const sendProjectData = async () => {
+      try {
+        const response = await fetch(
+          "https://sheeladecor.netlify.app/.netlify/functions/server/sendprojectdata",
+          {
+            method: "POST",
+            credentials: "include",
+            headers: {
+              "content-type": "application/json",
+            },
+            body: JSON.stringify({
+              projectName: projectName,
+              customerLink: JSON.stringify(selectedCustomer), // Serialize array to string
+              projectReference: projectReference,
+              status: status,
+              totalAmount: Amount,
+              totalTax: Tax,
+              paid: Paid,
+              discount: Discount,
+              createdBy: user,
+              allData: JSON.stringify(selections), // Serialize object/array to string
+              projectDate: projectDate,
+            }),
+          }
+        );
+    
+        console.log("Response:", response);
+    
+        if (response.status === 200) {
+          alert("Project Added");
+        } else {
+          const errorText = await response.text(); // Get error details
+          console.error("Error response:", errorText);
+          alert("Error: Failed to add project");
+        }
+      } catch (error) {
+        console.error("Fetch error:", error);
+        alert("Error: Network issue or server not responding");
+      }
     };
 
-    const handleitemnamechange = (index : number, mainindex : number, i : number, name) => {
-      const updatedSelection = [...selections];
-
-      updatedSelection[mainindex].areacollection[index].additionalItems[i][0] = name;
-
-      setSelections(updatedSelection);
-    }
-    const handleitemquantitychange = (index : number, mainindex : number, i : number, quantity) => {
-      const updatedSelection = [...selections];
-
-      updatedSelection[mainindex].areacollection[index].additionalItems[i][1] = quantity;
-
-      setSelections(updatedSelection);
-    }
-    const handleitemratechange = (index : number, mainindex : number, i : number, rate) => {
-      const updatedSelection = [...selections];
-
-      updatedSelection[mainindex].areacollection[index].additionalItems[i][2] = rate;
-      updatedSelection[mainindex].areacollection[index].additionalItems[i][3] = updatedSelection[mainindex].areacollection[index].additionalItems[i][1] * rate;
-      setSelections(updatedSelection);
-    }
-    const handleitemtaxchange = (index : number, mainindex : number, i : number, tax) => {
-      const updatedSelection = [...selections];
-
-      updatedSelection[mainindex].areacollection[index].additionalItems[i][4] = tax;
-      updatedSelection[mainindex].areacollection[index].additionalItems[i][5] = updatedSelection[mainindex].areacollection[index].additionalItems[i][3] * tax / 100;
-      updatedSelection[mainindex].areacollection[index].additionalItems[i][6] = updatedSelection[mainindex].areacollection[index].additionalItems[i][5] + updatedSelection[mainindex].areacollection[index].additionalItems[i][3];
-      setSelections(updatedSelection);
-    }
-    const handleitemremarkchange = (index : number, mainindex : number, i : number, remark) => {
-      const updatedSelection = [...selections];
-
-      updatedSelection[mainindex].areacollection[index].additionalItems[i][7] = remark;
-
-      setSelections(updatedSelection);
-    }
   return (
     <div className="flex flex-col gap-3 w-full h-screen">
         <div className="flex flex-col w-full">
@@ -535,10 +624,22 @@ function AddProjectForm() {
           projectData={projectData}
         />
         <ProjectDetails
-          selectedCustomer={selectedCustomer}
-          interior={interior}
-          salesdata={salesdata}
-        />
+              selectedCustomer={selectedCustomer}
+              interior={interior}
+              salesdata={salesdata}
+              interiorArray={interiorArray}
+              setInteriorArray={setInteriorArray}
+              salesAssociateArray={salesAssociateArray}
+              setSalesAssociateArray={setSalesAssociateArray}
+              projectName={projectName}
+              setProjectName={setProjectName}
+              projectReference={projectReference}
+              setProjectReference={setProjectReference}
+              user={user}
+              setUser={setUser}
+              projectDate={projectDate}
+              setProjectDate={setPRojectDate}
+            />
 
         <MaterialSelectionComponent
           selections={selections}
@@ -590,130 +691,198 @@ function AddProjectForm() {
                 </tr>
               </thead>
               <tbody>
-                {selection.areacollection && selection.areacollection.length > 0 ? (
-                  selection.areacollection.map((collection, collectionIndex) => {
-                    const pg = collection.productGroup;
+  {selection.areacollection && selection.areacollection.length > 0 ? (
+    selection.areacollection.map((collection, collectionIndex) => {
+      const pg = collection.productGroup;
 
-                    if (!Array.isArray(pg) || pg.length < 2) return null;
+      if (!Array.isArray(pg) || pg.length < 2) return null;
 
-                    const second = pg[1];
-                    const secondLast = pg[pg.length - 2];
+      const relevantPG = pg.length > 2 ? pg.slice(1, -2) : [];
 
-                    const matchedItems = items.filter(
-                      (item) => item[0] === second || item[0] === secondLast
-                    );
+      // Replace strings in productGroup with matched item arrays
+      const matchedItems = relevantPG.map((pgItem) => {
+        const matched = items.find((item) => item[0] === pgItem);
+        return matched || pgItem; // if match not found, keep original
+      });
 
-                    return matchedItems.map((item, itemIndex) => {
-                      const key = `${mainindex}-${collectionIndex}-${itemIndex}`;
-                      const qty = quantities[key] || 0;
-                      const subtotal = (item.mrp || 0) * qty;
+      // Update productGroup with replaced arrays
+      collection.items = [                 // keep the first element (title/groupName maybe)
+        ...matchedItems,          // updated product items       // last (e.g., addon maybe)
+      ];
 
-                      return (
-                        <tr key={key} className="flex justify-between w-full border-b p-2">
-                          <td className="w-[10%]">{itemIndex + 1}</td>
-                          <td className="w-[45%]">{item[0]+" * "+collection.measurement.quantity}</td>
-                          <td className="w-[45%]">{
-                            collection.measurement.width+"*"+collection.measurement.height+" "+
-                            collection.measurement.unit
-                            }
-                          </td>
-                          <td className="w-[20%]">{item[4]*collection.measurement.quantity}</td>
-                          <td className="w-[20%]">
-                            <div className="flex flex-col">
-                              <input
-                                type="text"
-                                value={quantities[key]}
-                                onChange={(e) => handleQuantityChange(key, e.target.value, mainindex, collectionIndex, collection.measurement.quantity, item[4], item[5])}
-                                className="border w-[40%] px-2 py-1 rounded"
-                              />
-                              <p className=" text-[0.8vw] text-gray-600">{item[3]}</p>
-                            </div>
-                          </td>
-                          <td className="w-[20%]">{item[4]*collection.measurement.quantity*quantities[key]}</td>
-                          <td className="w-[20%]">{item[5]}</td>
-                          <td className="w-[20%]">{collection.totalTax}</td>
-                          <td className="w-[20%]">{collection.totalAmount}</td>
-                        </tr>
-                      );
-                    });
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan="7" className="text-center py-2 text-gray-500">
-                      No product data available.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
+      // Filter only matched full item arrays (to avoid rendering original strings)
+      const validMatchedItems = matchedItems.filter((el) => Array.isArray(el));
+
+      return validMatchedItems.map((item, itemIndex) => {
+        const key = `${mainindex}-${collectionIndex}-${itemIndex}`;
+        const qty = quantities[key] || 0;
+
+        return (
+          <tr key={key} className="flex justify-between w-full border-b p-2">
+            <td className="w-[10%]">{itemIndex + 1}</td>
+            <td className="w-[45%]">{item[0] + " * " + collection.measurement.quantity}</td>
+            <td className="w-[45%]">
+              {collection.measurement.width + "*" + collection.measurement.height + " " + collection.measurement.unit}
+            </td>
+            <td className="w-[20%]">{item[4] * collection.measurement.quantity}</td>
+            <td className="w-[20%]">
+              <div className="flex flex-col">
+                <input
+                  type="text"
+                  value={quantities[key]}
+                  onChange={(e) =>
+                    handleQuantityChange(
+                      key,
+                      e.target.value,
+                      mainindex,
+                      collectionIndex,
+                      collection.measurement.quantity,
+                      item[4],
+                      item[5],
+                      itemIndex
+                    )
+                  }
+                  className="border w-[40%] px-2 py-1 rounded"
+                />
+                <p className=" text-[0.8vw] text-gray-600">{item[3]}</p>
+              </div>
+            </td>
+            <td className="w-[20%]">{item[4] * collection.measurement.quantity * qty}</td>
+            <td className="w-[20%]">{item[5]}</td>
+            <td className="w-[20%]">{collection.totalTax[itemIndex]}</td>
+            <td className="w-[20%]">{collection.totalAmount[itemIndex]}</td>
+          </tr>
+        );
+      });
+    })
+  ) : (
+    <tr>
+      <td colSpan="7" className="text-center py-2 text-gray-500">
+        No product data available.
+      </td>
+    </tr>
+  )}
+</tbody>
+
             </table>
           </div>
         ))}
       </div>
       <div className="border p-6 rounded-lg w-full flex flex-col">
-      <p className="text-[1.1vw] font-semibold">Miscellaneous</p>
-      <div className="flex w-full flex-col">
-        <table className="mt-3 w-full">
-          <thead>
-            <tr className="ml-3 flex text-[1.1vw] w-full justify-between">
-              <td className="w-[3vw]">SR</td>
-              <td className="w-[6vw]">Item Name</td>
-              <td className="w-[6vw]">Quantity</td>
-              <td className="w-[6vw]">Rate</td>
-              <td className="w-[6vw]">Net Rate</td>
-              <td className="w-[6vw]">Tax (%)</td>
-              <td className="w-[6vw]">Tax Amount</td>
-              <td className="w-[6vw]">Total Amount</td>
-              <td className="w-[6vw]">Remark</td>
-              <td className="w-[6vw]">Actions</td>
-            </tr>
-          </thead>
-
-          {selections.map((selection, mainindex) => (
-            <React.Fragment key={mainindex}>
-              {selection.areacollection.map((collection, index) => (
-                <React.Fragment key={index}>
-                  <div className="flex flex-row justify-between items-center mt-4">
-                    <button
-                      className="flex flex-row gap-2 rounded-xl bg-sky-50 hover:bg-sky-100 items-center px-2 py-1"
-                      onClick={() => handleAddMiscItem(mainindex, index)}
-                    >
-                      <FaPlus className="text-sky-500 mt-1" />
-                      Add Item
-                    </button>
-                  </div>
-
-                  <table className="flex flex-col w-full">
-                    {collection.additionalItems.map((item, i) => {
-
-                      return (
-                        <tr key={i} className="w-full flex flex-row justify-between mt-2">
-                          <td className="text-center w-[3vw]">{i + 1}</td>
-                          <td><input onChange={(e) => handleitemnamechange(index, mainindex, i, e.target.value)} className="pl-2 w-[6vw] border rounded-lg" value={item[0] || ""} type="text" /></td>
-                          <td><input onChange={(e) => handleitemquantitychange(index, mainindex, i, e.target.value)} className="pl-2 w-[6vw] border rounded-lg" value={item[1] || ""} type="text" /></td>
-                          <td><input onChange={(e) => handleitemratechange(index, mainindex, i, e.target.value)} className="pl-2 w-[6vw] border rounded-lg" value={item[2] || ""} type="text" /></td>
-                          <td className="w-[6vw] text-center">{item[3]}</td>
-                          <td><input onChange={(e) => handleitemtaxchange(index, mainindex, i , e.target.value)} className="pl-2 w-[6vw] border rounded-lg" value={item[4] || ""} type="text" /></td>
-                          <td className="w-[6vw] text-center">{item[5] || 0}</td>
-                          <td className="w-[6vw] text-center">{item[6] || 0}</td>
-                          <td><input onChange={(e) => handleitemremarkchange(index, mainindex, i, e.target.value)} className="pl-2 w-[6vw] border rounded-lg" value={item[7] || ""} type="text" /></td>
-                          <td className="w-[6vw] text-center">
-                          <button onClick={() => handleDeleteMiscItem(mainindex, index, i)}>
-                            <FaTrash className="text-red-500 hover:text-red-600" />
-                          </button>
-
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </table>
-                </React.Fragment>
-              ))}
-            </React.Fragment>
-          ))}
-        </table>
-      </div>
+  <p className="text-[1.1vw] font-semibold">Miscellaneous</p>
+  <div className="flex w-full flex-col">
+    <div className="flex flex-row justify-between items-center mt-4">
+      <button
+        className="flex flex-row gap-2 rounded-xl bg-sky-50 hover:bg-sky-100 items-center px-2 py-1"
+        onClick={handleAddMiscItem}
+      >
+        <FaPlus className="text-sky-500 mt-1" />
+        Add Item
+      </button>
     </div>
+
+    <table className="mt-3 w-full">
+      <thead>
+        <tr className="ml-3 flex text-[1.1vw] w-full justify-between">
+          <td className="w-[3vw]">SR</td>
+          <td className="w-[6vw]">Item Name</td>
+          <td className="w-[6vw]">Quantity</td>
+          <td className="w-[6vw]">Rate</td>
+          <td className="w-[6vw]">Net Rate</td>
+          <td className="w-[6vw]">Tax (%)</td>
+          <td className="w-[6vw]">Tax Amount</td>
+          <td className="w-[6vw]">Total Amount</td>
+          <td className="w-[6vw]">Remark</td>
+          <td className="w-[6vw]">Actions</td>
+        </tr>
+      </thead>
+
+      <tbody className="flex flex-col w-full">
+        {additionalItems.map((item, i) => (
+          <tr key={i} className="w-full flex flex-row justify-between mt-2">
+            <td className="text-center w-[3vw]">{i + 1}</td>
+            <td>
+              <input
+                onChange={(e) => handleItemNameChange(i, e.target.value)}
+                className="pl-2 w-[6vw] border rounded-lg"
+                value={item[0] || ""}
+                type="text"
+              />
+            </td>
+            <td>
+              <input
+                onChange={(e) => handleItemQuantityChange(i, e.target.value)}
+                className="pl-2 w-[6vw] border rounded-lg"
+                value={item[1] || ""}
+                type="text"
+              />
+            </td>
+            <td>
+              <input
+                onChange={(e) => handleItemRateChange(i, e.target.value)}
+                className="pl-2 w-[6vw] border rounded-lg"
+                value={item[2] || ""}
+                type="text"
+              />
+            </td>
+            <td className="w-[6vw] text-center">{item[3]}</td>
+            <td>
+              <input
+                onChange={(e) => handleItemTaxChange(i, e.target.value)}
+                className="pl-2 w-[6vw] border rounded-lg"
+                value={item[4] || ""}
+                type="text"
+              />
+            </td>
+            <td className="w-[6vw] text-center">{item[5] || 0}</td>
+            <td className="w-[6vw] text-center">{item[6] || 0}</td>
+            <td>
+              <input
+                onChange={(e) => handleItemRemarkChange(i, e.target.value)}
+                className="pl-2 w-[6vw] border rounded-lg"
+                value={item[7] || ""}
+                type="text"
+              />
+            </td>
+            <td className="w-[6vw] text-center">
+              <button onClick={() => handleDeleteMiscItem(i)}>
+                <FaTrash className="text-red-500 hover:text-red-600" />
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</div>
+
     </div>
+          <div className="shadow-xl p-6 flex flex-col gap-2 border w-1/2 rounded-lg">
+            <p className="text-[1.2vw]">Summary</p>
+            <div className="flex flex-row justify-between w-full">
+              <p className="text-[1.1vw]">Sub Total</p>
+              <p className="text-[1.1vw]">{Amount}</p>
+            </div>
+            <div className="flex flex-row justify-between w-full">
+              <p className="text-[1.1vw]">Total Tax Amount</p>
+              <p className="text-[1.1vw]">{Tax}</p>
+            </div>
+            <div className="flex flex-row justify-between w-full">
+              <p className="text-[1.1vw]">Total Amount</p>
+              <p className="text-[1.1vw]">{Amount + Tax}</p>
+            </div>
+            <div className="border border-gray-400"></div>
+            <div className="flex justify-between mt-1 w-full">
+              <p className="text-[1.1vw]">Discount</p>
+              <input className="rounded-lg border text-center" value={Discount} onChange={(e) => setDiscount(e.target.value)} type="text" />
+            </div>
+            <div className="border border-gray-400"></div>
+            <div className="flex w-full flex-row items-center justify-between">
+              <p className="text-[1.1vw]">Grand Total</p>
+              <p className="text-[1.1vw]">{Amount + Tax - Discount}</p>
+            </div>
+            <button onClick={sendProjectData} style={{borderRadius : "10px"}} className="rounded-lg bg-sky-700 hover:bg-sky-800 text-white p-[6px]">Update & Generate Quote</button>
+          </div>
 
         <br />
     </div>
