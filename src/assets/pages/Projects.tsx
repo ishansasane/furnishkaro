@@ -5,6 +5,7 @@ import { RootState } from "../Redux/store";
 import { useDispatch, useSelector } from "react-redux";
 import { setProjects, setTasks } from "../Redux/dataSlice";
 import { Root } from "react-dom/client";
+import EditProjects from "./EditProjects";
 
 // Define the type for a project
 interface Project {
@@ -22,7 +23,7 @@ interface Project {
 
 
 // Status filter options
-const statusFilters = [
+const statusFilters = [                                                                                                                                                 
   "all",
   "approved",
   "good pending",
@@ -34,6 +35,9 @@ const statusFilters = [
 export default function Projects() {
   const [projects, setprojects] = useState<Project[]>([]);
   const [filter, setFilter] = useState<(typeof statusFilters)[number]>("all");
+  const [index, setIndex] = useState(null);
+  const [flag, setFlag] = useState(false);
+  const [sendProject, setSendProject] = useState([]);
 
   const dispatch = useDispatch();
   const projectData = useSelector((state : RootState) => state.data.projects);
@@ -110,8 +114,8 @@ export default function Projects() {
     filter === "all" ? projects : projects.filter((proj) => proj.status === filter);
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-4">
+    <div className={`p-6`}>
+      <div className={` flex justify-between items-center mb-4`}>
         <h1 className="text-2xl font-bold">🚀 Projects</h1>
         <Link to="/add-project">
         <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md">
@@ -120,7 +124,7 @@ export default function Projects() {
         </Link>
       </div>
 
-      <div className="mb-4 flex gap-4">
+      <div className={`${flag ? "hidden" : ""} mb-4 flex gap-4`}>
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value as (typeof statusFilters)[number])}
@@ -133,7 +137,7 @@ export default function Projects() {
         <input type="text" placeholder="Search projects..." className="border px-3 py-2 rounded-md" />
       </div>
 
-      <table className="w-full">
+      <table className={`${flag ? "hidden" : ""} w-full`}>
         <thead className="bg-sky-50">
           <tr>
             <th className="px-4 py-2">Project Name</th>
@@ -162,7 +166,7 @@ export default function Projects() {
               <td className="px-4 py-2">{project[12]}</td>
               <td className="px-4 py-2">
                 <div className="flex gap-2">
-                  <button className="border px-2 py-1 rounded-md bg-gray-300">
+                  <button onClick={(e) => { setIndex(index); setSendProject(project); setFlag(true); }} className="border px-2 py-1 rounded-md bg-gray-300">
                     <Edit size={16} />
                   </button>
                   <button className="border px-2 py-1 rounded-md bg-red-500 text-white">
@@ -174,6 +178,11 @@ export default function Projects() {
           ))}
         </tbody>
       </table>
+      {flag && <EditProjects 
+        projectData={sendProject}
+        index={index}
+        goBack={() => setFlag(false)}
+      />}
     </div>
   );
 }

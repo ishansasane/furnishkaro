@@ -29,6 +29,7 @@ import VerifyMail from "./assets/compoonents/VerifyMail.tsx";
 import ProductFormPage from "./assets/pages/ProductFormPage.tsx";
 import ProductGroupForm from "./assets/pages/ProductGroupForm.tsx";
 import AddProjectForm from "./assets/pages/AddProjectForm.tsx";
+import EditProjects from "./assets/pages/EditProjects.tsx";
 
 function App() {
   const [expanded, setExpanded] = useState(true);

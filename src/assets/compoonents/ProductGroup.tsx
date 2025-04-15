@@ -39,7 +39,7 @@ export default function ProductGroups() {
    const navigate = useNavigate();
   const [productGroups, setProductGroups] = useState<ProductGroup[]>([]);
   const [search, setSearch] = useState("");
-  const [isDialogOpen, setDialogOpen] = useState(false);
+  const [isDialogOpen, setDialogOpen] = useState(false);  
   const [editingGroup, setEditingGroup] = useState<ProductGroup | null>(null);
   const [refresh, setRefresh] = useState(false);
 
