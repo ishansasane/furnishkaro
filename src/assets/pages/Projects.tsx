@@ -5,6 +5,7 @@ import { RootState } from "../Redux/store";
 import { useDispatch, useSelector } from "react-redux";
 import { setProjects, setTasks } from "../Redux/dataSlice";
 import { Root } from "react-dom/client";
+import EditProjects from "./EditProjects";
 
 // Define the type for a project
 interface Project {
@@ -22,7 +23,7 @@ interface Project {
 
 
 // Status filter options
-const statusFilters = [
+const statusFilters = [                                                                                                                                                 
   "all",
   "approved",
   "good pending",
@@ -34,20 +35,67 @@ const statusFilters = [
 export default function Projects() {
   const [projects, setprojects] = useState<Project[]>([]);
   const [filter, setFilter] = useState<(typeof statusFilters)[number]>("all");
+  const [index, setIndex] = useState(null);
+  const [flag, setFlag] = useState(false);
+  const [sendProject, setSendProject] = useState([]);
 
   const dispatch = useDispatch();
   const projectData = useSelector((state : RootState) => state.data.projects);
 
   const fetchProjectData = async () => {
-    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata", {
-      credentials : "include",
-    });
-
-    const data = await response.json();
-
-    return data.body;
-  }
-
+    try {
+      const response = await fetch(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
+        {
+          credentials: "include",
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+  
+      // Ensure data.body exists and is an array
+      if (!data.body || !Array.isArray(data.body)) {
+        throw new Error("Invalid data format: Expected an array in data.body");
+      }
+  
+      // Parse customerLink and allData for each row
+      const projects = data.body.map((row, index) => {
+        // Safely parse JSON fields
+        const parseSafely = (value, fallback) => {
+          try {
+            return value ? JSON.parse(value) : fallback;
+          } catch (error) {
+            console.warn(`Invalid JSON in row ${index}:`, value, error);
+            return fallback;
+          }
+        };
+  
+        return {
+          projectName: row[0] || "",
+          customerLink: parseSafely(row[1], []), // Parse to array
+          projectReference: row[2] || "",
+          status: row[3] || "",
+          totalAmount: parseFloat(row[4]) || 0,
+          totalTax: parseFloat(row[5]) || 0,
+          paid: parseFloat(row[6]) || 0,
+          discount: parseFloat(row[7]) || 0,
+          createdBy: row[8] || "",
+          allData: parseSafely(row[9], []), // Parse to array/object
+          projectDate: row[10] || "",
+        };
+      });
+      console.log(projects);
+      return projects;
+    } catch (error) {
+      console.error("Error fetching project data:", error);
+      alert("Failed to fetch projects. Please try again.");
+      return []; // Return empty array to prevent breaking the UI
+    }
+  };
   useEffect(() => {
     async function getData(){
       const data = await fetchProjectData();
@@ -66,8 +114,8 @@ export default function Projects() {
     filter === "all" ? projects : projects.filter((proj) => proj.status === filter);
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-4">
+    <div className={`p-6`}>
+      <div className={` flex justify-between items-center mb-4`}>
         <h1 className="text-2xl font-bold">🚀 Projects</h1>
         <Link to="/add-project">
         <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md">
@@ -76,7 +124,7 @@ export default function Projects() {
         </Link>
       </div>
 
-      <div className="mb-4 flex gap-4">
+      <div className={`${flag ? "hidden" : ""} mb-4 flex gap-4`}>
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value as (typeof statusFilters)[number])}
@@ -89,7 +137,7 @@ export default function Projects() {
         <input type="text" placeholder="Search projects..." className="border px-3 py-2 rounded-md" />
       </div>
 
-      <table className="w-full">
+      <table className={`${flag ? "hidden" : ""} w-full`}>
         <thead className="bg-sky-50">
           <tr>
             <th className="px-4 py-2">Project Name</th>
@@ -107,18 +155,18 @@ export default function Projects() {
         <tbody>
           {filteredProjects.map((project, index) => (
             <tr key={index} className="hover:bg-sky-50">
-              <td className="px-4 py-2">{project[0]}</td>
-              <td className="px-4 py-2">{project[1]}</td>
-              <td className="px-4 py-2">{project[4]}</td>
-              <td className="px-4 py-2">{project[5]}</td>
-              <td className="px-4 py-2">{project[6]}</td>
-              <td className="px-4 py-2">{project[7]}</td>
-              <td className="px-4 py-2">{project[8]}</td>
-              <td className="px-4 py-2">{project[14]}</td>
+              <td className="px-4 py-2">{project.projectName}</td>
+              <td className="px-4 py-2">{project.customerLink[0]}</td>
+              <td className="px-4 py-2">{project.status}</td>
+              <td className="px-4 py-2">{project.totalAmount + project.totalTax - project.discount}</td>
+              <td className="px-4 py-2">{project.paid}</td>
+              <td className="px-4 py-2">{project.totalAmount + project.totalTax - project.discount - project.paid}</td>
+              <td className="px-4 py-2">{project.createdBy}</td>
+              <td className="px-4 py-2">{project.projectDate}</td>
               <td className="px-4 py-2">{project[12]}</td>
               <td className="px-4 py-2">
                 <div className="flex gap-2">
-                  <button className="border px-2 py-1 rounded-md bg-gray-300">
+                  <button onClick={(e) => { setIndex(index); setSendProject(project); setFlag(true); }} className="border px-2 py-1 rounded-md bg-gray-300">
                     <Edit size={16} />
                   </button>
                   <button className="border px-2 py-1 rounded-md bg-red-500 text-white">
@@ -130,6 +178,11 @@ export default function Projects() {
           ))}
         </tbody>
       </table>
+      {flag && <EditProjects 
+        projectData={sendProject}
+        index={index}
+        goBack={() => setFlag(false)}
+      />}
     </div>
   );
 }

@@ -29,12 +29,14 @@ import VerifyMail from "./assets/compoonents/VerifyMail.tsx";
 import ProductFormPage from "./assets/pages/ProductFormPage.tsx";
 import ProductGroupForm from "./assets/pages/ProductGroupForm.tsx";
 import AddProjectForm from "./assets/pages/AddProjectForm.tsx";
+
 import BrandDialog from "./assets/compoonents/BrandDialog.tsx";
 import CatalogueDialog from "./assets/compoonents/CatalogueDialog.tsx";
 import InteriorDialog from "./assets/compoonents/InteriorDialog.tsx";
 import TailorDialog from "./assets/compoonents/TailorDialog.tsx";
 import SalesAssociateDialog from "./assets/compoonents/SalesAssociateDialog.tsx";
 import StoreDialog from "./assets/compoonents/StoreDialog.tsx";
+import EditProjects from "./assets/pages/EditProjects.tsx";
 
 function App() {
   const [expanded, setExpanded] = useState(true);

@@ -84,7 +84,7 @@ const MaterialSelectionComponent = ({
                         <p>Product Group</p>
                         <select
                           className="border p-2 rounded w-full"
-                          value={element.productGroup}
+                          value={element[0]}
                           onChange={(e) =>
                             {handleProductGroupChange(mainindex, i, e.target.value); console.log(i); }
                           }
