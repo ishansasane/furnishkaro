@@ -4,6 +4,7 @@ import InteriorDialog from "../compoonents/InteriorDialog";
 import { RootState } from "../Redux/Store";
 import { useDispatch, useSelector } from "react-redux"
 import { setInteriorData } from "../Redux/dataSlice";
+import { useNavigate } from "react-router-dom";
 
 
 // Fetch interiors from the server
@@ -43,6 +44,7 @@ async function deleteInterior(name: string, setRefresh: (state: boolean) => void
 }
 
 export default function Interiors() {
+  const navigate = useNavigate();
   const [interiors, setInteriors] = useState([]);
   const [search, setSearch] = useState("");
   const [isDialogOpen, setDialogOpen] = useState(false);
@@ -81,7 +83,8 @@ export default function Interiors() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">🏠 Interiors</h1>
-        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md" onClick={() => setDialogOpen(true)}>
+        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md" onClick={() => navigate("/interior-dialog")}
+        >
           <Plus size={18} /> Add Interior
         </button>
       </div>

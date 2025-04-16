@@ -4,6 +4,9 @@ import TailorDialog from "../compoonents/TailorDialog";
 import { RootState } from "../Redux/store";
 import { useDispatch, useSelector } from "react-redux";
 import { setTailorData } from "../Redux/dataSlice";
+import { useNavigate } from "react-router-dom";
+  
+
 
 // Fetch Tailors
 async function fetchTailors(){
@@ -42,6 +45,7 @@ async function deleteTailor(tailorName: string, setRefresh: (state: boolean) => 
 }
 
 export default function Tailors() {
+  const navigate = useNavigate();
   const [tailors, setTailors] = useState([]);
   const [search, setSearch] = useState("");
   const [isDialogOpen, setDialogOpen] = useState(false);
@@ -80,7 +84,7 @@ export default function Tailors() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">👗 Tailors</h1>
-        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md" onClick={() => setDialogOpen(true)}>
+        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md" onClick={() => navigate("/tailor-dialog")}>
           <Plus size={18} /> Add Tailor
         </button>
       </div>

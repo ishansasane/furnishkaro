@@ -4,6 +4,8 @@ import CatalogueDialog from "../compoonents/CatalogueDialog";
 import { useDispatch, useSelector } from "react-redux";
 import { setCatalogs } from "../Redux/dataSlice";
 import { RootState } from "../Redux/Store";
+import { useNavigate } from "react-router-dom";
+
 
 interface Catalogue {
   catalogueName: string;
@@ -47,6 +49,8 @@ async function deleteCatalogue(catalogueName: string, setRefresh: (state: boolea
 }
 
 export default function Catalogues() {
+  const navigate = useNavigate();
+
   const [catalogues, setCatalogues] = useState<Catalogue[]>([]);
   const [search, setSearch] = useState("");
   const [isDialogOpen, setDialogOpen] = useState(false);
@@ -85,7 +89,7 @@ export default function Catalogues() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">📚 Catalogues</h1>
-        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md" onClick={() => setDialogOpen(true)}>
+        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md" onClick={() => navigate("/catalogue-dialog")}>
           <Plus size={18} /> Add Catalogue
         </button>
       </div>

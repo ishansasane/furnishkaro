@@ -4,7 +4,7 @@ import BrandDialog from "../compoonents/BrandDialog";
 import { useDispatch, useSelector } from "react-redux";
 import { setBrandData } from "../Redux/dataSlice";
 import { RootState } from "../Redux/Store";
-
+import { useNavigate } from "react-router-dom";
 
 // Fetch brands from the server
 async function fetchBrands(){
@@ -48,6 +48,7 @@ export default function Brands() {
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [editingBrand, setEditingBrand] = useState(null);
   const [refresh, setRefresh] = useState(false);
+  const navigate = useNavigate();
 
   const dispatch = useDispatch();
   const brandData = useSelector((state : RootState) => state.data.brands);
@@ -83,7 +84,7 @@ export default function Brands() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">🏷️ Brands</h1>
-        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md" onClick={() => setDialogOpen(true)}>
+        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md" onClick={() => navigate("/brand-dilog")}>
           <Plus size={18} /> Add Brand
         </button>
       </div>

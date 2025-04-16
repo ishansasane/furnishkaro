@@ -95,7 +95,7 @@ export default function ProductGroups() {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-6 bg-gray-50">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">📦 Product Groups</h1>
         <button
@@ -106,7 +106,7 @@ export default function ProductGroups() {
     </button>
       </div>
 
-      <div className="mb-4">
+      <div className="mb-4 ">
         <input
           type="text"
           placeholder="Search product groups..."

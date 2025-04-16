@@ -1,4 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+
+
+
 
 interface InteriorDialogProps {
   setDialogOpen: (open: boolean) => void;
@@ -9,6 +14,7 @@ interface InteriorDialogProps {
 }
 
 const InteriorDialog: React.FC<InteriorDialogProps> = ({ setDialogOpen, setRefresh, refresh, editingInterior, setEditingInterior }) => {
+  const navigate = useNavigate();
   const data = editingInterior;
   const [name, setName] = useState(editingInterior ? data[0] : "");
   const [email, setEmail] = useState(editingInterior ? data[1] : "");
@@ -46,10 +52,10 @@ const InteriorDialog: React.FC<InteriorDialogProps> = ({ setDialogOpen, setRefre
         <input className="border p-2 rounded w-full mb-2" placeholder="Phone Number" value={phonenumber} onChange={(e) => setPhoneNumber(e.target.value)} />
         <input className="border p-2 rounded w-full mb-2" placeholder="Address" value={address} onChange={(e) => setAddress(e.target.value)} />
         <div className="flex justify-end gap-2 mt-4">
-          <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => { setEditingInterior(null); setDialogOpen(false); }}>
+          <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={() => navigate(-1)}>
             Cancel
-          </button>
-          <button className="bg-green-500 text-white px-4 py-2 rounded" onClick={handleSubmit}>
+    </button>
+          <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleSubmit}>
             Save
           </button>
         </div>

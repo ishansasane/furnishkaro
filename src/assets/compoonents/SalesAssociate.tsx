@@ -4,6 +4,9 @@ import SalesAssociateDialog from "../compoonents/SalesAssociateDialog";
 import { RootState } from "../Redux/Store";
 import { useSelector, useDispatch } from "react-redux";
 import { setSalesAssociateData } from "../Redux/dataSlice";
+import { useNavigate } from "react-router-dom";
+  
+
 
 // Fetch Sales Associates
 async function fetchSalesAssociates() {
@@ -42,6 +45,7 @@ async function deleteSalesAssociate(name: string, setRefresh: (state: boolean) =
 }
 
 export default function SalesAssociates() {
+  const navigate = useNavigate();
   const [salesAssociates, setSalesAssociates] = useState([]);
   const [search, setSearch] = useState("");
   const [isDialogOpen, setDialogOpen] = useState(false);
@@ -79,7 +83,7 @@ export default function SalesAssociates() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">🛒 Sales Associates</h1>
-        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md" onClick={() => setDialogOpen(true)}>
+        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md" onClick={() => navigate("/sales-associateDialog")}>
           <Plus size={18} /> Add Sales Associate
         </button>
       </div>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface BrandDialogProps {
   setDialogOpen: (open: boolean) => void;
@@ -9,11 +10,15 @@ interface BrandDialogProps {
 }
 
 const BrandDialog: React.FC<BrandDialogProps> = ({ setDialogOpen, setRefresh, refresh, editingBrand, setEditingBrand }) => {
+  const navigate = useNavigate();
+
   const data = editingBrand;
   const [brandName, setBrandName] = useState(editingBrand ? data[0] : "");
   const [description, setDescription] = useState(editingBrand ? data[1] : "");
 
   const handleSubmit = async () => {
+
+    
     const url = editingBrand
       ? "https://sheeladecor.netlify.app/.netlify/functions/server/updatebrand"
       : "https://sheeladecor.netlify.app/.netlify/functions/server/addbrand";
@@ -52,10 +57,10 @@ const BrandDialog: React.FC<BrandDialogProps> = ({ setDialogOpen, setRefresh, re
           onChange={(e) => setDescription(e.target.value)}
         />
         <div className="flex justify-end gap-2 mt-4">
-          <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => { setEditingBrand(null); setDialogOpen(false); }}>
+          <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={() => navigate(-1)}>
             Cancel
-          </button>
-          <button className="bg-green-500 text-white px-4 py-2 rounded" onClick={handleSubmit}>
+    </button>
+          <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleSubmit}>
             Save
           </button>
         </div>

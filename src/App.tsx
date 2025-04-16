@@ -29,6 +29,12 @@ import VerifyMail from "./assets/compoonents/VerifyMail.tsx";
 import ProductFormPage from "./assets/pages/ProductFormPage.tsx";
 import ProductGroupForm from "./assets/pages/ProductGroupForm.tsx";
 import AddProjectForm from "./assets/pages/AddProjectForm.tsx";
+import BrandDialog from "./assets/compoonents/BrandDialog.tsx";
+import CatalogueDialog from "./assets/compoonents/CatalogueDialog.tsx";
+import InteriorDialog from "./assets/compoonents/InteriorDialog.tsx";
+import TailorDialog from "./assets/compoonents/TailorDialog.tsx";
+import SalesAssociateDialog from "./assets/compoonents/SalesAssociateDialog.tsx";
+import StoreDialog from "./assets/compoonents/StoreDialog.tsx";
 
 function App() {
   const [expanded, setExpanded] = useState(true);
@@ -58,7 +64,13 @@ function App() {
               <Route path="/reports" element={<Reports />} />
               <Route path="/settings" element={<SettingsPage />} />
               <Route path="/add-project" element={<AddProjectForm />} />
-              
+              <Route path="/brand-dilog" element={<BrandDialog />} />
+              <Route path="/catalogue-dialog" element={<CatalogueDialog />} />
+              <Route path="/interior-dialog" element={<InteriorDialog />} />
+              <Route path="/tailor-dialog" element={<TailorDialog />} />
+              <Route path="/sales-associateDialog" element={<SalesAssociateDialog />} />
+              <Route path="/store-dialog" element={<StoreDialog />} />
+
               {/* Masters Subroutes */}
               <Route path="/masters/stores" element={<Store />} />
               <Route path="/masters/items" element={<Items />} />
