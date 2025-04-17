@@ -1,4 +1,7 @@
 import { useState } from "react";
+import { setTaskDialogOpen } from "../Redux/dataSlice";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 interface TaskDialogProps {
   onClose: () => void;
@@ -6,7 +9,7 @@ interface TaskDialogProps {
   setrefresh: (val: boolean) => void;
 }
 
-const TaskDialog: React.FC<TaskDialogProps> = ({ onClose, isEditing, setediting, name, setrefresh }) => {
+const TaskDialog: React.FC<TaskDialogProps> = ({ onClose, isEditing, setediting, name, setrefresh, projectData, taskDialogOpen, setProjectFlag }) => {
   const [taskName, setTaskName] = useState(undefined);
   const [description, setDescription] = useState(undefined);
   const [dateTime, setDateTime] = useState(undefined);
@@ -14,6 +17,8 @@ const TaskDialog: React.FC<TaskDialogProps> = ({ onClose, isEditing, setediting,
   const [project, setProject] = useState(undefined);
   const [priority, setPriority] = useState(isEditing ? isEditing[6] : "Moderate");
   const [status, setStatus] = useState(isEditing ? isEditing[7] : "To Do");
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const addTask = async () => {
     if (!dateTime) {
@@ -86,6 +91,12 @@ const TaskDialog: React.FC<TaskDialogProps> = ({ onClose, isEditing, setediting,
   };
 
   const cancel = () => {
+    const flag = taskDialogOpen;
+    dispatch(setTaskDialogOpen(false));
+    if(flag){
+      dispatch(setProjectFlag(true));
+      navigate("/projects");
+    }
     setediting(null);
     onClose();
   };
@@ -139,9 +150,9 @@ const TaskDialog: React.FC<TaskDialogProps> = ({ onClose, isEditing, setediting,
           className="w-full border p-2 rounded mb-3"
         >
           <option value="">Select Project</option>
-          <option value="Website Redesign">Website Redesign</option>
-          <option value="Mobile App Development">Mobile App Development</option>
-          <option value="Backend API">Backend API</option>
+          {projectData.map((project, index) => (
+            <option key={index} value={project.projectName}>{project.projectName}</option>
+          ))}
         </select>
 
         {/* Priority Selection */}

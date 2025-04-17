@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Edit, Trash2, Plus, MoreVertical } from "lucide-react";
 import TaskDialog from "../compoonents/TaskDialog";
-import { setTasks } from "../Redux/dataSlice";
+import { setTasks, setProjects, setProducts, setTaskDialogOpen, setProjectFlag } from "../Redux/dataSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store";
+import { Root } from "react-dom/client";
 interface Task {
   task: string;
   description: string;
@@ -14,14 +15,15 @@ interface Task {
   project: string;
 }
 
-const fetchTaskData = async () => {
-  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks");
-  const data = await response.json();
-  return data.body;
-};
+  const fetchTaskData = async () => {
+    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks");
+    const data = await response.json();
+    return data.body;
+  };
 
 export default function Tasks() {
   const [tasks, settasks] = useState<Task[]>([]);
+  const [projectData, setProjectData] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [name, setName] = useState("");
@@ -33,6 +35,8 @@ export default function Tasks() {
 
   const dispatch = useDispatch();
   const taskData = useSelector((state: RootState) => state.data.tasks);
+  const projects = useSelector((state : RootState) => state.data.projects);
+  const taskDialogOpen = useSelector(( state : RootState) => state.data.taskDialogOpen);
 
   const deleteTask = async (name: string) => {
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletetask", {
@@ -48,6 +52,63 @@ export default function Tasks() {
     setrefresh(true);
   };
 
+  const fetchProjectData = async () => {
+    try {
+      const response = await fetch(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
+        {
+          credentials: "include",
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+  
+      // Ensure data.body exists and is an array
+      if (!data.body || !Array.isArray(data.body)) {
+        throw new Error("Invalid data format: Expected an array in data.body");
+      }
+  
+      // Parse customerLink and allData for each row
+      const projects = data.body.map((row, index) => {
+        // Safely parse JSON fields
+        const parseSafely = (value, fallback) => {
+          try {
+            return value ? JSON.parse(value) : fallback;
+          } catch (error) {
+            console.warn(`Invalid JSON in row ${index}:`, value, error);
+            return fallback;
+          }
+        };
+  
+        return {
+          projectName: row[0] || "",
+          customerLink: parseSafely(row[1], []), // Parse to array
+          projectReference: row[2] || "",
+          status: row[3] || "",
+          totalAmount: parseFloat(row[4]) || 0,
+          totalTax: parseFloat(row[5]) || 0,
+          paid: parseFloat(row[6]) || 0,
+          discount: parseFloat(row[7]) || 0,
+          createdBy: row[8] || "",
+          allData: parseSafely(row[9], []), // Parse to array/object
+          projectDate: row[10] || "",
+          additionalRequests : row[11],
+          interiorArray: typeof row[12] === "string" ? row[12].replace(/^"(.*)"$/, "$1").split(",").map(str => str.trim()) : [],
+          salesAssociateArray : typeof row[13] === "string" ? row[13].replace(/^"(.*)"$/, "$1").split(",").map(str => str.trim()) : []
+        };
+      });
+      return projects;
+    } catch (error) {
+      console.error("Error fetching project data:", error);
+      alert("Failed to fetch projects. Please try again.");
+      return []; // Return empty array to prevent breaking the UI
+    }
+  };
+
   useEffect(() => {
     async function getTasks() {
       const data = await fetchTaskData();
@@ -60,7 +121,11 @@ export default function Tasks() {
       dispatch(setTasks(sortedTasks));
       settasks(sortedTasks);
     }
-  
+    async function getProjects(){
+      const data = await fetchProjectData();
+      dispatch(setProjects(data));
+      setProjectData(projects);
+    }
     if (taskData.length === 0) {
       getTasks();
     } else {
@@ -73,7 +138,15 @@ export default function Tasks() {
     }
     if (taskData.length === 0) getTasks();
     else settasks(taskData);
-  }, [dispatch, taskData]);
+
+    if(projectData.length == 0){
+      if(projects.length == 0){
+        getProjects();
+      }else{
+        setProjectData(projects);
+      }
+    }
+  }, [dispatch, taskData, projects]);
   
 
   useEffect(() => {
@@ -82,8 +155,15 @@ export default function Tasks() {
       dispatch(setTasks(data));
       settasks(data);
     }
+    async function getProjects(){
+      const data = await fetchProjectData();
+      dispatch(setProjects(data));
+      setProjectData(projects);
+    }
+
     if (refresh) {
       getTasks();
+      getProjects();
       setrefresh(false);
     }
   }, [refresh]);
@@ -195,6 +275,20 @@ export default function Tasks() {
           setediting={setediting}
           name={name}
           setrefresh={setrefresh}
+          projectData = {projectData}
+        />
+      )}
+        {taskDialogOpen && (
+        <TaskDialog
+          onClose={() => setDialogOpen(false)}
+          isEditing={editing}
+          setediting={setediting}
+          name={name}
+          setrefresh={setrefresh}
+          projectData = {projectData}
+          setTaskDialogOpen={setTaskDialogOpen}
+          taskDialogOpen={taskDialogOpen}
+          setProjectFlag={setProjectFlag}
         />
       )}
 

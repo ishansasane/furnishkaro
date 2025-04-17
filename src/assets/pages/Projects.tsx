@@ -3,7 +3,7 @@ import { Edit, Trash2, Plus,  } from "lucide-react";
 import { Link } from "react-router-dom";
 import { RootState } from "../Redux/store";
 import { useDispatch, useSelector } from "react-redux";
-import { setProjects, setTasks } from "../Redux/dataSlice";
+import { setProjects, setTasks, setProjectFlag } from "../Redux/dataSlice";
 import { Root } from "react-dom/client";
 import EditProjects from "./EditProjects";
 
@@ -38,9 +38,12 @@ export default function Projects() {
   const [index, setIndex] = useState(null);
   const [flag, setFlag] = useState(false);
   const [sendProject, setSendProject] = useState([]);
+  const [taskData, setTaskData] = useState([]);
 
   const dispatch = useDispatch();
   const projectData = useSelector((state : RootState) => state.data.projects);
+  const tasks = useSelector((state : RootState) => state.data.tasks);
+  const projectFlag = useSelector(( state : RootState ) => state.data.projectFlag);
 
   const fetchProjectData = async () => {
     try {
@@ -86,6 +89,9 @@ export default function Projects() {
           createdBy: row[8] || "",
           allData: parseSafely(row[9], []), // Parse to array/object
           projectDate: row[10] || "",
+          additionalRequests : row[11],
+          interiorArray: typeof row[12] === "string" ? row[12].replace(/^"(.*)"$/, "$1").split(",").map(str => str.trim()) : [],
+          salesAssociateArray : typeof row[13] === "string" ? row[13].replace(/^"(.*)"$/, "$1").split(",").map(str => str.trim()) : []
         };
       });
       console.log(projects);
@@ -96,18 +102,36 @@ export default function Projects() {
       return []; // Return empty array to prevent breaking the UI
     }
   };
+
+  const fetchTaskData = async () => {
+    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks");
+    const data = await response.json();
+    return data.body;
+  };
+
   useEffect(() => {
     async function getData(){
       const data = await fetchProjectData();
       dispatch(setProjects(data));
       setprojects(projectData);
     }
+    async function taskData(){
+      const data = await fetchTaskData();
+      setTasks(data);
+      setTaskData(data);
+      console.log(data);
+    }
     if(projectData.length == 0){
       getData();
     }else{
       setprojects(projectData);
     }
-  } ,[dispatch, projectData]);
+    if(tasks.length == 0){
+      taskData();
+    }else{
+      setTaskData(tasks);
+    }
+  } ,[dispatch, projectData, tasks]);
 
   // Filter projects based on selected status
   const filteredProjects =
@@ -137,7 +161,7 @@ export default function Projects() {
         <input type="text" placeholder="Search projects..." className="border px-3 py-2 rounded-md" />
       </div>
 
-      <table className={`${flag ? "hidden" : ""} w-full`}>
+      <table className={`${flag ? "hidden" : ""}  w-full`}>
         <thead className="bg-sky-50">
           <tr>
             <th className="px-4 py-2">Project Name</th>
@@ -156,7 +180,7 @@ export default function Projects() {
           {filteredProjects.map((project, index) => (
             <tr key={index} className="hover:bg-sky-50">
               <td className="px-4 py-2">{project.projectName}</td>
-              <td className="px-4 py-2">{project.customerLink[0]}</td>
+              <td className="px-4 py-2">{project.customerLink ? project.customerLink[0] : ""}</td>
               <td className="px-4 py-2">{project.status}</td>
               <td className="px-4 py-2">{project.totalAmount + project.totalTax - project.discount}</td>
               <td className="px-4 py-2">{project.paid}</td>
@@ -181,7 +205,8 @@ export default function Projects() {
       {flag && <EditProjects 
         projectData={sendProject}
         index={index}
-        goBack={() => setFlag(false)}
+        goBack={() => {setFlag(false); dispatch(setProjectFlag(false));}}
+        tasks={taskData}
       />}
     </div>
   );

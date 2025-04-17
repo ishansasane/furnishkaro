@@ -1,5 +1,5 @@
 import { Divide } from 'lucide-react';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FaPlus, FaTrash } from 'react-icons/fa';
 
 const MaterialSelectionComponent = ({
@@ -18,8 +18,13 @@ const MaterialSelectionComponent = ({
   handleCatalogueChange,
   handleDesignNoChange,
   handleReferenceChange,
-  handleGroupDelete
+  handleGroupDelete,
+  projectData
 }) => {
+
+  useEffect(() => {
+    console.log(projectData);
+  })
   return (
     <div className="flex flex-col bg-white p-6 rounded-lg shadow-lg">
       <p className="text-[1.2vw] text-gray-700">Material Selection</p>
@@ -32,7 +37,7 @@ const MaterialSelectionComponent = ({
             <div key={index} className="flex items-center gap-2 mb-4">
               <select
                 className="border border-gray-300 p-2 rounded-lg w-full focus:ring-2 focus:ring-blue-400"
-                value={selection.area}
+                value={selection.area ? selection.area : projectData}
                 onChange={(e) => handleAreaChange(index, e.target.value)}
               >
                 <option value="">Select Area</option>
@@ -84,9 +89,9 @@ const MaterialSelectionComponent = ({
                         <p>Product Group</p>
                         <select
                           className="border p-2 rounded w-full"
-                          value={element[0]}
+                          value={element.productGroup}
                           onChange={(e) =>
-                            {handleProductGroupChange(mainindex, i, e.target.value); console.log(i); }
+                            {handleProductGroupChange(mainindex, i, e.target.value); }
                           }
                         >
                           <option value="">Select Product Group</option>
