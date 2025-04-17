@@ -284,7 +284,7 @@ const Items = () => {
           )}
           <h1 className="text-2xl font-semibold">Items</h1>
           </div>
-          <div className="flex items-center gap-5">
+          <div className="flex items-center md:!gap-5 gap-2">
           <div className="dropdown">
           <button className="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
             More Options
@@ -381,7 +381,7 @@ const Items = () => {
           </div>
         )}
 
- <div className="bg-white shadow rounded-lg p-4 mt-4">
+ <div className="bg-white shadow rounded-lg p-4 mt-4 overflow-x-auto" >
       <input
         type="text"
         placeholder="Search items..."
@@ -391,7 +391,7 @@ const Items = () => {
       />
       <table className="w-full text-left border-collapse">
         <thead>
-          <tr className="text-gray-500 bg-sky-50">
+          <tr className="text-gray-500  bg-sky-50">
             <th className="py-3 px-4">Item Name</th>
             <th className="py-3 px-4">Description</th>
             <th className="py-3 px-4">Costing Type</th>

@@ -49,7 +49,7 @@ function App() {
           <Sidebar />
 
           {/* Main Content */}
-          <div className={`flex-1 overflow-y-auto h-screen p-6 transition-all ${expanded ? "ml-64" : "ml-20"}`}>
+          <div className={`flex-1 overflow-y-auto h-screen p-6 transition-all `}>
             <Routes>
               <Route path="/" element={<Dashboard />} />
               <Route path="/login" element={<Login />} />

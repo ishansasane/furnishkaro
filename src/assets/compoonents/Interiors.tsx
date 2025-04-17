@@ -80,10 +80,10 @@ export default function Interiors() {
   }, [refresh])
 
   return (
-    <div className="p-6">
+    <div className="p-6 h-full bg-gray-50">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">🏠 Interiors</h1>
-        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md" onClick={() => navigate("/interior-dialog")}
+        <button className="flex !rounded-lg items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md" onClick={() => navigate("/interior-dialog")}
         >
           <Plus size={18} /> Add Interior
         </button>
@@ -98,7 +98,7 @@ export default function Interiors() {
           className="border px-3 py-2 rounded-md w-full"
         />
       </div>
-
+      <div className="bg-white shadow rounded-lg p-5">
       <table className="w-full">
         <thead className="bg-sky-50">
           <tr>
@@ -134,7 +134,7 @@ export default function Interiors() {
           )}
         </tbody>
       </table>
-
+      </div>
       {isDialogOpen && <InteriorDialog setDialogOpen={setDialogOpen} setRefresh={setRefresh} refresh={refresh} editingInterior={editingInterior} setEditingInterior={setEditingInterior} />}
     </div>
   );

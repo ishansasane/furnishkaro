@@ -159,7 +159,7 @@ const Store: React.FC = () => {
             color: 'white',
             border: 'none',
             padding: '8px 16px',
-            borderRadius: '4px',
+            borderRadius: '8px',
           }}
         >
           + Add Store
