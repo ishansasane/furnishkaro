@@ -1,7 +1,7 @@
 import { Target } from "lucide-react";
 import React from "react";
 
-const ProjectDetails = ({
+const EditProjectDetails = ({
   selectedCustomer,
   interior,
   salesdata,
@@ -18,8 +18,26 @@ const ProjectDetails = ({
   projectDate,
   setProjectDate,
   setAdditionalRequests,
-  additionalRequests
+  additionalRequests,
+  projectData
 }) => {
+
+  const setInterior = (e) => {
+    if (e.target.value === "") {
+      setInteriorArray(null);
+    } else {
+      const customerObj = interior.find(c => c[0] === e.target.value);
+      setInteriorArray(customerObj);
+    }
+  }
+  const setSalesAssociate = (e) => {
+    if (e.target.value === "") {
+      setSalesAssociateArray(null);
+    } else {
+      const customerObj = salesdata.find(c => c[0] === e.target.value);
+      setSalesAssociateArray(customerObj);
+    }
+  }
   return (
     <div className="flex flex-col gap-3 w-full rounded-xl shadow-2xl border-2 border-gray-200 px-3 py-3">
       <p className="text-[1.2vw]">Project Details</p>
@@ -31,7 +49,7 @@ const ProjectDetails = ({
           <input
             type="text"
             className="border p-2 rounded w-full"
-            value={projectReference}
+            value={projectReference ? projectReference : projectData.projectReference}
             onChange={(e) => setProjectReference(e.target.value)}
           />
         </div>
@@ -40,21 +58,21 @@ const ProjectDetails = ({
           <input
             type="text"
             className="border p-2 rounded w-full"
-            value={projectName}
+            value={projectName ? projectName : projectData.projectName}
             onChange={(e) => setProjectName(e.target.value)}
           />
         </div>
       </div>
 
       {/* Address */}
-      {selectedCustomer && (
+      {projectData.customerLink && (
         <div className="flex flex-row w-full gap-2">
           <div className="flex flex-col w-full">
             <p className="text-[1vw]">Address</p>
             <input
               type="text"
               className="border p-2 rounded w-full"
-              value={selectedCustomer[3]}
+              value={selectedCustomer ? selectedCustomer[3] : projectData.customerLink[3]}
               readOnly
             />
           </div>
@@ -62,11 +80,11 @@ const ProjectDetails = ({
       )}
 
       {/* Additional Requests */}
-      {selectedCustomer && (
+      {projectData.additionalRequests && (
         <div className="flex flex-row w-full gap-2">
           <div className="flex flex-col w-full">
             <p className="text-[1vw]">Any Additional Requests (optional)</p>
-            <input type="text" value={additionalRequests} onChange={(e) => setAdditionalRequests(e.target.value)} className="border p-2 rounded w-full" />
+            <input type="text" value={additionalRequests ? additionalRequests : projectData.additionalRequests} onChange={(e) => setAdditionalRequests(e.target.value)} className="border p-2 rounded w-full" />
           </div>
         </div>
       )}
@@ -77,12 +95,12 @@ const ProjectDetails = ({
           <p className="text-[1vw]">Interior Name (optional)</p>
           <select
             className="border p-2 rounded w-full"
-            value={interiorArray}
-            onChange={(e) => {setInteriorArray(e.target.value); console.log(interiorArray)}}
+            value={interiorArray[0] ? interiorArray[0] : projectData.interiorArray[0]}
+            onChange={setInterior}
           >
             <option value="">Select Interior Name (optional)</option>
             {interior.map((data, index) => (
-              <option key={index} value={data}>
+              <option key={index} value={data[0]}>
                 {data[0]}
               </option>
             ))}
@@ -93,12 +111,12 @@ const ProjectDetails = ({
           <p className="text-[1vw]">Sales Associate (optional)</p>
           <select
             className="border p-2 rounded w-full"
-            value={salesAssociateArray}
-            onChange={(e) => setSalesAssociateArray(e.target.value)}
+            value={salesAssociateArray[0] ? salesAssociateArray[0] : projectData.salesAssociateArray[0]}
+            onChange={setSalesAssociate}
           >
             <option value="">Select Sales Associate (optional)</option>
             {salesdata.map((data, index) => (
-              <option key={index} value={data}>
+              <option key={index} value={data[0]}>
                 {data[0]}
               </option> 
             ))}
@@ -113,7 +131,7 @@ const ProjectDetails = ({
           <input
             type="text"
             className="border p-2 rounded w-full"
-            value={user}
+            value={user ? user : projectData.createdBy}
             onChange={(e) => setUser(e.target.value)}
           />
         </div>
@@ -122,7 +140,7 @@ const ProjectDetails = ({
           <input
             type="date"
             className="border p-2 rounded w-full"
-            value={projectDate}
+            value={projectDate ? projectData : projectData.projectDate}
             onChange={(e) => setProjectDate(e.target.value)}
           />
         </div>
@@ -131,4 +149,4 @@ const ProjectDetails = ({
   );
 };
 
-export default ProjectDetails;
+export default EditProjectDetails;

@@ -12,6 +12,8 @@ interface DataState {
   customers : [];
   stores : any[];
   items : [];
+  taskDialogOpen : boolean;
+  projectFlag : boolean;
 }
 
 const initialState: DataState = {
@@ -26,6 +28,8 @@ const initialState: DataState = {
   customers : [],
   stores : [],
   items : [],
+  taskDialogOpen : false,
+  projectFlag : false,
 };
 
 const dataSlice = createSlice({
@@ -65,6 +69,12 @@ const dataSlice = createSlice({
     setItemData : (state, action : PayloadAction<[]> ) => {
         state.items = action.payload;
     },
+    setTaskDialogOpen : (state, action : PayloadAction<false>) => {
+      state.taskDialogOpen = action.payload;
+    },
+    setProjectFlag : (state, action : PayloadAction<false>) => {
+      state.projectFlag = action.payload;
+    }
   },
 });
 
@@ -80,6 +90,8 @@ export const {
   setCustomerData,
   setStoreData,
   setItemData,
+  setTaskDialogOpen,
+  setProjectFlag
 } = dataSlice.actions;
 
 export default dataSlice.reducer;

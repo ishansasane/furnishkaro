@@ -210,7 +210,7 @@ function AddProjectForm() {
 
       useEffect(() => {
         async function getData(){
-          let data = await fetchSalesAssociates();
+          const data = await fetchSalesAssociates();
           dispatch(setSalesAssociateData(data));
           setsalesdata(salesAssociateData);
         }
@@ -232,7 +232,7 @@ function AddProjectForm() {
         }else{
           setAvailableProductGroups(products);
         }
-      },[dispatch, products]);
+      },[dispatch, fetchProductGroups, products]);
 
       useEffect(() => {
         async function getData(){
@@ -557,6 +557,7 @@ const [projectName, setProjectName] = useState("");
 const [projectReference, setProjectReference] = useState("");
 const [user, setUser] = useState("");
 const [projectDate, setPRojectDate] = useState("");
+const [additionalRequests, setAdditionalRequests] = useState("");
 // Update remark
 const handleItemRemarkChange = (i, remark) => {
   const updated = [...additionalItems];
@@ -589,6 +590,9 @@ const handleItemRemarkChange = (i, remark) => {
               createdBy: user,
               allData: JSON.stringify(selections), // Serialize object/array to string
               projectDate: projectDate,
+              additionalRequests : additionalRequests,
+              interiorArray : JSON.stringify(interiorArray),
+              salesAssociateArray : JSON.stringify(salesAssociateArray)
             }),
           }
         );
@@ -639,6 +643,8 @@ const handleItemRemarkChange = (i, remark) => {
               setUser={setUser}
               projectDate={projectDate}
               setProjectDate={setPRojectDate}
+              setAdditionalRequests={setAdditionalRequests}
+              additionalRequests={additionalRequests}
             />
 
         <MaterialSelectionComponent
