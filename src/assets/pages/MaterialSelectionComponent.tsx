@@ -23,11 +23,12 @@ const MaterialSelectionComponent = ({
 }) => {
 
   useEffect(() => {
-    console.log(projectData);
-  })
+    console.log(selections);
+  }, [selections])
+
   return (
     <div className="flex flex-col bg-white p-6 rounded-lg shadow-lg">
-      <p className="text-[1.2vw] text-gray-700">Material Selection</p>
+      <p className="text-[1.3vw] font-semibold">Material Selection</p>
 
       <div className="flex flex-row gap-5">
         {/* Left Column: Area Selection */}

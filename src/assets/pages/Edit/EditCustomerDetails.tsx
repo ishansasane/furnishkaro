@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const EditCustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer, projectData }) => {
 
@@ -15,10 +15,14 @@ const EditCustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer,
   useState(() => {
     console.log(projectData);
   }, []);
+
+  useEffect(() => {
+    console.log(selectedCustomer)
+  }, [selectedCustomer])
   
   return (
     <div className="flex flex-col gap-3 px-3 py-3 rounded-xl shadow-xl w-full border-gray-200 border-2 mt-3">
-      <p className="text-[1.2vw]">Customer Details</p>
+      <p className="text-[1.3vw] font-semibold">Customer Details</p>
 
       <div className="flex flex-row justify-between gap-2">
         {/* Select Customer */}

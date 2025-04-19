@@ -71,6 +71,7 @@ function AddProjectForm() {
       measurement : measurements;
       totalAmount : number;
       totalTax : number;
+      quantities : [];
     }
 
     interface ProductGroup {
@@ -426,22 +427,46 @@ function AddProjectForm() {
     }
     const [quantities, setQuantities] = useState({});
 
-    const handleQuantityChange = async (key, value, mainIndex, collectionIndex, quantity, num1, num2, itemIndex) => {
-      setQuantities((prev) => ({
-        ...prev,
-        [key]: value,
-      }));
-    
+    const handleQuantityChange = async (
+      key,
+      value,
+      mainIndex,
+      collectionIndex,
+      quantity,
+      num1,
+      num2,
+      itemIndex
+    ) => {
       const updatedSelections = [...selections];
+    
+      // Ensure the quantities array exists in this areacollection
+      if (!updatedSelections[mainIndex].areacollection[collectionIndex].quantities) {
+        updatedSelections[mainIndex].areacollection[collectionIndex].quantities = [];
+      }
+    
+      // Update the quantity for this itemIndex
+      updatedSelections[mainIndex].areacollection[collectionIndex].quantities[itemIndex] = value;
+    
+      // Calculate cost, tax and total
       const cost = num1 * quantity * value;
       const taxAmount = cost * (num2 / 100);
       const totalWithTax = cost + taxAmount;
     
+      // Ensure totalTax and totalAmount arrays exist
+      if (!updatedSelections[mainIndex].areacollection[collectionIndex].totalTax) {
+        updatedSelections[mainIndex].areacollection[collectionIndex].totalTax = [];
+      }
+      if (!updatedSelections[mainIndex].areacollection[collectionIndex].totalAmount) {
+        updatedSelections[mainIndex].areacollection[collectionIndex].totalAmount = [];
+      }
+    
+      // Update tax and total values for the item
       updatedSelections[mainIndex].areacollection[collectionIndex].totalTax[itemIndex] = taxAmount;
       updatedSelections[mainIndex].areacollection[collectionIndex].totalAmount[itemIndex] = totalWithTax;
+    
       setSelections(updatedSelections);
     
-      // ✅ Get tax and amount from selections
+      // Gather tax and amount from all area collections
       const selectionTaxArray = updatedSelections.flatMap(selection =>
         selection.areacollection.flatMap(col => col.totalTax || [])
       );
@@ -449,17 +474,17 @@ function AddProjectForm() {
         selection.areacollection.flatMap(col => col.totalAmount || [])
       );
     
-      // ✅ Get tax and amount from additionalItems
+      // Include additional items in total
       const additionalTaxArray = additionalItems.map(item => parseFloat(item[5]) || 0);
       const additionalAmountArray = additionalItems.map(item => parseFloat(item[6]) || 0);
     
-      // ✅ Combine all arrays
       const totalTax = [...selectionTaxArray, ...additionalTaxArray].reduce((acc, curr) => acc + curr, 0);
       const totalAmount = [...selectionAmountArray, ...additionalAmountArray].reduce((acc, curr) => acc + curr, 0);
     
       setTax(totalTax);
       setAmount(totalAmount);
     };
+    
     
 
     // Add a new empty item
@@ -592,7 +617,8 @@ const handleItemRemarkChange = (i, remark) => {
               projectDate: projectDate,
               additionalRequests : additionalRequests,
               interiorArray : JSON.stringify(interiorArray),
-              salesAssociateArray : JSON.stringify(salesAssociateArray)
+              salesAssociateArray : JSON.stringify(salesAssociateArray),
+              additionalItems : JSON.stringify(additionalItems),
             }),
           }
         );
@@ -721,7 +747,7 @@ const handleItemRemarkChange = (i, remark) => {
 
       return validMatchedItems.map((item, itemIndex) => {
         const key = `${mainindex}-${collectionIndex}-${itemIndex}`;
-        const qty = quantities[key] || 0;
+        const qty = selection.areacollection[collectionIndex]?.quantities?.[itemIndex] || 0;
 
         return (
           <tr key={key} className="flex justify-between w-full border-b p-2">
@@ -735,7 +761,7 @@ const handleItemRemarkChange = (i, remark) => {
               <div className="flex flex-col">
                 <input
                   type="text"
-                  value={quantities[key]}
+                  value={selection.areacollection[collectionIndex]?.quantities?.[itemIndex] || ""} 
                   onChange={(e) =>
                     handleQuantityChange(
                       key,

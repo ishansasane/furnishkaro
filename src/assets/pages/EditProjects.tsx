@@ -9,6 +9,7 @@ import EditCustomerDetails from "./Edit/EditCustomerDetails";
 import EditProjectDetails from "./Edit/EditProjectDetails";
 import MaterialSelectionComponent from "./MaterialSelectionComponent";
 import MeasurementSection from "./MeasurementSections";
+import QuotationTable from "./QuotationTable";
 
 const EditProjects = ({ projectData, index, goBack, tasks }) => {
 
@@ -187,8 +188,17 @@ const EditProjects = ({ projectData, index, goBack, tasks }) => {
       }
 
       useEffect(() => {
-        setSelections(projectData.allData);
-      }, [projectData])
+        const clonedSelections = JSON.parse(JSON.stringify(projectData.allData || []));
+        const clonedAdditionalItems = JSON.parse(JSON.stringify(projectData.additionalItems || []));
+      
+        setSelections(clonedSelections);
+        setAdditionaItems(clonedAdditionalItems);
+        if(Object.isFrozen(additionalItems)){
+          console.log("frozen");
+        }
+      }, [projectData]);
+      
+      
 
             useEffect(() => {
               async function getData(){
@@ -353,9 +363,8 @@ const handleProductGroupChange = (mainindex: number,i : number, product) => {
   
   updatedSelections[mainindex].areacollection[i].productGroup = newproduct;
   updatedSelections[mainindex].areacollection[i].items = items;
-  console.log(updatedSelections[mainindex].areacollection[i].productGroup);
   setSelections(updatedSelections);
-  
+  console.log(selections);
 };
 
 const handleCatalogueChange = (mainindex: number,i : number, catalogue) => {
@@ -421,6 +430,7 @@ const handleReferenceChange = (mainindex : number, i : number, reference) => {
   updatedSelection[mainindex].areacollection[i].reference = reference;
 
   setSelections(updatedSelection);
+
 }
 
 const handleAddNewGroup = (mainindex) => {
@@ -486,6 +496,163 @@ const handleunitchange = (mainindex : number, index : number, unit) => {
   updatedSelection[mainindex].areacollection[index].measurement.unit = unit;
   setSelections(updatedSelection);
 }
+const [quantities, setQuantities] = useState({});
+const [Amount, setAmount] = useState(0);
+const [Tax, setTax] = useState(0);
+const [Paid, setPaid] = useState(0);
+const [Discount, setDiscount] = useState(0);
+
+const handleQuantityChange = async (
+  key,
+  value,
+  mainIndex,
+  collectionIndex,
+  quantity,
+  num1,
+  num2,
+  itemIndex
+) => {
+  const updatedSelections = [...selections];
+
+  // Ensure the quantities array exists in this areacollection
+  if (!updatedSelections[mainIndex].areacollection[collectionIndex].quantities) {
+    updatedSelections[mainIndex].areacollection[collectionIndex].quantities = [];
+  }
+
+  // Update the quantity for this itemIndex
+  updatedSelections[mainIndex].areacollection[collectionIndex].quantities[itemIndex] = value;
+
+  // Calculate cost, tax and total
+  const cost = num1 * quantity * value;
+  const taxAmount = cost * (num2 / 100);
+  const totalWithTax = cost + taxAmount;
+
+  // Ensure totalTax and totalAmount arrays exist
+  if (!updatedSelections[mainIndex].areacollection[collectionIndex].totalTax) {
+    updatedSelections[mainIndex].areacollection[collectionIndex].totalTax = [];
+  }
+  if (!updatedSelections[mainIndex].areacollection[collectionIndex].totalAmount) {
+    updatedSelections[mainIndex].areacollection[collectionIndex].totalAmount = [];
+  }
+
+  // Update tax and total values for the item
+  updatedSelections[mainIndex].areacollection[collectionIndex].totalTax[itemIndex] = taxAmount;
+  updatedSelections[mainIndex].areacollection[collectionIndex].totalAmount[itemIndex] = totalWithTax;
+
+  setSelections(updatedSelections);
+
+  // Gather tax and amount from all area collections
+  const selectionTaxArray = updatedSelections.flatMap(selection =>
+    selection.areacollection.flatMap(col => col.totalTax || [])
+  );
+  const selectionAmountArray = updatedSelections.flatMap(selection =>
+    selection.areacollection.flatMap(col => col.totalAmount || [])
+  );
+
+  // Include additional items in total
+  const additionalTaxArray = additionalItems.map(item => parseFloat(item[5]) || 0);
+  const additionalAmountArray = additionalItems.map(item => parseFloat(item[6]) || 0);
+
+  const totalTax = [...selectionTaxArray, ...additionalTaxArray].reduce((acc, curr) => acc + curr, 0);
+  const totalAmount = [...selectionAmountArray, ...additionalAmountArray].reduce((acc, curr) => acc + curr, 0);
+
+  setTax(totalTax);
+  setAmount(totalAmount);
+};
+
+const handleAddMiscItem = () => {
+  setAdditionaItems(prev => [...prev, ["", "", "", "", "", "", "", ""]]);
+};
+const handleItemQuantityChange = (i, quantity) => {
+  const updated = [...additionalItems];
+  updated[i][1] = quantity;
+  updated[i][3] = quantity * updated[i][2]; // Net Rate
+  updated[i][5] = updated[i][3] * (updated[i][4] / 100); // Tax Amount
+  updated[i][6] = Number(updated[i][3]) + Number(updated[i][5]); // Total Amount
+  setAdditionaItems(updated);
+};
+const handleDeleteMiscItem = (itemIndex) => {
+  const updated = [...additionalItems];
+  updated.splice(itemIndex, 1);
+  setAdditionaItems(updated);
+};
+
+const [itemTax, setItemTax] = useState(0);
+const [itemTotal, setItemTotal] = useState(0);
+
+const handleItemNameChange = (i, value) => {
+  const updated = [...additionalItems];
+  updated[i][0] = value;
+  setAdditionaItems(updated);
+};
+
+const recalculateItemTotals = (items) => {
+  const totalTax = items.reduce((acc, item) => acc + (parseFloat(item[5]) || 0), 0);
+  const totalAmount = items.reduce((acc, item) => acc + (parseFloat(item[6]) || 0), 0);
+
+  setItemTax(totalTax);
+  setItemTotal(totalAmount);
+};
+
+// Update rate and auto-update net rate, tax amount, and total amount
+const handleItemRateChange = (i, rate) => {
+  const updated = [...additionalItems];
+  updated[i][2] = rate;
+  updated[i][3] = rate * updated[i][1]; // Net Rate
+  updated[i][5] = updated[i][3] * (updated[i][4] / 100); // Tax Amount
+  updated[i][6] = Number(updated[i][3]) + Number(updated[i][5]); // Total Amount
+  setAdditionaItems(updated);
+};
+
+// Update tax and auto-update tax amount and total amount
+const handleItemTaxChange = (i, tax) => {
+  const updated = [...additionalItems];
+
+  // Ensure numeric values
+  const rate = parseFloat(updated[i][2]) || 0;
+  const quantity = parseFloat(updated[i][1]) || 0;
+  const netRate = rate * quantity;
+
+  updated[i][3] = netRate; // Net rate
+  updated[i][4] = parseFloat(tax) || 0; // Tax %
+  updated[i][5] = netRate * (updated[i][4] / 100); // Tax Amount
+  updated[i][6] = netRate + updated[i][5]; // Total Amount
+
+  setAdditionaItems(updated);
+
+  // 🧮 Sum from additionalItems
+  const additionalTax = updated.reduce((acc, item) => acc + (parseFloat(item[5]) || 0), 0);
+  const additionalAmount = updated.reduce((acc, item) => acc + (parseFloat(item[6]) || 0), 0);
+
+  // 🧮 Sum from selections.areacollection totalTax and totalAmount
+  const selectionTax = selections.flatMap(sel =>
+    sel.areacollection.flatMap(col => col.totalTax || [])
+  ).reduce((acc, val) => acc + (parseFloat(val) || 0), 0);
+
+  const selectionAmount = selections.flatMap(sel =>
+    sel.areacollection.flatMap(col => col.totalAmount || [])
+  ).reduce((acc, val) => acc + (parseFloat(val) || 0), 0);
+
+  // 💡 Combine both
+  const totalTax = additionalTax + selectionTax;
+  const totalAmount = additionalAmount + selectionAmount;
+
+  setTax(totalTax);
+  setAmount(totalAmount);
+};
+
+const handleItemRemarkChange = (i, remark) => {
+  const updated = [...additionalItems];
+  updated[i][7] = remark;
+  setAdditionaItems(updated);
+};
+
+useEffect(() => {
+  setAdditionaItems(projectData.additionalItems)
+}, [projectData.additionalItems, additionalItems]);
+
+  const [selectedMainIndex, setSelectedMainIndex] = useState(null);
+  const [selectedCollectionIndex, setSelectedCollectionIndex] = useState(null);
 
     return (
       <div className='p-6'>
@@ -598,6 +765,32 @@ const handleunitchange = (mainindex : number, index : number, unit) => {
                 <button onClick={() => setNavState("Quotation")} style={{ borderRadius : "8px" }} className="rounded-lg text-white border px-2 h-8 bg-sky-600">Next</button>
               </div>
             </div>
+          }
+          {
+            navState == "Quotation" && <div className="flex flex-col gap-3">
+                <QuotationTable
+                  selections={selections}
+                  items={items}
+                  quantities={quantities}
+                  handleQuantityChange={handleQuantityChange}
+                  additionalItems={additionalItems}
+                  handleAddMiscItem={handleAddMiscItem}
+                  handleItemNameChange={handleItemNameChange}
+                  handleItemQuantityChange={handleItemQuantityChange}
+                  handleItemRateChange={handleItemRateChange}
+                  handleItemTaxChange={handleItemTaxChange}
+                  handleItemRemarkChange={handleItemRemarkChange}
+                  handleDeleteMiscItem={handleDeleteMiscItem}
+                  projectData={projectData}
+                  setAdditionalItems={setAdditionaItems}
+                />
+
+              <div className="flex flex-row justify-between">
+                <button onClick={() => setNavState("Measurement")} style={{ borderRadius : "8px" }} className="rounded-lg border px-2 h-8 bg-white">Back</button>
+                <button onClick={() => setNavState("Goods")} style={{ borderRadius : "8px" }} className="rounded-lg text-white border px-2 h-8 bg-sky-600">Next</button>
+              </div>
+            </div>
+            
           }
         </div>
         

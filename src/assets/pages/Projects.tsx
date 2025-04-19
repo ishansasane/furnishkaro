@@ -44,6 +44,7 @@ export default function Projects() {
   const projectData = useSelector((state : RootState) => state.data.projects);
   const tasks = useSelector((state : RootState) => state.data.tasks);
   const projectFlag = useSelector(( state : RootState ) => state.data.projectFlag);
+  let sampleprojectData = [];
 
   const fetchProjectData = async () => {
     try {
@@ -77,7 +78,11 @@ export default function Projects() {
           }
         };
   
+        const deepClone = (obj) => JSON.parse(JSON.stringify(obj));
+
+
         return {
+          additionalItems: deepClone(parseSafely(row[14], [])),
           projectName: row[0] || "",
           customerLink: parseSafely(row[1], []), // Parse to array
           projectReference: row[2] || "",
@@ -91,10 +96,10 @@ export default function Projects() {
           projectDate: row[10] || "",
           additionalRequests : row[11],
           interiorArray: typeof row[12] === "string" ? row[12].replace(/^"(.*)"$/, "$1").split(",").map(str => str.trim()) : [],
-          salesAssociateArray : typeof row[13] === "string" ? row[13].replace(/^"(.*)"$/, "$1").split(",").map(str => str.trim()) : []
+          salesAssociateArray : typeof row[13] === "string" ? row[13].replace(/^"(.*)"$/, "$1").split(",").map(str => str.trim()) : [],
         };
       });
-      console.log(projects);
+
       return projects;
     } catch (error) {
       console.error("Error fetching project data:", error);

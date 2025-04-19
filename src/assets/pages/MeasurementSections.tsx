@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FaTrash, FaPlus } from "react-icons/fa";
 
 interface MeasurementSectionProps {
@@ -22,9 +22,13 @@ const MeasurementSection: React.FC<MeasurementSectionProps> = ({
   handleheightchange,
   handlequantitychange
 }) => {
+
+  useEffect(() => {
+    console.log(selections)
+  }, [selections])
   return (
     <div className="rounded-lg border shadow-2xl w-full flex flex-col p-6">
-      <p className="text-[1.2vw]">Measurements</p>
+      <p className="text-[1.3vw] font-semibold">Measurements</p>
       <div className="flex flex-row gap-2">
         <div className="flex flex-col border rounded-lg w-[15vw]">
           <p className="text-[1.1vw] pl-5 pt-2">Area</p>
