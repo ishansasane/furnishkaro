@@ -58,11 +58,11 @@ export default function Reports() {
   };
 
   return (
-    <div>
+    <div className="p-2 md:p-6  bg-gray-50 md:mt-0 mt-20 h-screen">
       <h1 className="text-2xl font-bold">📑 Reports</h1>
-      <div className="flex flex-col mt-36 items-center p-6">
+      <div className="flex flex-col items-center p-6">
         {/* Button Group */}
-        <div className="flex w-full gap-4 mb-6">
+        <div className="flex w-full flex flex-wrap  gap-4 mb-6">
         <button
             className={`px-4 py-2 rounded-xl ${
               activeForm === "form1"
@@ -88,7 +88,7 @@ export default function Reports() {
         </div>
 
         {/* Form Components */}
-        <div className="w-full p-6 bg-white shadow-lg rounded-lg">
+        <div className="w-full md:p-6 p-2 bg-white shadow-lg rounded-lg">
           {activeForm === "form1" && (
             <Form1
               dateRange={dateRange}
@@ -114,7 +114,7 @@ export default function Reports() {
 // Form 1 with Date Range Picker & Delete Feature
 function Form1({ dateRange, setDateRange, applyFilter, resetFilter, filteredData, data, toggleSelection, deleteSelected, selectedIds, toggleSelectAll }) {
   return (
-    <div className="p-4">
+    <div className="md:p-7 p-1 overflow-x-auto">
       <div className="flex items-center gap-2 mb-4">
         <DatePicker
           selectsRange
@@ -183,7 +183,7 @@ function Form1({ dateRange, setDateRange, applyFilter, resetFilter, filteredData
 
 function Form2() {
   return (
-    <div className="p-4">
+    <div className="p-4 md:p-7 p-1 overflow-x-auto">
       
       <div className="flex items-center gap-2 mb-4">
         <DatePicker
@@ -229,7 +229,7 @@ function Form2() {
 
 function Form3() {
   return (
-    <div className="p-4">
+    <div className=" md:p-7 p-1 overflow-x-auto">
       
       <div className="flex items-center gap-2 mb-4">
         <DatePicker

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface CatalogueDialogProps {
   setDialogOpen: (open: boolean) => void;
@@ -9,6 +10,7 @@ interface CatalogueDialogProps {
 }
 
 const CatalogueDialog: React.FC<CatalogueDialogProps> = ({ setDialogOpen, setRefresh, refresh, editingCatalogue, setEditingCatalogue }) => {
+  const navigate = useNavigate();
   const data = editingCatalogue;
   const [catalogueName, setCatalogueName] = useState(editingCatalogue ? data[0] : "");
   const [description, setDescription] = useState(editingCatalogue ? data[1] : "");
@@ -51,11 +53,11 @@ const CatalogueDialog: React.FC<CatalogueDialogProps> = ({ setDialogOpen, setRef
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
-        <div className="flex justify-end gap-2 mt-4">
-          <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => { setEditingCatalogue(null); setDialogOpen(false); }}>
+         <div className="flex justify-end gap-2 mt-4">
+          <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={() => navigate(-1)}>
             Cancel
-          </button>
-          <button className="bg-green-500 text-white px-4 py-2 rounded" onClick={handleSubmit}>
+    </button>
+          <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleSubmit}>
             Save
           </button>
         </div>

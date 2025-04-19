@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 
 interface SalesAssociateDialogProps {
   setDialogOpen: (open: boolean) => void;
@@ -9,6 +11,7 @@ interface SalesAssociateDialogProps {
 }
 
 const SalesAssociateDialog: React.FC<SalesAssociateDialogProps> = ({ setDialogOpen, setRefresh, refresh, editingSalesAssociate, setEditingSalesAssociate }) => {
+  const navigate = useNavigate();
   const data = editingSalesAssociate;
   const [name, setName] = useState(editingSalesAssociate ? data[0] : "");
   const [email, setEmail] = useState(editingSalesAssociate ? data[1] : "");
@@ -47,8 +50,12 @@ const SalesAssociateDialog: React.FC<SalesAssociateDialogProps> = ({ setDialogOp
         <input className="border p-2 rounded w-full mb-2" placeholder="Phone Number" value={phonenumber} onChange={(e) => setPhoneNumber(e.target.value)} />
         <input className="border p-2 rounded w-full mb-2" placeholder="Address" value={address} onChange={(e) => setAddress(e.target.value)} />
         <div className="flex justify-end gap-2 mt-4">
-          <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => { setEditingSalesAssociate(null); setDialogOpen(false); }}>Cancel</button>
-          <button className="bg-green-500 text-white px-4 py-2 rounded" onClick={handleSubmit}>Save</button>
+          <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={() => navigate(-1)}>
+            Cancel
+    </button>
+          <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleSubmit}>
+            Save
+          </button>
         </div>
       </div>
     </div>

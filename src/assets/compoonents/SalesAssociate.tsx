@@ -4,6 +4,9 @@ import SalesAssociateDialog from "../compoonents/SalesAssociateDialog";
 import { RootState } from "../Redux/Store";
 import { useSelector, useDispatch } from "react-redux";
 import { setSalesAssociateData } from "../Redux/dataSlice";
+import { useNavigate } from "react-router-dom";
+  
+
 
 // Fetch Sales Associates
 async function fetchSalesAssociates() {
@@ -42,6 +45,7 @@ async function deleteSalesAssociate(name: string, setRefresh: (state: boolean) =
 }
 
 export default function SalesAssociates() {
+  const navigate = useNavigate();
   const [salesAssociates, setSalesAssociates] = useState([]);
   const [search, setSearch] = useState("");
   const [isDialogOpen, setDialogOpen] = useState(false);
@@ -76,10 +80,10 @@ export default function SalesAssociates() {
     }
   }, [refresh])
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-4">
+    <div className="md:p-6 pt-20 h-full bg-gray-50">
+      <div className="flex flex-wrap justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">🛒 Sales Associates</h1>
-        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md" onClick={() => setDialogOpen(true)}>
+        <button className="flex !rounded-lg items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md" onClick={() => navigate("/sales-associateDialog")}>
           <Plus size={18} /> Add Sales Associate
         </button>
       </div>
@@ -93,7 +97,7 @@ export default function SalesAssociates() {
           className="border px-3 py-2 rounded-md w-full"
         />
       </div>
-
+      <div className="bg-white overflow-x-auto shadow rounded-lg p-5">
       <table className="w-full">
         <thead className="bg-sky-50">
           <tr>
@@ -129,7 +133,7 @@ export default function SalesAssociates() {
           )}
         </tbody>
       </table>
-
+</div>
       {isDialogOpen && <SalesAssociateDialog setDialogOpen={setDialogOpen} setRefresh={setRefresh} refresh={refresh} editingSalesAssociate={editingSalesAssociate} setEditingSalesAssociate={setEditingSalesAssociate} />}
     </div>
   );

@@ -143,16 +143,16 @@ export default function Projects() {
     filter === "all" ? projects : projects.filter((proj) => proj.status === filter);
 
   return (
-    <div className={`p-6`}>
-      <div className={` flex justify-between items-center mb-4`}>
+    <div className={`md:!p-6 p-2  md:mt-0 mt-20 h-screen bg-gray-50 `}>
+      <div className={` flex justify-between flex-wrap items-center mb-4`}>
         <h1 className="text-2xl font-bold">🚀 Projects</h1>
         <Link to="/add-project">
-        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md">
+        <button className="flex items-center  gap-2 bg-blue-600 text-white px-4 py-2 !rounded-md">
           <Plus size={18} /> Add Project
         </button>
         </Link>
       </div>
-
+<div className="bg-white md:!p-6 p-2 mt-5 md:mt-0 rounded-md shadow overflow-x-auto">
       <div className={`${flag ? "hidden" : ""} mb-4 flex gap-4`}>
         <select
           value={filter}
@@ -213,6 +213,7 @@ export default function Projects() {
         goBack={() => {setFlag(false); dispatch(setProjectFlag(false));}}
         tasks={taskData}
       />}
+    </div>
     </div>
   );
 }
