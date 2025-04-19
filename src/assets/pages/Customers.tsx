@@ -105,7 +105,7 @@ export default function Customers() {
     <div className="p-6 bg-gray-50 md:mt-0 mt-20 h-screen">
       <div className="flex flex-wrap justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">👥 Customers</h1>
-        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2" style={{ borderRadius : "8px" }} onClick={() => navigate("/add-customer")} onClick={() => setDialogOpen(true)}><Plus size={18} /> Add Customer</button>
+        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2" style={{ borderRadius : "8px" }} onClick={() => navigate("/add-customer")} ><Plus size={18} /> Add Customer</button>
       </div>
 
 <div className="bg-white p-5 rounded-md shadow overflow-x-auto">
