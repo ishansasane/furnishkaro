@@ -180,13 +180,13 @@ export default function Tasks() {
     { label: "Completed", value: "Completed" },
   ];
   return (
-    <div className="p-6">
+    <div className="p-6 bg-gray-50 md:mt-0 mt-20 h-screen">
       {/* Header */}
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex flex-wrap justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">✅ Tasks</h1>
         <button onClick={() => setDialogOpen(true)} style={{ borderRadius : "8px" }} className="flex items-center gap-2 bg-blue-600 rounded-3xl shadow-2xl text-white px-4 py-2"><Plus size={18}/> Add Task</button>
       </div>
-      <div className="flex space-x-4 border-b pb-2 mb-4 lg:gap-4">
+      <div className="flex flex-wrap gap-2 space-x-4 border-b pb-2 mb-4 lg:gap-4">
         {filterOptions.map((option) => (
           <button
             key={option.value}
@@ -200,10 +200,11 @@ export default function Tasks() {
         ))}
       </div>
       {/* Search */}
+      <div className="bg-white p-5 rounded-md shadow overflow-x-auto">
       <input
         type="text"
         placeholder="Search tasks..."
-        className="border px-3 py-2 rounded-md w-[20vw] mb-4"
+        className="border px-3 py-2 rounded-md w-full mb-4"
       />
       <table className="w-full border-collapse border border-gray-300">
         <thead className="bg-sky-50">
@@ -266,7 +267,7 @@ export default function Tasks() {
           ))}
         </tbody>
       </table>
-
+      </div>
       {/* Add Task Dialog */}
       {isDialogOpen && (
         <TaskDialog

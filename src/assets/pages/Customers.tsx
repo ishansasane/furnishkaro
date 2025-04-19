@@ -5,6 +5,7 @@ import { RootState } from "../Redux/store";
 import { useDispatch, useSelector } from "react-redux";
 import { setCustomerData } from "../Redux/dataSlice";
 import AddCustomerDialog from "../compoonents/AddCustomerDialog";
+import { useNavigate } from "react-router-dom";
 
 interface Customer {
   name: string;
@@ -42,6 +43,7 @@ export default function Customers() {
   const [reset, setreset] = useState(false);
   const [editing, setEditing] = useState(null);
   const [openDropdown, setOpenDropdown] = useState<number | null>(null); 
+  const navigate = useNavigate();
 
   let count = 0;
 
@@ -100,19 +102,20 @@ export default function Customers() {
   }, [reset, editing])
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-4">
+    <div className="p-6 bg-gray-50 md:mt-0 mt-20 h-screen">
+      <div className="flex flex-wrap justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">👥 Customers</h1>
-        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2" style={{ borderRadius : "8px" }} onClick={() => setDialogOpen(true)}><Plus size={18} /> Add Customer</button>
+        <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2" style={{ borderRadius : "8px" }} onClick={() => navigate("/add-customer")} onClick={() => setDialogOpen(true)}><Plus size={18} /> Add Customer</button>
       </div>
 
-      <div className="mb-4">
+<div className="bg-white p-5 rounded-md shadow overflow-x-auto">
+      <div className="mb-4 ">
         <input
           type="text"
           placeholder="Search customers..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border px-3 py-2 rounded-md w-[20vw]"
+          className="border px-3 py-2 rounded-md w-full"
         />
       </div>
 
@@ -179,7 +182,7 @@ export default function Customers() {
           )}
         </tbody>
       </table>
-
+      </div>
       {isDialogOpen && (
         <AddCustomerDialog
           setDialogOpen={setDialogOpen}

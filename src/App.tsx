@@ -37,6 +37,7 @@ import TailorDialog from "./assets/compoonents/TailorDialog.tsx";
 import SalesAssociateDialog from "./assets/compoonents/SalesAssociateDialog.tsx";
 import StoreDialog from "./assets/compoonents/StoreDialog.tsx";
 import EditProjects from "./assets/pages/EditProjects.tsx";
+import AddCustomerDialog from "./assets/compoonents/AddCustomerDialog.tsx";
 
 function App() {
   const [expanded, setExpanded] = useState(true);
@@ -72,6 +73,7 @@ function App() {
               <Route path="/tailor-dialog" element={<TailorDialog />} />
               <Route path="/sales-associateDialog" element={<SalesAssociateDialog />} />
               <Route path="/store-dialog" element={<StoreDialog />} />
+              <Route path="/add-customer" element={<AddCustomerDialog />} />
 
               {/* Masters Subroutes */}
               <Route path="/masters/stores" element={<Store />} />

@@ -37,12 +37,12 @@ const Dashboard: React.FC = () => {
   }, [dispatch, refresh]);
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="p-6 md:mt-0 mt-20 bg-gray-100 min-h-screen">
       {/* Header Section */}
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Welcome, User 👋</h1>
         <Link to="/add-project">
-        <button className="bg-indigo-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-indigo-700 transition-transform transform hover:scale-105">
+        <button className="bg-indigo-600  text-white px-5 py-2 !rounded-lg shadow-md hover:bg-indigo-700 transition-transform transform hover:scale-105">
           + Add Project
         </button>
         </Link>
@@ -77,7 +77,7 @@ const Dashboard: React.FC = () => {
 
             <button
               onClick={() => setTaskDialogOpen(true)}
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-600 transition-transform transform hover:scale-105"
+              className="bg-blue-500 text-white px-4 py-2 !rounded-lg shadow-md hover:bg-blue-600 transition-transform transform hover:scale-105"
             >
               + Add Task
             </button>
