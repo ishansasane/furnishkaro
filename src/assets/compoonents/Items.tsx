@@ -273,9 +273,9 @@ const Items = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen p-4">
+    <div className="bg-gray-50 min-h-screen pt-20 md:p-4 ">
       <div className="container mx-auto">
-        <div className="flex justify-between items-center mb-4">
+        <div className="flex justify-between flex-wrap items-center mb-4">
           <div className="flex items-center gap-5">
           {isFormOpen && (
             <button onClick={() => {setIsFormOpen(false); setediting(false)}} className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100">
@@ -284,7 +284,8 @@ const Items = () => {
           )}
           <h1 className="text-2xl font-semibold">Items</h1>
           </div>
-          <div className="flex items-center md:!gap-5 gap-2">
+          
+          <div className="flex items-center md:!gap-5 flex-wrap gap-2">
           <div className="dropdown">
           <button className="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
             More Options
@@ -306,7 +307,7 @@ const Items = () => {
           
 
         {isFormOpen && (
-          <div className="bg-white shadow rounded-lg p-4">
+          <div className="bg-white shadow  rounded-lg p-4">
             <h1 className="text-xl font-semibold mb-4">{editing ? "Edit Task" : "Add Task"}</h1>
             <form>
               <div className={`${editing ? "hidden" : "none"}`}>

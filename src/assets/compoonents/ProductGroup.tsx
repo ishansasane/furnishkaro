@@ -95,8 +95,8 @@ export default function ProductGroups() {
   }
 
   return (
-    <div className="p-6 h-full bg-gray-50">
-      <div className="flex justify-between items-center mb-4">
+    <div className="md:p-6 h-full pt-20  bg-gray-50">
+      <div className="flex justify-between flex-wrap items-center mb-4">
         <h1 className="text-2xl font-bold">📦 Product Groups</h1>
         <button
       className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 !rounded-lg hover:bg-blue-700"
@@ -105,7 +105,7 @@ export default function ProductGroups() {
       <Plus size={18} /> Add Product Group
     </button>
       </div>
-<div className="bg-white shadow rounded-lg p-5">
+<div className="bg-white shadow rounded-lg overflow-x-auto p-5">
       <div className="mb-4 ">
         <input
           type="text"

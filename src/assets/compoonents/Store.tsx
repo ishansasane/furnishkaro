@@ -149,7 +149,7 @@ const Store: React.FC = () => {
   }, [dropdownOpen, refresh, dispatch, storeData])
 
   return (
-    <div style={{ padding: '20px' , backgroundColor: '#f0f2f5' , borderRadius: '20px'}}>
+    <div style={{   backgroundColor: '#f0f2f5' , borderRadius: '20px'}} className='p-6 pt-20'>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <h2 className='font-bold text-3xl m-5'>Stores</h2>
         <button
@@ -174,12 +174,14 @@ const Store: React.FC = () => {
             padding: '8px',
             borderRadius: '4px',
             border: '1px solid #ccc',
-            width: '300px',
+            
           }}
+          className='px-3 py-2 rounded-md w-full'
         />
       </div>
 
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+      <div style={{ overflowX: 'auto' }}>
+  <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '600px' }}>
         <thead>
           <tr>
             <th style={{ textAlign: 'left', padding: '8px', borderBottom: '1px solid #eee' }}>Store Name</th>
@@ -227,7 +229,7 @@ const Store: React.FC = () => {
           ))}
         </tbody>
       </table>
-
+        </div>  
       
 
       

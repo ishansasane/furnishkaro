@@ -80,8 +80,8 @@ export default function SalesAssociates() {
     }
   }, [refresh])
   return (
-    <div className="p-6 h-full bg-gray-50">
-      <div className="flex justify-between items-center mb-4">
+    <div className="md:p-6 pt-20 h-full bg-gray-50">
+      <div className="flex flex-wrap justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">🛒 Sales Associates</h1>
         <button className="flex !rounded-lg items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md" onClick={() => navigate("/sales-associateDialog")}>
           <Plus size={18} /> Add Sales Associate
@@ -97,7 +97,7 @@ export default function SalesAssociates() {
           className="border px-3 py-2 rounded-md w-full"
         />
       </div>
-      <div className="bg-white shadow rounded-lg p-5">
+      <div className="bg-white overflow-x-auto shadow rounded-lg p-5">
       <table className="w-full">
         <thead className="bg-sky-50">
           <tr>

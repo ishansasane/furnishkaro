@@ -51,7 +51,7 @@ export default function Sidebar() {
     <>
       <SidebarContext.Provider value={{ expanded, toggleSidebar }}>
         {/* Desktop Sidebar */}
-        <nav className="h-full flex-col hidden md:flex">
+        <nav className="h-full flex-col hidden md:flex ">
           <div className="p-4 pb-2 flex justify-between items-center">
             <img
               src="https://img.logoipsum.com/243.svg"
