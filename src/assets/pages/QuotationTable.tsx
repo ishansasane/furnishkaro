@@ -16,12 +16,18 @@ const QuotationTable = ({
   handleItemRemarkChange,
   handleDeleteMiscItem,
   projectData,
-  setAdditionalItems
+  setAdditionalItems,
+  Tax,
+  setTax,
+  Amount,
+  setAmount,
+  Discount,
+  setDiscount
 }) => {
+
   useEffect(() => {
-    const cloned = JSON.parse(JSON.stringify(projectData.additionalItems));
-    setAdditionalItems(cloned);
-  }, [projectData]);
+    console.log(additionalItems);
+  })
 
   return (
     <div className="flex flex-col p-6 border rounded-lg w-full shadow-2xl">
@@ -153,7 +159,7 @@ const QuotationTable = ({
                     <input
                       onChange={(e) => handleItemNameChange(i, e.target.value)}
                       className="pl-2 w-[6vw] border rounded-lg"
-                      value={item[0] || ""}
+                      value={item.name || ""}
                       type="text"
                     />
                   </td>
@@ -161,7 +167,7 @@ const QuotationTable = ({
                     <input
                       onChange={(e) => handleItemQuantityChange(i, e.target.value)}
                       className="pl-2 w-[6vw] border rounded-lg"
-                      value={item[1] || ""}
+                      value={item.quantity || ""}
                       type="text"
                     />
                   </td>
@@ -169,26 +175,26 @@ const QuotationTable = ({
                     <input
                       onChange={(e) => handleItemRateChange(i, e.target.value)}
                       className="pl-2 w-[6vw] border rounded-lg"
-                      value={item[2] || ""}
+                      value={item.rate || ""}
                       type="text"
                     />
                   </td>
-                  <td className="w-[6vw] text-center">{item[3]}</td>
+                  <td className="w-[6vw] text-center">{item.netRate}</td>
                   <td>
                     <input
                       onChange={(e) => handleItemTaxChange(i, e.target.value)}
                       className="pl-2 w-[6vw] border rounded-lg"
-                      value={item[4] || ""}
+                      value={item.tax || ""}
                       type="text"
                     />
                   </td>
-                  <td className="w-[6vw] text-center">{item[5] || 0}</td>
-                  <td className="w-[6vw] text-center">{item[6] || 0}</td>
+                  <td className="w-[6vw] text-center">{item.taxAmount || 0}</td>
+                  <td className="w-[6vw] text-center">{item.totalAmount || 0}</td>
                   <td>
                     <input
                       onChange={(e) => handleItemRemarkChange(i, e.target.value)}
                       className="pl-2 w-[6vw] border rounded-lg"
-                      value={item[7] || ""}
+                      value={item.remark || ""}
                       type="text"
                     />
                   </td>
@@ -203,6 +209,32 @@ const QuotationTable = ({
           </table>
         </div>
       </div>
+      <div className="shadow-xl p-6 flex flex-col gap-2 border w-1/2 rounded-lg mt-3">
+            <p className="text-[1.2vw]">Summary</p>
+            <div className="flex flex-row justify-between w-full">
+              <p className="text-[1.1vw]">Sub Total</p>
+              <p className="text-[1.1vw]">{Amount}</p>
+            </div>
+            <div className="flex flex-row justify-between w-full">
+              <p className="text-[1.1vw]">Total Tax Amount</p>
+              <p className="text-[1.1vw]">{Tax}</p>
+            </div>
+            <div className="flex flex-row justify-between w-full">
+              <p className="text-[1.1vw]">Total Amount</p>
+              <p className="text-[1.1vw]">{Amount + Tax}</p>
+            </div>
+            <div className="border border-gray-400"></div>
+            <div className="flex justify-between mt-1 w-full">
+              <p className="text-[1.1vw]">Discount</p>
+              <input className="rounded-lg border text-center" value={Discount} onChange={(e) => setDiscount(e.target.value)} type="text" />
+            </div>
+            <div className="border border-gray-400"></div>
+            <div className="flex w-full flex-row items-center justify-between">
+              <p className="text-[1.1vw]">Grand Total</p>
+              <p className="text-[1.1vw]">{Amount + Tax - Discount}</p>
+            </div>
+            <button style={{borderRadius : "10px"}} className="rounded-lg bg-sky-700 hover:bg-sky-800 text-white p-[6px]">Update & Generate Quote</button>
+          </div>
     </div>
   );
 };

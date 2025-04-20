@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store";
@@ -39,8 +40,17 @@ const EditProjects = ({ projectData, index, goBack, tasks }) => {
     const [ salesdata, setsalesdata ] = useState([]);
     const [availableProductGroups, setAvailableProductGroups] = useState([]);
 
-    const [additionalItems, setAdditionaItems] = useState([]);
-
+    const [additionalItems, setAdditionaItems] = useState<additional[]>([]);
+    interface additional{
+      name : string;
+      quantity : number;
+      rate : number;
+      netRate : number;
+      tax : number;
+      taxAmount : number;
+      totalAmount : number;
+      remark : string;
+    }
     const availableAreas = ["Living Room", "Kitchen", "Bedroom", "Bathroom"];
     
         interface AreaSelection {
@@ -364,7 +374,6 @@ const handleProductGroupChange = (mainindex: number,i : number, product) => {
   updatedSelections[mainindex].areacollection[i].productGroup = newproduct;
   updatedSelections[mainindex].areacollection[i].items = items;
   setSelections(updatedSelections);
-  console.log(selections);
 };
 
 const handleCatalogueChange = (mainindex: number,i : number, catalogue) => {
@@ -395,8 +404,6 @@ const handleCompanyChange = (mainindex: number,i : number, company: string) => {
 
   updatedSelections[mainindex].areacollection[i].company = company;
   setSelections(updatedSelections);
-
-  console.log(updatedSelections);
 };
 
 const handleDesignNoChange = (mainindex : number,i : number, designNo) => {
@@ -550,8 +557,8 @@ const handleQuantityChange = async (
   );
 
   // Include additional items in total
-  const additionalTaxArray = additionalItems.map(item => parseFloat(item[5]) || 0);
-  const additionalAmountArray = additionalItems.map(item => parseFloat(item[6]) || 0);
+  const additionalTaxArray = additionalItems.map(item => parseFloat(item.taxAmount) || 0);
+  const additionalAmountArray = additionalItems.map(item => parseFloat(item.totalAmount) || 0);
 
   const totalTax = [...selectionTaxArray, ...additionalTaxArray].reduce((acc, curr) => acc + curr, 0);
   const totalAmount = [...selectionAmountArray, ...additionalAmountArray].reduce((acc, curr) => acc + curr, 0);
@@ -560,17 +567,51 @@ const handleQuantityChange = async (
   setAmount(totalAmount);
 };
 
-const handleAddMiscItem = () => {
-  setAdditionaItems(prev => [...prev, ["", "", "", "", "", "", "", ""]]);
-};
 const handleItemQuantityChange = (i, quantity) => {
   const updated = [...additionalItems];
-  updated[i][1] = quantity;
-  updated[i][3] = quantity * updated[i][2]; // Net Rate
-  updated[i][5] = updated[i][3] * (updated[i][4] / 100); // Tax Amount
-  updated[i][6] = Number(updated[i][3]) + Number(updated[i][5]); // Total Amount
+  updated[i].quantity = quantity;
+  updated[i].netRate = quantity * updated[i].rate; // Net Rate
+  updated[i].taxAmount = updated[i].netRate * (updated[i].tax / 100); // Tax Amount
+  updated[i].totalAmount = Number(updated[i].netRate) + Number(updated[i].taxAmount); // Total Amount
   setAdditionaItems(updated);
+
+  const additionalTax = updated.reduce((acc, item) => acc + (parseFloat(item.totalTax) || 0), 0);
+  const additionalAmount = updated.reduce((acc, item) => acc + (parseFloat(item.totalAmount) || 0), 0);
+
+  // 🧮 Sum from selections.areacollection totalTax and totalAmount
+  const selectionTax = selections.flatMap(sel =>
+    sel.areacollection.flatMap(col => col.totalTax || [])
+  ).reduce((acc, val) => acc + (parseFloat(val) || 0), 0);
+
+  const selectionAmount = selections.flatMap(sel =>
+    sel.areacollection.flatMap(col => col.totalAmount || [])
+  ).reduce((acc, val) => acc + (parseFloat(val) || 0), 0);
+
+  // 💡 Combine both
+  const totalTax = additionalTax + selectionTax;
+  const totalAmount = additionalAmount + selectionAmount;
+
+  setTax(totalTax);
+  setAmount(totalAmount);
 };
+const handleAddMiscItem = () => {
+  setAdditionaItems(prev => [
+    ...prev,
+    {
+      name: "",
+      quantity: 0,
+      rate: 0,
+      netRate: 0,
+      tax: 0,
+      taxAmount: 0,
+      totalAmount: 0,
+      remark: ""
+    }
+  ]);
+};
+
+
+// Delete item by index
 const handleDeleteMiscItem = (itemIndex) => {
   const updated = [...additionalItems];
   updated.splice(itemIndex, 1);
@@ -582,7 +623,7 @@ const [itemTotal, setItemTotal] = useState(0);
 
 const handleItemNameChange = (i, value) => {
   const updated = [...additionalItems];
-  updated[i][0] = value;
+  updated[i].name = value;
   setAdditionaItems(updated);
 };
 
@@ -597,11 +638,30 @@ const recalculateItemTotals = (items) => {
 // Update rate and auto-update net rate, tax amount, and total amount
 const handleItemRateChange = (i, rate) => {
   const updated = [...additionalItems];
-  updated[i][2] = rate;
-  updated[i][3] = rate * updated[i][1]; // Net Rate
-  updated[i][5] = updated[i][3] * (updated[i][4] / 100); // Tax Amount
-  updated[i][6] = Number(updated[i][3]) + Number(updated[i][5]); // Total Amount
+  updated[i].rate = rate;
+  updated[i].netRate = rate * updated[i].quantity; // Net Rate
+  updated[i].taxAmount = updated[i].netRate * (updated[i].tax / 100); // Tax Amount
+  updated[i].totalAmount = Number(updated[i].rate) + Number(updated[i].taxAmount); // Total Amount
   setAdditionaItems(updated);
+
+  const additionalTax = updated.reduce((acc, item) => acc + (parseFloat(item.totalTax) || 0), 0);
+  const additionalAmount = updated.reduce((acc, item) => acc + (parseFloat(item.totalAmount) || 0), 0);
+
+  // 🧮 Sum from selections.areacollection totalTax and totalAmount
+  const selectionTax = selections.flatMap(sel =>
+    sel.areacollection.flatMap(col => col.totalTax || [])
+  ).reduce((acc, val) => acc + (parseFloat(val) || 0), 0);
+
+  const selectionAmount = selections.flatMap(sel =>
+    sel.areacollection.flatMap(col => col.totalAmount || [])
+  ).reduce((acc, val) => acc + (parseFloat(val) || 0), 0);
+
+  // 💡 Combine both
+  const totalTax = additionalTax + selectionTax;
+  const totalAmount = additionalAmount + selectionAmount;
+
+  setTax(totalTax);
+  setAmount(totalAmount);
 };
 
 // Update tax and auto-update tax amount and total amount
@@ -609,20 +669,20 @@ const handleItemTaxChange = (i, tax) => {
   const updated = [...additionalItems];
 
   // Ensure numeric values
-  const rate = parseFloat(updated[i][2]) || 0;
-  const quantity = parseFloat(updated[i][1]) || 0;
+  const rate = parseFloat(updated[i].rate) || 0;
+  const quantity = parseFloat(updated[i].quantity) || 0;
   const netRate = rate * quantity;
 
-  updated[i][3] = netRate; // Net rate
-  updated[i][4] = parseFloat(tax) || 0; // Tax %
-  updated[i][5] = netRate * (updated[i][4] / 100); // Tax Amount
-  updated[i][6] = netRate + updated[i][5]; // Total Amount
+  updated[i].netRate = netRate; // Net rate
+  updated[i].tax = parseFloat(tax) || 0; // Tax %
+  updated[i].taxAmount = netRate * (updated[i].tax / 100); // Tax Amount
+  updated[i].totalAmount = netRate + updated[i].taxAmount; // Total Amount
 
   setAdditionaItems(updated);
 
   // 🧮 Sum from additionalItems
-  const additionalTax = updated.reduce((acc, item) => acc + (parseFloat(item[5]) || 0), 0);
-  const additionalAmount = updated.reduce((acc, item) => acc + (parseFloat(item[6]) || 0), 0);
+  const additionalTax = updated.reduce((acc, item) => acc + (parseFloat(item.totalTax) || 0), 0);
+  const additionalAmount = updated.reduce((acc, item) => acc + (parseFloat(item.totalAmount) || 0), 0);
 
   // 🧮 Sum from selections.areacollection totalTax and totalAmount
   const selectionTax = selections.flatMap(sel =>
@@ -643,16 +703,25 @@ const handleItemTaxChange = (i, tax) => {
 
 const handleItemRemarkChange = (i, remark) => {
   const updated = [...additionalItems];
-  updated[i][7] = remark;
+  updated[i].remark = remark;
   setAdditionaItems(updated);
 };
+useEffect(() => {
+  const deepClone = (data) => JSON.parse(JSON.stringify(data));
+  setAdditionaItems(deepClone(projectData.additionalItems));
+  setAmount(projectData.totalAmount);
+  setTax(projectData.totalTax);
+}, [projectData.additionalItems]);
 
 useEffect(() => {
-  setAdditionaItems(projectData.additionalItems)
-}, [projectData.additionalItems, additionalItems]);
+  console.log(selections);
+})
 
+  
   const [selectedMainIndex, setSelectedMainIndex] = useState(null);
   const [selectedCollectionIndex, setSelectedCollectionIndex] = useState(null);
+
+  
 
     return (
       <div className='p-6'>
@@ -783,6 +852,12 @@ useEffect(() => {
                   handleDeleteMiscItem={handleDeleteMiscItem}
                   projectData={projectData}
                   setAdditionalItems={setAdditionaItems}
+                  Tax={Tax}
+                  setTax={setTax}
+                  Amount={Amount}
+                  setAmount={setAmount}
+                  Discount={Discount}
+                  setDiscount={setDiscount}
                 />
 
               <div className="flex flex-row justify-between">
@@ -791,6 +866,67 @@ useEffect(() => {
               </div>
             </div>
             
+          }
+          {
+            navState == "Goods" && <div className="flex flex-col w-full gap-3">
+              <div className="w-full">
+              <table className="w-full table-auto ">
+    <tr className="bg-gray-100 text-center">
+      <th>Sr.No.</th>
+      <th>Area</th>
+      <th>Product Group</th>
+      <th>Company</th>
+      <th>Catalogue</th>
+      <th>Design No</th>
+      <th>Date</th>
+      <th>Status</th>
+      <th>Order ID</th>
+      <th>Remark</th>
+    </tr>
+    {selections.map((selection, mainindex) =>
+      selection.areacollection.map((collection, index) =>
+        collection.items.map((item, i) => (
+          <tr
+            key={`${mainindex}-${index}-${i}`}
+            className="text-center rounded-md"
+          >
+            <td>{i + 1}</td>
+            <td>{selection.area}</td>
+            <td>{item[0]}</td>
+            <td>{collection.company}</td>
+            <td>{collection.catalogue}</td>
+            <td>{collection.designNo}</td>
+            <td>
+              <input
+                type="date"
+                className="border pl-2 rounded-lg w-[8vw] px-1 py-1"
+              />
+            </td>
+            <td>Status</td>
+            <td>
+              <input
+                type="text"
+                className="border pl-2 rounded-lg w-[5vw] px-1 py-1"
+              />
+            </td>
+            <td>
+              <input
+                type="text"
+                className="border pl-2 rounded-lg w-[8vw] px-1 py-1"
+              />
+            </td>
+          </tr>
+        ))
+      )
+    )}
+</table>
+
+              </div>
+              <div className="flex flex-row justify-between">
+                <button onClick={() => setNavState("Quotation")} style={{ borderRadius : "8px" }} className="rounded-lg border px-2 h-8 bg-white">Back</button>
+                <button onClick={() => setNavState("Tailors")} style={{ borderRadius : "8px" }} className="rounded-lg text-white border px-2 h-8 bg-sky-600">Next</button>
+              </div>
+            </div>
           }
         </div>
         

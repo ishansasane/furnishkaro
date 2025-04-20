@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { RootState } from "../Redux/store";
@@ -47,7 +47,17 @@ function AddProjectForm() {
     const [Paid, setPaid] = useState(0);
     const [Discount, setDiscount] = useState(0);
 
-    const [additionalItems, setAdditionaItems] = useState([]);
+    const [additionalItems, setAdditionaItems] = useState<additional[]>([]);
+    interface additional{
+      name : string;
+      quantity : number;
+      rate : number;
+      netRate : number;
+      tax : number;
+      taxAmount : number;
+      totalAmount : number;
+      remark : string;
+    }
     interface AreaSelection {
       area: string;
       areacollection : collectionArea[];
@@ -81,6 +91,15 @@ function AddProjectForm() {
       color: string;
       needsTailoring: boolean;
     }
+
+    interface Goods {
+      date;
+      status;
+      orderID;
+      remark;
+    }
+
+    const [goodsArray, setGoodsArray] = useState<Goods[]>([]);
 
     const [selections, setSelections] = useState<AreaSelection[]>([]);
 
@@ -281,28 +300,51 @@ function AddProjectForm() {
       };
          
 
-    const handleProductGroupChange = (mainindex: number,i : number, product) => {
-      const updatedSelections = [...selections];
-    
-      // Ensure areacollection exists before accessing the index
-      if (!updatedSelections[mainindex].areacollection) {
-        updatedSelections[mainindex].areacollection = [];
-      }
-    
-      // Ensure the specific index exists
-      if (!updatedSelections[mainindex].areacollection[i]) {
-        updatedSelections[mainindex].areacollection[i] = { productGroup: null, items : [""], catalogue: null, company: null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : []};
-      }
+      const handleProductGroupChange = (mainindex: number, i: number, product: string) => {
+        const updatedSelections = [...selections];
       
-      const newproduct = product.split(",");
-
-      const items = newproduct.slice(1, -2);
-      console.log(items);
-
-      updatedSelections[mainindex].areacollection[i].productGroup = newproduct;
-      updatedSelections[mainindex].areacollection[i].items = items;
-      setSelections(updatedSelections);
-    };
+        // Ensure areacollection exists
+        if (!updatedSelections[mainindex].areacollection) {
+          updatedSelections[mainindex].areacollection = [];
+        }
+      
+        // Ensure the specific index exists
+        if (!updatedSelections[mainindex].areacollection[i]) {
+          updatedSelections[mainindex].areacollection[i] = {
+            productGroup: null,
+            items: [""],
+            catalogue: [],
+            company: null,
+            designNo: null,
+            reference: null,
+            measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+            additionalItems: [],
+            totalAmount: [],
+            totalTax: []
+          };
+        }
+      
+        // Parse the product group string
+        const newproduct = product.split(",");
+        const items = newproduct.slice(1, -2);
+        console.log(items);
+      
+        // Update selections
+        updatedSelections[mainindex].areacollection[i].productGroup = newproduct;
+        updatedSelections[mainindex].areacollection[i].items = items;
+        setSelections(updatedSelections);
+      
+        // ✅ Set goodsArray to have exactly the same number of items
+        const updatedGoodsArray = items.map(() => ({
+          date: "",
+          status: "",
+          orderID: "",
+          remark: ""
+        }));
+        setGoodsArray(updatedGoodsArray);
+      };
+      
+      
     
     const handleCatalogueChange = (mainindex: number,i : number, catalogue) => {
       const updatedSelections = [...selections];
@@ -312,7 +354,7 @@ function AddProjectForm() {
       }
     
       if (!updatedSelections[mainindex].areacollection[i]) {
-        updatedSelections[mainindex].areacollection[i] = { productGroup: null, items : [""],  catalogue: null, company: null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] };
+        updatedSelections[mainindex].areacollection[i] = { productGroup: null, items : [""],  catalogue: [], company: null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] };
       }
     
       updatedSelections[mainindex].areacollection[i].catalogue = catalogue;
@@ -327,7 +369,7 @@ function AddProjectForm() {
       }
     
       if (!updatedSelections[mainindex].areacollection[i]) {
-        updatedSelections[mainindex].areacollection[i] = { productGroup: null, items : [""], catalogue: null, company: null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] };
+        updatedSelections[mainindex].areacollection[i] = { productGroup: null, items : [""], catalogue: [], company: null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] };
       }
     
       updatedSelections[mainindex].areacollection[i].company = company;
@@ -344,7 +386,7 @@ function AddProjectForm() {
       }
 
       if(!updatedSelections[mainindex].areacollection[i]){
-        updatedSelections[mainindex].areacollection[i] = { productGroup : null, items : [""], catalogue : null, company : null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] };
+        updatedSelections[mainindex].areacollection[i] = { productGroup : null, items : [""], catalogue : [], company : null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] };
       }
 
       updatedSelections[mainindex].areacollection[i].designNo = designNo;
@@ -361,7 +403,7 @@ function AddProjectForm() {
       }
 
       if(!updatedSelection[mainindex].areacollection[i]){
-        updatedSelection[mainindex].areacollection[i] = { productGroup : null, items : [""], catalogue : null, company : null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] }
+        updatedSelection[mainindex].areacollection[i] = { productGroup : null, items : [""], catalogue : [], company : null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] }
       }
 
       updatedSelection[mainindex].areacollection[i].reference = reference;
@@ -488,9 +530,22 @@ function AddProjectForm() {
     
 
     // Add a new empty item
-const handleAddMiscItem = () => {
-  setAdditionaItems(prev => [...prev, ["", "", "", "", "", "", "", ""]]);
-};
+    const handleAddMiscItem = () => {
+      setAdditionaItems(prev => [
+        ...prev,
+        {
+          name: "",
+          quantity: 0,
+          rate: 0,
+          netRate: 0,
+          tax: 0,
+          taxAmount: 0,
+          totalAmount: 0,
+          remark: ""
+        }
+      ]);
+    };
+    
 
 // Delete item by index
 const handleDeleteMiscItem = (itemIndex) => {
@@ -502,17 +557,17 @@ const handleDeleteMiscItem = (itemIndex) => {
 // Update item name
 const handleItemNameChange = (i, value) => {
   const updated = [...additionalItems];
-  updated[i][0] = value;
+  updated[i].name = value;
   setAdditionaItems(updated);
 };
 
 // Update quantity and auto-update net rate, tax amount, and total amount
 const handleItemQuantityChange = (i, quantity) => {
   const updated = [...additionalItems];
-  updated[i][1] = quantity;
-  updated[i][3] = quantity * updated[i][2]; // Net Rate
-  updated[i][5] = updated[i][3] * (updated[i][4] / 100); // Tax Amount
-  updated[i][6] = Number(updated[i][3]) + Number(updated[i][5]); // Total Amount
+  updated[i].quantity = quantity;
+  updated[i].netRate = quantity * updated[i].rate; // Net Rate
+  updated[i].taxAmount = updated[i].netRate * (updated[i].tax / 100); // Tax Amount
+  updated[i].totalAmount = Number(updated[i].netRate) + Number(updated[i].taxAmount); // Total Amount
   setAdditionaItems(updated);
 };
 
@@ -520,8 +575,8 @@ const [itemTax, setItemTax] = useState(0);
 const [itemTotal, setItemTotal] = useState(0);
 
 const recalculateItemTotals = (items) => {
-  const totalTax = items.reduce((acc, item) => acc + (parseFloat(item[5]) || 0), 0);
-  const totalAmount = items.reduce((acc, item) => acc + (parseFloat(item[6]) || 0), 0);
+  const totalTax = items.reduce((acc, item) => acc + (parseFloat(item.taxAmount) || 0), 0);
+  const totalAmount = items.reduce((acc, item) => acc + (parseFloat(item.totalAmount) || 0), 0);
 
   setItemTax(totalTax);
   setItemTotal(totalAmount);
@@ -530,11 +585,31 @@ const recalculateItemTotals = (items) => {
 // Update rate and auto-update net rate, tax amount, and total amount
 const handleItemRateChange = (i, rate) => {
   const updated = [...additionalItems];
-  updated[i][2] = rate;
-  updated[i][3] = rate * updated[i][1]; // Net Rate
-  updated[i][5] = updated[i][3] * (updated[i][4] / 100); // Tax Amount
-  updated[i][6] = Number(updated[i][3]) + Number(updated[i][5]); // Total Amount
+  updated[i].rate = rate;
+  updated[i].netRate = rate * updated[i].quantity; // Net Rate
+  updated[i].taxAmount = updated[i].netRate * (updated[i].tax / 100); // Tax Amount
+  updated[i].totalAmount = Number(updated[i].rate) + Number(updated[i].taxAmount); // Total Amount
   setAdditionaItems(updated);
+
+    // 🧮 Sum from additionalItems
+    const additionalTax = updated.reduce((acc, item) => acc + (parseFloat(item.taxAmount) || 0), 0);
+    const additionalAmount = updated.reduce((acc, item) => acc + (parseFloat(item.totalAmount) || 0), 0);
+  
+    // 🧮 Sum from selections.areacollection totalTax and totalAmount
+    const selectionTax = selections.flatMap(sel =>
+      sel.areacollection.flatMap(col => col.totalTax || [])
+    ).reduce((acc, val) => acc + (parseFloat(val) || 0), 0);
+  
+    const selectionAmount = selections.flatMap(sel =>
+      sel.areacollection.flatMap(col => col.totalAmount || [])
+    ).reduce((acc, val) => acc + (parseFloat(val) || 0), 0);
+  
+    // 💡 Combine both
+    const totalTax = additionalTax + selectionTax;
+    const totalAmount = additionalAmount + selectionAmount;
+  
+    setTax(totalTax);
+    setAmount(totalAmount);
 };
 
 // Update tax and auto-update tax amount and total amount
@@ -542,20 +617,20 @@ const handleItemTaxChange = (i, tax) => {
   const updated = [...additionalItems];
 
   // Ensure numeric values
-  const rate = parseFloat(updated[i][2]) || 0;
-  const quantity = parseFloat(updated[i][1]) || 0;
+  const rate = parseFloat(updated[i].rate) || 0;
+  const quantity = parseFloat(updated[i].quantity) || 0;
   const netRate = rate * quantity;
 
-  updated[i][3] = netRate; // Net rate
-  updated[i][4] = parseFloat(tax) || 0; // Tax %
-  updated[i][5] = netRate * (updated[i][4] / 100); // Tax Amount
-  updated[i][6] = netRate + updated[i][5]; // Total Amount
+  updated[i].netRate = netRate; // Net rate
+  updated[i].tax = parseFloat(tax) || 0; // Tax %
+  updated[i].taxAmount = netRate * (updated[i].tax / 100); // Tax Amount
+  updated[i].totalAmount = netRate + updated[i].taxAmount; // Total Amount
 
   setAdditionaItems(updated);
 
   // 🧮 Sum from additionalItems
-  const additionalTax = updated.reduce((acc, item) => acc + (parseFloat(item[5]) || 0), 0);
-  const additionalAmount = updated.reduce((acc, item) => acc + (parseFloat(item[6]) || 0), 0);
+  const additionalTax = updated.reduce((acc, item) => acc + (parseFloat(item.taxAmount) || 0), 0);
+  const additionalAmount = updated.reduce((acc, item) => acc + (parseFloat(item.totalAmount) || 0), 0);
 
   // 🧮 Sum from selections.areacollection totalTax and totalAmount
   const selectionTax = selections.flatMap(sel =>
@@ -572,6 +647,7 @@ const handleItemTaxChange = (i, tax) => {
 
   setTax(totalTax);
   setAmount(totalAmount);
+  console.log(goodsArray);
 };
 
 
@@ -586,8 +662,9 @@ const [additionalRequests, setAdditionalRequests] = useState("");
 // Update remark
 const handleItemRemarkChange = (i, remark) => {
   const updated = [...additionalItems];
-  updated[i][7] = remark;
+  updated[i].remark = remark;
   setAdditionaItems(updated);
+  console.log(additionalItems);
 };
 
     const [selectedMainIndex, setSelectedMainIndex] = useState(null);
@@ -637,6 +714,24 @@ const handleItemRemarkChange = (i, remark) => {
         alert("Error: Network issue or server not responding");
       }
     };
+
+    const [goodsItems, setGoodsItems] = useState([]);
+
+    useEffect(() => {
+      setGoodsArray((prevGoodsArray) => {
+        const updatedGoodsArray = [...prevGoodsArray]; // Create a copy of the array
+        updatedGoodsArray[0] = { // Update the item at index 0
+          ...updatedGoodsArray[0], // Keep the other properties of the item unchanged
+          date: "", // New value for the `date` field
+          status: "", // New value for the `status` field
+          orderID: "", // New value for the `orderID` field
+          remark: "", // New value for the `remark` field
+        };
+      
+        return updatedGoodsArray; // Return the new array
+      });
+    }, [goodsItems]);
+    
 
   return (
     <div className="flex flex-col gap-3 w-full h-screen">
@@ -741,14 +836,13 @@ const handleItemRemarkChange = (i, remark) => {
       collection.items = [                 // keep the first element (title/groupName maybe)
         ...matchedItems,          // updated product items       // last (e.g., addon maybe)
       ];
-
       // Filter only matched full item arrays (to avoid rendering original strings)
       const validMatchedItems = matchedItems.filter((el) => Array.isArray(el));
 
+      
       return validMatchedItems.map((item, itemIndex) => {
         const key = `${mainindex}-${collectionIndex}-${itemIndex}`;
-        const qty = selection.areacollection[collectionIndex]?.quantities?.[itemIndex] || 0;
-
+        const qty = selection.areacollection[collectionIndex]?.quantities?.[itemIndex] || 0;        
         return (
           <tr key={key} className="flex justify-between w-full border-b p-2">
             <td className="w-[10%]">{itemIndex + 1}</td>
@@ -837,7 +931,7 @@ const handleItemRemarkChange = (i, remark) => {
               <input
                 onChange={(e) => handleItemNameChange(i, e.target.value)}
                 className="pl-2 w-[6vw] border rounded-lg"
-                value={item[0] || ""}
+                value={item.name || ""}
                 type="text"
               />
             </td>
@@ -845,7 +939,7 @@ const handleItemRemarkChange = (i, remark) => {
               <input
                 onChange={(e) => handleItemQuantityChange(i, e.target.value)}
                 className="pl-2 w-[6vw] border rounded-lg"
-                value={item[1] || ""}
+                value={item.quantity || ""}
                 type="text"
               />
             </td>
@@ -853,26 +947,26 @@ const handleItemRemarkChange = (i, remark) => {
               <input
                 onChange={(e) => handleItemRateChange(i, e.target.value)}
                 className="pl-2 w-[6vw] border rounded-lg"
-                value={item[2] || ""}
+                value={item.rate || ""}
                 type="text"
               />
             </td>
-            <td className="w-[6vw] text-center">{item[3]}</td>
+            <td className="w-[6vw] text-center">{item.netRate}</td>
             <td>
               <input
                 onChange={(e) => handleItemTaxChange(i, e.target.value)}
                 className="pl-2 w-[6vw] border rounded-lg"
-                value={item[4] || ""}
+                value={item.tax || ""}
                 type="text"
               />
             </td>
-            <td className="w-[6vw] text-center">{item[5] || 0}</td>
-            <td className="w-[6vw] text-center">{item[6] || 0}</td>
+            <td className="w-[6vw] text-center">{item.taxAmount || 0}</td>
+            <td className="w-[6vw] text-center">{item.totalAmount || 0}</td>
             <td>
               <input
                 onChange={(e) => handleItemRemarkChange(i, e.target.value)}
                 className="pl-2 w-[6vw] border rounded-lg"
-                value={item[7] || ""}
+                value={item.remark || ""}
                 type="text"
               />
             </td>
@@ -913,7 +1007,7 @@ const handleItemRemarkChange = (i, remark) => {
               <p className="text-[1.1vw]">Grand Total</p>
               <p className="text-[1.1vw]">{Amount + Tax - Discount}</p>
             </div>
-            <button onClick={sendProjectData} style={{borderRadius : "10px"}} className="rounded-lg bg-sky-700 hover:bg-sky-800 text-white p-[6px]">Update & Generate Quote</button>
+            <button onClick={sendProjectData} style={{borderRadius : "10px"}} className="rounded-lg bg-sky-700 hover:bg-sky-800 text-white p-[6px]">Add Project & Generate Quote</button>
           </div>
 
         <br />

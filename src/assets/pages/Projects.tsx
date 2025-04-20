@@ -80,11 +80,9 @@ export default function Projects() {
   
         const deepClone = (obj) => JSON.parse(JSON.stringify(obj));
 
-
         return {
-          additionalItems: deepClone(parseSafely(row[14], [])),
           projectName: row[0] || "",
-          customerLink: parseSafely(row[1], []), // Parse to array
+          customerLink: parseSafely(row[1], []),
           projectReference: row[2] || "",
           status: row[3] || "",
           totalAmount: parseFloat(row[4]) || 0,
@@ -92,12 +90,24 @@ export default function Projects() {
           paid: parseFloat(row[6]) || 0,
           discount: parseFloat(row[7]) || 0,
           createdBy: row[8] || "",
-          allData: parseSafely(row[9], []), // Parse to array/object
+          allData: parseSafely(row[9], []),
           projectDate: row[10] || "",
-          additionalRequests : row[11],
-          interiorArray: typeof row[12] === "string" ? row[12].replace(/^"(.*)"$/, "$1").split(",").map(str => str.trim()) : [],
-          salesAssociateArray : typeof row[13] === "string" ? row[13].replace(/^"(.*)"$/, "$1").split(",").map(str => str.trim()) : [],
+          additionalRequests: row[11],
+          interiorArray: typeof row[12] === "string"
+            ? row[12].replace(/^"(.*)"$/, "$1").split(",").map(str => str.trim())
+            : [],
+          salesAssociateArray: typeof row[13] === "string"
+            ? row[13].replace(/^"(.*)"$/, "$1").split(",").map(str => str.trim())
+            : [],
+          
+          // Safely parse additionalItems and goodsArray
+          additionalItems: deepClone(parseSafely(row[14], [])),
+          
+          // Fetching goodsArray with same pattern, assuming it's in the correct format
+          goodsArray: parseSafely(row[15], []), // Assuming goodsArray is at index 15 (adjust accordingly)
         };
+        
+        
       });
 
       return projects;
@@ -113,6 +123,8 @@ export default function Projects() {
     const data = await response.json();
     return data.body;
   };
+
+  const [deleted, setDeleted] = useState(false);
 
   useEffect(() => {
     async function getData(){
@@ -136,11 +148,31 @@ export default function Projects() {
     }else{
       setTaskData(tasks);
     }
-  } ,[dispatch, projectData, tasks]);
+  } ,[dispatch, projectData, tasks, deleted]);
 
   // Filter projects based on selected status
   const filteredProjects =
     filter === "all" ? projects : projects.filter((proj) => proj.status === filter);
+
+    const deleteProject = async (name) => {
+      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deleteprojectdata", {
+        method : "POST",
+        headers : {
+          "content-type" : "application/json"
+        },
+        credentials : "include",
+        body : JSON.stringify({ projectName : name })
+      });
+
+      if(response.status == 200){
+        alert("Project Deleted");
+      }else{
+        alert("Error");
+      }
+      const data = await fetchProjectData();
+      dispatch(setProjects(data));
+      setprojects(projectData);
+    }
 
   return (
     <div className={`md:!p-6 p-2  md:mt-0 mt-20 h-screen bg-gray-50 `}>
@@ -198,7 +230,7 @@ export default function Projects() {
                   <button onClick={(e) => { setIndex(index); setSendProject(project); setFlag(true); }} className="border px-2 py-1 rounded-md bg-gray-300">
                     <Edit size={16} />
                   </button>
-                  <button className="border px-2 py-1 rounded-md bg-red-500 text-white">
+                  <button onClick={() => deleteProject(project.projectName)} className="border px-2 py-1 rounded-md bg-red-500 text-white">
                     <Trash2 size={16} />
                   </button>
                 </div>

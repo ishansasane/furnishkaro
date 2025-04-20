@@ -24,6 +24,7 @@ const MaterialSelectionComponent = ({
 
   useEffect(() => {
     console.log(selections);
+    console.log(catalogueData)
   }, [selections])
 
   return (
