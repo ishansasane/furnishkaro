@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { setTaskDialogOpen } from "../Redux/dataSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -9,7 +9,7 @@ interface TaskDialogProps {
   setrefresh: (val: boolean) => void;
 }
 
-const TaskDialog: React.FC<TaskDialogProps> = ({ onClose, isEditing, setediting, name, setrefresh, projectData, taskDialogOpen, setProjectFlag }) => {
+const TaskDialog: React.FC<TaskDialogProps> = ({ setAdded, onClose, isEditing, setediting, name, setrefresh, projectData, taskDialogOpen, setProjectFlag, setTaskDialogOpen }) => {
   const [taskName, setTaskName] = useState(undefined);
   const [description, setDescription] = useState(undefined);
   const [dateTime, setDateTime] = useState(undefined);
@@ -51,9 +51,11 @@ const TaskDialog: React.FC<TaskDialogProps> = ({ onClose, isEditing, setediting,
 
     if (response.status === 200) {
       alert("Task Added");
+      setTaskDialogOpen(false);
     } else {
       alert("Error adding task");
     }
+    setediting(null);
     setrefresh(true);
     onClose();
   };
@@ -82,6 +84,8 @@ const TaskDialog: React.FC<TaskDialogProps> = ({ onClose, isEditing, setediting,
 
     if (response.status === 200) {
       alert("Task updated");
+      setAdded(false);
+      setTaskDialogOpen(false);
     } else {
       alert("Error updating task");
     }

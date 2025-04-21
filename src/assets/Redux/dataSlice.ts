@@ -14,6 +14,7 @@ interface DataState {
   items : [];
   taskDialogOpen : boolean;
   projectFlag : boolean;
+  paymentData : [];
 }
 
 const initialState: DataState = {
@@ -30,6 +31,7 @@ const initialState: DataState = {
   items : [],
   taskDialogOpen : false,
   projectFlag : false,
+  paymentData : []
 };
 
 const dataSlice = createSlice({
@@ -74,6 +76,9 @@ const dataSlice = createSlice({
     },
     setProjectFlag : (state, action : PayloadAction<false>) => {
       state.projectFlag = action.payload;
+    },
+    setPaymentData : (state, action : PayloadAction<[]>) => {
+      state.paymentData = action.payload;
     }
   },
 });
@@ -91,7 +96,8 @@ export const {
   setStoreData,
   setItemData,
   setTaskDialogOpen,
-  setProjectFlag
+  setProjectFlag,
+  setPaymentData
 } = dataSlice.actions;
 
 export default dataSlice.reducer;

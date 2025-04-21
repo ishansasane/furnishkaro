@@ -62,7 +62,7 @@ const Dashboard: React.FC = () => {
         <div className="bg-white shadow-lg rounded-xl p-6">
           <h2 className="text-xl font-semibold mb-4 text-gray-800">📅 Project Deadlines</h2>
           <div className="space-y-4">
-            {projects.map((project, index) => (
+            {projects != undefined && projects.map((project, index) => (
               <DeadlineCard project={project[0]} date={project[5]} key={index} />
             ))}
           </div>

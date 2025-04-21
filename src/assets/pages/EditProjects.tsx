@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store";
 import OverviewPage from './OverviewPage';
-import { setSalesAssociateData, setInteriorData, setCustomerData, setProducts, setCatalogs, setProjects, setItemData, setProjectFlag } from "../Redux/dataSlice";
+import { setPaymentData , setSalesAssociateData, setInteriorData, setCustomerData, setProducts, setCatalogs, setProjects, setItemData, setProjectFlag, setTasks } from "../Redux/dataSlice";
 import CustomerDetails from "./CustomerDetails";
 import ProjectDetails from "./ProjectDetails";
 import EditCustomerDetails from "./Edit/EditCustomerDetails";
@@ -11,8 +11,14 @@ import EditProjectDetails from "./Edit/EditProjectDetails";
 import MaterialSelectionComponent from "./MaterialSelectionComponent";
 import MeasurementSection from "./MeasurementSections";
 import QuotationTable from "./QuotationTable";
+import { Disc, Edit } from "lucide-react";
+import { FaPlus, FaTrash } from "react-icons/fa";
+import PaymentsSection from "./PaymentSection";
+import TailorsSection from "./TailorsSection";
+import { AnimatePresence, motion } from "framer-motion";
+import TaskDialog from "../compoonents/TaskDialog";
 
-const EditProjects = ({ projectData, index, goBack, tasks }) => {
+const EditProjects = ({ projectData, index, goBack, projects }) => {
 
     const [currentStatus, setCurrentStatus] = useState("Unsent");
     const [navState, setNavState] = useState("Overview");
@@ -23,8 +29,10 @@ const EditProjects = ({ projectData, index, goBack, tasks }) => {
     const salesAssociateData = useSelector((state : RootState) => state.data.salesAssociates);
     const products = useSelector((state : RootState) => state.data.products);
     const items = useSelector((state : RootState) => state.data.items);
+    const paymentData = useSelector((state : RootState) => state.data.paymentData);
 
     const catalogueData = useSelector((state : RootState) => state.data.catalogs);
+    const Tasks = useSelector((state : RootState) => state.data.tasks);
     let availableCompanies = ["D Decor", "Asian Paints", "ZAMAN"];
     const designNo = [ "514", "98", "123" ];
 
@@ -95,6 +103,12 @@ const EditProjects = ({ projectData, index, goBack, tasks }) => {
     const [user, setUser] = useState("");
     const [projectDate, setPRojectDate] = useState("");
     const [additionalRequests, setAdditionalRequests] = useState("");
+
+    const fetchTaskData = async () => {
+      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks");
+      const data = await response.json();
+      return data.body;
+    };
 
     const getItemsData = async () => {
  
@@ -210,78 +224,72 @@ const EditProjects = ({ projectData, index, goBack, tasks }) => {
       
       
 
-            useEffect(() => {
-              async function getData(){
-                let data = await fetchInteriors();
-                dispatch(setInteriorData(data));
-                setinterior(interiorData);
+      useEffect(() => {
+        async function getData() {
+          const data = await fetchInteriors();
+          dispatch(setInteriorData(data));
+          setinterior(data);
+        }
+        async function getitemsdata() {
+          const response = await fetch(
+            "https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts",
+            { credentials: "include" }
+          );
+          const data = await response.json();
+          const items = data.body || [];
+          dispatch(setItemData(items));
+          setsingleitems(items);
+        }
+        if (interiorData.length === 0) {
+          getData();
+        }
+        if (items.length === 0) {
+          getitemsdata();
+        }
+      }, [dispatch]);
       
-              }
-              async function getitemsdata(){
-                let data = await getItemsData();
-                dispatch(setItemData(data));
-                setsingleitems(items);
-              }
-              if(interiorData.length == 0){
-                getData();
-              }else{
-                setinterior(interiorData);
-              }
-              if(items.length == 0){
-                getitemsdata();
-              }else{
-                setinterior(interiorData);
-              }
-            },[dispatch, interiorData, items]);
+      useEffect(() => {
+        async function getData() {
+          const data = await fetchSalesAssociates();
+          dispatch(setSalesAssociateData(data));
+          setsalesdata(data);
+        }
+        if (salesAssociateData.length === 0) {
+          getData();
+        }
+      }, [dispatch]);
       
-            useEffect(() => {
-              async function getData(){
-                const data = await fetchSalesAssociates();
-                dispatch(setSalesAssociateData(data));
-                setsalesdata(salesAssociateData);
-              }
-              if(salesAssociateData.length == 0){
-                getData();
-              }else{
-                setsalesdata(salesAssociateData);
-              }
-            },[dispatch, salesAssociateData]);
+      useEffect(() => {
+        async function getData() {
+          const data = await fetchProductGroups();
+          dispatch(setProducts(data));
+          setAvailableProductGroups(data);
+        }
+        if (products.length === 0) {
+          getData();
+        }
+      }, [dispatch]);
       
-            useEffect(() => {
-              async function getData(){
-                let data = await fetchProductGroups();
-                dispatch(setProducts(data));
-                setAvailableProductGroups(products);        
-              }
-              if(products.length == 0){
-                getData();
-              }else{
-                setAvailableProductGroups(products);
-              }
-            },[dispatch, fetchProductGroups, products]);
+      useEffect(() => {
+        async function getData() {
+          const data = await fetchCatalogues();
+          dispatch(setCatalogs(data));
+        }
+        if (catalogueData.length === 0) {
+          getData();
+        }
+      }, [dispatch]);
       
-            useEffect(() => {
-              async function getData(){
-                let data = await fetchCatalogues();
-                dispatch(setCatalogs(data));      
-              }
-              if(catalogueData.length == 0){
-                getData();
-              }
-            },[dispatch, catalogueData]);
-      
-          useEffect(() => {
-              async function fetchData(){
-                const data = await fetchCustomers();
-                dispatch(setCustomerData(data));
-                setcustomers(customerData);
-              }
-              if(customerData.length == 0){
-                fetchData();
-              }else{
-                setcustomers(customerData);
-              }
-            }, [customerData, dispatch])
+      useEffect(() => {
+        async function getData() {
+          const data = await fetchCustomers();
+          dispatch(setCustomerData(data));
+          setcustomers(data);
+        }
+        if (customerData.length === 0) {
+          getData();
+        }
+      }, [dispatch]);
 
 const sendProjectData = async () => {
     try {
@@ -508,6 +516,7 @@ const [Amount, setAmount] = useState(0);
 const [Tax, setTax] = useState(0);
 const [Paid, setPaid] = useState(0);
 const [Discount, setDiscount] = useState(0);
+const [Received, setReceived] = useState(0);
 
 const handleQuantityChange = async (
   key,
@@ -706,23 +715,174 @@ const handleItemRemarkChange = (i, remark) => {
   updated[i].remark = remark;
   setAdditionaItems(updated);
 };
-useEffect(() => {
-  const deepClone = (data) => JSON.parse(JSON.stringify(data));
-  setAdditionaItems(deepClone(projectData.additionalItems));
-  setAmount(projectData.totalAmount);
-  setTax(projectData.totalTax);
-}, [projectData.additionalItems]);
 
-useEffect(() => {
-  console.log(selections);
-})
+    interface Goods {
+      date;
+      status;
+      orderID;
+      remark;
+    }
 
+    const [goodsArray, setGoodsArray] = useState<Goods[]>([]);
+
+    useEffect(() => {
+      const deepClone = (data) => JSON.parse(JSON.stringify(data));
+      setAdditionaItems(deepClone(projectData.additionalItems));
+      setGoodsArray(deepClone(projectData.goodsArray));
+    }, [projectData]);
+
+    useEffect(() => {
+      setTax(projectData.totalTax);
+      setAmount(projectData.totalAmount);
+      setDiscount(projectData.discount);
+    })
   
   const [selectedMainIndex, setSelectedMainIndex] = useState(null);
   const [selectedCollectionIndex, setSelectedCollectionIndex] = useState(null);
 
-  
+const setGoodsDate = (index , date) => {
+  let newarray = [...goodsArray];
+  newarray[index].date = date;
+  setGoodsArray(newarray);
+}
+const setGoodsStatus = (index , status) => {
+  let newarray = [...goodsArray];
+  newarray[index].status = status;
+  setGoodsArray(newarray);
+}
+const setGoodsOrderID = (index , orderID) => {
+  let newarray = [...goodsArray];
+  newarray[index].orderID = orderID;
+  setGoodsArray(newarray);
+}
+const setGoodsRemark  = (index , remark) => {
+  let newarray = [...goodsArray];
+  newarray[index].remark = remark;
+  setGoodsArray(newarray);
+}
 
+const [payment, setPayment] = useState(0);
+const [paymentDate, setPaymentDate] = useState("");
+const [paymentMode, setPaymentMode] = useState("");
+const [paymentRemarks, setPaymentRemarks] = useState("");
+
+const [addPayment , setAddPayment] = useState(false);
+
+// eslint-disable-next-line react-hooks/exhaustive-deps
+const fetchPaymentData = async () => {
+  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getPayments"); 
+  const data = await response.json();
+  return data.message;
+}
+
+const hasFetchedPayments = useRef(false);
+const [added, setAdded] = useState(false);
+useEffect(() => {
+  async function fetchPayments() {
+    const data = await fetchPaymentData();
+    dispatch(setPaymentData(data));
+
+    // Sum the values at index 1
+    const total = data.reduce((acc, curr) => {
+      const amount = parseFloat(curr[1]);
+      return acc + (isNaN(amount) ? 0 : amount);
+    }, 0);
+
+    setReceived(total);
+    setAdded(true);
+  }
+  if (!added) {
+    fetchPayments();
+  }
+}, [dispatch, added, fetchPaymentData]);
+
+const addPaymentFunction = async () => {
+
+  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/addPayment", {
+    credentials : "include",
+    method : "POST",
+    headers : {
+      "content-type" : "application/json"
+    },
+    body : JSON.stringify({ Name : projectData.projectName, Received : payment, ReceivedDate : paymentDate, PaymentMode : paymentMode, Remarks : paymentRemarks })
+  })
+  if(response.status == 200){
+    alert("Payment added");
+    setAddPayment(false);
+    setPayment(0);
+    setPaymentDate("");
+    setPaymentMode("");
+    setPaymentRemarks("");
+    if(added){
+      setAdded(false);
+    }else{
+      setAdded(true);
+    }
+  }else{
+    alert("Error");
+  }
+}
+
+const deletePayment = async (p, pd, pm, re) => {
+  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletePayment", {
+    credentials : "include",
+    method : "POST",
+    headers : {
+      "content-type" : "application/json",
+    },
+    body : JSON.stringify({ Name : projectData.projectName, Received : p, ReceivedDate : pd, PaymentMode : pm, Remarks : re })
+  });
+
+  if(response.status == 200){
+    alert("Deleted");
+    if(added){
+      setAdded(false);
+    }else{
+      setAdded(true);
+    }
+  }else{
+    alert("Error");
+  }
+}
+
+const [taskFilter, setTaskFilter] = useState("All Tasks");
+
+const filteredTasks = Tasks
+  .filter((task) => task[5] === projectData.projectName)
+  .filter((task) => {
+    if (taskFilter === "All Tasks") return true;
+    return task[7] === taskFilter;
+  });
+
+  const [taskDialogOpen, setTaskDialogOpen] = useState(false);
+  const [editing, setediting] = useState<[]>(null);
+
+  const [name, setName] = useState("");
+
+  useEffect(() => {
+
+    async function taskData(){
+      const data = await fetchTaskData();
+      dispatch(setTasks(data));
+      setAdded(true);
+    }
+    if (!added) {
+      taskData();
+    }
+  } ,[dispatch, taskDialogOpen, added]);
+
+  const deleteTask = async (name: string) => {
+    await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletetask", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ title: name }),
+    });
+
+    setAdded(false);
+  };
     return (
       <div className='p-6'>
         <div className='flex flex-col'>
@@ -747,10 +907,10 @@ useEffect(() => {
             projectData={projectData}
             status={currentStatus}
             setStatus={setCurrentStatus}
-            tasks={tasks}
+            tasks={Tasks}
             />
             <div className="flex flex-row justify-between mt-3">
-                <button onClick={() => setNavState("Overview")} style={{ borderRadius : "8px" }} className="rounded-lg border px-2 h-8 bg-white">Back</button>
+                <button onClick={() => setNavState("Tasks")} style={{ borderRadius : "8px" }} className="rounded-lg border px-2 h-8 bg-white">Back</button>
                 <button onClick={() => setNavState("Customer & Project Details")} style={{ borderRadius : "8px" }} className="rounded-lg text-white border px-2 h-8 bg-sky-600">Next</button>
             </div>
           </div>
@@ -871,55 +1031,68 @@ useEffect(() => {
             navState == "Goods" && <div className="flex flex-col w-full gap-3">
               <div className="w-full">
               <table className="w-full table-auto ">
-    <tr className="bg-gray-100 text-center">
-      <th>Sr.No.</th>
-      <th>Area</th>
-      <th>Product Group</th>
-      <th>Company</th>
-      <th>Catalogue</th>
-      <th>Design No</th>
-      <th>Date</th>
-      <th>Status</th>
-      <th>Order ID</th>
-      <th>Remark</th>
-    </tr>
-    {selections.map((selection, mainindex) =>
-      selection.areacollection.map((collection, index) =>
-        collection.items.map((item, i) => (
-          <tr
-            key={`${mainindex}-${index}-${i}`}
-            className="text-center rounded-md"
-          >
-            <td>{i + 1}</td>
-            <td>{selection.area}</td>
-            <td>{item[0]}</td>
-            <td>{collection.company}</td>
-            <td>{collection.catalogue}</td>
-            <td>{collection.designNo}</td>
-            <td>
-              <input
-                type="date"
-                className="border pl-2 rounded-lg w-[8vw] px-1 py-1"
-              />
-            </td>
-            <td>Status</td>
-            <td>
-              <input
-                type="text"
-                className="border pl-2 rounded-lg w-[5vw] px-1 py-1"
-              />
-            </td>
-            <td>
-              <input
-                type="text"
-                className="border pl-2 rounded-lg w-[8vw] px-1 py-1"
-              />
-            </td>
-          </tr>
-        ))
-      )
-    )}
-</table>
+                <tr className="bg-gray-100 text-center">
+                  <th>Sr.No.</th>
+                  <th>Area</th>
+                  <th>Product Group</th>
+                  <th>Company</th>
+                  <th>Catalogue</th>
+                  <th>Design No</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Order ID</th>
+                  <th>Remark</th>
+                </tr>
+                {selections.map((selection, mainindex) =>
+                  selection.areacollection.map((collection, index) =>
+                    collection.items.map((item, i) => (
+                      <tr
+                        key={`${mainindex}-${index}-${i}`}
+                        className="text-center rounded-md"
+                      >
+                        <td>{i + 1}</td>
+                        <td>{selection.area}</td>
+                        <td>{item[0]}</td>
+                        <td>{collection.company}</td>
+                        <td className="mt-2">{collection.catalogue}</td>
+                        <td className="mt-2">{collection.designNo}</td>
+                        <td>
+                          <input
+                            type="date"
+                            className="border pl-2 rounded-lg w-[8vw] px-1 py-1 text-center mt-2"
+                            value={goodsArray[i].date}
+                            onChange={(e) => {setGoodsDate(i, e.target.value);}}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            className="border pl-2 rounded-lg w-[8vw] px-1 py-1 text-center mt-2"
+                            value={goodsArray[i].status}
+                            onChange={(e) => {setGoodsStatus(i, e.target.value);}}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            className="border pl-2 rounded-lg w-[5vw] px-1 py-1 text-center mt-2"
+                            value={goodsArray[i].orderID}
+                            onChange={(e) => {setGoodsOrderID(i, e.target.value);}}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="text"
+                            className="border pl-2 rounded-lg w-[8vw] px-1 py-1 text-center mt-2"
+                            value={goodsArray[i].remark}
+                            onChange={(e) => {setGoodsRemark(i, e.target.value);}}
+                          />
+                        </td>
+                      </tr>
+                    ))
+                  )
+                )}
+            </table>
 
               </div>
               <div className="flex flex-row justify-between">
@@ -928,6 +1101,148 @@ useEffect(() => {
               </div>
             </div>
           }
+          {
+            navState === "Tailors" && <TailorsSection selections={selections} setNavState={setNavState} />
+          }
+          {
+            navState == "Payments" && <PaymentsSection
+            addPayment={addPayment}
+            setAddPayment={setAddPayment}
+            Amount={Amount}
+            Tax={Tax}
+            Received={Received}
+            Discount={Discount}
+            paymentData={paymentData}
+            deletePayment={deletePayment}
+            setNavState={setNavState}
+          />
+          }
+          {
+            addPayment && <div className="flex flex-col z-50 justify-between gap-3 w-[50vw] border rounded-xl p-3">
+              <div className="flex flex-col">
+                <div className="flex flex-row gap-1"><p className="text-[1.1vw]">Amount Received</p><p className="text-red-500">*</p></div>
+                <input type="text" value={payment ? payment : 0} className="border-1 rounded-lg pl-2 h-8" onChange={(e) => setPayment(parseInt(e.target.value))}/>
+              </div>
+              <div className="flex flex-col">
+                <div className="flex flex-row gap-1"><p className="text-[1.1vw]">Payment Date</p><p className="text-red-500">*</p></div>
+                <input type="date" value={paymentDate} className="border-1 rounded-lg pl-2 h-8 pr-2" onChange={(e) => setPaymentDate(e.target.value)}/>
+              </div>
+              <div className="flex flex-col">
+                <div className="flex flex-row gap-1"><p className="text-[1.1vw]">Payment Mode</p><p className="text-red-500">*</p></div>
+                <input type="text" value={paymentMode}  className="border-1 rounded-lg pl-2 h-8" onChange={(e) => setPaymentMode(e.target.value)}/>
+              </div>
+              <div className="flex flex-col">
+                <div className="flex flex-row gap-1"><p className="text-[1.1vw]">Remarks</p><p className="text-red-500">*</p></div>
+                <input type="text" value={paymentRemarks} className="border-1 rounded-lg pl-2 h-8" onChange={(e) => setPaymentRemarks(e.target.value)}/>
+              </div>
+              <div className="flex flex-row justify-end gap-3">
+                <button onClick={() => setAddPayment(false)} style={{ borderRadius : "8px" }} className="border-2 border-sky-700 text-sky-600 bg-white px-2 h-8">Close</button>
+                <button onClick={() => addPaymentFunction()} style={{ borderRadius : "8px" }} className="text-white bg-sky-600 hover:bg-sky-700 px-2 h-8">Add Payment</button>
+              </div>
+            </div>
+          }
+          {
+            navState == "Tasks" && <div className="flex flex-col w-full justify-between gap-3 mt-3 p-3">
+              <div className="flex flex-row w-full justify-between items-center">
+                  <p className="text-[1.4vw] font-semibold">Tasks</p>
+                  <button onClick={() => setTaskDialogOpen(true)} style={{ borderRadius : "8px" }} className="bg-sky-600 text-white hover:bg-sky-700 px-2 h-8">Add Task</button>
+              </div>
+              <div className="flex flex-row gap-5">
+                <div className="flex flex-col gap-3">
+                  <button onClick={() => setTaskFilter("All Tasks")} className={` text-[1.1vw] text-gray-600 font-semibold`}>All Tasks</button>
+                  <div className={`${taskFilter != "All Tasks" ? "bg-white" : "bg-sky-500"} w-full h-[2px] rounded-full`}></div>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <button onClick={() => setTaskFilter("To Do")} className={`text-[1.1vw] text-gray-600 font-semibold`}>To Do</button>
+                  <div className={`${taskFilter != "To Do" ? "bg-white" : "bg-sky-500"} w-full h-[2px] rounded-full`}></div>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <button onClick={() => setTaskFilter("In Progress")} className={`text-[1.1vw] text-gray-600 font-semibold`}>In Progress</button>
+                  <div className={`${taskFilter != "In Progress" ? "bg-white" : "bg-sky-500"} w-full h-[2px] rounded-full`}></div>
+                </div>
+                <div className="flex flex-col gap-3">
+                  <button onClick={() => setTaskFilter("Completed")} className={`text-[1.1vw] text-gray-600 font-semibold`}>Completed</button>
+                  <div className={`${taskFilter != "Completed" ? "bg-white" : "bg-sky-500"} w-full h-[2px] rounded-full`}></div>
+                </div>
+              </div>
+              <table className="w-full p-3">
+                <thead>
+                  <tr>
+                    <td>Sr.No.</td>
+                    <td>Task Name</td>
+                    <td>Priority</td>
+                    <td>Project</td>
+                    <td>Assignee</td>
+                    <td>Due Date</td>
+                    <td>Status</td>
+                    <td>Created At</td>
+                    <td>Actions</td>
+                  </tr>
+                </thead>
+                <tbody className="overflow-y-scroll">
+                  {filteredTasks.map((task, index) => (
+                    <tr
+                      key={index}
+                      className="max-h-fit border-b border-gray-200 py-3" // Added padding for vertical spacing
+                    >
+                      <td className="py-2">{index + 1}</td>
+                      <td className="py-2">{task[0]}</td>
+                      <td className={`py-2 font-semibold ${task[6] == "Low" ? "text-green-600" : ""} ${task[6] == "Moderate" ? "text-yellow-600" : ""} ${task[6] == "High" ? "text-red-500" : ""}`}>{task[6]}</td>
+                      <td className="py-2">{task[5]}</td>
+                      <td className="py-2">{task[4]}</td>
+                      <td className="py-2">{task[2]}</td>
+                      <td className={`py-2 font-semibold ${task[7] == "Completed" ? "text-green-600" : ""} ${task[7] == "In Progress" ? "text-yellow-600" : ""} ${task[7] == "To Do" ? "text-red-500" : ""}`}>{task[7]}</td>
+                      <td className="py-2">{task[3]}</td>
+                      <td className="flex flex-row gap-2 items-center py-2">
+                        <button onClick={() => { setName(task[0]); setediting(task); setTaskDialogOpen(true);}}>
+                          <Edit size={18} />
+                        </button>
+                        <button onClick={() => deleteTask(task[0])}>
+                          <FaTrash size={18} className="text-red-500" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="flex flex-row justify-between">
+                <button onClick={() => setNavState("Payments")} style={{ borderRadius : "8px" }} className="rounded-lg border px-2 h-8 bg-white">Back</button>
+                <button onClick={() => setNavState("Overview")} style={{ borderRadius : "8px" }} className="rounded-lg text-white border px-2 h-8 bg-sky-600">Next</button>
+              </div>
+            </div>
+          }
+                <AnimatePresence>
+        {taskDialogOpen && (
+          <>
+            <motion.div
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setTaskDialogOpen(false)}
+            />
+            <motion.div
+              className="fixed inset-0 z-50 flex items-center justify-center"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3 }}
+            >
+              <TaskDialog
+                onClose={() => setTaskDialogOpen(false)}
+                isEditing={editing}
+                setediting={setediting}
+                name={name}
+                projectData={projects}
+                setTaskDialogOpen={setTaskDialogOpen}
+                taskDialogOpen={taskDialogOpen}
+                setProjectFlag={setProjectFlag}
+                setAdded={setAdded}
+              />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
         </div>
         
       </div>

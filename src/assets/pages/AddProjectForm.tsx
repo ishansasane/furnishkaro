@@ -204,78 +204,7 @@ function AddProjectForm() {
       }
     }
 
-      useEffect(() => {
-        async function getData(){
-          let data = await fetchInteriors();
-          dispatch(setInteriorData(data));
-          setinterior(interiorData);
 
-        }
-        async function getitemsdata(){
-          let data = await getItemsData();
-          dispatch(setItemData(data));
-          setsingleitems(items);
-        }
-        if(interiorData.length == 0){
-          getData();
-        }else{
-          setinterior(interiorData);
-        }
-        if(items.length == 0){
-          getitemsdata();
-        }else{
-          setinterior(interiorData);
-        }
-      },[dispatch, interiorData, items]);
-
-      useEffect(() => {
-        async function getData(){
-          const data = await fetchSalesAssociates();
-          dispatch(setSalesAssociateData(data));
-          setsalesdata(salesAssociateData);
-        }
-        if(salesAssociateData.length == 0){
-          getData();
-        }else{
-          setsalesdata(salesAssociateData);
-        }
-      },[dispatch, salesAssociateData]);
-
-      useEffect(() => {
-        async function getData(){
-          let data = await fetchProductGroups();
-          dispatch(setProducts(data));
-          setAvailableProductGroups(products);        
-        }
-        if(products.length == 0){
-          getData();
-        }else{
-          setAvailableProductGroups(products);
-        }
-      },[dispatch, fetchProductGroups, products]);
-
-      useEffect(() => {
-        async function getData(){
-          let data = await fetchCatalogues();
-          dispatch(setCatalogs(data));      
-        }
-        if(catalogueData.length == 0){
-          getData();
-        }
-      },[dispatch, catalogueData]);
-
-    useEffect(() => {
-        async function fetchData(){
-          const data = await fetchCustomers();
-          dispatch(setCustomerData(data));
-          setcustomers(customerData);
-        }
-        if(customerData.length == 0){
-          fetchData();
-        }else{
-          setcustomers(customerData);
-        }
-      }, [customerData, dispatch])
 
       const handleAddArea = () => {
         setSelections([...selections, { area: "", areacollection : []}]);
@@ -664,7 +593,8 @@ const handleItemRemarkChange = (i, remark) => {
   const updated = [...additionalItems];
   updated[i].remark = remark;
   setAdditionaItems(updated);
-  console.log(additionalItems);
+  console.log(goodsArray);
+  console.log(selections);
 };
 
     const [selectedMainIndex, setSelectedMainIndex] = useState(null);
@@ -696,6 +626,7 @@ const handleItemRemarkChange = (i, remark) => {
               interiorArray : JSON.stringify(interiorArray),
               salesAssociateArray : JSON.stringify(salesAssociateArray),
               additionalItems : JSON.stringify(additionalItems),
+              goodsArray : JSON.stringify(goodsArray)
             }),
           }
         );
@@ -718,19 +649,71 @@ const handleItemRemarkChange = (i, remark) => {
     const [goodsItems, setGoodsItems] = useState([]);
 
     useEffect(() => {
-      setGoodsArray((prevGoodsArray) => {
-        const updatedGoodsArray = [...prevGoodsArray]; // Create a copy of the array
-        updatedGoodsArray[0] = { // Update the item at index 0
-          ...updatedGoodsArray[0], // Keep the other properties of the item unchanged
-          date: "", // New value for the `date` field
-          status: "", // New value for the `status` field
-          orderID: "", // New value for the `orderID` field
-          remark: "", // New value for the `remark` field
-        };
-      
-        return updatedGoodsArray; // Return the new array
-      });
-    }, [goodsItems]);
+      async function getData() {
+        const data = await fetchInteriors();
+        dispatch(setInteriorData(data));
+        setinterior(data);
+      }
+      async function getitemsdata() {
+        const response = await fetch(
+          "https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts",
+          { credentials: "include" }
+        );
+        const data = await response.json();
+        const items = data.body || [];
+        dispatch(setItemData(items));
+        setsingleitems(items);
+      }
+      if (interiorData.length === 0) {
+        getData();
+      }
+      if (items.length === 0) {
+        getitemsdata();
+      }
+    }, [dispatch]);
+    
+    useEffect(() => {
+      async function getData() {
+        const data = await fetchSalesAssociates();
+        dispatch(setSalesAssociateData(data));
+        setsalesdata(data);
+      }
+      if (salesAssociateData.length === 0) {
+        getData();
+      }
+    }, [dispatch]);
+    
+    useEffect(() => {
+      async function getData() {
+        const data = await fetchProductGroups();
+        dispatch(setProducts(data));
+        setAvailableProductGroups(data);
+      }
+      if (products.length === 0) {
+        getData();
+      }
+    }, [dispatch]);
+    
+    useEffect(() => {
+      async function getData() {
+        const data = await fetchCatalogues();
+        dispatch(setCatalogs(data));
+      }
+      if (catalogueData.length === 0) {
+        getData();
+      }
+    }, [dispatch]);
+    
+    useEffect(() => {
+      async function getData() {
+        const data = await fetchCustomers();
+        dispatch(setCustomerData(data));
+        setcustomers(data);
+      }
+      if (customerData.length === 0) {
+        getData();
+      }
+    }, [dispatch]);
     
 
   return (

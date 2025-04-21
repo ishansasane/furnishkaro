@@ -1,9 +1,10 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
-import { Edit, Trash2, Plus,  } from "lucide-react";
+import { Edit, Trash2, Plus, Redo,  } from "lucide-react";
 import { Link } from "react-router-dom";
 import { RootState } from "../Redux/store";
 import { useDispatch, useSelector } from "react-redux";
-import { setProjects, setTasks, setProjectFlag } from "../Redux/dataSlice";
+import { setProjects, setTasks, setProjectFlag, setPaymentData } from "../Redux/dataSlice";
 import { Root } from "react-dom/client";
 import EditProjects from "./EditProjects";
 
@@ -39,84 +40,99 @@ export default function Projects() {
   const [flag, setFlag] = useState(false);
   const [sendProject, setSendProject] = useState([]);
   const [taskData, setTaskData] = useState([]);
+  const [Received, setReceived] = useState(0);
 
   const dispatch = useDispatch();
   const projectData = useSelector((state : RootState) => state.data.projects);
   const tasks = useSelector((state : RootState) => state.data.tasks);
   const projectFlag = useSelector(( state : RootState ) => state.data.projectFlag);
+  const paymentData = useSelector((state : RootState) => state.data.paymentData);
   let sampleprojectData = [];
 
   const fetchProjectData = async () => {
-    try {
-      const response = await fetch(
-        "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
-        {
-          credentials: "include",
-        }
-      );
-  
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+    const response = await fetch(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
+      {
+        credentials: "include",
       }
+    );
   
-      const data = await response.json();
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
   
-      // Ensure data.body exists and is an array
-      if (!data.body || !Array.isArray(data.body)) {
-        throw new Error("Invalid data format: Expected an array in data.body");
+    const data = await response.json();
+  
+    if (!data.body || !Array.isArray(data.body)) {
+      throw new Error("Invalid data format: Expected an array in data.body");
+    }
+  
+    const parseSafely = (value: any, fallback: any) => {
+      try {
+        return typeof value === "string" ? JSON.parse(value) : value || fallback;
+      } catch (error) {
+        console.warn("Invalid JSON:", value, error);
+        return fallback;
       }
+    };
   
-      // Parse customerLink and allData for each row
-      const projects = data.body.map((row, index) => {
-        // Safely parse JSON fields
-        const parseSafely = (value, fallback) => {
-          try {
-            return value ? JSON.parse(value) : fallback;
-          } catch (error) {
-            console.warn(`Invalid JSON in row ${index}:`, value, error);
-            return fallback;
-          }
-        };
+    const deepClone = (obj: any) => JSON.parse(JSON.stringify(obj));
   
-        const deepClone = (obj) => JSON.parse(JSON.stringify(obj));
-
-        return {
-          projectName: row[0] || "",
-          customerLink: parseSafely(row[1], []),
-          projectReference: row[2] || "",
-          status: row[3] || "",
-          totalAmount: parseFloat(row[4]) || 0,
-          totalTax: parseFloat(row[5]) || 0,
-          paid: parseFloat(row[6]) || 0,
-          discount: parseFloat(row[7]) || 0,
-          createdBy: row[8] || "",
-          allData: parseSafely(row[9], []),
-          projectDate: row[10] || "",
-          additionalRequests: row[11],
-          interiorArray: typeof row[12] === "string"
+    const projects = data.body.map((row: any[], index: number) => {
+  
+      return {
+        projectName: row[0] || "",
+        customerLink: parseSafely(row[1], []),
+        projectReference: row[2] || "",
+        status: row[3] || "",
+        totalAmount: parseFloat(row[4]) || 0,
+        totalTax: parseFloat(row[5]) || 0,
+        paid: parseFloat(row[6]) || 0,
+        discount: parseFloat(row[7]) || 0,
+        createdBy: row[8] || "",
+        allData: deepClone(parseSafely(row[9], [])),
+        projectDate: row[10] || "",
+        additionalRequests: row[11] || "",
+        interiorArray:
+          typeof row[12] === "string"
             ? row[12].replace(/^"(.*)"$/, "$1").split(",").map(str => str.trim())
             : [],
-          salesAssociateArray: typeof row[13] === "string"
+        salesAssociateArray:
+          typeof row[13] === "string"
             ? row[13].replace(/^"(.*)"$/, "$1").split(",").map(str => str.trim())
             : [],
-          
-          // Safely parse additionalItems and goodsArray
-          additionalItems: deepClone(parseSafely(row[14], [])),
-          
-          // Fetching goodsArray with same pattern, assuming it's in the correct format
-          goodsArray: parseSafely(row[15], []), // Assuming goodsArray is at index 15 (adjust accordingly)
-        };
-        
-        
-      });
-
-      return projects;
-    } catch (error) {
-      console.error("Error fetching project data:", error);
-      alert("Failed to fetch projects. Please try again.");
-      return []; // Return empty array to prevent breaking the UI
-    }
+        additionalItems: deepClone(parseSafely(row[14], [])),
+        goodsArray: deepClone(parseSafely(row[15], [])),
+      };
+    });
+  
+    return projects;
   };
+  const [added, setAdded] = useState(false);
+  const fetchPaymentData = async () => {
+    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getPayments"); 
+    const data = await response.json();
+    return data.message;
+  }
+  useEffect(() => {
+    async function fetchPayments() {
+      const data = await fetchPaymentData();
+      dispatch(setPaymentData(data));
+  
+      // Sum the values at index 1
+      const total = data.reduce((acc, curr) => {
+        const amount = parseFloat(curr[1]);
+        return acc + (isNaN(amount) ? 0 : amount);
+      }, 0);
+  
+      setReceived(total);
+      setAdded(true);
+    }
+  
+    if (!added) {
+      fetchPayments();
+    }
+  }, [dispatch, added, fetchPaymentData]);
 
   const fetchTaskData = async () => {
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks");
@@ -132,17 +148,22 @@ export default function Projects() {
       dispatch(setProjects(data));
       setprojects(projectData);
     }
-    async function taskData(){
-      const data = await fetchTaskData();
-      setTasks(data);
-      setTaskData(data);
-      console.log(data);
-    }
-    if(projectData.length == 0){
+    if(projects.length == 0){
       getData();
     }else{
       setprojects(projectData);
     }
+  }, [projectData, dispatch])
+
+  useEffect(() => {
+
+    async function taskData(){
+      const data = await fetchTaskData();
+      setTasks(data);
+      setTaskData(data);
+
+    }
+
     if(tasks.length == 0){
       taskData();
     }else{
@@ -220,8 +241,8 @@ export default function Projects() {
               <td className="px-4 py-2">{project.customerLink ? project.customerLink[0] : ""}</td>
               <td className="px-4 py-2">{project.status}</td>
               <td className="px-4 py-2">{project.totalAmount + project.totalTax - project.discount}</td>
-              <td className="px-4 py-2">{project.paid}</td>
-              <td className="px-4 py-2">{project.totalAmount + project.totalTax - project.discount - project.paid}</td>
+              <td className="px-4 py-2">{Received}</td>
+              <td className="px-4 py-2">{project.totalAmount + project.totalTax - project.discount - Received}</td>
               <td className="px-4 py-2">{project.createdBy}</td>
               <td className="px-4 py-2">{project.projectDate}</td>
               <td className="px-4 py-2">{project[12]}</td>
@@ -244,6 +265,7 @@ export default function Projects() {
         index={index}
         goBack={() => {setFlag(false); dispatch(setProjectFlag(false));}}
         tasks={taskData}
+        projects={filteredProjects}
       />}
     </div>
     </div>
