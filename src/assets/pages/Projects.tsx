@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setProjects, setTasks, setProjectFlag, setPaymentData } from "../Redux/dataSlice";
 import { Root } from "react-dom/client";
 import EditProjects from "./EditProjects";
+import Tailors from "../compoonents/Tailors";
 
 // Define the type for a project
 interface Project {
@@ -103,6 +104,7 @@ export default function Projects() {
             : [],
         additionalItems: deepClone(parseSafely(row[14], [])),
         goodsArray: deepClone(parseSafely(row[15], [])),
+        tailorsArray: deepClone(parseSafely(row[16], [])),
       };
     });
   
@@ -120,12 +122,15 @@ export default function Projects() {
       dispatch(setPaymentData(data));
   
       // Sum the values at index 1
-      const total = data.reduce((acc, curr) => {
-        const amount = parseFloat(curr[1]);
-        return acc + (isNaN(amount) ? 0 : amount);
-      }, 0);
-  
+      if(data != undefined){
+        const total = data.reduce((acc, curr) => {
+          const amount = parseFloat(curr[1]);
+          return acc + (isNaN(amount) ? 0 : amount);
+        }, 0);
+          
       setReceived(total);
+      }
+
       setAdded(true);
     }
   
@@ -147,6 +152,7 @@ export default function Projects() {
       const data = await fetchProjectData();
       dispatch(setProjects(data));
       setprojects(projectData);
+      console.log(projectData);
     }
     if(projects.length == 0){
       getData();
@@ -194,6 +200,15 @@ export default function Projects() {
       dispatch(setProjects(data));
       setprojects(projectData);
     }
+    const [Amount, setAmount] = useState(0);
+    const [Tax, setTax] = useState(0);
+    const [Discount, setDiscount] = useState(0);
+    const setValues = (i) => {
+      console.log(projectData);
+      setTax(projectData[i].totalTax);
+      setAmount(projectData[i].totalAmount);
+      setDiscount(projectData[i].discount != undefined ? projectData[i].discount : 0);
+    }
 
   return (
     <div className={`md:!p-6 p-2  md:mt-0 mt-20 h-screen bg-gray-50 `}>
@@ -240,15 +255,15 @@ export default function Projects() {
               <td className="px-4 py-2">{project.projectName}</td>
               <td className="px-4 py-2">{project.customerLink ? project.customerLink[0] : ""}</td>
               <td className="px-4 py-2">{project.status}</td>
-              <td className="px-4 py-2">{project.totalAmount + project.totalTax - project.discount}</td>
+              <td className="px-4 py-2">{(project.totalAmount + project.totalTax - project.discount).toFixed(2)}</td>
               <td className="px-4 py-2">{Received}</td>
-              <td className="px-4 py-2">{project.totalAmount + project.totalTax - project.discount - Received}</td>
+              <td className="px-4 py-2">{(project.totalAmount + project.totalTax - project.discount - Received).toFixed(2)}</td>
               <td className="px-4 py-2">{project.createdBy}</td>
               <td className="px-4 py-2">{project.projectDate}</td>
               <td className="px-4 py-2">{project[12]}</td>
               <td className="px-4 py-2">
                 <div className="flex gap-2">
-                  <button onClick={(e) => { setIndex(index); setSendProject(project); setFlag(true); }} className="border px-2 py-1 rounded-md bg-gray-300">
+                  <button onClick={(e) => { setValues(index); setIndex(index); setSendProject(project); setFlag(true); }} className="border px-2 py-1 rounded-md bg-gray-300">
                     <Edit size={16} />
                   </button>
                   <button onClick={() => deleteProject(project.projectName)} className="border px-2 py-1 rounded-md bg-red-500 text-white">
@@ -266,6 +281,12 @@ export default function Projects() {
         goBack={() => {setFlag(false); dispatch(setProjectFlag(false));}}
         tasks={taskData}
         projects={filteredProjects}
+        Tax={Tax}
+        setTax={setTax}
+        Amount={Amount}
+        setAmount={setAmount}
+        Discount={Discount}
+        setDiscount={setDiscount}
       />}
     </div>
     </div>

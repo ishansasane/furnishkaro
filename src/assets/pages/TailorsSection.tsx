@@ -5,25 +5,25 @@ interface TailorsSectionProps {
   setNavState: (nav: string) => void;
 }
 
-const TailorsSection: React.FC<TailorsSectionProps> = ({ selections, setNavState }) => {
+const TailorsSection: React.FC<TailorsSectionProps> = ({ selections, setNavState, statusArray }) => {
   return (
     <div className="flex flex-col w-full justify-between gap-3 mt-3">
       <p className="text-[1.3vw] font-semibold">Tailors</p>
 
       <table className="w-full">
         <thead>
-          <tr className="w-full flex flex-row justify-between font-semibold border-b pb-1">
-            <td className="w-[10%]">Sr.No.</td>
-            <td className="w-[10%]">Product</td>
-            <td className="w-[10%]">Reference</td>
-            <td className="w-[10%]">Room</td>
-            <td className="w-[10%]">Width</td>
-            <td className="w-[10%]">Height</td>
-            <td className="w-[10%]">Parts/Sq.Ft</td>
-            <td className="w-[10%]">Rate</td>
-            <td className="w-[10%]">Tailor</td>
-            <td className="w-[10%]">Status</td>
-            <td className="w-[10%]">Remark</td>
+          <tr className="text-center">
+            <td className="">Sr.No.</td>
+            <td className="">Product</td>
+            <td className="">Reference</td>
+            <td className="">Room</td>
+            <td className="">Width</td>
+            <td className="">Height</td>
+            <td className="">Parts/Sq.Ft</td>
+            <td className="">Rate</td>
+            <td className="">Tailor</td>
+            <td className="">Status</td>
+            <td className="">Remark</td>
           </tr>
         </thead>
         <tbody>
@@ -35,19 +35,31 @@ const TailorsSection: React.FC<TailorsSectionProps> = ({ selections, setNavState
                     return (
                       <tr
                         key={`${mainIndex}-${areaIndex}-${itemIndex}`}
-                        className="w-full flex flex-row justify-between border-b py-1"
+                        className="text-center"
                       >
-                        <td className="w-[10%]">{itemIndex + 1}</td>
-                        <td className="w-[10%]">{item[0]}</td>
-                        <td className="w-[10%]">{area.reference || "-"}</td>
-                        <td className="w-[10%]">{selection.area || "-"}</td>
-                        <td className="w-[10%]">{area.measurement?.width}</td>
-                        <td className="w-[10%]">{area.measurement?.height}</td>
-                        <td className="w-[10%]">{area.measurement?.quantity}</td>
-                        <td className="w-[10%]">{"Rate"}</td>
-                        <td className="w-[10%]">{"Tailor"}</td>
-                        <td className="w-[10%]">{"Status"}</td>
-                        <td className="w-[10%]">{"Remark"}</td>
+                        <td className="">{itemIndex + 1}</td>
+                        <td className="">{item[0]}</td>
+                        <td className="">{area.reference || "-"}</td>
+                        <td className="">{selection.area || "-"}</td>
+                        <td className="">{area.measurement?.width}</td>
+                        <td className="">{area.measurement?.height}</td>
+                        <td className="">{area.measurement?.quantity}</td>
+                        <td className="">{"Rate"}</td>
+                        <td className="">{"Tailor"}</td>
+                        <td className="">                        <select
+                          className="border px-2 py-1 rounded mr-2"
+                          value={""}
+                        
+                        >
+                          <option value="">Pending</option>
+                          {statusArray.map((data, index) => (
+                            <option key={index} value={data}>
+                              {data}
+                            </option>
+                          ))}
+
+                        </select></td>
+                        <td className="py-3">{"Remark"}</td>
                       </tr>
                     );
                   }

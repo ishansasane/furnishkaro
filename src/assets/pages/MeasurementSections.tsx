@@ -22,10 +22,6 @@ const MeasurementSection: React.FC<MeasurementSectionProps> = ({
   handleheightchange,
   handlequantitychange
 }) => {
-
-  useEffect(() => {
-    console.log(selections)
-  }, [selections])
   return (
     <div className="rounded-lg border shadow-2xl w-full flex flex-col p-6">
       <p className="text-[1.3vw] font-semibold">Measurements</p>
@@ -115,7 +111,7 @@ const MeasurementSection: React.FC<MeasurementSectionProps> = ({
                         <p className="text-[1.1vw]">Quantity</p>
                         <input
                           type="text"
-                          onChange={(e) => handlequantitychange(mainindex, index, e.target.value)}
+                          onChange={(e) => {handlequantitychange(mainindex, index, e.target.value); }}
                           className="rounded-lg border px-2 py-2 w-[6vw]"
                           value={collection.measurement.quantity}
                         />

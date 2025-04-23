@@ -22,10 +22,6 @@ const MaterialSelectionComponent = ({
   projectData
 }) => {
 
-  useEffect(() => {
-    console.log(selections);
-    console.log(catalogueData)
-  }, [selections])
 
   return (
     <div className="flex flex-col bg-white p-6 rounded-lg shadow-lg">

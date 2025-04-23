@@ -79,8 +79,8 @@ function AddProjectForm() {
       designNo;
       reference;
       measurement : measurements;
-      totalAmount : number;
-      totalTax : number;
+      totalAmount : [];
+      totalTax : [];
       quantities : [];
     }
 
@@ -98,8 +98,15 @@ function AddProjectForm() {
       orderID;
       remark;
     }
+    interface Tailor{
+      rate;
+      tailorData;
+      status;
+      remark;
+    }
 
     const [goodsArray, setGoodsArray] = useState<Goods[]>([]);
+    const [tailorsArray, setTailorsArray] = useState<Tailor[]>([]);
 
     const [selections, setSelections] = useState<AreaSelection[]>([]);
 
@@ -255,22 +262,37 @@ function AddProjectForm() {
       
         // Parse the product group string
         const newproduct = product.split(",");
-        const items = newproduct.slice(1, -2);
-        console.log(items);
-      
         // Update selections
         updatedSelections[mainindex].areacollection[i].productGroup = newproduct;
-        updatedSelections[mainindex].areacollection[i].items = items;
+        
+        const pg = newproduct;
+        if (!Array.isArray(pg) || pg.length < 2) return null;
+
+        const relevantPG = pg.length > 2 ? pg.slice(1, -2) : [];
+        const matchedItems = relevantPG.map((pgItem) => {
+          const matched = items.find((item) => item[0] === pgItem);
+          return matched || pgItem;
+        });
+
+        const validMatchedItems = matchedItems.filter((el) => Array.isArray(el));
+        updatedSelections[mainindex].areacollection[i].items = validMatchedItems;
         setSelections(updatedSelections);
-      
         // ✅ Set goodsArray to have exactly the same number of items
         const updatedGoodsArray = items.map(() => ({
           date: "",
-          status: "",
+          status: "Pending",
           orderID: "",
-          remark: ""
+          remark: "NA"
         }));
-        setGoodsArray(updatedGoodsArray);
+        setGoodsArray(updatedGoodsArray); 
+
+        const newtailorsArray = updatedSelections[mainindex].areacollection[i].items.filter(item => item[2] == "Tailoring").map(() => ({
+            rate: 0,
+            tailorData: [""],
+            status : "Pending",
+            remark: "NA"
+          }));
+        setTailorsArray(newtailorsArray);
       };
       
       
@@ -288,6 +310,8 @@ function AddProjectForm() {
     
       updatedSelections[mainindex].areacollection[i].catalogue = catalogue;
       setSelections(updatedSelections);
+      console.log(goodsArray);
+      console.log(tailorsArray);
     };
     
     const handleCompanyChange = (mainindex: number,i : number, company: string) => {
@@ -386,11 +410,78 @@ function AddProjectForm() {
       updatedSelection[mainindex].areacollection[index].measurement.height = height;
       setSelections(updatedSelection);
     }
-    const handlequantitychange = (mainindex : number, index : number, quantity) => {
-      const updatedSelection = [...selections];
-      updatedSelection[mainindex].areacollection[index].measurement.quantity = quantity;
-      setSelections(updatedSelection);
-    }
+    
+    const recalculateTotals = (updatedSelections, additionalItems) => {
+      const selectionTaxArray = updatedSelections.flatMap(selection =>
+        selection.areacollection.flatMap(col => col.totalTax || [])
+      );
+    
+      const selectionAmountArray = updatedSelections.flatMap(selection =>
+        selection.areacollection.flatMap(col => col.totalAmount || [])
+      );
+    
+      const additionalTaxArray = additionalItems.map(item => parseFloat(item.taxAmount) || 0);
+      const additionalAmountArray = additionalItems.map(item => parseFloat(item.totalAmount) || 0);
+    
+      const totalTax = parseFloat(([...selectionTaxArray, ...additionalTaxArray].reduce((acc, curr) => acc + curr, 0)).toFixed(2));
+      const totalAmount = parseFloat(([...selectionAmountArray, ...additionalAmountArray].reduce((acc, curr) => acc + curr, 0)).toFixed(2));
+    
+      return { totalTax, totalAmount };
+    };
+    
+    const handlequantitychange = (mainIndex, index, quantity) => {
+      const updatedSelections = [...selections];
+      const areaCol = updatedSelections[mainIndex].areacollection[index];
+    
+      // Update the quantity in measurement
+      areaCol.measurement.quantity = quantity;
+    
+      let taxSum = 0;
+      let amountSum = 0;
+      let corrected = [[]];
+      if (areaCol.items !== undefined) {
+        // Ensure arrays exist
+        if (!areaCol.totalTax) areaCol.totalTax = [];
+        if (!areaCol.totalAmount) areaCol.totalAmount = [];
+      
+        let taxSum = 0;
+        let amountSum = 0;
+      
+        const corrected = areaCol.items.map((item, i) => {
+          const itemQuantity = parseFloat(updatedSelections[mainIndex].areacollection[index].quantities?.[i]) || 0;
+          const itemRate = parseFloat(item[4]) || 0;
+          const itemTaxPercent = parseFloat(item[5]) || 0;
+      
+          const netRate = quantity * itemQuantity * itemRate;
+          const taxAmount = parseFloat((netRate * (itemTaxPercent / 100)).toFixed(2));
+          const totalAmount = parseFloat((netRate + taxAmount).toFixed(2));
+      
+          // Store per-item totals in the areaCol arrays
+          areaCol.totalTax[i] = taxAmount;
+          areaCol.totalAmount[i] = totalAmount;
+      
+          taxSum += taxAmount;
+          amountSum += totalAmount;
+      
+          // Update item[5] = taxAmount and item[6] = totalAmount
+          return [
+            ...item.slice(0, 5),
+            taxAmount,     // index 5
+            totalAmount    // index 6
+          ];
+        });
+      
+        areaCol.items = corrected; // Optional: store full amount sum
+      }
+      
+    
+      setSelections(updatedSelections);
+
+      const { totalTax, totalAmount } = recalculateTotals(updatedSelections, additionalItems);
+      setTax(totalTax);
+      setAmount(totalAmount);
+
+    };
     const handleunitchange = (mainindex : number, index : number, unit) => {
       const updatedSelection = [...selections];
       updatedSelection[mainindex].areacollection[index].measurement.unit = unit;
@@ -410,48 +501,30 @@ function AddProjectForm() {
     ) => {
       const updatedSelections = [...selections];
     
-      // Ensure the quantities array exists in this areacollection
       if (!updatedSelections[mainIndex].areacollection[collectionIndex].quantities) {
         updatedSelections[mainIndex].areacollection[collectionIndex].quantities = [];
       }
     
-      // Update the quantity for this itemIndex
       updatedSelections[mainIndex].areacollection[collectionIndex].quantities[itemIndex] = value;
     
-      // Calculate cost, tax and total
       const cost = num1 * quantity * value;
       const taxAmount = cost * (num2 / 100);
       const totalWithTax = cost + taxAmount;
     
-      // Ensure totalTax and totalAmount arrays exist
       if (!updatedSelections[mainIndex].areacollection[collectionIndex].totalTax) {
         updatedSelections[mainIndex].areacollection[collectionIndex].totalTax = [];
       }
+    
       if (!updatedSelections[mainIndex].areacollection[collectionIndex].totalAmount) {
         updatedSelections[mainIndex].areacollection[collectionIndex].totalAmount = [];
       }
     
-      // Update tax and total values for the item
-      updatedSelections[mainIndex].areacollection[collectionIndex].totalTax[itemIndex] = taxAmount;
-      updatedSelections[mainIndex].areacollection[collectionIndex].totalAmount[itemIndex] = totalWithTax;
+      updatedSelections[mainIndex].areacollection[collectionIndex].totalTax[itemIndex] = parseFloat(taxAmount.toFixed(2));
+      updatedSelections[mainIndex].areacollection[collectionIndex].totalAmount[itemIndex] = parseFloat(totalWithTax.toFixed(2));
     
       setSelections(updatedSelections);
     
-      // Gather tax and amount from all area collections
-      const selectionTaxArray = updatedSelections.flatMap(selection =>
-        selection.areacollection.flatMap(col => col.totalTax || [])
-      );
-      const selectionAmountArray = updatedSelections.flatMap(selection =>
-        selection.areacollection.flatMap(col => col.totalAmount || [])
-      );
-    
-      // Include additional items in total
-      const additionalTaxArray = additionalItems.map(item => parseFloat(item[5]) || 0);
-      const additionalAmountArray = additionalItems.map(item => parseFloat(item[6]) || 0);
-    
-      const totalTax = [...selectionTaxArray, ...additionalTaxArray].reduce((acc, curr) => acc + curr, 0);
-      const totalAmount = [...selectionAmountArray, ...additionalAmountArray].reduce((acc, curr) => acc + curr, 0);
-    
+      const { totalTax, totalAmount } = recalculateTotals(updatedSelections, additionalItems);
       setTax(totalTax);
       setAmount(totalAmount);
     };
@@ -494,9 +567,9 @@ const handleItemNameChange = (i, value) => {
 const handleItemQuantityChange = (i, quantity) => {
   const updated = [...additionalItems];
   updated[i].quantity = quantity;
-  updated[i].netRate = quantity * updated[i].rate; // Net Rate
-  updated[i].taxAmount = updated[i].netRate * (updated[i].tax / 100); // Tax Amount
-  updated[i].totalAmount = Number(updated[i].netRate) + Number(updated[i].taxAmount); // Total Amount
+  updated[i].netRate = parseFloat((quantity * updated[i].rate).toFixed(2)); // Net Rate
+  updated[i].taxAmount = parseFloat((updated[i].netRate * (updated[i].tax / 100)).toFixed(2)); // Tax Amount
+  updated[i].totalAmount = parseFloat(((updated[i].netRate) + Number(updated[i].taxAmount)).toFixed(2)); // Total Amount
   setAdditionaItems(updated);
 };
 
@@ -515,9 +588,9 @@ const recalculateItemTotals = (items) => {
 const handleItemRateChange = (i, rate) => {
   const updated = [...additionalItems];
   updated[i].rate = rate;
-  updated[i].netRate = rate * updated[i].quantity; // Net Rate
-  updated[i].taxAmount = updated[i].netRate * (updated[i].tax / 100); // Tax Amount
-  updated[i].totalAmount = Number(updated[i].rate) + Number(updated[i].taxAmount); // Total Amount
+  updated[i].netRate = parseFloat((updated[i].quantity * updated[i].rate).toFixed(2));// Net Rate
+  updated[i].taxAmount = parseFloat((updated[i].netRate * (updated[i].tax / 100)).toFixed(2)); // Tax Amount
+  updated[i].totalAmount = parseFloat(((updated[i].netRate) + updated[i].taxAmount).toFixed(2)); // Total Amount
   setAdditionaItems(updated);
 
     // 🧮 Sum from additionalItems
@@ -534,8 +607,8 @@ const handleItemRateChange = (i, rate) => {
     ).reduce((acc, val) => acc + (parseFloat(val) || 0), 0);
   
     // 💡 Combine both
-    const totalTax = additionalTax + selectionTax;
-    const totalAmount = additionalAmount + selectionAmount;
+    const totalTax = parseFloat((additionalTax + selectionTax).toFixed(2));
+    const totalAmount = parseFloat((additionalAmount + selectionAmount).toFixed(2));
   
     setTax(totalTax);
     setAmount(totalAmount);
@@ -550,10 +623,10 @@ const handleItemTaxChange = (i, tax) => {
   const quantity = parseFloat(updated[i].quantity) || 0;
   const netRate = rate * quantity;
 
-  updated[i].netRate = netRate; // Net rate
-  updated[i].tax = parseFloat(tax) || 0; // Tax %
-  updated[i].taxAmount = netRate * (updated[i].tax / 100); // Tax Amount
-  updated[i].totalAmount = netRate + updated[i].taxAmount; // Total Amount
+  updated[i].netRate =  parseFloat((quantity * updated[i].rate).toFixed(2));; // Net rate
+  updated[i].tax = tax; // Tax %
+  updated[i].taxAmount = parseFloat((updated[i].netRate * (updated[i].tax / 100)).toFixed(2)); // Tax Amount
+  updated[i].totalAmount = parseFloat(((updated[i].netRate) + updated[i].taxAmount).toFixed(2)); // Total Amount
 
   setAdditionaItems(updated);
 
@@ -571,12 +644,11 @@ const handleItemTaxChange = (i, tax) => {
   ).reduce((acc, val) => acc + (parseFloat(val) || 0), 0);
 
   // 💡 Combine both
-  const totalTax = additionalTax + selectionTax;
-  const totalAmount = additionalAmount + selectionAmount;
+  const totalTax = parseFloat((additionalTax + selectionTax).toFixed(2));
+  const totalAmount = parseFloat((additionalAmount + selectionAmount).toFixed(2));
 
   setTax(totalTax);
   setAmount(totalAmount);
-  console.log(goodsArray);
 };
 
 
@@ -593,8 +665,6 @@ const handleItemRemarkChange = (i, remark) => {
   const updated = [...additionalItems];
   updated[i].remark = remark;
   setAdditionaItems(updated);
-  console.log(goodsArray);
-  console.log(selections);
 };
 
     const [selectedMainIndex, setSelectedMainIndex] = useState(null);
@@ -626,7 +696,8 @@ const handleItemRemarkChange = (i, remark) => {
               interiorArray : JSON.stringify(interiorArray),
               salesAssociateArray : JSON.stringify(salesAssociateArray),
               additionalItems : JSON.stringify(additionalItems),
-              goodsArray : JSON.stringify(goodsArray)
+              goodsArray : JSON.stringify(goodsArray),
+              tailorsArray : JSON.stringify(tailorsArray)
             }),
           }
         );
@@ -689,10 +760,10 @@ const handleItemRemarkChange = (i, remark) => {
         dispatch(setProducts(data));
         setAvailableProductGroups(data);
       }
-      if (products.length === 0) {
+      if (products.length == 0) {
         getData();
       }
-    }, [dispatch]);
+    }, [dispatch, productGroups]);
     
     useEffect(() => {
       async function getData() {
@@ -715,7 +786,8 @@ const handleItemRemarkChange = (i, remark) => {
       }
     }, [dispatch]);
     
-
+    const bankDetails = ["123213", "!23123213", "123132"];
+    const termsCondiditions = ["sadsdsad", "Adasdad"];
   return (
     <div className="flex flex-col gap-3 w-full h-screen">
         <div className="flex flex-col w-full">
@@ -966,6 +1038,35 @@ const handleItemRemarkChange = (i, remark) => {
 </div>
 
     </div>
+        <div className="flex flex-row gap-3 justify-between w-full">
+          <div className="flex flex-col gap-2 w-1/2 rounded mt-3 p-6 shadow-xl border">
+  `          <select
+              className="border p-2 rounded w-1/2 h-16"
+              value={""}
+              
+            >
+              <option value="">Bank Details</option>
+              {bankDetails.map((data, index) => (
+                <option key={index} value={data}>
+                  {data}
+                </option>
+              ))}
+            </select>
+            <textarea placeholder="Description" className="w-full rounded-lg border py-2 pl-2"></textarea>
+            <select
+              className="border p-2 rounded w-1/2 h-16"
+              value={""}
+              
+            >
+              <option value="">Terms & Conditions</option>
+              {termsCondiditions.map((data, index) => (
+                <option key={index} value={data}>
+                  {data}
+                </option>
+              ))}
+            </select>
+            <textarea placeholder="Description" className="w-full rounded-lg border py-2 pl-2"></textarea>
+          </div>
           <div className="shadow-xl p-6 flex flex-col gap-2 border w-1/2 rounded-lg">
             <p className="text-[1.2vw]">Summary</p>
             <div className="flex flex-row justify-between w-full">
@@ -978,7 +1079,7 @@ const handleItemRemarkChange = (i, remark) => {
             </div>
             <div className="flex flex-row justify-between w-full">
               <p className="text-[1.1vw]">Total Amount</p>
-              <p className="text-[1.1vw]">{Amount + Tax}</p>
+              <p className="text-[1.1vw]">{parseFloat((Amount + Tax).toFixed(2))}</p>
             </div>
             <div className="border border-gray-400"></div>
             <div className="flex justify-between mt-1 w-full">
@@ -988,11 +1089,11 @@ const handleItemRemarkChange = (i, remark) => {
             <div className="border border-gray-400"></div>
             <div className="flex w-full flex-row items-center justify-between">
               <p className="text-[1.1vw]">Grand Total</p>
-              <p className="text-[1.1vw]">{Amount + Tax - Discount}</p>
+              <p className="text-[1.1vw]">{parseFloat((Amount + Tax - Discount).toFixed(2))}</p>
             </div>
             <button onClick={sendProjectData} style={{borderRadius : "10px"}} className="rounded-lg bg-sky-700 hover:bg-sky-800 text-white p-[6px]">Add Project & Generate Quote</button>
           </div>
-
+        </div>
         <br />
     </div>
   )
