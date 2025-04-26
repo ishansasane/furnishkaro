@@ -12,9 +12,6 @@ const EditCustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer,
       setSelectedCustomer(customerObj);
     }
   };
-  useState(() => {
-    console.log(projectData);
-  }, []);
 
   useEffect(() => {
     console.log(selectedCustomer)
@@ -29,18 +26,19 @@ const EditCustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer,
         <div className="flex flex-col w-1/2">
           <p className="text-[1vw]">Select Customer</p>
           <select
-            className="border p-2 rounded w-full"
-            value={selectedCustomer ? selectedCustomer[0] : projectData.customerLink[0]}
-            onChange={handleCustomerChange}
-            >
-            <option value="">Select Customer</option>
-            {Array.isArray(customers) &&
-                customers.map((customer, index) => (
-                <option key={index} value={customer[0]}>
-                    {customer[0]}
-                </option>
-                ))}
-            </select>
+  className="border p-2 rounded w-full"
+  value={JSON.stringify(selectedCustomer)}
+  onChange={(e) => setSelectedCustomer(JSON.parse(e.target.value))}
+>
+  <option value="">Select Customer</option>
+  {Array.isArray(customers) &&
+    customers.map((customer, index) => (
+      <option key={index} value={JSON.stringify(customer)}>
+        {customer[0]}
+      </option>
+    ))}
+</select>
+
         </div>
 
         {/* Email Field */}
@@ -50,7 +48,7 @@ const EditCustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer,
             <input
               type="text"
               className="border p-2 rounded w-full"
-              value={selectedCustomer ? selectedCustomer[2] : projectData.customerLink[2]}
+              value={selectedCustomer[2]}
               readOnly
             />
           </div>
@@ -65,7 +63,7 @@ const EditCustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer,
             <input
               type="text"
               className="border p-2 rounded w-full"
-              value={selectedCustomer ? selectedCustomer[1] : projectData.customerLink[1]}
+              value={selectedCustomer[1]}
               readOnly
             />
           </div>
@@ -74,7 +72,7 @@ const EditCustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer,
             <input
               type="text"
               className="border p-2 rounded w-full"
-              value={selectedCustomer ? selectedCustomer[4] : projectData.customerLink[4]}
+              value={selectedCustomer[4]}
               readOnly
             />
           </div>

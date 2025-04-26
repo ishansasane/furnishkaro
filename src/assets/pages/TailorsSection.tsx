@@ -1,11 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 interface TailorsSectionProps {
   selections: any[];
   setNavState: (nav: string) => void;
 }
 
-const TailorsSection: React.FC<TailorsSectionProps> = ({ selections, setNavState, statusArray }) => {
+const TailorsSection: React.FC<TailorsSectionProps> = ({ updateTailorRate, updateTailorRemark, updateTailorStatus, updateTailorData, tailors, selections, setNavState, statusArray, tailorsArray, setTailorsArray }) => {
+
   return (
     <div className="flex flex-col w-full justify-between gap-3 mt-3">
       <p className="text-[1.3vw] font-semibold">Tailors</p>
@@ -27,48 +28,70 @@ const TailorsSection: React.FC<TailorsSectionProps> = ({ selections, setNavState
           </tr>
         </thead>
         <tbody>
-          {selections.flatMap((selection, mainIndex) =>
-            selection.areacollection?.flatMap((area, areaIndex) =>
-              area.items
-                ?.map((item, itemIndex) => {
-                  if (Array.isArray(item) && item[2] === "Tailoring") {
-                    return (
-                      <tr
-                        key={`${mainIndex}-${areaIndex}-${itemIndex}`}
-                        className="text-center"
-                      >
-                        <td className="">{itemIndex + 1}</td>
-                        <td className="">{item[0]}</td>
-                        <td className="">{area.reference || "-"}</td>
-                        <td className="">{selection.area || "-"}</td>
-                        <td className="">{area.measurement?.width}</td>
-                        <td className="">{area.measurement?.height}</td>
-                        <td className="">{area.measurement?.quantity}</td>
-                        <td className="">{"Rate"}</td>
-                        <td className="">{"Tailor"}</td>
-                        <td className="">                        <select
-                          className="border px-2 py-1 rounded mr-2"
-                          value={""}
-                        
-                        >
-                          <option value="">Pending</option>
-                          {statusArray.map((data, index) => (
-                            <option key={index} value={data}>
-                              {data}
-                            </option>
-                          ))}
+  {tailorsArray.map((tailor, index) => {
+    if (!tailor.item || tailor.item[2] !== "Tailoring") return null;
 
-                        </select></td>
-                        <td className="py-3">{"Remark"}</td>
-                      </tr>
-                    );
-                  }
-                  return null;
-                })
-                .filter(Boolean)
-            )
-          )}
-        </tbody>
+    const selection = selections[tailor.mainindex];
+    const area = selection?.areacollection[tailor.groupIndex];
+
+    return (
+      <tr key={index} className="text-center">
+        <td>{index + 1}</td>
+        <td>{tailor.item[0]}</td>
+        <td>{area?.reference || "-"}</td>
+        <td>{selection?.area || "-"}</td>
+        <td>{area?.measurement?.width}</td>
+        <td>{area?.measurement?.height}</td>
+        <td>{area?.measurement?.quantity}</td>
+        <td>
+          <input
+            type="text"
+            className="border rounded-lg pl-2 h-8 w-[6vw]"
+            value={tailor.rate}
+            onChange={(e) => updateTailorRate(index, e.target.value)}
+          />
+        </td>
+        <td>
+          <select
+            className="border px-2 py-1 rounded mr-2"
+            value={tailor.tailorData}
+            onChange={(e) => updateTailorData(index, e.target.value)}
+          >
+            <option value="">Choose Tailor</option>
+            {tailors.map((data, i) => (
+              <option key={i} value={data}>
+                {data[0]}
+              </option>
+            ))}
+          </select>
+        </td>
+        <td>
+          <select
+            className="border px-2 py-1 rounded mr-2"
+            value={tailor.status}
+            onChange={(e) => updateTailorStatus(index, e.target.value)}
+          >
+            <option value="">Pending</option>
+            {statusArray.map((data, i) => (
+              <option key={i} value={data}>
+                {data}
+              </option>
+            ))}
+          </select>
+        </td>
+        <td className="py-3">
+          <input
+            className="border rounded-lg pl-2 h-8 w-[8vw]"
+            type="text"
+            value={tailor.remark}
+            onChange={(e) => updateTailorRemark(index, e.target.value)}
+          />
+        </td>
+      </tr>
+    );
+  })}
+</tbody>
+
       </table>
 
       <div className="flex flex-row justify-between mt-4">

@@ -239,12 +239,89 @@ function AddProjectForm() {
       const handleProductGroupChange = (mainindex: number, i: number, product: string) => {
         const updatedSelections = [...selections];
       
-        // Ensure areacollection exists
         if (!updatedSelections[mainindex].areacollection) {
           updatedSelections[mainindex].areacollection = [];
         }
       
-        // Ensure the specific index exists
+        if (!updatedSelections[mainindex].areacollection[i]) {
+          updatedSelections[mainindex].areacollection[i] = {
+            productGroup: null,
+            items: [],
+            catalogue: [],
+            company: null,
+            designNo: null,
+            reference: null,
+            measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+            additionalItems: [],
+            totalAmount: [],
+            totalTax: []
+          };
+        }
+      
+        const newproduct = product.split(",");
+        updatedSelections[mainindex].areacollection[i].productGroup = newproduct;
+      
+        const pg = newproduct;
+        if (!Array.isArray(pg) || pg.length < 2) return;
+      
+        const relevantPG = pg.length > 2 ? pg.slice(1, -2) : [];
+      
+        const newMatchedItems = relevantPG.map(pgItem =>
+          items.find(item => item[0] === pgItem)
+        ).filter(item => Array.isArray(item));
+      
+        updatedSelections[mainindex].areacollection[i].items = newMatchedItems;
+        setSelections(updatedSelections);
+      
+        // Remove old entries for this area and group index
+        const filteredGoods = goodsArray.filter(
+          g => !(g.mainindex === mainindex && g.groupIndex === i)
+        );
+      
+        const newGoods = newMatchedItems.map((item, itemindex) => ({
+          mainindex,
+          groupIndex: i,
+          pg: newproduct,
+          date: "",
+          status: "Pending",
+          orderID: "",
+          remark: "NA",
+          item : item,
+        }));
+      
+        setGoodsArray([...filteredGoods, ...newGoods]);
+      
+        const filteredTailors = tailorsArray.filter(
+          t => !(t.mainindex === mainindex && t.groupIndex === i)
+        );
+      
+        const newTailors = newMatchedItems
+          .filter(item => item[2] === "Tailoring")
+          .map((item, itemIndex) => ({
+            mainindex,
+            groupIndex: i,
+            pg: newproduct,
+            rate: 0,
+            tailorData: [""],
+            status: "Pending",
+            remark: "NA",
+            item : item,
+          }));
+      
+        setTailorsArray([...filteredTailors, ...newTailors]);
+    
+        console.log(tailorsArray);
+        console.log(goodsArray);
+      };
+      
+    
+      const handleCatalogueChange = (mainindex: number, i: number, catalogue: string) => {
+        const updatedSelections = [...selections];
+      
+        if (!updatedSelections[mainindex].areacollection) {
+          updatedSelections[mainindex].areacollection = [];
+        }
+      
         if (!updatedSelections[mainindex].areacollection[i]) {
           updatedSelections[mainindex].areacollection[i] = {
             productGroup: null,
@@ -260,59 +337,15 @@ function AddProjectForm() {
           };
         }
       
-        // Parse the product group string
-        const newproduct = product.split(",");
-        // Update selections
-        updatedSelections[mainindex].areacollection[i].productGroup = newproduct;
-        
-        const pg = newproduct;
-        if (!Array.isArray(pg) || pg.length < 2) return null;
-
-        const relevantPG = pg.length > 2 ? pg.slice(1, -2) : [];
-        const matchedItems = relevantPG.map((pgItem) => {
-          const matched = items.find((item) => item[0] === pgItem);
-          return matched || pgItem;
-        });
-
-        const validMatchedItems = matchedItems.filter((el) => Array.isArray(el));
-        updatedSelections[mainindex].areacollection[i].items = validMatchedItems;
+        updatedSelections[mainindex].areacollection[i].catalogue = catalogue
+          .split(",")
+          .map(item => item.trim())
+          .filter(item => item);
+      
         setSelections(updatedSelections);
-        // ✅ Set goodsArray to have exactly the same number of items
-        const updatedGoodsArray = items.map(() => ({
-          date: "",
-          status: "Pending",
-          orderID: "",
-          remark: "NA"
-        }));
-        setGoodsArray(updatedGoodsArray); 
-
-        const newtailorsArray = updatedSelections[mainindex].areacollection[i].items.filter(item => item[2] == "Tailoring").map(() => ({
-            rate: 0,
-            tailorData: [""],
-            status : "Pending",
-            remark: "NA"
-          }));
-        setTailorsArray(newtailorsArray);
+        console.log(updatedSelections[mainindex].areacollection[i].catalogue)
       };
       
-      
-    
-    const handleCatalogueChange = (mainindex: number,i : number, catalogue) => {
-      const updatedSelections = [...selections];
-    
-      if (!updatedSelections[mainindex].areacollection) {
-        updatedSelections[mainindex].areacollection = [];
-      }
-    
-      if (!updatedSelections[mainindex].areacollection[i]) {
-        updatedSelections[mainindex].areacollection[i] = { productGroup: null, items : [""],  catalogue: [], company: null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] };
-      }
-    
-      updatedSelections[mainindex].areacollection[i].catalogue = catalogue;
-      setSelections(updatedSelections);
-      console.log(goodsArray);
-      console.log(tailorsArray);
-    };
     
     const handleCompanyChange = (mainindex: number,i : number, company: string) => {
       const updatedSelections = [...selections];
@@ -364,31 +397,70 @@ function AddProjectForm() {
       setSelections(updatedSelection);
     }
 
-    const handleAddNewGroup = (mainindex) => {
-      // Clone the selections array to avoid direct mutation of state
+    const handleAddNewGroup = (mainindex: number, productGroupString = "") => {
       const updatedSelections = [...selections];
     
-      // Ensure the area exists before proceeding
-      if (updatedSelections[mainindex] && updatedSelections[mainindex].area) {
-        // Add a new group to the `areacollection` array for the selected area
-        updatedSelections[mainindex].areacollection.push({
-          productGroup: "",
-          company: "",
-          catalogue: [],
-          designNo: "",
-          reference: "",
-          measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"},
-          items : [""],
-          additionalItems : [],
-          totalAmount : [],
-          totalTax : []
-        });
-    
-        // Update the state with the new selections array
-        setSelections(updatedSelections);
+      if (!updatedSelections[mainindex]?.areacollection) {
+        updatedSelections[mainindex].areacollection = [];
       }
-    };
     
+      const groupIndex = updatedSelections[mainindex].areacollection.length;
+    
+      // Parse product group string (can be empty initially)
+      const productGroupArray = productGroupString ? productGroupString.split(",") : [];
+    
+      const relevantPG = productGroupArray.length > 2 ? productGroupArray.slice(1, -2) : [];
+    
+      const matchedItems = relevantPG
+        .map(pgName => items.find(item => item[0] === pgName))
+        .filter(item => Array.isArray(item));
+    
+      // Add the new group
+      updatedSelections[mainindex].areacollection.push({
+        productGroup: productGroupArray,
+        company: "",
+        catalogue: [],
+        designNo: "",
+        reference: "",
+        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+        items: matchedItems,
+        additionalItems: [],
+        totalAmount: [],
+        totalTax: []
+      });
+    
+      setSelections(updatedSelections);
+    
+      // Create new goodsArray entries
+      const newGoods = matchedItems.map(item => ({
+        mainindex,
+        groupIndex,
+        pg: productGroupArray,
+        date: "",
+        status: "Pending",
+        orderID: "",
+        remark: "NA",
+        item : item,
+      }));
+    
+      // Create new tailorsArray entries
+      const newTailors = matchedItems
+        .filter(item => item[2] === "Tailoring")
+        .map(item => ({
+          mainindex,
+          groupIndex,
+          pg: productGroupArray,
+          rate: 0,
+          tailorData: [""],
+          status: "Pending",
+          remark: "NA",
+          item : item
+        }));
+    
+      // Add new entries
+      setGoodsArray(prev => [...prev, ...newGoods]);
+      setTailorsArray(prev => [...prev, ...newTailors]);
+    };
     const handleGroupDelete = (mainindex : number, index : number) => {
       const updatedSelection = [...selections];
       if(updatedSelection[mainindex].areacollection[index]){
