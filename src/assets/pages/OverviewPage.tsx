@@ -1,9 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { setTaskDialogOpen } from '../Redux/dataSlice';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
-const OverviewPage = ({ projectData, status, setStatus, tasks }) => {
+const OverviewPage = ({ setNavState, projectData, status, setStatus, tasks, tailorsArray, setTailorsArray, goodsArray, setGoodsArray }) => {
   const dueAmount = projectData.totalAmount + projectData.totalTax - projectData.paid;
   const dispatch = useDispatch();
   const taskDialogOpen = useSelector(( state : RootState) => state.data.taskDialogOpen);
@@ -14,6 +14,75 @@ const OverviewPage = ({ projectData, status, setStatus, tasks }) => {
     console.log(taskDialogOpen);
     navigate("/tasks");
   }
+  const [pending, setPending] = useState(0);
+  const [ordered, setOrdered] = useState(0);
+  const [received, setReceived] = useState(0);
+  const [instock, setInStock] = useState(0);
+
+  const [tailorpending, setTailorPending] = useState(0);
+  const [tailorordered, setTailorOrdered] = useState(0);
+  const [tailorreceived, setTailorReceived] = useState(0);
+
+  useEffect(() => {
+    // Reset counts first
+    let pendingCount = 0;
+    let orderedCount = 0;
+    let receivedCount = 0;
+    let instockCount = 0;
+  
+    let tailorPendingCount = 0;
+    let tailorOrderedCount = 0;
+    let tailorReceivedCount = 0;
+    console.log(goodsArray);
+  
+    // Count statuses in goodsArray
+    goodsArray.forEach(item => {
+      switch (item.status) {
+        case "Pending":
+          pendingCount++;
+          break;
+        case "Ordered":
+          orderedCount++;
+          break;
+        case "Received":
+          receivedCount++;
+          break;
+        case "In Stock":
+          instockCount++;
+          break;
+        default:
+          break;
+      }
+    });
+  
+    // Count statuses in tailorsArray
+    tailorsArray.forEach(tailor => {
+      switch (tailor.status) {
+        case "Pending":
+          tailorPendingCount++;
+          break;
+        case "Ordered":
+          tailorOrderedCount++;
+          break;
+        case "Received":
+          tailorReceivedCount++;
+          break;
+        default:
+          break;
+      }
+    });
+  
+    // Update state
+    setPending(pendingCount);
+    setOrdered(orderedCount);
+    setReceived(receivedCount);
+    setInStock(instockCount);
+  
+    setTailorPending(tailorPendingCount);
+    setTailorOrdered(tailorOrderedCount);
+    setTailorReceived(tailorReceivedCount);
+  }, [goodsArray, tailorsArray]);
+  
 
   return (
     <div className='flex flex-col'>
@@ -24,14 +93,28 @@ const OverviewPage = ({ projectData, status, setStatus, tasks }) => {
 
       <div className='flex flex-row justify-between gap-3 h-[25vw]'>
         {/* Client Info */}
-        <div className='flex flex-col border rounded-lg p-3 w-1/3 justify-between'>
+        <div className='flex flex-col border rounded-lg p-3 w-[25vw] justify-between'>
           <p className='text-[1.2vw]'>Client Information</p>
-          {["Name", "Phone", "Alternate Phone", "Email", "Address"].map((label, idx) => (
-            <div key={label} className='flex flex-row justify-between'>
-              <p className='text-[1.1vw] text-gray-500'>{label}</p>
-              <p className='text-[1.1vw]'>{projectData.customerLink[idx]}</p>
+            <div className='flex flex-row justify-between'>
+              <p className='text-[1.1vw] text-gray-500'>Name</p>
+              <p className='text-[1.1vw] overflow-y-auto'>{projectData.customerLink[0]}</p>
             </div>
-          ))}
+            <div className='flex flex-row justify-between'>
+              <p className='text-[1.1vw] text-gray-500'>Phone</p>
+              <p className='text-[1.1vw] overflow-y-auto'>{projectData.customerLink[1]}</p>
+            </div>
+            <div className='flex flex-row justify-between'>
+              <p className='text-[1.1vw] text-gray-500'>Alternate Phone</p>
+              <p className='text-[1.1vw] overflow-y-auto'>{projectData.customerLink[4]}</p>
+            </div>
+            <div className='flex flex-row justify-between gap-3'>
+              <p className='text-[1.1vw] text-gray-500'>Email</p>
+              <p className='text-[1.1vw] flex-wrap gap-3 w-full'>{projectData.customerLink[2]}</p>
+            </div>
+            <div className='flex flex-row justify-between'>
+              <p className='text-[1.1vw] text-gray-500'>Address</p>
+              <p className='text-[1.1vw]  gap-3 flex-wrap'>{projectData.customerLink[3]}</p>
+            </div>
           <div className='flex flex-row justify-between'>
             <p className='text-[1.1vw] text-gray-500'>Additional Requests</p>
             <p className='text-[1.1vw]'>{projectData.additionalRequests}</p>
@@ -39,10 +122,10 @@ const OverviewPage = ({ projectData, status, setStatus, tasks }) => {
         </div>
 
         {/* Status */}
-        <div className='flex flex-col w-1/3 p-3 border rounded-lg'>
+        <div className='flex flex-col w-1/3 p-3 border rounded-lg overflow-y-scroll'>
           <p className='text-[1.2vw]'>Current Status</p>
-          <div className='flex flex-row justify-between items-center'>
-            <p className='text-[1vw] text-gray-500 mt-1'>Delivery & Installation</p>
+          <div className='flex flex-row justify-between -mt-3'>
+            <p className='text-[1vw] text-gray-500 mt-2'>Delivery & Installation</p>
             <select value={status} onChange={(e) => setStatus(e.target.value)} className="border px-4 py-2 rounded-md">
               <option value="Unsent">Unsent</option>
               <option value="Pending">Pending</option>
@@ -50,6 +133,30 @@ const OverviewPage = ({ projectData, status, setStatus, tasks }) => {
               <option value="Delivered">Delivered</option>
               <option value="Rejected">Rejected</option>
             </select>
+          </div>
+          <p className='text-[0.9vw] font-semibold'>Order Confirmed</p>
+          <div className='flex flex-col gap-1 w-full'>
+            <p className='text-[0.9vw] font-semibold'>Goods Ordered</p>
+            <div className='flex flex-row w-full justify-between'>
+            <div className='flex flex-row w-full flex-wrap gap-1'>
+              <p className='text-[0.8vw] rounded-xl text-yellow-500 font-semibold bg-yellow-100 py-1 px-2'>Pending-{pending}</p>
+              <p className='text-[0.8vw] rounded-xl text-sky-600 font-semibold bg-sky-100 py-1 px-2'>Ordered-{ordered}</p>
+              <p className='text-[0.8vw] rounded-xl text-green-600 font-semibold bg-green-100 py-1 px-2'>Received-{received}</p>
+              <p className='text-[0.8vw] rounded-xl text-green-600 font-semibold bg-green-100 py-1 px-2'>In Stock-{instock}</p>
+            </div>
+            <button style={{ borderRadius : "6px" }} onClick={() => setNavState("Goods")} className='text-sky-600 border-1 font-semibold h-8 px-2 border-sky-600 bg-white'>View</button>
+          </div>
+          </div>
+          <div className='flex flex-col gap-1 w-full'>
+            <p className='text-[0.9vw] font-semibold'>Goods Sent to Tailor</p>
+            <div className='flex flex-row w-full justify-between'>
+            <div className='flex flex-row w-full flex-wrap gap-1'>
+              <p className='text-[0.8vw] rounded-xl text-yellow-500 font-semibold bg-yellow-100 py-1 px-2'>Pending-{tailorpending}</p>
+              <p className='text-[0.8vw] rounded-xl text-sky-600 font-semibold bg-sky-100 py-1 px-2'>Ordered-{tailorordered}</p>
+              <p className='text-[0.8vw] rounded-xl text-green-600 font-semibold bg-green-100 py-1 px-2'>Received-{tailorreceived}</p>
+            </div>
+            <button style={{ borderRadius : "6px" }} onClick={() => setNavState("Tailors")} className='text-sky-600 border-1 font-semibold h-8 px-2 border-sky-600 bg-white'>View</button>
+          </div>
           </div>
         </div>
 
@@ -64,7 +171,7 @@ const OverviewPage = ({ projectData, status, setStatus, tasks }) => {
           </div>
           <div className='flex flex-row justify-between'>
             <p className='text-[1.1vw]'>Total Payment</p>
-            <p className='text-[1.1vw]'>{projectData.totalAmount + projectData.totalTax}</p>
+            <p className='text-[1.1vw]'>{(projectData.totalAmount + projectData.totalTax).toFixed(2)}</p>
           </div>
           <div className='flex flex-row justify-between'>
             <p className='text-[1.1vw]'>Payment Received</p>
@@ -72,7 +179,7 @@ const OverviewPage = ({ projectData, status, setStatus, tasks }) => {
           </div>
           <div className='flex flex-row justify-between'>
             <p className='text-[1.1vw]'>Due</p>
-            <p className='text-[1.1vw]'>{dueAmount}</p>
+            <p className='text-[1.1vw]'>{(dueAmount).toFixed(2)}</p>
           </div>
         </div>
       </div>
@@ -80,10 +187,24 @@ const OverviewPage = ({ projectData, status, setStatus, tasks }) => {
       {/* Lower section */}
       <div className='flex flex-row w-full gap-3 justify-between mt-3 h-[25vw]'>
         {/* Tailor Info */}
-        <div className='flex flex-col justify-between w-1/3 border rounded-lg p-3'>
+        <div className='flex flex-col w-1/3 border rounded-lg p-3'>
           <div className='flex flex-row justify-between'>
             <p className='text-[1.2vw]'>Tailor Information</p>
-            <button className='text-white rounded-lg bg-sky-600 px-2 h-8'>Assign</button>
+            <button onClick={() => setNavState("Tailors")} className='text-white rounded-lg bg-sky-600 px-2 h-8'>Assign</button>
+          </div>
+          <div className='flex flex-col justify-between gap-2'>
+            
+              {
+                tailorsArray && tailorsArray.map((tailor, index) => (
+                  <div className='flex flex-row w-full justify-between' key={index}>
+                  <div className='flex flex-col border rounded-lg p-2 w-full'>
+                    <p className='text-[1.1vw] text-sky-600 font-semibold'>{tailor.tailorData[0]}</p>
+                    <p className='text-[1.1vw]'>{tailor.tailorData[1]}</p>
+                  </div>
+                  </div>
+                ))
+              }
+            
           </div>
         </div>
 
@@ -114,7 +235,7 @@ const OverviewPage = ({ projectData, status, setStatus, tasks }) => {
             <button onClick={addNewTask} style={{ borderRadius : "8px" }} className='text-white bg-sky-600 px-2 h-8'>Create Task</button>
           </div>
           <div className='flex flex-col justify-between gap-2 overflow-y-scroll'>
-            {tasks.filter(task => task[5] === projectData.projectName).map((task, index) => (
+            {tasks !== undefined && tasks.filter(task => task[5] === projectData.projectName).map((task, index) => (
               <div key={index} className="border rounded-lg p-2 flex flex-col">
                 <div className='flex flex-row justify-between'>
                   <p className={`text-white text-[1.1vw] border rounded-lg px-2 py-1 ${

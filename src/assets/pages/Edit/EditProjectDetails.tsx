@@ -49,7 +49,7 @@ const EditProjectDetails = ({
           <input
             type="text"
             className="border p-2 rounded w-full"
-            value={projectReference ? projectReference : projectData.projectReference}
+            value={projectReference}
             onChange={(e) => setProjectReference(e.target.value)}
           />
         </div>
@@ -58,7 +58,7 @@ const EditProjectDetails = ({
           <input
             type="text"
             className="border p-2 rounded w-full"
-            value={projectName ? projectName : projectData.projectName}
+            value={projectName}
             onChange={(e) => setProjectName(e.target.value)}
           />
         </div>
@@ -72,7 +72,7 @@ const EditProjectDetails = ({
             <input
               type="text"
               className="border p-2 rounded w-full"
-              value={selectedCustomer ? selectedCustomer[3] : projectData.customerLink[3]}
+              value={selectedCustomer[3]}
               readOnly
             />
           </div>
@@ -84,7 +84,7 @@ const EditProjectDetails = ({
         <div className="flex flex-row w-full gap-2">
           <div className="flex flex-col w-full">
             <p className="text-[1vw]">Any Additional Requests (optional)</p>
-            <input type="text" value={additionalRequests ? additionalRequests : projectData.additionalRequests} onChange={(e) => setAdditionalRequests(e.target.value)} className="border p-2 rounded w-full" />
+            <input type="text" value={additionalRequests} onChange={(e) => setAdditionalRequests(e.target.value)} className="border p-2 rounded w-full" />
           </div>
         </div>
       )}
@@ -95,12 +95,12 @@ const EditProjectDetails = ({
           <p className="text-[1vw]">Interior Name (optional)</p>
           <select
             className="border p-2 rounded w-full"
-            value={interiorArray[0] ? interiorArray[0] : projectData.interiorArray[0]}
-            onChange={setInterior}
+            value={JSON.stringify(interiorArray)}
+            onChange={(e) => setInteriorArray(JSON.parse(e.target.value))}
           >
             <option value="">Select Interior Name (optional)</option>
             {interior.map((data, index) => (
-              <option key={index} value={data[0]}>
+              <option key={index} value={JSON.stringify(data)}>
                 {data[0]}
               </option>
             ))}
@@ -111,16 +111,17 @@ const EditProjectDetails = ({
           <p className="text-[1vw]">Sales Associate (optional)</p>
           <select
             className="border p-2 rounded w-full"
-            value={salesAssociateArray[0] ? salesAssociateArray[0] : projectData.salesAssociateArray[0]}
-            onChange={setSalesAssociate}
+            value={JSON.stringify(salesAssociateArray)}
+            onChange={(e) => setSalesAssociateArray(JSON.parse(e.target.value))}
           >
             <option value="">Select Sales Associate (optional)</option>
             {salesdata.map((data, index) => (
-              <option key={index} value={data[0]}>
+              <option key={index} value={JSON.stringify(data)}>
                 {data[0]}
-              </option> 
+              </option>
             ))}
           </select>
+
         </div>
       </div>
 
@@ -131,7 +132,7 @@ const EditProjectDetails = ({
           <input
             type="text"
             className="border p-2 rounded w-full"
-            value={user ? user : projectData.createdBy}
+            value={user}
             onChange={(e) => setUser(e.target.value)}
           />
         </div>
@@ -140,7 +141,7 @@ const EditProjectDetails = ({
           <input
             type="date"
             className="border p-2 rounded w-full"
-            value={projectDate ? projectData : projectData.projectDate}
+            value={projectDate}
             onChange={(e) => setProjectDate(e.target.value)}
           />
         </div>

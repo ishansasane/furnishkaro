@@ -215,175 +215,169 @@ function AddProjectForm() {
     setSelections(updatedSelections);
   };
 
-  const handleProductGroupChange = (mainindex: number, i: number, product: string) => {
-    const updatedSelections = [...selections];
-    if (!updatedSelections[mainindex].areacollection) {
-      updatedSelections[mainindex].areacollection = [];
-    }
-    if (!updatedSelections[mainindex].areacollection[i]) {
-      updatedSelections[mainindex].areacollection[i] = {
-        productGroup: null,
-        items: [""],
-        catalogue: [],
-        company: null,
-        designNo: null,
-        reference: null,
-        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
-        totalAmount: [],
-        totalTax: [],
-        quantities: [],
-      };
-    }
-    const newProduct = product.split(",");
-    updatedSelections[mainindex].areacollection[i].productGroup = newProduct;
-    const pg = newProduct;
-    if (!Array.isArray(pg) || pg.length < 2) return;
-    const relevantPG = pg.length > 2 ? pg.slice(1, -2) : [];
-    const matchedItems = relevantPG.map((pgItem) => {
-      const matched = items.find((item) => item[0] === pgItem);
-      return matched || pgItem;
-    });
-    const validMatchedItems = matchedItems.filter((el) => Array.isArray(el));
-    updatedSelections[mainindex].areacollection[i].items = validMatchedItems;
-    setSelections(updatedSelections);
-    const updatedGoodsArray = items.map(() => ({
-      date: "",
-      status: "Pending",
-      orderID: "",
-      remark: "NA",
-    }));
-    setGoodsArray(updatedGoodsArray);
-    const newTailorsArray = updatedSelections[mainindex].areacollection[i].items
-      .filter((item) => item[2] === "Tailoring")
-      .map(() => ({
-        rate: 0,
-        tailorData: [""],
-        status: "Pending",
-        remark: "NA",
-      }));
-    setTailorsArray(newTailorsArray);
-  };
+      const handleProductGroupChange = (mainindex: number, i: number, product: string) => {
+        const updatedSelections = [...selections];
+      
+        // Ensure areacollection exists
+        if (!updatedSelections[mainindex].areacollection) {
+          updatedSelections[mainindex].areacollection = [];
+        }
+      
+        // Ensure the specific index exists
+        if (!updatedSelections[mainindex].areacollection[i]) {
+          updatedSelections[mainindex].areacollection[i] = {
+            productGroup: null,
+            items: [""],
+            catalogue: [],
+            company: null,
+            designNo: null,
+            reference: null,
+            measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+            additionalItems: [],
+            totalAmount: [],
+            totalTax: []
+          };
+        }
+      
+        // Parse the product group string
+        const newproduct = product.split(",");
+        // Update selections
+        updatedSelections[mainindex].areacollection[i].productGroup = newproduct;
+        
+        const pg = newproduct;
+        if (!Array.isArray(pg) || pg.length < 2) return null;
 
-  const handleCatalogueChange = (mainindex: number, i: number, catalogue: any) => {
-    const updatedSelections = [...selections];
-    if (!updatedSelections[mainindex].areacollection) {
-      updatedSelections[mainindex].areacollection = [];
-    }
-    if (!updatedSelections[mainindex].areacollection[i]) {
-      updatedSelections[mainindex].areacollection[i] = {
-        productGroup: null,
-        items: [""],
-        catalogue: [],
-        company: null,
-        designNo: null,
-        reference: null,
-        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
-        totalAmount: [],
-        totalTax: [],
-        quantities: [],
-      };
-    }
-    updatedSelections[mainindex].areacollection[i].catalogue = catalogue;
-    setSelections(updatedSelections);
-  };
+        const relevantPG = pg.length > 2 ? pg.slice(1, -2) : [];
+        const matchedItems = relevantPG.map((pgItem) => {
+          const matched = items.find((item) => item[0] === pgItem);
+          return matched || pgItem;
+        });
 
-  const handleCompanyChange = (mainindex: number, i: number, company: string) => {
-    const updatedSelections = [...selections];
-    if (!updatedSelections[mainindex].areacollection) {
-      updatedSelections[mainindex].areacollection = [];
-    }
-    if (!updatedSelections[mainindex].areacollection[i]) {
-      updatedSelections[mainindex].areacollection[i] = {
-        productGroup: null,
-        items: [""],
-        catalogue: [],
-        company: null,
-        designNo: null,
-        reference: null,
-        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
-        totalAmount: [],
-        totalTax: [],
-        quantities: [],
-      };
-    }
-    updatedSelections[mainindex].areacollection[i].company = company;
-    setSelections(updatedSelections);
-  };
+        const validMatchedItems = matchedItems.filter((el) => Array.isArray(el));
+        updatedSelections[mainindex].areacollection[i].items = validMatchedItems;
+        setSelections(updatedSelections);
+        // ✅ Set goodsArray to have exactly the same number of items
+        const updatedGoodsArray = items.map(() => ({
+          date: "",
+          status: "Pending",
+          orderID: "",
+          remark: "NA"
+        }));
+        setGoodsArray(updatedGoodsArray); 
 
-  const handleDesignNoChange = (mainindex: number, i: number, designNo: string) => {
-    const updatedSelections = [...selections];
-    if (!updatedSelections[mainindex].areacollection) {
-      updatedSelections[mainindex].areacollection = [];
-    }
-    if (!updatedSelections[mainindex].areacollection[i]) {
-      updatedSelections[mainindex].areacollection[i] = {
-        productGroup: null,
-        items: [""],
-        catalogue: [],
-        company: null,
-        designNo: null,
-        reference: null,
-        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
-        totalAmount: [],
-        totalTax: [],
-        quantities: [],
+        const newtailorsArray = updatedSelections[mainindex].areacollection[i].items.filter(item => item[2] == "Tailoring").map(() => ({
+            rate: 0,
+            tailorData: [""],
+            status : "Pending",
+            remark: "NA"
+          }));
+        setTailorsArray(newtailorsArray);
       };
-    }
-    updatedSelections[mainindex].areacollection[i].designNo = designNo;
-    setSelections(updatedSelections);
-  };
-
-  const handleReferenceChange = (mainindex: number, i: number, reference: string) => {
-    const updatedSelections = [...selections];
-    if (!updatedSelections[mainindex].areacollection) {
-      updatedSelections[mainindex].areacollection = [];
-    }
-    if (!updatedSelections[mainindex].areacollection[i]) {
-      updatedSelections[mainindex].areacollection[i] = {
-        productGroup: null,
-        items: [""],
-        catalogue: [],
-        company: null,
-        designNo: null,
-        reference: null,
-        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
-        totalAmount: [],
-        totalTax: [],
-        quantities: [],
-      };
-    }
-    updatedSelections[mainindex].areacollection[i].reference = reference;
-    setSelections(updatedSelections);
-  };
-
-  const handleAddNewGroup = (mainindex: number) => {
-    const updatedSelections = [...selections];
-    if (updatedSelections[mainindex] && updatedSelections[mainindex].area) {
-      updatedSelections[mainindex].areacollection.push({
-        productGroup: "",
-        company: "",
-        catalogue: [],
-        designNo: "",
-        reference: "",
-        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
-        items: [""],
-        totalAmount: [],
-        totalTax: [],
-        quantities: [],
-      });
+      
+      
+    
+    const handleCatalogueChange = (mainindex: number,i : number, catalogue) => {
+      const updatedSelections = [...selections];
+    
+      if (!updatedSelections[mainindex].areacollection) {
+        updatedSelections[mainindex].areacollection = [];
+      }
+    
+      if (!updatedSelections[mainindex].areacollection[i]) {
+        updatedSelections[mainindex].areacollection[i] = { productGroup: null, items : [""],  catalogue: [], company: null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] };
+      }
+    
+      updatedSelections[mainindex].areacollection[i].catalogue = catalogue;
       setSelections(updatedSelections);
-    }
-  };
+      console.log(goodsArray);
+      console.log(tailorsArray);
+    };
+    
+    const handleCompanyChange = (mainindex: number,i : number, company: string) => {
+      const updatedSelections = [...selections];
+    
+      if (!updatedSelections[mainindex].areacollection) {
+        updatedSelections[mainindex].areacollection = [];
+      }
+    
+      if (!updatedSelections[mainindex].areacollection[i]) {
+        updatedSelections[mainindex].areacollection[i] = { productGroup: null, items : [""], catalogue: [], company: null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] };
+      }
+    
+      updatedSelections[mainindex].areacollection[i].company = company;
+      setSelections(updatedSelections);
 
-  const handleGroupDelete = (mainindex: number, index: number) => {
-    const updatedSelections = [...selections];
-    if (updatedSelections[mainindex].areacollection[index]) {
-      updatedSelections[mainindex].areacollection.splice(index, 1);
-    }
-    setSelections(updatedSelections);
-  };
+      console.log(updatedSelections);
+    };
 
-  const units = ["Inches (in)", "Centimeter (cm)", "Meters (m)", "Feet (ft)"];
+    const handleDesignNoChange = (mainindex : number,i : number, designNo) => {
+      const updatedSelections = [...selections];
+
+      if(!updatedSelections[mainindex].areacollection){
+        updatedSelections[mainindex].areacollection = [];
+      }
+
+      if(!updatedSelections[mainindex].areacollection[i]){
+        updatedSelections[mainindex].areacollection[i] = { productGroup : null, items : [""], catalogue : [], company : null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] };
+      }
+
+      updatedSelections[mainindex].areacollection[i].designNo = designNo;
+      setSelections(updatedSelections);
+
+      console.log(updatedSelections);
+    }
+
+    const handleReferenceChange = (mainindex : number, i : number, reference) => {
+      const updatedSelection = [...selections];
+
+      if(!updatedSelection[mainindex].areacollection){
+        updatedSelection[mainindex].areacollection = [];
+      }
+
+      if(!updatedSelection[mainindex].areacollection[i]){
+        updatedSelection[mainindex].areacollection[i] = { productGroup : null, items : [""], catalogue : [], company : null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] }
+      }
+
+      updatedSelection[mainindex].areacollection[i].reference = reference;
+
+      setSelections(updatedSelection);
+    }
+
+    const handleAddNewGroup = (mainindex) => {
+      // Clone the selections array to avoid direct mutation of state
+      const updatedSelections = [...selections];
+    
+      // Ensure the area exists before proceeding
+      if (updatedSelections[mainindex] && updatedSelections[mainindex].area) {
+        // Add a new group to the `areacollection` array for the selected area
+        updatedSelections[mainindex].areacollection.push({
+          productGroup: "",
+          company: "",
+          catalogue: [],
+          designNo: "",
+          reference: "",
+          measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"},
+          items : [""],
+          additionalItems : [],
+          totalAmount : [],
+          totalTax : []
+        });
+    
+        // Update the state with the new selections array
+        setSelections(updatedSelections);
+      }
+    };
+    
+    const handleGroupDelete = (mainindex : number, index : number) => {
+      const updatedSelection = [...selections];
+      if(updatedSelection[mainindex].areacollection[index]){
+        updatedSelection[mainindex].areacollection.splice(index, 1);
+      }
+
+      setSelections(updatedSelection);
+    }
+    
+    const units = ["Inches (in)", "Centimeter (cm)", "Meters (m)", "Feet (ft)"];
 
   const handleWidthChange = (mainindex: number, index: number, width: string) => {
     const updatedSelections = [...selections];

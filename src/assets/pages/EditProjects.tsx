@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store";
 import OverviewPage from './OverviewPage';
-import { setPaymentData , setSalesAssociateData, setInteriorData, setCustomerData, setProducts, setCatalogs, setProjects, setItemData, setProjectFlag, setTasks } from "../Redux/dataSlice";
+import { setPaymentData , setSalesAssociateData, setInteriorData, setCustomerData, setProducts, setCatalogs, setProjects, setItemData, setProjectFlag, setTasks, setTailorData } from "../Redux/dataSlice";
 import CustomerDetails from "./CustomerDetails";
 import ProjectDetails from "./ProjectDetails";
 import EditCustomerDetails from "./Edit/EditCustomerDetails";
@@ -22,6 +22,7 @@ const EditProjects = ({ projectData, index, goBack, projects, Tax, setTax, Amoun
 
     const [currentStatus, setCurrentStatus] = useState("Unsent");
     const [navState, setNavState] = useState("Overview");
+    const [status, changeStatus] = useState("approved");
 
     const dispatch = useDispatch();
     const customerData = useSelector((state : RootState) => state.data.customers);
@@ -30,12 +31,12 @@ const EditProjects = ({ projectData, index, goBack, projects, Tax, setTax, Amoun
     const products = useSelector((state : RootState) => state.data.products);
     const items = useSelector((state : RootState) => state.data.items);
     const paymentData = useSelector((state : RootState) => state.data.paymentData);
+    const tailors = useSelector((state : RootState) => state.data.tailors);
 
     const catalogueData = useSelector((state : RootState) => state.data.catalogs);
     const Tasks = useSelector((state : RootState) => state.data.tasks);
     let availableCompanies = ["D Decor", "Asian Paints", "ZAMAN"];
     const designNo = [ "514", "98", "123" ];
-
     
     const [ customers, setcustomers ] = useState<[]>([]);
     const [ selectedCustomer, setSelectedCustomer ] = useState(null);
@@ -49,6 +50,8 @@ const EditProjects = ({ projectData, index, goBack, projects, Tax, setTax, Amoun
     const [availableProductGroups, setAvailableProductGroups] = useState([]);
 
     const [additionalItems, setAdditionaItems] = useState<additional[]>([]);
+
+    const [editPayments, setEditPayments] = useState([]);
     interface additional{
       name : string;
       quantity : number;
@@ -92,6 +95,27 @@ const EditProjects = ({ projectData, index, goBack, projects, Tax, setTax, Amoun
           addonProducts: string;
           color: string;
           needsTailoring: boolean;
+        }
+        interface Goods {
+          pg;
+          date;
+          status;
+          orderID;
+          remark;
+          mainindex;
+          groupIndex;
+          item;
+        }
+    
+        interface Tailor{
+          pg;
+          rate;
+          tailorData;
+          status;
+          remark;
+          mainindex;
+          groupIndex;
+          item;
         }
     const units = ["Inches (in)", "Centimeter (cm)", "Meters (m)", "Feet (ft)"];
     
@@ -217,6 +241,13 @@ const EditProjects = ({ projectData, index, goBack, projects, Tax, setTax, Amoun
       
         setSelections(clonedSelections);
         setAdditionaItems(clonedAdditionalItems);
+        setSelectedCustomer(projectData.customerLink);
+        setUser(projectData.createdBy);
+        setPRojectDate(projectData.projectDate);
+        setAdditionalRequests(projectData.additionalRequests);
+        setInteriorArray(projectData.interiorArray);
+        setSalesAssociateArray(projectData.salesAssociateArray);
+        setProjectReference(projectData.projectReference);
         if(Object.isFrozen(additionalItems)){
           console.log("frozen");
         }
@@ -291,47 +322,7 @@ const EditProjects = ({ projectData, index, goBack, projects, Tax, setTax, Amoun
         }
       }, [dispatch]);
 
-const sendProjectData = async () => {
-    try {
-      const response = await fetch(
-        "https://sheeladecor.netlify.app/.netlify/functions/server/sendprojectdata",
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "content-type": "application/json",
-          },
-          body: JSON.stringify({
-            projectName: projectName,
-            customerLink: JSON.stringify(selectedCustomer), // Serialize array to string
-            projectReference: projectReference,
-            status: status,
-            totalAmount: Amount,
-            totalTax: Tax,
-            paid: Paid,
-            discount: Discount,
-            createdBy: user,
-            allData: JSON.stringify(selections), // Serialize object/array to string
-            projectDate: projectDate,
-            additionalRequests : additionalRequests,
-            interiorArray : JSON.stringify(interiorArray),
-            salesAssociateArray : JSON.stringify(salesAssociateArray)
-          }),
-        }
-      );
-  
-      if (response.status === 200) {
-        alert("Project Added");
-      } else {
-        const errorText = await response.text(); // Get error details
-        console.error("Error response:", errorText);
-        alert("Error: Failed to add project");
-      }
-    } catch (error) {
-      console.error("Fetch error:", error);
-      alert("Error: Network issue or server not responding");
-    }
-  };
+
 
   const handleAreaChange = (mainindex, newArea) => {
     // Clone the selections array to avoid direct mutation of state
@@ -347,55 +338,116 @@ const sendProjectData = async () => {
   };
      
 
-const handleProductGroupChange = (mainindex: number,i : number, product) => {
-  const updatedSelections = structuredClone(selections); // Deep clone
-
-  if (!updatedSelections[mainindex].areacollection) {
-    updatedSelections[mainindex].areacollection = [];
-  }
+  const handleProductGroupChange = (mainindex: number, i: number, product: string) => {
+    const updatedSelections = [...selections];
   
-  if (!updatedSelections[mainindex].areacollection[i]) {
-    updatedSelections[mainindex].areacollection[i] = {
-      productGroup: null,
-      items: [""],
-      catalogue: null,
-      company: null,
-      designNo: null,
-      reference: null,
-      measurement: {
-        unit: "Centimeter (cm)",
-        width: "0",
-        height: "0",
-        quantity: "0"
-      },
-      additionalItems: [],
-      totalAmount: [],
-      totalTax: []
-    };
-  }
+    if (!updatedSelections[mainindex].areacollection) {
+      updatedSelections[mainindex].areacollection = [];
+    }
   
-  const newproduct = product.split(",");
-  const items = newproduct.slice(1, -2);
+    if (!updatedSelections[mainindex].areacollection[i]) {
+      updatedSelections[mainindex].areacollection[i] = {
+        productGroup: null,
+        items: [],
+        catalogue: [],
+        company: null,
+        designNo: null,
+        reference: null,
+        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+        additionalItems: [],
+        totalAmount: [],
+        totalTax: []
+      };
+    }
   
-  updatedSelections[mainindex].areacollection[i].productGroup = newproduct;
-  updatedSelections[mainindex].areacollection[i].items = items;
-  setSelections(updatedSelections);
-};
+    const newproduct = product.split(",");
+    updatedSelections[mainindex].areacollection[i].productGroup = newproduct;
+  
+    const pg = newproduct;
+    if (!Array.isArray(pg) || pg.length < 2) return;
+  
+    const relevantPG = pg.length > 2 ? pg.slice(1, -2) : [];
+  
+    const newMatchedItems = relevantPG.map(pgItem =>
+      items.find(item => item[0] === pgItem)
+    ).filter(item => Array.isArray(item));
+  
+    updatedSelections[mainindex].areacollection[i].items = newMatchedItems;
+    setSelections(updatedSelections);
+  
+    // Remove old entries for this area and group index
+    const filteredGoods = goodsArray.filter(
+      g => !(g.mainindex === mainindex && g.groupIndex === i)
+    );
+  
+    const newGoods = newMatchedItems.map((item, itemindex) => ({
+      mainindex,
+      groupIndex: i,
+      pg: newproduct,
+      date: "",
+      status: "Pending",
+      orderID: "",
+      remark: "NA",
+      item : item,
+    }));
+  
+    setGoodsArray([...filteredGoods, ...newGoods]);
+  
+    const filteredTailors = tailorsArray.filter(
+      t => !(t.mainindex === mainindex && t.groupIndex === i)
+    );
+  
+    const newTailors = newMatchedItems
+      .filter(item => item[2] === "Tailoring")
+      .map((item, itemIndex) => ({
+        mainindex,
+        groupIndex: i,
+        pg: newproduct,
+        rate: 0,
+        tailorData: [""],
+        status: "Pending",
+        remark: "NA",
+        item : item,
+      }));
+  
+    setTailorsArray([...filteredTailors, ...newTailors]);
 
-const handleCatalogueChange = (mainindex: number,i : number, catalogue) => {
-  const updatedSelections = [...selections];
+    console.log(tailorsArray);
+    console.log(goodsArray);
+  };
+  
+  
 
-  if (!updatedSelections[mainindex].areacollection) {
-    updatedSelections[mainindex].areacollection = [];
-  }
-
-  if (!updatedSelections[mainindex].areacollection[i]) {
-    updatedSelections[mainindex].areacollection[i] = { productGroup: null, items : [""],  catalogue: null, company: null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] };
-  }
-
-  updatedSelections[mainindex].areacollection[i].catalogue = catalogue;
-  setSelections(updatedSelections);
-};
+  const handleCatalogueChange = (mainindex: number, i: number, catalogue: string) => {
+    const updatedSelections = [...selections];
+  
+    if (!updatedSelections[mainindex].areacollection) {
+      updatedSelections[mainindex].areacollection = [];
+    }
+  
+    if (!updatedSelections[mainindex].areacollection[i]) {
+      updatedSelections[mainindex].areacollection[i] = {
+        productGroup: null,
+        items: [""],
+        catalogue: [],
+        company: null,
+        designNo: null,
+        reference: null,
+        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+        additionalItems: [],
+        totalAmount: [],
+        totalTax: []
+      };
+    }
+  
+    updatedSelections[mainindex].areacollection[i].catalogue = catalogue
+      .split(",")
+      .map(item => item.trim())
+      .filter(item => item);
+  
+    setSelections(updatedSelections);
+    console.log(updatedSelections[mainindex].areacollection[i].catalogue)
+  };
 
 const handleCompanyChange = (mainindex: number,i : number, company: string) => {
   const updatedSelections = [...selections];
@@ -446,48 +498,128 @@ const handleReferenceChange = (mainindex : number, i : number, reference) => {
 
 }
 
-const handleAddNewGroup = (mainindex) => {
-  // Clone the selections array to avoid direct mutation of state
+const handleAddNewGroup = (mainindex: number, productGroupString = "") => {
   const updatedSelections = [...selections];
 
-  // Ensure the area exists before proceeding
-  if (updatedSelections[mainindex] && updatedSelections[mainindex].area) {
-    // Add a new group to the `areacollection` array for the selected area
-    updatedSelections[mainindex].areacollection.push({
-      productGroup: "",
-      company: "",
-      catalogue: [],
-      designNo: "",
-      reference: "",
-      measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"},
-      items : [""],
-      additionalItems : [],
-      totalAmount : [],
-      totalTax : []
-    });
-
-    // Update the state with the new selections array
-    setSelections(updatedSelections);
+  if (!updatedSelections[mainindex]?.areacollection) {
+    updatedSelections[mainindex].areacollection = [];
   }
+
+  const groupIndex = updatedSelections[mainindex].areacollection.length;
+
+  // Parse product group string (can be empty initially)
+  const productGroupArray = productGroupString ? productGroupString.split(",") : [];
+
+  const relevantPG = productGroupArray.length > 2 ? productGroupArray.slice(1, -2) : [];
+
+  const matchedItems = relevantPG
+    .map(pgName => items.find(item => item[0] === pgName))
+    .filter(item => Array.isArray(item));
+
+  // Add the new group
+  updatedSelections[mainindex].areacollection.push({
+    productGroup: productGroupArray,
+    company: "",
+    catalogue: [],
+    designNo: "",
+    reference: "",
+    measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+    items: matchedItems,
+    additionalItems: [],
+    totalAmount: [],
+    totalTax: []
+  });
+
+  setSelections(updatedSelections);
+
+  // Create new goodsArray entries
+  const newGoods = matchedItems.map(item => ({
+    mainindex,
+    groupIndex,
+    pg: productGroupArray,
+    date: "",
+    status: "Pending",
+    orderID: "",
+    remark: "NA",
+    item : item,
+  }));
+
+  // Create new tailorsArray entries
+  const newTailors = matchedItems
+    .filter(item => item[2] === "Tailoring")
+    .map(item => ({
+      mainindex,
+      groupIndex,
+      pg: productGroupArray,
+      rate: 0,
+      tailorData: [""],
+      status: "Pending",
+      remark: "NA",
+      item : item
+    }));
+
+  // Add new entries
+  setGoodsArray(prev => [...prev, ...newGoods]);
+  setTailorsArray(prev => [...prev, ...newTailors]);
 };
 
-const handleGroupDelete = (mainindex : number, index : number) => {
+
+const handleGroupDelete = (mainindex: number, index: number) => {
   const updatedSelection = [...selections];
-  if(updatedSelection[mainindex].areacollection[index]){
+  if (updatedSelection[mainindex].areacollection[index]) {
     updatedSelection[mainindex].areacollection.splice(index, 1);
   }
 
   setSelections(updatedSelection);
-}
+
+  // Remove matching goods and tailors for this group
+  setGoodsArray(prev =>
+    prev.filter(g => !(g.mainindex === mainindex && g.groupIndex === index))
+  );
+
+  setTailorsArray(prev =>
+    prev.filter(t => !(t.mainindex === mainindex && t.groupIndex === index))
+  );
+
+  console.log(goodsArray);
+  console.log(tailorsArray);
+};
+
 
 const handleAddArea = () => {
   setSelections([...selections, { area: "", areacollection : []}]);
 };
 
 const handleRemoveArea = (index: number) => {
-  const updatedSelections = selections.filter((_, i) => i !== index);
-  setSelections(updatedSelections);
+  const updatedSelections = [...selections];
+  const removedArea = updatedSelections[index];
+
+  // Count how many product groups (areacollection) are in the removed area
+  let productGroupCount = 0;
+  removedArea.areacollection.forEach(collection => {
+    productGroupCount += collection.items.length;
+  });
+
+  // Calculate the starting index in goodsArray and tailorsArray for this area
+  let startIndex = 0;
+  for (let i = 0; i < index; i++) {
+    selections[i].areacollection.forEach(collection => {
+      startIndex += collection.items.length;
+    });
+  }
+
+  // Remove corresponding items from goodsArray and tailorsArray
+  const updatedGoodsArray = [...goodsArray];
+  const updatedTailorsArray = [...tailorsArray];
+  updatedGoodsArray.splice(startIndex, productGroupCount);
+  updatedTailorsArray.splice(startIndex, productGroupCount);
+
+  // Update state
+  setGoodsArray(updatedGoodsArray);
+  setTailorsArray(updatedTailorsArray);
+  setSelections(updatedSelections.filter((_, i) => i !== index));
 };
+
 
 const handlewidthchange = (mainindex : number, index : number, width) => {
   const updatedSelection = [...selections];
@@ -745,19 +877,7 @@ const handleItemRemarkChange = (i, remark) => {
   setAdditionaItems(updated);
 };
 
-    interface Goods {
-      date;
-      status;
-      orderID;
-      remark;
-    }
 
-    interface Tailor{
-      rate;
-      tailorData;
-      status;
-      remark;
-    }
 
     const [goodsArray, setGoodsArray] = useState<Goods[]>([]);
     const [tailorsArray, setTailorsArray] = useState<Tailor[]>([]);
@@ -808,6 +928,12 @@ const fetchPaymentData = async () => {
   return data.message;
 }
 
+const fetchTailorData = async () => {
+  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettailors");
+  const data = await response.json();
+  return data.body;
+}
+
 const hasFetchedPayments = useRef(false);
 const [added, setAdded] = useState(false);
 useEffect(() => {
@@ -830,6 +956,15 @@ useEffect(() => {
     fetchPayments();
   }
 }, [dispatch, added, fetchPaymentData]);
+useEffect(() => {
+  async function fetchtailors() {
+    const data = await fetchTailorData();
+    dispatch(setTailorData(data));
+  }
+  if (!added) {
+    fetchtailors();
+  }
+}, [dispatch, added, fetchTailorData]);
 
 const addPaymentFunction = async () => {
 
@@ -883,12 +1018,19 @@ const deletePayment = async (p, pd, pm, re) => {
 const [taskFilter, setTaskFilter] = useState("All Tasks");
 const statusArray = ["Pending", "Ordered", "Received", "In Stock"];
 
-const filteredTasks = Tasks
+const [filteredTasks, setFilteredTasks] = useState([]);
+
+useEffect(() => {
+  const filteredTasks = Tasks
   .filter((task) => task[5] === projectData.projectName)
   .filter((task) => {
     if (taskFilter === "All Tasks") return true;
     return task[7] === taskFilter;
   });
+
+  setFilteredTasks(filteredTasks);
+
+}, [projectData]);
 
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [editing, setediting] = useState<[]>(null);
@@ -922,6 +1064,88 @@ const filteredTasks = Tasks
 
   const bankDetails = ["123123", "!23123", "!2312331"];
   const termsCondiditions = ["asdasd", "asasda"];
+
+  const updateTailorData = (index, data) => {
+    const formattedData = data.split(",").map(item => item.trim()); // split and trim spaces
+    const newtailors = [...tailorsArray];
+    newtailors[index].tailorData = formattedData;
+    console.log(newtailors[index]);
+    setTailorsArray(newtailors);
+  };
+  
+  const updateTailorRate = (index, data) => {
+    const newtailors = [...tailorsArray];
+    newtailors[index].rate = data;
+    setTailorsArray(newtailors);
+  }
+  const updateTailorStatus = (index, data) => {
+    const newtailors = [...tailorsArray];
+    newtailors[index].status = data;
+    setTailorsArray(newtailors);
+  }
+  const updateTailorRemark = (index, data) => {
+    const newtailors = [...tailorsArray];
+    newtailors[index].remark = data;
+    setTailorsArray(newtailors);
+  }
+
+  const setCancelPayment = () => {
+    if(editPayments){
+      setPayment(0);
+      setPaymentDate("");
+      setPaymentMode("");
+      setPaymentRemarks("NA");
+      setAddPayment(false);
+    }else{
+      setAddPayment(false);
+    }
+  }
+
+  const sendProjectData = async () => {
+    try {
+      const response = await fetch(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/updateprojectdata",
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            projectName: projectData.projectName,
+            customerLink: JSON.stringify(selectedCustomer), // Serialize array to string
+            projectReference: projectReference,
+            status: status,
+            totalAmount: Amount,
+            totalTax: Tax,
+            paid: Paid,
+            discount: Discount,
+            createdBy: user,
+            allData: JSON.stringify(selections), // Serialize object/array to string
+            projectDate: projectDate,
+            additionalRequests : additionalRequests,
+            interiorArray : JSON.stringify(interiorArray),
+            salesAssociateArray : JSON.stringify(salesAssociateArray),
+            additionalItems : JSON.stringify(additionalItems),
+            goodsArray : JSON.stringify(goodsArray),
+            tailorsArray : JSON.stringify(tailorsArray)
+          }),
+        }
+      );
+  
+      if (response.status === 200) {
+        alert("Project Added");
+      } else {
+        const errorText = await response.text(); // Get error details
+        console.error("Error response:", errorText);
+        alert("Error: Failed to add project");
+      }
+    } catch (error) {
+      console.error("Fetch error:", error);
+      alert("Error: Network issue or server not responding");
+    }
+  };
+
     return (
       <div className='p-6'>
         <div className='flex flex-col'>
@@ -947,6 +1171,11 @@ const filteredTasks = Tasks
             status={currentStatus}
             setStatus={setCurrentStatus}
             tasks={Tasks}
+            setNavState={setNavState}
+            tailorsArray={tailorsArray}
+            setTailorsArray={setTailorsArray}
+            goodsArray={goodsArray}
+            setGoodsArray={setGoodsArray}
             />
             <div className="flex flex-row justify-between mt-3">
                 <button onClick={() => setNavState("Tasks")} style={{ borderRadius : "8px" }} className="rounded-lg border px-2 h-8 bg-white">Back</button>
@@ -1081,10 +1310,10 @@ const filteredTasks = Tasks
       
       return validMatchedItems.map((item, itemIndex) => {
         const key = `${mainindex}-${collectionIndex}-${itemIndex}`;
-        const qty = selection.areacollection[collectionIndex]?.quantities?.[itemIndex] || 0;        
+        const qty = selection.areacollection[collectionIndex]?.quantities?.[itemIndex] || 0;   
         return (
           <tr key={key} className="flex justify-between w-full border-b p-2">
-            <td className="w-[10%]">{itemIndex + 1}</td>
+            <td className="w-[10%]">{itemIndex}</td>
             <td className="w-[45%]">{item[0] + " * " + collection.measurement.quantity}</td>
             <td className="w-[45%]">
               {collection.measurement.width + "*" + collection.measurement.height + " " + collection.measurement.unit}
@@ -1275,7 +1504,7 @@ const filteredTasks = Tasks
               <p className="text-[1.1vw]">Grand Total</p>
               <p className="text-[1.1vw]">{parseFloat((Amount + Tax - Discount).toFixed(2))}</p>
             </div>
-            <button onClick={sendProjectData} style={{borderRadius : "10px"}} className="rounded-lg bg-sky-700 hover:bg-sky-800 text-white p-[6px]">Add Project & Generate Quote</button>
+            <button onClick={sendProjectData} style={{borderRadius : "10px"}} className="rounded-lg bg-sky-700 hover:bg-sky-800 text-white p-[6px]">Edit Project & Generate Quote</button>
           </div>
         </div>
 
@@ -1304,62 +1533,62 @@ const filteredTasks = Tasks
                   <th>Order ID</th>
                   <th>Remark</th>
                 </tr>
-                {selections.map((selection, mainindex) =>
-                  selection.areacollection.map((collection, index) =>
-                    collection.items.map((item, i) => (
-                      <tr
-                        key={`${mainindex}-${index}-${i}`}
-                        className="text-center rounded-md"
-                      >
-                        <td>{i + 1}</td>
-                        <td>{selection.area}</td>
-                        <td>{item[0]}</td>
-                        <td>{collection.company}</td>
-                        <td className="mt-2">{collection.catalogue}</td>
-                        <td className="mt-2">{collection.designNo}</td>
-                        <td>
-                          <input
-                            type="date"
-                            className="border pl-2 rounded-lg w-[8vw] px-1 py-1 text-center mt-2"
-                            value={goodsArray[i].date}
-                            onChange={(e) => {setGoodsDate(i, e.target.value);}}
-                          />
-                        </td>
-                        <td>
-                        <select
-                          className="border px-2 py-1 mt-2 rounded w-full"
-                          value={goodsArray[2]}
-                        
-                        >
-                          <option value="">Pending</option>
-                          {statusArray.map((data, index) => (
-                            <option key={index} value={data}>
-                              {data}
-                            </option>
-                          ))}
-                        </select>
+                <tbody>
+  {goodsArray.map((goods, index) => {
+    const selection = selections[goods.mainindex];
+    const collection = selection?.areacollection[goods.groupIndex];
 
-                        </td>
-                        <td>
-                          <input
-                            type="text"
-                            className="border pl-2 rounded-lg w-[5vw] px-1 py-1 text-center mt-2"
-                            value={goodsArray[i].orderID}
-                            onChange={(e) => {setGoodsOrderID(i, e.target.value);}}
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="text"
-                            className="border pl-2 rounded-lg w-[8vw] px-1 py-1 text-center mt-2"
-                            value={goodsArray[i].remark}
-                            onChange={(e) => {setGoodsRemark(i, e.target.value);}}
-                          />
-                        </td>
-                      </tr>
-                    ))
-                  )
-                )}
+    return (
+      <tr key={index} className="text-center rounded-md">
+        <td>{index + 1}</td>
+        <td>{selection.area || "-"}</td>
+        <td>{goods.item[0]}</td>
+        <td>{collection.company}</td>
+        <td>{collection.catalogue[0]}</td>
+        <td>{collection.designNo}</td>
+        <td>
+          <input
+            type="date"
+            className="border pl-2 rounded-lg w-[8vw] px-1 py-1 text-center mt-2"
+            value={goods.date}
+            onChange={(e) => setGoodsDate(index, e.target.value)}
+          />
+        </td>
+        <td>
+          <select
+            className="border px-2 py-1 mt-2 rounded w-full"
+            value={goods.status}
+            onChange={(e) => setGoodsStatus(index, e.target.value)}
+          >
+            <option value="">Pending</option>
+            {statusArray.map((data, i) => (
+              <option key={i} value={data}>
+                {data}
+              </option>
+            ))}
+          </select>
+        </td>
+        <td>
+          <input
+            type="text"
+            className="border pl-2 rounded-lg w-[5vw] px-1 py-1 text-center mt-2"
+            value={goods.orderID}
+            onChange={(e) => setGoodsOrderID(index, e.target.value)}
+          />
+        </td>
+        <td>
+          <input
+            type="text"
+            className="border pl-2 rounded-lg w-[8vw] px-1 py-1 text-center mt-2"
+            value={goods.remark}
+            onChange={(e) => setGoodsRemark(index, e.target.value)}
+          />
+        </td>
+      </tr>
+    );
+  })}
+</tbody>
+
             </table>
 
               </div>
@@ -1370,7 +1599,17 @@ const filteredTasks = Tasks
             </div>
           }
           {
-            navState === "Tailors" && <TailorsSection statusArray={statusArray} selections={selections} setNavState={setNavState} />
+            navState === "Tailors" && <TailorsSection 
+            updateTailorRate={updateTailorRate}
+            updateTailorRemark={updateTailorRemark} 
+            updateTailorData={updateTailorData} 
+            updateTailorStatus={updateTailorStatus}
+            tailors={tailors} 
+            statusArray={statusArray} 
+            selections={selections} 
+            setNavState={setNavState} 
+            tailorsArray={tailorsArray} 
+            setTailorsArray={setTailorsArray} />
           }
           {
             navState == "Payments" && <PaymentsSection
@@ -1383,13 +1622,19 @@ const filteredTasks = Tasks
             paymentData={paymentData}
             deletePayment={deletePayment}
             setNavState={setNavState}
+            setEditPayments={setEditPayments}
+            setPayment={setPayment}
+            setPaymentDate={setPaymentDate}
+            setPaymentRemarks={setPaymentRemarks}
+            setPaymentMode={setPaymentMode}
+            projectData={projectData}
           />
           }
-          {
+          { 
             addPayment && <div className="flex flex-col z-50 justify-between gap-3 w-[50vw] border rounded-xl p-3">
               <div className="flex flex-col">
                 <div className="flex flex-row gap-1"><p className="text-[1.1vw]">Amount Received</p><p className="text-red-500">*</p></div>
-                <input type="text" value={payment ? payment : 0} className="border-1 rounded-lg pl-2 h-8" onChange={(e) => setPayment(parseInt(e.target.value))}/>
+                <input type="text" value={payment} className="border-1 rounded-lg pl-2 h-8" onChange={(e) => setPayment(e.target.value == "" ? 0 : parseFloat(e.target.value))}/>
               </div>
               <div className="flex flex-col">
                 <div className="flex flex-row gap-1"><p className="text-[1.1vw]">Payment Date</p><p className="text-red-500">*</p></div>
@@ -1404,7 +1649,7 @@ const filteredTasks = Tasks
                 <input type="text" value={paymentRemarks} className="border-1 rounded-lg pl-2 h-8" onChange={(e) => setPaymentRemarks(e.target.value)}/>
               </div>
               <div className="flex flex-row justify-end gap-3">
-                <button onClick={() => setAddPayment(false)} style={{ borderRadius : "8px" }} className="border-2 border-sky-700 text-sky-600 bg-white px-2 h-8">Close</button>
+                <button onClick={() => setCancelPayment()} style={{ borderRadius : "8px" }} className="border-2 border-sky-700 text-sky-600 bg-white px-2 h-8">Close</button>
                 <button onClick={() => addPaymentFunction()} style={{ borderRadius : "8px" }} className="text-white bg-sky-600 hover:bg-sky-700 px-2 h-8">Add Payment</button>
               </div>
             </div>

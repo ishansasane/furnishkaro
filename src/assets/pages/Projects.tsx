@@ -79,10 +79,31 @@ export default function Projects() {
   
     const deepClone = (obj: any) => JSON.parse(JSON.stringify(obj));
   
-    const projects = data.body.map((row: any[], index: number) => {
+    const fixBrokenArray = (input: any): string[] => {
+      if (Array.isArray(input)) return input;
+      if (typeof input !== "string") return [];
   
+      try {
+        const fixed = JSON.parse(input);
+        if (Array.isArray(fixed)) return fixed;
+        return [];
+      } catch {
+        // Attempt to manually fix broken strings like: ["[\"a\"", "\"b\"]"]
+        try {
+          const cleaned = input
+            .replace(/^\[|\]$/g, "") // remove starting and ending square brackets
+            .split(",")
+            .map((item: string) => item.trim().replace(/^"+|"+$/g, "")); // remove quotes
+          return cleaned;
+        } catch {
+          return [];
+        }
+      }
+    };
+  
+    const projects = data.body.map((row: any[], index: number) => {
       return {
-        projectName: row[0] || "",
+        projectName: row[0],
         customerLink: parseSafely(row[1], []),
         projectReference: row[2] || "",
         status: row[3] || "",
@@ -93,15 +114,9 @@ export default function Projects() {
         createdBy: row[8] || "",
         allData: deepClone(parseSafely(row[9], [])),
         projectDate: row[10] || "",
-        additionalRequests: row[11] || "",
-        interiorArray:
-          typeof row[12] === "string"
-            ? row[12].replace(/^"(.*)"$/, "$1").split(",").map(str => str.trim())
-            : [],
-        salesAssociateArray:
-          typeof row[13] === "string"
-            ? row[13].replace(/^"(.*)"$/, "$1").split(",").map(str => str.trim())
-            : [],
+        additionalRequests: parseSafely(row[11], []),
+        interiorArray: fixBrokenArray(row[12]),
+        salesAssociateArray: fixBrokenArray(row[13]),
         additionalItems: deepClone(parseSafely(row[14], [])),
         goodsArray: deepClone(parseSafely(row[15], [])),
         tailorsArray: deepClone(parseSafely(row[16], [])),
@@ -110,34 +125,45 @@ export default function Projects() {
   
     return projects;
   };
+  
   const [added, setAdded] = useState(false);
   const fetchPaymentData = async () => {
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getPayments"); 
     const data = await response.json();
     return data.message;
   }
+  const [projectPayments, setProjectPayments] = useState([]);
+
   useEffect(() => {
     async function fetchPayments() {
       const data = await fetchPaymentData();
       dispatch(setPaymentData(data));
   
-      // Sum the values at index 1
-      if(data != undefined){
-        const total = data.reduce((acc, curr) => {
-          const amount = parseFloat(curr[1]);
-          return acc + (isNaN(amount) ? 0 : amount);
-        }, 0);
-          
-      setReceived(total);
+      if (data !== undefined && projectData) {
+        const projectWisePayments = [];
+  
+        projectData.forEach((project) => {
+          const filtered = data.filter(item => item[0] === project.projectName);
+          const total = filtered.reduce((acc, curr) => {
+            const amount = parseFloat(curr[1]);
+            return acc + (isNaN(amount) ? 0 : amount);
+          }, 0);
+  
+          projectWisePayments.push(total);
+        });
+  
+        setProjectPayments(projectWisePayments);
       }
-
+  
       setAdded(true);
     }
   
     if (!added) {
       fetchPayments();
     }
-  }, [dispatch, added, fetchPaymentData]);
+  }, [dispatch, added, fetchPaymentData, projectData]);
+  
+  
 
   const fetchTaskData = async () => {
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks");
@@ -177,6 +203,20 @@ export default function Projects() {
     }
   } ,[dispatch, projectData, tasks, deleted]);
 
+  const [filteredTasks, setTaskNames] = useState([]);
+
+  const deleteTask = async (name: string) => {
+    await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletetask", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ title: name }),
+    });
+
+    setAdded(false);
+  };
   // Filter projects based on selected status
   const filteredProjects =
     filter === "all" ? projects : projects.filter((proj) => proj.status === filter);
@@ -190,6 +230,25 @@ export default function Projects() {
         credentials : "include",
         body : JSON.stringify({ projectName : name })
       });
+
+      const taskData = await fetchTaskData();
+
+      const filteredTaskNames = taskData
+        .filter(task => task[5] === name)
+        .map(task => task[0]);
+
+      setTaskNames(filteredTaskNames); 
+
+      const handleDeleteTasks = async () => {
+        // Iterate over filteredTasks and delete each task
+        for (const taskName of filteredTaskNames) {
+          await deleteTask(taskName);
+        }
+      };
+      
+      // Use this function to delete tasks when you want
+      handleDeleteTasks();
+      
 
       if(response.status == 200){
         alert("Project Deleted");
@@ -256,7 +315,7 @@ export default function Projects() {
               <td className="px-4 py-2">{project.customerLink ? project.customerLink[0] : ""}</td>
               <td className="px-4 py-2">{project.status}</td>
               <td className="px-4 py-2">{(project.totalAmount + project.totalTax - project.discount).toFixed(2)}</td>
-              <td className="px-4 py-2">{Received}</td>
+              <td className="px-4 py-2">{projectPayments[index]}</td>
               <td className="px-4 py-2">{(project.totalAmount + project.totalTax - project.discount - Received).toFixed(2)}</td>
               <td className="px-4 py-2">{project.createdBy}</td>
               <td className="px-4 py-2">{project.projectDate}</td>

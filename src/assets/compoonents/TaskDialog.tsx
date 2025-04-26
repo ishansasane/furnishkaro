@@ -96,10 +96,10 @@ const TaskDialog: React.FC<TaskDialogProps> = ({ setAdded, onClose, isEditing, s
 
   const cancel = () => {
     const flag = taskDialogOpen;
-    dispatch(setTaskDialogOpen(false));
     if(flag){
       dispatch(setProjectFlag(true));
       navigate("/projects");
+      dispatch(setTaskDialogOpen(false));
     }
     setediting(null);
     onClose();

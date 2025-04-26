@@ -19,7 +19,11 @@ interface Task {
 const fetchTaskData = async () => {
   const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks");
   const data = await response.json();
-  return data.body;
+  if(data.body){
+    return data.body;
+  }else{
+    return [];
+  }
 };
 
 export default function Tasks() {
@@ -108,7 +112,7 @@ export default function Tasks() {
       setProjectData(projects);
     }
 
-    if (taskData.length === 0) getTasks();
+    if (!taskData) getTasks();
     else settasks([...taskData].sort((a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime()));
 
     if (projectData.length === 0) {
@@ -195,7 +199,7 @@ export default function Tasks() {
             </tr>
           </thead>
           <tbody>
-            {tasks.map((task, index) =>
+            {tasks.length != 0 && tasks.map((task, index) =>
               task[7] === `${filter}` || filter === "All Tasks" ? (
                 <tr key={index} className="hover:bg-sky-50">
                   <td className="px-4 py-2">{task[0]}</td>

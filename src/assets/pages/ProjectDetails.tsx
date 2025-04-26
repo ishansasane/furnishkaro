@@ -78,7 +78,7 @@ const ProjectDetails = ({
           <select
             className="border p-2 rounded w-full"
             value={interiorArray}
-            onChange={(e) => {setInteriorArray(e.target.value); console.log(interiorArray)}}
+            onChange={(e) => {setInteriorArray(e.target.value);}}
           >
             <option value="">Select Interior Name (optional)</option>
             {interior.map((data, index) => (

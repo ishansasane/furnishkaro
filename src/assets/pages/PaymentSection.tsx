@@ -23,8 +23,24 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
   Discount,
   paymentData,
   deletePayment,
-  setNavState
+  setNavState,
+  setEditPayments,
+  setPaymentDate,
+  setPaymentMode,
+  setPayment,
+  setPaymentRemarks,
+  projectData
 }) => {
+
+  const editPaymentData = (data) => {
+    setPayment(data[1]);
+    setPaymentDate(data[2]);
+    setPaymentMode(data[3]);
+    setPaymentRemarks(data[4]);
+    setEditPayments(data); 
+    setAddPayment(true);
+  }
+
   return (
     <div className={`${addPayment ? "hidden" : ""} flex flex-col gap-3 mt-3 w-full`}>
       <p className="text-[1.3vw] font-semibold">Payments</p>
@@ -70,20 +86,23 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
             </tr>
           </thead>
           <tbody>
-            {paymentData?.map((data, index) => (
+          {paymentData
+            ?.filter(data => data[0] === projectData.projectName)
+            .map((data, index) => (
               <tr key={index} className="border-t">
                 <td className="p-2">{data[1]}</td>
                 <td className="p-2">{data[2]}</td>
                 <td className="p-2">{data[3]}</td>
                 <td className="p-2">{data[4]}</td>
                 <td className="flex flex-row gap-2 items-center mt-2">
-                  <button><Edit size={18} /></button>
+                  <button><Edit size={18} onClick={() => editPaymentData(data)}/></button>
                   <button onClick={() => deletePayment(data[1], data[2], data[3], data[4])}>
                     <FaTrash className="text-red-500" />
                   </button>
                 </td>
               </tr>
-            ))}
+          ))}
+
           </tbody>
         </table>
       </div>
