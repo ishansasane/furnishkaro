@@ -924,8 +924,8 @@ function AddProjectForm() {
                                 <p className="text-[0.8vw] text-gray-600">{item[3]}</p>
                               </div>
                             </td>
-                            <td className="w-[20%]">{(item[4] * parseFloat(collection.measurement.quantity) * qty).toFixed(2)}</td>
-                            <td className="w-[20%]">{item[5].toFixed(2)}</td>
+                            <td className="w-[20%]">{item[4] * (parseFloat(collection.measurement.quantity) * qty)}</td>
+                            <td className="w-[20%]">{item[5]}</td>
                             <td className="w-[20%]">{collection.totalTax[itemIndex]?.toFixed(2) || "0.00"}</td>
                             <td className="w-[20%]">{collection.totalAmount[itemIndex]?.toFixed(2) || "0.00"}</td>
                           </tr>
