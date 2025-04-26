@@ -1,4 +1,4 @@
-import { useState, useEffect, use } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { RootState } from "../Redux/store";
@@ -8,1095 +8,1105 @@ import { FaPlus, FaTrash } from "react-icons/fa";
 import CustomerDetails from "./CustomerDetails";
 import ProjectDetails from "./ProjectDetails";
 import MaterialSelectionComponent from "./MaterialSelectionComponent";
-import React from "react";
 import MeasurementSection from "./MeasurementSections";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 function AddProjectForm() {
+  const dispatch = useDispatch();
+  const customerData = useSelector((state: RootState) => state.data.customers);
+  const interiorData = useSelector((state: RootState) => state.data.interiors);
+  const salesAssociateData = useSelector((state: RootState) => state.data.salesAssociates);
+  const products = useSelector((state: RootState) => state.data.products);
+  const items = useSelector((state: RootState) => state.data.items);
 
-    const dispatch = useDispatch();
-    const customerData = useSelector((state : RootState) => state.data.customers);
-    const interiorData = useSelector((state : RootState) => state.data.interiors);
-    const salesAssociateData = useSelector((state : RootState) => state.data.salesAssociates);
-    const products = useSelector((state : RootState) => state.data.products);
-    const items = useSelector((state : RootState) => state.data.items);
+  let projectData: any[] = [];
+  const [count, setCount] = useState(0);
 
-    let projectData = [];
-    const [ count, setCount ] = useState(0);
+  const [customers, setCustomers] = useState<any[]>([]);
+  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
 
-    const [ customers, setcustomers ] = useState<[]>([]);
-    const [ selectedCustomer, setSelectedCustomer ] = useState(null);
+  const [singleItems, setSingleItems] = useState<any[]>([]);
 
-    const [singleitems, setsingleitems] = useState([]);
+  const [productGroups, setProductGroups] = useState<ProductGroup[]>([]);
 
-    const [productGroups, setProductGroups] = useState<ProductGroup[]>([]);
+  const [interior, setInterior] = useState<any[]>([]);
+  const [salesData, setSalesData] = useState<any[]>([]);
 
-    const [ interior, setinterior ] = useState([]);
-    const [ salesdata, setsalesdata ] = useState([]);
+  const availableAreas = ["Living Room", "Kitchen", "Bedroom", "Bathroom"];
+  const [availableProductGroups, setAvailableProductGroups] = useState<any[]>([]);
 
-    const availableAreas = ["Living Room", "Kitchen", "Bedroom", "Bathroom"];
-    const [availableProductGroups, setAvailableProductGroups] = useState([]);
+  const catalogueData = useSelector((state: RootState) => state.data.catalogs);
 
-    const catalogueData = useSelector((state : RootState) => state.data.catalogs);
+  let availableCompanies = ["D Decor", "Asian Paints", "ZAMAN"];
 
-    let availableCompanies = ["D Decor", "Asian Paints", "ZAMAN"];
+  const designNo = ["514", "98", "123"];
 
-    const designNo = [ "514", "98", "123" ];
+  const [amount, setAmount] = useState(0);
+  const [tax, setTax] = useState(0);
+  const [paid, setPaid] = useState(0);
+  const [discount, setDiscount] = useState(0);
 
-    const [Amount, setAmount] = useState(0);
-    const [Tax, setTax] = useState(0);
-    const [Paid, setPaid] = useState(0);
-    const [Discount, setDiscount] = useState(0);
+  const [additionalItems, setAdditionalItems] = useState<Additional[]>([]);
+  interface Additional {
+    name: string;
+    quantity: number;
+    rate: number;
+    netRate: number;
+    tax: number;
+    taxAmount: number;
+    totalAmount: number;
+    remark: string;
+  }
 
-    const [additionalItems, setAdditionaItems] = useState<additional[]>([]);
-    interface additional{
-      name : string;
-      quantity : number;
-      rate : number;
-      netRate : number;
-      tax : number;
-      taxAmount : number;
-      totalAmount : number;
-      remark : string;
-    }
-    interface AreaSelection {
-      area: string;
-      areacollection : collectionArea[];
-    }
+  interface AreaSelection {
+    area: string;
+    areacollection: CollectionArea[];
+  }
 
-    interface measurements {
-      unit;
-      width;
-      height;
-      quantity;
-      newquantity;
-    }
+  interface Measurements {
+    unit: string;
+    width: string;
+    height: string;
+    quantity: string;
+    newquantity?: string;
+  }
 
-    interface collectionArea {
-      productGroup;
-      items : [];
-      company;
-      catalogue;
-      designNo;
-      reference;
-      measurement : measurements;
-      totalAmount : [];
-      totalTax : [];
-      quantities : [];
-    }
+  interface CollectionArea {
+    productGroup: any;
+    items: any[];
+    company: string | null;
+    catalogue: any[];
+    designNo: string | null;
+    reference: string | null;
+    measurement: Measurements;
+    totalAmount: number[];
+    totalTax: number[];
+    quantities: any[];
+  }
 
-    interface ProductGroup {
-      groupName: string;
-      mainProducts: string;
-      addonProducts: string;
-      color: string;
-      needsTailoring: boolean;
-    }
+  interface ProductGroup {
+    groupName: string;
+    mainProducts: string;
+    addonProducts: string;
+    color: string;
+    needsTailoring: boolean;
+  }
 
-    interface Goods {
-      date;
-      status;
-      orderID;
-      remark;
-    }
-    interface Tailor{
-      rate;
-      tailorData;
-      status;
-      remark;
-    }
+  interface Goods {
+    date: string;
+    status: string;
+    orderID: string;
+    remark: string;
+  }
 
-    const [goodsArray, setGoodsArray] = useState<Goods[]>([]);
-    const [tailorsArray, setTailorsArray] = useState<Tailor[]>([]);
+  interface Tailor {
+    rate: number;
+    tailorData: string[];
+    status: string;
+    remark: string;
+  }
 
-    const [selections, setSelections] = useState<AreaSelection[]>([]);
+  const [goodsArray, setGoodsArray] = useState<Goods[]>([]);
+  const [tailorsArray, setTailorsArray] = useState<Tailor[]>([]);
 
-    const getItemsData = async () => {
- 
-      const response  = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts");
-    
+  const [selections, setSelections] = useState<AreaSelection[]>([]);
+
+  const getItemsData = async () => {
+    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts");
+    const data = await response.json();
+    return data.body;
+  };
+
+  const fetchCustomers = async () => {
+    try {
+      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getcustomerdata", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
       const data = await response.json();
-    
+      return Array.isArray(data.body) ? data.body : [];
+    } catch (error) {
+      console.error("Error fetching customer data:", error);
+      return [];
+    }
+  };
+
+  async function fetchCatalogues() {
+    try {
+      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getcatalogues", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      return Array.isArray(data.body) ? data.body : [];
+    } catch (error) {
+      console.error("Error fetching catalogues:", error);
+      return [];
+    }
+  }
+
+  async function fetchInteriors() {
+    try {
+      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getinteriordata", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
       return data.body;
+    } catch (error) {
+      console.error("Error fetching interiors:", error);
+      return [];
     }
+  }
 
-    const fetchCustomers = async () => {
-        try {
-          const response = await fetch(
-            "https://sheeladecor.netlify.app/.netlify/functions/server/getcustomerdata",
-            { credentials: "include" }
-          );
-    
-          if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-          }
-    
-          const data = await response.json();
-          return Array.isArray(data.body) ? data.body : [];
-        } catch (error) {
-          console.error("Error fetching customer data:", error);
-          return [];
-        }
-    };
-
-    async function fetchCatalogues(){
-      try {
-        const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getcatalogues", {
-          credentials: "include",
-        });
-    
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-    
-        const data = await response.json();
-        return Array.isArray(data.body) ? data.body : [];
-      } catch (error) {
-        console.error("Error fetching catalogues:", error);
-        return [];
+  async function fetchSalesAssociates() {
+    try {
+      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsalesassociatedata", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
+      const data = await response.json();
+      return Array.isArray(data.body) ? data.body : [];
+    } catch (error) {
+      console.error("Error fetching sales associates:", error);
+      return [];
     }
+  }
 
-    async function fetchInteriors(){
-      try {
-        const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getinteriordata", {
-          credentials: "include",
-        });
-    
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-    
-        const data = await response.json();
-        return data.body;
-      } catch (error) {
-        console.error("Error fetching interiors:", error);
-        return [];
+  async function fetchProductGroups(): Promise<ProductGroup[]> {
+    try {
+      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getallproductgroup", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
       }
+      const data = await response.json();
+      return Array.isArray(data.body) ? data.body : [];
+    } catch (error) {
+      console.error("Error fetching product groups:", error);
+      return [];
     }
-  
-    async function fetchSalesAssociates() {
-      try {
-        const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsalesassociatedata", {
-          credentials: "include",
-        });
-    
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-    
-        const data = await response.json();
-        return Array.isArray(data.body) ? data.body : [];
-      } catch (error) {
-        console.error("Error fetching sales associates:", error);
-        return [];
-      }
+  }
+
+  const handleAddArea = () => {
+    setSelections([...selections, { area: "", areacollection: [] }]);
+  };
+
+  const handleRemoveArea = (index: number) => {
+    const updatedSelections = selections.filter((_, i) => i !== index);
+    setSelections(updatedSelections);
+  };
+
+  const handleAreaChange = (mainindex: number, newArea: string) => {
+    const updatedSelections = [...selections];
+    if (updatedSelections[mainindex]) {
+      updatedSelections[mainindex].area = newArea;
     }
+    setSelections(updatedSelections);
+  };
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    async function fetchProductGroups(): Promise<ProductGroup[]> {
-      try {
-        const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getallproductgroup", {
-          credentials: "include",
-        });
-    
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-    
-        const data = await response.json();
-        return Array.isArray(data.body) ? data.body : [];
-      } catch (error) {
-        console.error("Error fetching product groups:", error);
-        return [];
-      }
+  const handleProductGroupChange = (mainindex: number, i: number, product: string) => {
+    const updatedSelections = [...selections];
+    if (!updatedSelections[mainindex].areacollection) {
+      updatedSelections[mainindex].areacollection = [];
     }
-
-
-
-      const handleAddArea = () => {
-        setSelections([...selections, { area: "", areacollection : []}]);
+    if (!updatedSelections[mainindex].areacollection[i]) {
+      updatedSelections[mainindex].areacollection[i] = {
+        productGroup: null,
+        items: [""],
+        catalogue: [],
+        company: null,
+        designNo: null,
+        reference: null,
+        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+        totalAmount: [],
+        totalTax: [],
+        quantities: [],
       };
+    }
+    const newProduct = product.split(",");
+    updatedSelections[mainindex].areacollection[i].productGroup = newProduct;
+    const pg = newProduct;
+    if (!Array.isArray(pg) || pg.length < 2) return;
+    const relevantPG = pg.length > 2 ? pg.slice(1, -2) : [];
+    const matchedItems = relevantPG.map((pgItem) => {
+      const matched = items.find((item) => item[0] === pgItem);
+      return matched || pgItem;
+    });
+    const validMatchedItems = matchedItems.filter((el) => Array.isArray(el));
+    updatedSelections[mainindex].areacollection[i].items = validMatchedItems;
+    setSelections(updatedSelections);
+    const updatedGoodsArray = items.map(() => ({
+      date: "",
+      status: "Pending",
+      orderID: "",
+      remark: "NA",
+    }));
+    setGoodsArray(updatedGoodsArray);
+    const newTailorsArray = updatedSelections[mainindex].areacollection[i].items
+      .filter((item) => item[2] === "Tailoring")
+      .map(() => ({
+        rate: 0,
+        tailorData: [""],
+        status: "Pending",
+        remark: "NA",
+      }));
+    setTailorsArray(newTailorsArray);
+  };
 
-      const handleRemoveArea = (index: number) => {
-        const updatedSelections = selections.filter((_, i) => i !== index);
-        setSelections(updatedSelections);
+  const handleCatalogueChange = (mainindex: number, i: number, catalogue: any) => {
+    const updatedSelections = [...selections];
+    if (!updatedSelections[mainindex].areacollection) {
+      updatedSelections[mainindex].areacollection = [];
+    }
+    if (!updatedSelections[mainindex].areacollection[i]) {
+      updatedSelections[mainindex].areacollection[i] = {
+        productGroup: null,
+        items: [""],
+        catalogue: [],
+        company: null,
+        designNo: null,
+        reference: null,
+        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+        totalAmount: [],
+        totalTax: [],
+        quantities: [],
       };
+    }
+    updatedSelections[mainindex].areacollection[i].catalogue = catalogue;
+    setSelections(updatedSelections);
+  };
 
-      const handleAreaChange = (mainindex, newArea) => {
-        // Clone the selections array to avoid direct mutation of state
-        const updatedSelections = [...selections];
-      
-        // Check if the area exists and update its value
-        if (updatedSelections[mainindex]) {
-          updatedSelections[mainindex].area = newArea;  // Set the new area for the selected index
-        }
-      
-        // Update the state with the new selections array
-        setSelections(updatedSelections);
+  const handleCompanyChange = (mainindex: number, i: number, company: string) => {
+    const updatedSelections = [...selections];
+    if (!updatedSelections[mainindex].areacollection) {
+      updatedSelections[mainindex].areacollection = [];
+    }
+    if (!updatedSelections[mainindex].areacollection[i]) {
+      updatedSelections[mainindex].areacollection[i] = {
+        productGroup: null,
+        items: [""],
+        catalogue: [],
+        company: null,
+        designNo: null,
+        reference: null,
+        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+        totalAmount: [],
+        totalTax: [],
+        quantities: [],
       };
-         
+    }
+    updatedSelections[mainindex].areacollection[i].company = company;
+    setSelections(updatedSelections);
+  };
 
-      const handleProductGroupChange = (mainindex: number, i: number, product: string) => {
-        const updatedSelections = [...selections];
-      
-        // Ensure areacollection exists
-        if (!updatedSelections[mainindex].areacollection) {
-          updatedSelections[mainindex].areacollection = [];
-        }
-      
-        // Ensure the specific index exists
-        if (!updatedSelections[mainindex].areacollection[i]) {
-          updatedSelections[mainindex].areacollection[i] = {
-            productGroup: null,
-            items: [""],
-            catalogue: [],
-            company: null,
-            designNo: null,
-            reference: null,
-            measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
-            additionalItems: [],
-            totalAmount: [],
-            totalTax: []
-          };
-        }
-      
-        // Parse the product group string
-        const newproduct = product.split(",");
-        // Update selections
-        updatedSelections[mainindex].areacollection[i].productGroup = newproduct;
-        
-        const pg = newproduct;
-        if (!Array.isArray(pg) || pg.length < 2) return null;
-
-        const relevantPG = pg.length > 2 ? pg.slice(1, -2) : [];
-        const matchedItems = relevantPG.map((pgItem) => {
-          const matched = items.find((item) => item[0] === pgItem);
-          return matched || pgItem;
-        });
-
-        const validMatchedItems = matchedItems.filter((el) => Array.isArray(el));
-        updatedSelections[mainindex].areacollection[i].items = validMatchedItems;
-        setSelections(updatedSelections);
-        // ✅ Set goodsArray to have exactly the same number of items
-        const updatedGoodsArray = items.map(() => ({
-          date: "",
-          status: "Pending",
-          orderID: "",
-          remark: "NA"
-        }));
-        setGoodsArray(updatedGoodsArray); 
-
-        const newtailorsArray = updatedSelections[mainindex].areacollection[i].items.filter(item => item[2] == "Tailoring").map(() => ({
-            rate: 0,
-            tailorData: [""],
-            status : "Pending",
-            remark: "NA"
-          }));
-        setTailorsArray(newtailorsArray);
+  const handleDesignNoChange = (mainindex: number, i: number, designNo: string) => {
+    const updatedSelections = [...selections];
+    if (!updatedSelections[mainindex].areacollection) {
+      updatedSelections[mainindex].areacollection = [];
+    }
+    if (!updatedSelections[mainindex].areacollection[i]) {
+      updatedSelections[mainindex].areacollection[i] = {
+        productGroup: null,
+        items: [""],
+        catalogue: [],
+        company: null,
+        designNo: null,
+        reference: null,
+        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+        totalAmount: [],
+        totalTax: [],
+        quantities: [],
       };
-      
-      
-    
-    const handleCatalogueChange = (mainindex: number,i : number, catalogue) => {
-      const updatedSelections = [...selections];
-    
-      if (!updatedSelections[mainindex].areacollection) {
-        updatedSelections[mainindex].areacollection = [];
-      }
-    
-      if (!updatedSelections[mainindex].areacollection[i]) {
-        updatedSelections[mainindex].areacollection[i] = { productGroup: null, items : [""],  catalogue: [], company: null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] };
-      }
-    
-      updatedSelections[mainindex].areacollection[i].catalogue = catalogue;
+    }
+    updatedSelections[mainindex].areacollection[i].designNo = designNo;
+    setSelections(updatedSelections);
+  };
+
+  const handleReferenceChange = (mainindex: number, i: number, reference: string) => {
+    const updatedSelections = [...selections];
+    if (!updatedSelections[mainindex].areacollection) {
+      updatedSelections[mainindex].areacollection = [];
+    }
+    if (!updatedSelections[mainindex].areacollection[i]) {
+      updatedSelections[mainindex].areacollection[i] = {
+        productGroup: null,
+        items: [""],
+        catalogue: [],
+        company: null,
+        designNo: null,
+        reference: null,
+        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+        totalAmount: [],
+        totalTax: [],
+        quantities: [],
+      };
+    }
+    updatedSelections[mainindex].areacollection[i].reference = reference;
+    setSelections(updatedSelections);
+  };
+
+  const handleAddNewGroup = (mainindex: number) => {
+    const updatedSelections = [...selections];
+    if (updatedSelections[mainindex] && updatedSelections[mainindex].area) {
+      updatedSelections[mainindex].areacollection.push({
+        productGroup: "",
+        company: "",
+        catalogue: [],
+        designNo: "",
+        reference: "",
+        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+        items: [""],
+        totalAmount: [],
+        totalTax: [],
+        quantities: [],
+      });
       setSelections(updatedSelections);
-      console.log(goodsArray);
-      console.log(tailorsArray);
-    };
-    
-    const handleCompanyChange = (mainindex: number,i : number, company: string) => {
-      const updatedSelections = [...selections];
-    
-      if (!updatedSelections[mainindex].areacollection) {
-        updatedSelections[mainindex].areacollection = [];
-      }
-    
-      if (!updatedSelections[mainindex].areacollection[i]) {
-        updatedSelections[mainindex].areacollection[i] = { productGroup: null, items : [""], catalogue: [], company: null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] };
-      }
-    
-      updatedSelections[mainindex].areacollection[i].company = company;
-      setSelections(updatedSelections);
-
-      console.log(updatedSelections);
-    };
-
-    const handleDesignNoChange = (mainindex : number,i : number, designNo) => {
-      const updatedSelections = [...selections];
-
-      if(!updatedSelections[mainindex].areacollection){
-        updatedSelections[mainindex].areacollection = [];
-      }
-
-      if(!updatedSelections[mainindex].areacollection[i]){
-        updatedSelections[mainindex].areacollection[i] = { productGroup : null, items : [""], catalogue : [], company : null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] };
-      }
-
-      updatedSelections[mainindex].areacollection[i].designNo = designNo;
-      setSelections(updatedSelections);
-
-      console.log(updatedSelections);
     }
+  };
 
-    const handleReferenceChange = (mainindex : number, i : number, reference) => {
-      const updatedSelection = [...selections];
-
-      if(!updatedSelection[mainindex].areacollection){
-        updatedSelection[mainindex].areacollection = [];
-      }
-
-      if(!updatedSelection[mainindex].areacollection[i]){
-        updatedSelection[mainindex].areacollection[i] = { productGroup : null, items : [""], catalogue : [], company : null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] }
-      }
-
-      updatedSelection[mainindex].areacollection[i].reference = reference;
-
-      setSelections(updatedSelection);
+  const handleGroupDelete = (mainindex: number, index: number) => {
+    const updatedSelections = [...selections];
+    if (updatedSelections[mainindex].areacollection[index]) {
+      updatedSelections[mainindex].areacollection.splice(index, 1);
     }
+    setSelections(updatedSelections);
+  };
 
-    const handleAddNewGroup = (mainindex) => {
-      // Clone the selections array to avoid direct mutation of state
-      const updatedSelections = [...selections];
-    
-      // Ensure the area exists before proceeding
-      if (updatedSelections[mainindex] && updatedSelections[mainindex].area) {
-        // Add a new group to the `areacollection` array for the selected area
-        updatedSelections[mainindex].areacollection.push({
-          productGroup: "",
-          company: "",
-          catalogue: [],
-          designNo: "",
-          reference: "",
-          measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"},
-          items : [""],
-          additionalItems : [],
-          totalAmount : [],
-          totalTax : []
-        });
-    
-        // Update the state with the new selections array
-        setSelections(updatedSelections);
-      }
-    };
-    
-    const handleGroupDelete = (mainindex : number, index : number) => {
-      const updatedSelection = [...selections];
-      if(updatedSelection[mainindex].areacollection[index]){
-        updatedSelection[mainindex].areacollection.splice(index, 1);
-      }
+  const units = ["Inches (in)", "Centimeter (cm)", "Meters (m)", "Feet (ft)"];
 
-      setSelections(updatedSelection);
+  const handleWidthChange = (mainindex: number, index: number, width: string) => {
+    const updatedSelections = [...selections];
+    updatedSelections[mainindex].areacollection[index].measurement.width = width;
+    setSelections(updatedSelections);
+  };
+
+  const handleHeightChange = (mainindex: number, index: number, height: string) => {
+    const updatedSelections = [...selections];
+    updatedSelections[mainindex].areacollection[index].measurement.height = height;
+    setSelections(updatedSelections);
+  };
+
+  const recalculateTotals = (updatedSelections: AreaSelection[], additionalItems: Additional[]) => {
+    const selectionTaxArray = updatedSelections.flatMap((selection) =>
+      selection.areacollection.flatMap((col) => col.totalTax || [])
+    );
+    const selectionAmountArray = updatedSelections.flatMap((selection) =>
+      selection.areacollection.flatMap((col) => col.totalAmount || [])
+    );
+    const additionalTaxArray = additionalItems.map((item) => parseFloat(item.taxAmount.toString()) || 0);
+    const additionalAmountArray = additionalItems.map((item) => parseFloat(item.totalAmount.toString()) || 0);
+    const totalTax = parseFloat([...selectionTaxArray, ...additionalTaxArray].reduce((acc, curr) => acc + curr, 0).toFixed(2));
+    const totalAmount = parseFloat([...selectionAmountArray, ...additionalAmountArray].reduce((acc, curr) => acc + curr, 0).toFixed(2));
+    return { totalTax, totalAmount };
+  };
+
+  const handleQuantityChangeMain = (mainIndex: number, index: number, quantity: string) => {
+    const updatedSelections = [...selections];
+    const areaCol = updatedSelections[mainIndex].areacollection[index];
+    areaCol.measurement.quantity = quantity;
+    if (areaCol.items !== undefined) {
+      if (!areaCol.totalTax) areaCol.totalTax = [];
+      if (!areaCol.totalAmount) areaCol.totalAmount = [];
+      const corrected = areaCol.items.map((item, i) => {
+        const itemQuantity = parseFloat(updatedSelections[mainIndex].areacollection[index].quantities?.[i]) || 0;
+        const itemRate = parseFloat(item[4]) || 0;
+        const itemTaxPercent = parseFloat(item[5]) || 0;
+        const netRate = parseFloat(quantity) * itemQuantity * itemRate;
+        const taxAmount = parseFloat((netRate * (itemTaxPercent / 100)).toFixed(2));
+        const totalAmount = parseFloat((netRate + taxAmount).toFixed(2));
+        areaCol.totalTax[i] = taxAmount;
+        areaCol.totalAmount[i] = totalAmount;
+        return [...item.slice(0, 5), taxAmount, totalAmount];
+      });
+      areaCol.items = corrected;
     }
-    
-    const units = ["Inches (in)", "Centimeter (cm)", "Meters (m)", "Feet (ft)"];
-
-    const handlewidthchange = (mainindex : number, index : number, width) => {
-      const updatedSelection = [...selections];
-      updatedSelection[mainindex].areacollection[index].measurement.width = width;
-      setSelections(updatedSelection);
-    }
-    const handleheightchange = (mainindex : number, index : number, height) => {
-      const updatedSelection = [...selections];
-      updatedSelection[mainindex].areacollection[index].measurement.height = height;
-      setSelections(updatedSelection);
-    }
-    
-    const recalculateTotals = (updatedSelections, additionalItems) => {
-      const selectionTaxArray = updatedSelections.flatMap(selection =>
-        selection.areacollection.flatMap(col => col.totalTax || [])
-      );
-    
-      const selectionAmountArray = updatedSelections.flatMap(selection =>
-        selection.areacollection.flatMap(col => col.totalAmount || [])
-      );
-    
-      const additionalTaxArray = additionalItems.map(item => parseFloat(item.taxAmount) || 0);
-      const additionalAmountArray = additionalItems.map(item => parseFloat(item.totalAmount) || 0);
-    
-      const totalTax = parseFloat(([...selectionTaxArray, ...additionalTaxArray].reduce((acc, curr) => acc + curr, 0)).toFixed(2));
-      const totalAmount = parseFloat(([...selectionAmountArray, ...additionalAmountArray].reduce((acc, curr) => acc + curr, 0)).toFixed(2));
-    
-      return { totalTax, totalAmount };
-    };
-    
-    const handlequantitychange = (mainIndex, index, quantity) => {
-      const updatedSelections = [...selections];
-      const areaCol = updatedSelections[mainIndex].areacollection[index];
-    
-      // Update the quantity in measurement
-      areaCol.measurement.quantity = quantity;
-    
-      let taxSum = 0;
-      let amountSum = 0;
-      let corrected = [[]];
-      if (areaCol.items !== undefined) {
-        // Ensure arrays exist
-        if (!areaCol.totalTax) areaCol.totalTax = [];
-        if (!areaCol.totalAmount) areaCol.totalAmount = [];
-      
-        let taxSum = 0;
-        let amountSum = 0;
-      
-        const corrected = areaCol.items.map((item, i) => {
-          const itemQuantity = parseFloat(updatedSelections[mainIndex].areacollection[index].quantities?.[i]) || 0;
-          const itemRate = parseFloat(item[4]) || 0;
-          const itemTaxPercent = parseFloat(item[5]) || 0;
-      
-          const netRate = quantity * itemQuantity * itemRate;
-          const taxAmount = parseFloat((netRate * (itemTaxPercent / 100)).toFixed(2));
-          const totalAmount = parseFloat((netRate + taxAmount).toFixed(2));
-      
-          // Store per-item totals in the areaCol arrays
-          areaCol.totalTax[i] = taxAmount;
-          areaCol.totalAmount[i] = totalAmount;
-      
-          taxSum += taxAmount;
-          amountSum += totalAmount;
-      
-          // Update item[5] = taxAmount and item[6] = totalAmount
-          return [
-            ...item.slice(0, 5),
-            taxAmount,     // index 5
-            totalAmount    // index 6
-          ];
-        });
-      
-        areaCol.items = corrected; // Optional: store full amount sum
-      }
-      
-    
-      setSelections(updatedSelections);
-
-      const { totalTax, totalAmount } = recalculateTotals(updatedSelections, additionalItems);
-      setTax(totalTax);
-      setAmount(totalAmount);
-
-    };
-    const handleunitchange = (mainindex : number, index : number, unit) => {
-      const updatedSelection = [...selections];
-      updatedSelection[mainindex].areacollection[index].measurement.unit = unit;
-      setSelections(updatedSelection);
-    }
-    const [quantities, setQuantities] = useState({});
-
-    const handleQuantityChange = async (
-      key,
-      value,
-      mainIndex,
-      collectionIndex,
-      quantity,
-      num1,
-      num2,
-      itemIndex
-    ) => {
-      const updatedSelections = [...selections];
-    
-      if (!updatedSelections[mainIndex].areacollection[collectionIndex].quantities) {
-        updatedSelections[mainIndex].areacollection[collectionIndex].quantities = [];
-      }
-    
-      updatedSelections[mainIndex].areacollection[collectionIndex].quantities[itemIndex] = value;
-    
-      const cost = num1 * quantity * value;
-      const taxAmount = cost * (num2 / 100);
-      const totalWithTax = cost + taxAmount;
-    
-      if (!updatedSelections[mainIndex].areacollection[collectionIndex].totalTax) {
-        updatedSelections[mainIndex].areacollection[collectionIndex].totalTax = [];
-      }
-    
-      if (!updatedSelections[mainIndex].areacollection[collectionIndex].totalAmount) {
-        updatedSelections[mainIndex].areacollection[collectionIndex].totalAmount = [];
-      }
-    
-      updatedSelections[mainIndex].areacollection[collectionIndex].totalTax[itemIndex] = parseFloat(taxAmount.toFixed(2));
-      updatedSelections[mainIndex].areacollection[collectionIndex].totalAmount[itemIndex] = parseFloat(totalWithTax.toFixed(2));
-    
-      setSelections(updatedSelections);
-    
-      const { totalTax, totalAmount } = recalculateTotals(updatedSelections, additionalItems);
-      setTax(totalTax);
-      setAmount(totalAmount);
-    };
-    
-    
-
-    // Add a new empty item
-    const handleAddMiscItem = () => {
-      setAdditionaItems(prev => [
-        ...prev,
-        {
-          name: "",
-          quantity: 0,
-          rate: 0,
-          netRate: 0,
-          tax: 0,
-          taxAmount: 0,
-          totalAmount: 0,
-          remark: ""
-        }
-      ]);
-    };
-    
-
-// Delete item by index
-const handleDeleteMiscItem = (itemIndex) => {
-  const updated = [...additionalItems];
-  updated.splice(itemIndex, 1);
-  setAdditionaItems(updated);
-};
-
-// Update item name
-const handleItemNameChange = (i, value) => {
-  const updated = [...additionalItems];
-  updated[i].name = value;
-  setAdditionaItems(updated);
-};
-
-// Update quantity and auto-update net rate, tax amount, and total amount
-const handleItemQuantityChange = (i, quantity) => {
-  const updated = [...additionalItems];
-  updated[i].quantity = quantity;
-  updated[i].netRate = parseFloat((quantity * updated[i].rate).toFixed(2)); // Net Rate
-  updated[i].taxAmount = parseFloat((updated[i].netRate * (updated[i].tax / 100)).toFixed(2)); // Tax Amount
-  updated[i].totalAmount = parseFloat(((updated[i].netRate) + Number(updated[i].taxAmount)).toFixed(2)); // Total Amount
-  setAdditionaItems(updated);
-};
-
-const [itemTax, setItemTax] = useState(0);
-const [itemTotal, setItemTotal] = useState(0);
-
-const recalculateItemTotals = (items) => {
-  const totalTax = items.reduce((acc, item) => acc + (parseFloat(item.taxAmount) || 0), 0);
-  const totalAmount = items.reduce((acc, item) => acc + (parseFloat(item.totalAmount) || 0), 0);
-
-  setItemTax(totalTax);
-  setItemTotal(totalAmount);
-};
-
-// Update rate and auto-update net rate, tax amount, and total amount
-const handleItemRateChange = (i, rate) => {
-  const updated = [...additionalItems];
-  updated[i].rate = rate;
-  updated[i].netRate = parseFloat((updated[i].quantity * updated[i].rate).toFixed(2));// Net Rate
-  updated[i].taxAmount = parseFloat((updated[i].netRate * (updated[i].tax / 100)).toFixed(2)); // Tax Amount
-  updated[i].totalAmount = parseFloat(((updated[i].netRate) + updated[i].taxAmount).toFixed(2)); // Total Amount
-  setAdditionaItems(updated);
-
-    // 🧮 Sum from additionalItems
-    const additionalTax = updated.reduce((acc, item) => acc + (parseFloat(item.taxAmount) || 0), 0);
-    const additionalAmount = updated.reduce((acc, item) => acc + (parseFloat(item.totalAmount) || 0), 0);
-  
-    // 🧮 Sum from selections.areacollection totalTax and totalAmount
-    const selectionTax = selections.flatMap(sel =>
-      sel.areacollection.flatMap(col => col.totalTax || [])
-    ).reduce((acc, val) => acc + (parseFloat(val) || 0), 0);
-  
-    const selectionAmount = selections.flatMap(sel =>
-      sel.areacollection.flatMap(col => col.totalAmount || [])
-    ).reduce((acc, val) => acc + (parseFloat(val) || 0), 0);
-  
-    // 💡 Combine both
-    const totalTax = parseFloat((additionalTax + selectionTax).toFixed(2));
-    const totalAmount = parseFloat((additionalAmount + selectionAmount).toFixed(2));
-  
+    setSelections(updatedSelections);
+    const { totalTax, totalAmount } = recalculateTotals(updatedSelections, additionalItems);
     setTax(totalTax);
     setAmount(totalAmount);
-};
+  };
 
-// Update tax and auto-update tax amount and total amount
-const handleItemTaxChange = (i, tax) => {
-  const updated = [...additionalItems];
+  const handleUnitChange = (mainindex: number, index: number, unit: string) => {
+    const updatedSelections = [...selections];
+    updatedSelections[mainindex].areacollection[index].measurement.unit = unit;
+    setSelections(updatedSelections);
+  };
 
-  // Ensure numeric values
-  const rate = parseFloat(updated[i].rate) || 0;
-  const quantity = parseFloat(updated[i].quantity) || 0;
-  const netRate = rate * quantity;
+  const [quantities, setQuantities] = useState<{ [key: string]: string }>({});
 
-  updated[i].netRate =  parseFloat((quantity * updated[i].rate).toFixed(2));; // Net rate
-  updated[i].tax = tax; // Tax %
-  updated[i].taxAmount = parseFloat((updated[i].netRate * (updated[i].tax / 100)).toFixed(2)); // Tax Amount
-  updated[i].totalAmount = parseFloat(((updated[i].netRate) + updated[i].taxAmount).toFixed(2)); // Total Amount
+  const handleQuantityChange = async (
+    key: string,
+    value: string,
+    mainIndex: number,
+    collectionIndex: number,
+    quantity: string,
+    num1: number,
+    num2: number,
+    itemIndex: number
+  ) => {
+    const updatedSelections = [...selections];
+    if (!updatedSelections[mainIndex].areacollection[collectionIndex].quantities) {
+      updatedSelections[mainIndex].areacollection[collectionIndex].quantities = [];
+    }
+    updatedSelections[mainIndex].areacollection[collectionIndex].quantities[itemIndex] = value;
+    const cost = num1 * parseFloat(quantity) * parseFloat(value);
+    const taxAmount = cost * (num2 / 100);
+    const totalWithTax = cost + taxAmount;
+    if (!updatedSelections[mainIndex].areacollection[collectionIndex].totalTax) {
+      updatedSelections[mainIndex].areacollection[collectionIndex].totalTax = [];
+    }
+    if (!updatedSelections[mainIndex].areacollection[collectionIndex].totalAmount) {
+      updatedSelections[mainIndex].areacollection[collectionIndex].totalAmount = [];
+    }
+    updatedSelections[mainIndex].areacollection[collectionIndex].totalTax[itemIndex] = parseFloat(taxAmount.toFixed(2));
+    updatedSelections[mainIndex].areacollection[collectionIndex].totalAmount[itemIndex] = parseFloat(totalWithTax.toFixed(2));
+    setSelections(updatedSelections);
+    const { totalTax, totalAmount } = recalculateTotals(updatedSelections, additionalItems);
+    setTax(totalTax);
+    setAmount(totalAmount);
+  };
 
-  setAdditionaItems(updated);
+  const handleAddMiscItem = () => {
+    setAdditionalItems((prev) => [
+      ...prev,
+      {
+        name: "",
+        quantity: 0,
+        rate: 0,
+        netRate: 0,
+        tax: 0,
+        taxAmount: 0,
+        totalAmount: 0,
+        remark: "",
+      },
+    ]);
+  };
 
-  // 🧮 Sum from additionalItems
-  const additionalTax = updated.reduce((acc, item) => acc + (parseFloat(item.taxAmount) || 0), 0);
-  const additionalAmount = updated.reduce((acc, item) => acc + (parseFloat(item.totalAmount) || 0), 0);
+  const handleDeleteMiscItem = (itemIndex: number) => {
+    const updated = [...additionalItems];
+    updated.splice(itemIndex, 1);
+    setAdditionalItems(updated);
+    const { totalTax, totalAmount } = recalculateTotals(selections, updated);
+    setTax(totalTax);
+    setAmount(totalAmount);
+  };
 
-  // 🧮 Sum from selections.areacollection totalTax and totalAmount
-  const selectionTax = selections.flatMap(sel =>
-    sel.areacollection.flatMap(col => col.totalTax || [])
-  ).reduce((acc, val) => acc + (parseFloat(val) || 0), 0);
+  const handleItemNameChange = (i: number, value: string) => {
+    const updated = [...additionalItems];
+    updated[i].name = value;
+    setAdditionalItems(updated);
+  };
 
-  const selectionAmount = selections.flatMap(sel =>
-    sel.areacollection.flatMap(col => col.totalAmount || [])
-  ).reduce((acc, val) => acc + (parseFloat(val) || 0), 0);
+  const handleItemQuantityChange = (i: number, quantity: string) => {
+    const updated = [...additionalItems];
+    updated[i].quantity = parseFloat(quantity) || 0;
+    updated[i].netRate = parseFloat((updated[i].quantity * updated[i].rate).toFixed(2));
+    updated[i].taxAmount = parseFloat((updated[i].netRate * (updated[i].tax / 100)).toFixed(2));
+    updated[i].totalAmount = parseFloat((updated[i].netRate + updated[i].taxAmount).toFixed(2));
+    setAdditionalItems(updated);
+    const { totalTax, totalAmount } = recalculateTotals(selections, updated);
+    setTax(totalTax);
+    setAmount(totalAmount);
+  };
 
-  // 💡 Combine both
-  const totalTax = parseFloat((additionalTax + selectionTax).toFixed(2));
-  const totalAmount = parseFloat((additionalAmount + selectionAmount).toFixed(2));
+  const [itemTax, setItemTax] = useState(0);
+  const [itemTotal, setItemTotal] = useState(0);
 
-  setTax(totalTax);
-  setAmount(totalAmount);
-};
+  const recalculateItemTotals = (items: Additional[]) => {
+    const totalTax = items.reduce((acc, item) => acc + (parseFloat(item.taxAmount.toString()) || 0), 0);
+    const totalAmount = items.reduce((acc, item) => acc + (parseFloat(item.totalAmount.toString()) || 0), 0);
+    setItemTax(totalTax);
+    setItemTotal(totalAmount);
+  };
 
+  const handleItemRateChange = (i: number, rate: string) => {
+    const updated = [...additionalItems];
+    updated[i].rate = parseFloat(rate) || 0;
+    updated[i].netRate = parseFloat((updated[i].quantity * updated[i].rate).toFixed(2));
+    updated[i].taxAmount = parseFloat((updated[i].netRate * (updated[i].tax / 100)).toFixed(2));
+    updated[i].totalAmount = parseFloat((updated[i].netRate + updated[i].taxAmount).toFixed(2));
+    setAdditionalItems(updated);
+    const { totalTax, totalAmount } = recalculateTotals(selections, updated);
+    setTax(totalTax);
+    setAmount(totalAmount);
+  };
 
-const [status, changeStatus] = useState("approved");
-const [interiorArray, setInteriorArray] = useState([]);
-const [salesAssociateArray, setSalesAssociateArray] = useState([]);
-const [projectName, setProjectName] = useState("");
-const [projectReference, setProjectReference] = useState("");
-const [user, setUser] = useState("");
-const [projectDate, setPRojectDate] = useState("");
-const [additionalRequests, setAdditionalRequests] = useState("");
-// Update remark
-const handleItemRemarkChange = (i, remark) => {
-  const updated = [...additionalItems];
-  updated[i].remark = remark;
-  setAdditionaItems(updated);
-};
+  const handleItemTaxChange = (i: number, tax: string) => {
+    const updated = [...additionalItems];
+    updated[i].tax = parseFloat(tax) || 0;
+    updated[i].netRate = parseFloat((updated[i].quantity * updated[i].rate).toFixed(2));
+    updated[i].taxAmount = parseFloat((updated[i].netRate * (updated[i].tax / 100)).toFixed(2));
+    updated[i].totalAmount = parseFloat((updated[i].netRate + updated[i].taxAmount).toFixed(2));
+    setAdditionalItems(updated);
+    const { totalTax, totalAmount } = recalculateTotals(selections, updated);
+    setTax(totalTax);
+    setAmount(totalAmount);
+  };
 
-    const [selectedMainIndex, setSelectedMainIndex] = useState(null);
-    const [selectedCollectionIndex, setSelectedCollectionIndex] = useState(null);
+  const [status, changeStatus] = useState("approved");
+  const [interiorArray, setInteriorArray] = useState<any[]>([]);
+  const [salesAssociateArray, setSalesAssociateArray] = useState<any[]>([]);
+  const [projectName, setProjectName] = useState("");
+  const [projectReference, setProjectReference] = useState("");
+  const [user, setUser] = useState("");
+  const [projectDate, setProjectDate] = useState("");
+  const [additionalRequests, setAdditionalRequests] = useState("");
 
-    const sendProjectData = async () => {
-      try {
-        const response = await fetch(
-          "https://sheeladecor.netlify.app/.netlify/functions/server/sendprojectdata",
-          {
-            method: "POST",
-            credentials: "include",
-            headers: {
-              "content-type": "application/json",
-            },
-            body: JSON.stringify({
-              projectName: projectName,
-              customerLink: JSON.stringify(selectedCustomer), // Serialize array to string
-              projectReference: projectReference,
-              status: status,
-              totalAmount: Amount,
-              totalTax: Tax,
-              paid: Paid,
-              discount: Discount,
-              createdBy: user,
-              allData: JSON.stringify(selections), // Serialize object/array to string
-              projectDate: projectDate,
-              additionalRequests : additionalRequests,
-              interiorArray : JSON.stringify(interiorArray),
-              salesAssociateArray : JSON.stringify(salesAssociateArray),
-              additionalItems : JSON.stringify(additionalItems),
-              goodsArray : JSON.stringify(goodsArray),
-              tailorsArray : JSON.stringify(tailorsArray)
-            }),
-          }
-        );
-    
-        console.log("Response:", response);
-    
-        if (response.status === 200) {
-          alert("Project Added");
-        } else {
-          const errorText = await response.text(); // Get error details
-          console.error("Error response:", errorText);
-          alert("Error: Failed to add project");
-        }
-      } catch (error) {
-        console.error("Fetch error:", error);
-        alert("Error: Network issue or server not responding");
+  const handleItemRemarkChange = (i: number, remark: string) => {
+    const updated = [...additionalItems];
+    updated[i].remark = remark;
+    setAdditionalItems(updated);
+  };
+
+  const [selectedMainIndex, setSelectedMainIndex] = useState<number | null>(null);
+  const [selectedCollectionIndex, setSelectedCollectionIndex] = useState<number | null>(null);
+
+  const sendProjectData = async () => {
+    try {
+      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/sendprojectdata", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          projectName: projectName,
+          customerLink: JSON.stringify(selectedCustomer),
+          projectReference: projectReference,
+          status: status,
+          totalAmount: amount,
+          totalTax: tax,
+          paid: paid,
+          discount: discount,
+          createdBy: user,
+          allData: JSON.stringify(selections),
+          projectDate: projectDate,
+          additionalRequests: additionalRequests,
+          interiorArray: JSON.stringify(interiorArray),
+          salesAssociateArray: JSON.stringify(salesAssociateArray),
+          additionalItems: JSON.stringify(additionalItems),
+          goodsArray: JSON.stringify(goodsArray),
+          tailorsArray: JSON.stringify(tailorsArray),
+        }),
+      });
+      if (response.status === 200) {
+        alert("Project Added");
+      } else {
+        const errorText = await response.text();
+        console.error("Error response:", errorText);
+        alert("Error: Failed to add project");
       }
-    };
+    } catch (error) {
+      console.error("Fetch error:", error);
+      alert("Error: Network issue or server not responding");
+    }
+  };
 
-    const [goodsItems, setGoodsItems] = useState([]);
+  const [goodsItems, setGoodsItems] = useState<any[]>([]);
 
-    useEffect(() => {
-      async function getData() {
-        const data = await fetchInteriors();
-        dispatch(setInteriorData(data));
-        setinterior(data);
+  useEffect(() => {
+    async function getData() {
+      const data = await fetchInteriors();
+      dispatch(setInteriorData(data));
+      setInterior(data);
+    }
+    async function getItemsData() {
+      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts", {
+        credentials: "include",
+      });
+      const data = await response.json();
+      const items = data.body || [];
+      dispatch(setItemData(items));
+      setSingleItems(items);
+    }
+    if (interiorData.length === 0) {
+      getData();
+    }
+    if (items.length === 0) {
+      getItemsData();
+    }
+  }, [dispatch, interiorData, items]);
+
+  useEffect(() => {
+    async function getData() {
+      const data = await fetchSalesAssociates();
+      dispatch(setSalesAssociateData(data));
+      setSalesData(data);
+    }
+    if (salesAssociateData.length === 0) {
+      getData();
+    }
+  }, [dispatch, salesAssociateData]);
+
+  useEffect(() => {
+    async function getData() {
+      const data = await fetchProductGroups();
+      dispatch(setProducts(data));
+      setAvailableProductGroups(data);
+    }
+    if (products.length === 0) {
+      getData();
+    }
+  }, [dispatch, products]);
+
+  useEffect(() => {
+    async function getData() {
+      const data = await fetchCatalogues();
+      dispatch(setCatalogs(data));
+    }
+    if (catalogueData.length === 0) {
+      getData();
+    }
+  }, [dispatch, catalogueData]);
+
+  useEffect(() => {
+    async function getData() {
+      const data = await fetchCustomers();
+      dispatch(setCustomerData(data));
+      setCustomers(data);
+    }
+    if (customerData.length === 0) {
+      getData();
+    }
+  }, [dispatch, customerData]);
+
+  const bankDetails = ["123213", "!23123213", "123132"];
+  const termsConditions = ["sadsdsad", "Adasdad"];
+
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    let yOffset = 20;
+
+    // Header
+    doc.setFontSize(18);
+    doc.setFont("helvetica", "bold");
+    doc.text("Quotation", pageWidth / 2, yOffset, { align: "center" });
+    yOffset += 10;
+
+    // Company Details
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
+    doc.text("Sheela Decor", 20, yOffset);
+    yOffset += 7;
+    doc.text("123 Business Street, City, Country", 20, yOffset);
+    yOffset += 7;
+    doc.text("Email: contact@sheeladecor.com", 20, yOffset);
+    yOffset += 7;
+    doc.text("Phone: +123 456 7890", 20, yOffset);
+    yOffset += 10;
+
+    // Customer and Project Details
+    doc.setFontSize(10);
+    doc.text(`Quotation Date: ${projectDate || "N/A"}`, 20, yOffset);
+    doc.text(`Project: ${projectName || "N/A"}`, pageWidth - 80, yOffset);
+    yOffset += 7;
+    doc.text(`Customer: ${selectedCustomer?.name || "N/A"}`, 20, yOffset);
+    doc.text(`Reference: ${projectReference || "N/A"}`, pageWidth - 80, yOffset);
+    yOffset += 15;
+
+    // Quotation Table
+    const tableData: any[] = [];
+    let srNo = 1;
+
+    selections.forEach((selection, mainIndex) => {
+      if (selection.areacollection && selection.areacollection.length > 0) {
+        selection.areacollection.forEach((collection, collectionIndex) => {
+          const pg = collection.productGroup;
+          if (!Array.isArray(pg) || pg.length < 2) return;
+          const relevantPG = pg.length > 2 ? pg.slice(1, -2) : [];
+          const matchedItems = relevantPG.map((pgItem) => {
+            const matched = items.find((item) => item[0] === pgItem);
+            return matched || pgItem;
+          });
+          const validMatchedItems = matchedItems.filter((el) => Array.isArray(el));
+          validMatchedItems.forEach((item, itemIndex) => {
+            const qty = collection.quantities?.[itemIndex] || 0;
+            tableData.push([
+              srNo++,
+              `${item[0]} * ${collection.measurement.quantity}`,
+              `${collection.measurement.width} x ${collection.measurement.height} ${collection.measurement.unit}`,
+              (item[4] * parseFloat(collection.measurement.quantity)).toFixed(2),
+              qty,
+              (item[4] * parseFloat(collection.measurement.quantity) * qty).toFixed(2),
+              item[5].toFixed(2),
+              collection.totalTax[itemIndex]?.toFixed(2) || "0.00",
+              collection.totalAmount[itemIndex]?.toFixed(2) || "0.00",
+            ]);
+          });
+        });
       }
-      async function getitemsdata() {
-        const response = await fetch(
-          "https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts",
-          { credentials: "include" }
-        );
-        const data = await response.json();
-        const items = data.body || [];
-        dispatch(setItemData(items));
-        setsingleitems(items);
-      }
-      if (interiorData.length === 0) {
-        getData();
-      }
-      if (items.length === 0) {
-        getitemsdata();
-      }
-    }, [dispatch]);
-    
-    useEffect(() => {
-      async function getData() {
-        const data = await fetchSalesAssociates();
-        dispatch(setSalesAssociateData(data));
-        setsalesdata(data);
-      }
-      if (salesAssociateData.length === 0) {
-        getData();
-      }
-    }, [dispatch]);
-    
-    useEffect(() => {
-      async function getData() {
-        const data = await fetchProductGroups();
-        dispatch(setProducts(data));
-        setAvailableProductGroups(data);
-      }
-      if (products.length == 0) {
-        getData();
-      }
-    }, [dispatch, productGroups]);
-    
-    useEffect(() => {
-      async function getData() {
-        const data = await fetchCatalogues();
-        dispatch(setCatalogs(data));
-      }
-      if (catalogueData.length === 0) {
-        getData();
-      }
-    }, [dispatch]);
-    
-    useEffect(() => {
-      async function getData() {
-        const data = await fetchCustomers();
-        dispatch(setCustomerData(data));
-        setcustomers(data);
-      }
-      if (customerData.length === 0) {
-        getData();
-      }
-    }, [dispatch]);
-    
-    const bankDetails = ["123213", "!23123213", "123132"];
-    const termsCondiditions = ["sadsdsad", "Adasdad"];
+    });
+
+    // Miscellaneous Items
+    additionalItems.forEach((item, i) => {
+      tableData.push([
+        srNo++,
+        item.name || "N/A",
+        "N/A",
+        item.rate.toFixed(2),
+        item.quantity,
+        item.netRate.toFixed(2),
+        item.tax.toFixed(2),
+        item.taxAmount.toFixed(2),
+        item.totalAmount.toFixed(2),
+      ]);
+    });
+
+    autoTable(doc, {
+      startY: yOffset,
+      head: [
+        ["Sr. No.", "Product Name", "Size", "MRP", "Quantity", "Subtotal", "Tax Rate (%)", "Tax Amount", "Total"],
+      ],
+      body: tableData,
+      theme: "grid",
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [0, 102, 204], textColor: [255, 255, 255] },
+      alternateRowStyles: { fillColor: [240, 240, 240] },
+    });
+
+    yOffset = (doc as any).lastAutoTable.finalY + 10;
+
+    // Summary
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text("Summary", 20, yOffset);
+    yOffset += 7;
+    doc.setFont("helvetica", "normal");
+    doc.text(`Sub Total: ${amount.toFixed(2)}`, pageWidth - 80, yOffset);
+    yOffset += 7;
+    doc.text(`Total Tax Amount: ${tax.toFixed(2)}`, pageWidth - 80, yOffset);
+    yOffset += 7;
+    doc.text(`Total Amount: ${(amount + tax).toFixed(2)}`, pageWidth - 80, yOffset);
+    yOffset += 7;
+    doc.text(`Discount: ${discount.toFixed(2)}`, pageWidth - 80, yOffset);
+    yOffset += 7;
+    doc.text(`Grand Total: ${(amount + tax - discount).toFixed(2)}`, pageWidth - 80, yOffset);
+
+    // Footer
+    yOffset = pageHeight - 20;
+    doc.setFontSize(8);
+    doc.text("Thank you for your business!", pageWidth / 2, yOffset, { align: "center" });
+
+    // Save PDF
+    doc.save(`Quotation_${projectName || "Project"}_${projectDate || "Date"}.pdf`);
+  };
+
   return (
     <div className="flex flex-col gap-3 w-full h-screen">
-        <div className="flex flex-col w-full">
-            <p className="lg:text-[1.8vw]">Add New Project</p>
-            <div className="flex gap-3 -mt-3">
-                <Link to="/" className="text-[1vw] text-black !no-underline">Dashboard</Link>
-                <Link to="/projects" className="text-[1vw] text-black !no-underline">All Projects</Link>
-            </div>
+      <div className="flex flex-col w-full">
+        <p className="lg:text-[1.8vw]">Add New Project</p>
+        <div className="flex gap-3 -mt-3">
+          <Link to="/" className="text-[1vw] text-black !no-underline">Dashboard</Link>
+          <Link to="/projects" className="text-[1vw] text-black !no-underline">All Projects</Link>
         </div>
-        <CustomerDetails
-          customers={customers}
-          selectedCustomer={selectedCustomer}
-          setSelectedCustomer={setSelectedCustomer}
-          projectData={projectData}
-        />
-        <ProjectDetails
-              selectedCustomer={selectedCustomer}
-              interior={interior}
-              salesdata={salesdata}
-              interiorArray={interiorArray}
-              setInteriorArray={setInteriorArray}
-              salesAssociateArray={salesAssociateArray}
-              setSalesAssociateArray={setSalesAssociateArray}
-              projectName={projectName}
-              setProjectName={setProjectName}
-              projectReference={projectReference}
-              setProjectReference={setProjectReference}
-              user={user}
-              setUser={setUser}
-              projectDate={projectDate}
-              setProjectDate={setPRojectDate}
-              setAdditionalRequests={setAdditionalRequests}
-              additionalRequests={additionalRequests}
-            />
-
-        <MaterialSelectionComponent
-          selections={selections}
-          availableAreas={availableAreas}
-          availableProductGroups={availableProductGroups}
-          availableCompanies={availableCompanies}
-          catalogueData={catalogueData}
-          designNo={designNo}
-          handleAddArea={handleAddArea}
-          handleRemoveArea={handleRemoveArea}
-          handleAreaChange={handleAreaChange}
-          handleAddNewGroup={handleAddNewGroup}
-          handleProductGroupChange={handleProductGroupChange}
-          handleCompanyChange={handleCompanyChange}
-          handleCatalogueChange={handleCatalogueChange}
-          handleDesignNoChange={handleDesignNoChange}
-          handleReferenceChange={handleReferenceChange}
-          handleGroupDelete = {handleGroupDelete}
-        />
-        
-        <MeasurementSection
-          selections={selections}
-          units={units}
-          handleRemoveArea={handleRemoveArea}
-          handleReferenceChange={handleReferenceChange}
-          handleunitchange={handleunitchange}
-          handlewidthchange={handlewidthchange}
-          handleheightchange={handleheightchange}
-          handlequantitychange={handlequantitychange}
-        />
-        <div className="flex flex-col p-6 border rounded-lg w-full shadow-2xl">
-      <p className="text-[1.1vw]">Quotation</p>
-      <div className="flex flex-col gap-3 w-full">
-        {selections.map((selection, mainindex) => (
-          <div key={mainindex} className="w-full">
-            <p className="text-[1.1vw] font-semibold mb-2">{selection.area}</p>
-            <table className="w-full border-collapse mb-6 text-[0.95vw]">
+      </div>
+      <CustomerDetails
+        customers={customers}
+        selectedCustomer={selectedCustomer}
+        setSelectedCustomer={setSelectedCustomer}
+        projectData={projectData}
+      />
+      <ProjectDetails
+        selectedCustomer={selectedCustomer}
+        interior={interior}
+        salesdata={salesData}
+        interiorArray={interiorArray}
+        setInteriorArray={setInteriorArray}
+        salesAssociateArray={salesAssociateArray}
+        setSalesAssociateArray={setSalesAssociateArray}
+        projectName={projectName}
+        setProjectName={setProjectName}
+        projectReference={projectReference}
+        setProjectReference={setProjectReference}
+        user={user}
+        setUser={setUser}
+        projectDate={projectDate}
+        setProjectDate={setProjectDate}
+        setAdditionalRequests={setAdditionalRequests}
+        additionalRequests={additionalRequests}
+      />
+      <MaterialSelectionComponent
+        selections={selections}
+        availableAreas={availableAreas}
+        availableProductGroups={availableProductGroups}
+        availableCompanies={availableCompanies}
+        catalogueData={catalogueData}
+        designNo={designNo}
+        handleAddArea={handleAddArea}
+        handleRemoveArea={handleRemoveArea}
+        handleAreaChange={handleAreaChange}
+        handleAddNewGroup={handleAddNewGroup}
+        handleProductGroupChange={handleProductGroupChange}
+        handleCompanyChange={handleCompanyChange}
+        handleCatalogueChange={handleCatalogueChange}
+        handleDesignNoChange={handleDesignNoChange}
+        handleReferenceChange={handleReferenceChange}
+        handleGroupDelete={handleGroupDelete}
+      />
+      <MeasurementSection
+        selections={selections}
+        units={units}
+        handleRemoveArea={handleRemoveArea}
+        handleReferenceChange={handleReferenceChange}
+        handleunitchange={handleUnitChange}
+        handlewidthchange={handleWidthChange}
+        handleheightchange={handleHeightChange}
+        handlequantitychange={handleQuantityChangeMain}
+      />
+      <div className="flex flex-col p-6 border rounded-lg w-full shadow-2xl">
+        <p className="text-[1.1vw]">Quotation</p>
+        <div className="flex flex-col gap-3 w-full">
+          {selections.map((selection, mainIndex) => (
+            <div key={mainIndex} className="w-full">
+              <p className="text-[1.1vw] font-semibold mb-2">{selection.area}</p>
+              <table className="w-full border-collapse mb-6 text-[0.95vw]">
+                <thead>
+                  <tr className="flex justify-between w-full bg-gray-100 p-2 border-b font-semibold">
+                    <td className="w-[10%]">Sr. No.</td>
+                    <td className="w-[45%]">Product Name</td>
+                    <td className="w-[45%]">Size</td>
+                    <td className="w-[20%]">MRP</td>
+                    <td className="w-[20%]">Quantity</td>
+                    <td className="w-[20%]">Subtotal</td>
+                    <td className="w-[20%]">Tax Rate (%)</td>
+                    <td className="w-[20%]">Tax Amount</td>
+                    <td className="w-[20%]">Total</td>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selection.areacollection && selection.areacollection.length > 0 ? (
+                    selection.areacollection.map((collection, collectionIndex) => {
+                      const pg = collection.productGroup;
+                      if (!Array.isArray(pg) || pg.length < 2) return null;
+                      const relevantPG = pg.length > 2 ? pg.slice(1, -2) : [];
+                      const matchedItems = relevantPG.map((pgItem) => {
+                        const matched = items.find((item) => item[0] === pgItem);
+                        return matched || pgItem;
+                      });
+                      const validMatchedItems = matchedItems.filter((el) => Array.isArray(el));
+                      return validMatchedItems.map((item, itemIndex) => {
+                        const key = `${mainIndex}-${collectionIndex}-${itemIndex}`;
+                        const qty = selection.areacollection[collectionIndex]?.quantities?.[itemIndex] || 0;
+                        return (
+                          <tr key={key} className="flex justify-between w-full border-b p-2">
+                            <td className="w-[10%]">{itemIndex + 1}</td>
+                            <td className="w-[45%]">{item[0] + " * " + collection.measurement.quantity}</td>
+                            <td className="w-[45%]">
+                              {collection.measurement.width + " x " + collection.measurement.height + " " + collection.measurement.unit}
+                            </td>
+                            <td className="w-[20%]">{(item[4] * parseFloat(collection.measurement.quantity)).toFixed(2)}</td>
+                            <td className="w-[20%]">
+                              <div className="flex flex-col">
+                                <input
+                                  type="text"
+                                  value={selection.areacollection[collectionIndex]?.quantities?.[itemIndex] || ""}
+                                  onChange={(e) =>
+                                    handleQuantityChange(
+                                      key,
+                                      e.target.value,
+                                      mainIndex,
+                                      collectionIndex,
+                                      collection.measurement.quantity,
+                                      item[4],
+                                      item[5],
+                                      itemIndex
+                                    )
+                                  }
+                                  className="border w-[40%] px-2 py-1 rounded"
+                                />
+                                <p className="text-[0.8vw] text-gray-600">{item[3]}</p>
+                              </div>
+                            </td>
+                            <td className="w-[20%]">{(item[4] * parseFloat(collection.measurement.quantity) * qty).toFixed(2)}</td>
+                            <td className="w-[20%]">{item[5].toFixed(2)}</td>
+                            <td className="w-[20%]">{collection.totalTax[itemIndex]?.toFixed(2) || "0.00"}</td>
+                            <td className="w-[20%]">{collection.totalAmount[itemIndex]?.toFixed(2) || "0.00"}</td>
+                          </tr>
+                        );
+                      });
+                    })
+                  ) : (
+                    <tr>
+                      <td colSpan={9} className="text-center py-2 text-gray-500">
+                        No product data available.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          ))}
+        </div>
+        <div className="border p-6 rounded-lg w-full flex flex-col">
+          <p className="text-[1.1vw] font-semibold">Miscellaneous</p>
+          <div className="flex w-full flex-col">
+            <div className="flex flex-row justify-between items-center mt-4">
+              <button
+                className="flex flex-row gap-2 rounded-xl bg-sky-50 hover:bg-sky-100 items-center px-2 py-1"
+                onClick={handleAddMiscItem}
+              >
+                <FaPlus className="text-sky-500 mt-1" />
+                Add Item
+              </button>
+            </div>
+            <table className="mt-3 w-full">
               <thead>
-                <tr className="flex justify-between w-full bg-gray-100 p-2 border-b font-semibold">
-                  <td className="w-[10%]">Sr. No.</td>
-                  <td className="w-[45%]">Product Name</td>
-                  <td className="w-[45%]">Size</td>
-                  <td className="w-[20%]">MRP</td>
-                  <td className="w-[20%]">Quantity</td>
-                  <td className="w-[20%]">Subtotal</td>
-                  <td className="w-[20%]">Tax Rate (%)</td>
-                  <td className="w-[20%]">Tax Amount</td>
-                  <td className="w-[20%]">Total</td>
+                <tr className="ml-3 flex text-[1.1vw] w-full justify-between">
+                  <td className="w-[3vw]">SR</td>
+                  <td className="w-[6vw]">Item Name</td>
+                  <td className="w-[6vw]">Quantity</td>
+                  <td className="w-[6vw]">Rate</td>
+                  <td className="w-[6vw]">Net Rate</td>
+                  <td className="w-[6vw]">Tax (%)</td>
+                  <td className="w-[6vw]">Tax Amount</td>
+                  <td className="w-[6vw]">Total Amount</td>
+                  <td className="w-[6vw]">Remark</td>
+                  <td className="w-[6vw]">Actions</td>
                 </tr>
               </thead>
-              <tbody>
-  {selection.areacollection && selection.areacollection.length > 0 ? (
-    selection.areacollection.map((collection, collectionIndex) => {
-      const pg = collection.productGroup;
+              <tbody className="flex flex-col w-full">
+                {additionalItems.map((item, i) => (
+                  <tr key={i} className="w-full flex flex-row justify-between mt-2">
+                    <td className="text-center w-[3vw]">{i + 1}</td>
+                    <td>
+                      <input
+                        onChange={(e) => handleItemNameChange(i, e.target.value)}
+                        className="pl-2 w-[6vw] border rounded-lg"
+                        value={item.name || ""}
+                        type="text"
+                      />
+                    </td>
+                    <td>
+                      <input
+                        onChange={(e) => handleItemQuantityChange(i, e.target.value)}
+                        className="pl-2 w-[6vw] border rounded-lg"
+                        value={item.quantity || ""}
+                        type="text"
+                      />
+                    </td>
+                    <td>
+                      <input
 
-      if (!Array.isArray(pg) || pg.length < 2) return null;
 
-      const relevantPG = pg.length > 2 ? pg.slice(1, -2) : [];
-
-      // Replace strings in productGroup with matched item arrays
-      const matchedItems = relevantPG.map((pgItem) => {
-        const matched = items.find((item) => item[0] === pgItem);
-        return matched || pgItem; // if match not found, keep original
-      });
-
-      // Update productGroup with replaced arrays
-      collection.items = [                 // keep the first element (title/groupName maybe)
-        ...matchedItems,          // updated product items       // last (e.g., addon maybe)
-      ];
-      // Filter only matched full item arrays (to avoid rendering original strings)
-      const validMatchedItems = matchedItems.filter((el) => Array.isArray(el));
-
-      
-      return validMatchedItems.map((item, itemIndex) => {
-        const key = `${mainindex}-${collectionIndex}-${itemIndex}`;
-        const qty = selection.areacollection[collectionIndex]?.quantities?.[itemIndex] || 0;        
-        return (
-          <tr key={key} className="flex justify-between w-full border-b p-2">
-            <td className="w-[10%]">{itemIndex + 1}</td>
-            <td className="w-[45%]">{item[0] + " * " + collection.measurement.quantity}</td>
-            <td className="w-[45%]">
-              {collection.measurement.width + "*" + collection.measurement.height + " " + collection.measurement.unit}
-            </td>
-            <td className="w-[20%]">{item[4] * collection.measurement.quantity}</td>
-            <td className="w-[20%]">
-              <div className="flex flex-col">
-                <input
-                  type="text"
-                  value={selection.areacollection[collectionIndex]?.quantities?.[itemIndex] || ""} 
-                  onChange={(e) =>
-                    handleQuantityChange(
-                      key,
-                      e.target.value,
-                      mainindex,
-                      collectionIndex,
-                      collection.measurement.quantity,
-                      item[4],
-                      item[5],
-                      itemIndex
-                    )
-                  }
-                  className="border w-[40%] px-2 py-1 rounded"
-                />
-                <p className=" text-[0.8vw] text-gray-600">{item[3]}</p>
-              </div>
-            </td>
-            <td className="w-[20%]">{item[4] * collection.measurement.quantity * qty}</td>
-            <td className="w-[20%]">{item[5]}</td>
-            <td className="w-[20%]">{collection.totalTax[itemIndex]}</td>
-            <td className="w-[20%]">{collection.totalAmount[itemIndex]}</td>
-          </tr>
-        );
-      });
-    })
-  ) : (
-    <tr>
-      <td colSpan="7" className="text-center py-2 text-gray-500">
-        No product data available.
-      </td>
-    </tr>
-  )}
-</tbody>
-
+                        onChange={(e) => handleItemRateChange(i, e.target.value)}
+                        className="pl-2 w-[6vw] border rounded-lg"
+                        value={item.rate || ""}
+                        type="text"
+                      />
+                    </td>
+                    <td className="w-[6vw] text-center">{item.netRate.toFixed(2)}</td>
+                    <td>
+                      <input
+                        onChange={(e) => handleItemTaxChange(i, e.target.value)}
+                        className="pl-2 w-[6vw] border rounded-lg"
+                        value={item.tax || ""}
+                        type="text"
+                      />
+                    </td>
+                    <td className="w-[6vw] text-center">{item.taxAmount.toFixed(2)}</td>
+                    <td className="w-[6vw] text-center">{item.totalAmount.toFixed(2)}</td>
+                    <td>
+                      <input
+                        onChange={(e) => handleItemRemarkChange(i, e.target.value)}
+                        className="pl-2 w-[6vw] border rounded-lg"
+                        value={item.remark || ""}
+                        type="text"
+                      />
+                    </td>
+                    <td className="w-[6vw] text-center">
+                      <button onClick={() => handleDeleteMiscItem(i)}>
+                        <FaTrash className="text-red-500 hover:text-red-600" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
             </table>
           </div>
-        ))}
-      </div>
-      <div className="border p-6 rounded-lg w-full flex flex-col">
-  <p className="text-[1.1vw] font-semibold">Miscellaneous</p>
-  <div className="flex w-full flex-col">
-    <div className="flex flex-row justify-between items-center mt-4">
-      <button
-        className="flex flex-row gap-2 rounded-xl bg-sky-50 hover:bg-sky-100 items-center px-2 py-1"
-        onClick={handleAddMiscItem}
-      >
-        <FaPlus className="text-sky-500 mt-1" />
-        Add Item
-      </button>
-    </div>
-
-    <table className="mt-3 w-full">
-      <thead>
-        <tr className="ml-3 flex text-[1.1vw] w-full justify-between">
-          <td className="w-[3vw]">SR</td>
-          <td className="w-[6vw]">Item Name</td>
-          <td className="w-[6vw]">Quantity</td>
-          <td className="w-[6vw]">Rate</td>
-          <td className="w-[6vw]">Net Rate</td>
-          <td className="w-[6vw]">Tax (%)</td>
-          <td className="w-[6vw]">Tax Amount</td>
-          <td className="w-[6vw]">Total Amount</td>
-          <td className="w-[6vw]">Remark</td>
-          <td className="w-[6vw]">Actions</td>
-        </tr>
-      </thead>
-
-      <tbody className="flex flex-col w-full">
-        {additionalItems.map((item, i) => (
-          <tr key={i} className="w-full flex flex-row justify-between mt-2">
-            <td className="text-center w-[3vw]">{i + 1}</td>
-            <td>
-              <input
-                onChange={(e) => handleItemNameChange(i, e.target.value)}
-                className="pl-2 w-[6vw] border rounded-lg"
-                value={item.name || ""}
-                type="text"
-              />
-            </td>
-            <td>
-              <input
-                onChange={(e) => handleItemQuantityChange(i, e.target.value)}
-                className="pl-2 w-[6vw] border rounded-lg"
-                value={item.quantity || ""}
-                type="text"
-              />
-            </td>
-            <td>
-              <input
-                onChange={(e) => handleItemRateChange(i, e.target.value)}
-                className="pl-2 w-[6vw] border rounded-lg"
-                value={item.rate || ""}
-                type="text"
-              />
-            </td>
-            <td className="w-[6vw] text-center">{item.netRate}</td>
-            <td>
-              <input
-                onChange={(e) => handleItemTaxChange(i, e.target.value)}
-                className="pl-2 w-[6vw] border rounded-lg"
-                value={item.tax || ""}
-                type="text"
-              />
-            </td>
-            <td className="w-[6vw] text-center">{item.taxAmount || 0}</td>
-            <td className="w-[6vw] text-center">{item.totalAmount || 0}</td>
-            <td>
-              <input
-                onChange={(e) => handleItemRemarkChange(i, e.target.value)}
-                className="pl-2 w-[6vw] border rounded-lg"
-                value={item.remark || ""}
-                type="text"
-              />
-            </td>
-            <td className="w-[6vw] text-center">
-              <button onClick={() => handleDeleteMiscItem(i)}>
-                <FaTrash className="text-red-500 hover:text-red-600" />
-              </button>
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
-</div>
-
-    </div>
-        <div className="flex flex-row gap-3 justify-between w-full">
-          <div className="flex flex-col gap-2 w-1/2 rounded mt-3 p-6 shadow-xl border">
-  `          <select
-              className="border p-2 rounded w-1/2 h-16"
-              value={""}
-              
-            >
-              <option value="">Bank Details</option>
-              {bankDetails.map((data, index) => (
-                <option key={index} value={data}>
-                  {data}
-                </option>
-              ))}
-            </select>
-            <textarea placeholder="Description" className="w-full rounded-lg border py-2 pl-2"></textarea>
-            <select
-              className="border p-2 rounded w-1/2 h-16"
-              value={""}
-              
-            >
-              <option value="">Terms & Conditions</option>
-              {termsCondiditions.map((data, index) => (
-                <option key={index} value={data}>
-                  {data}
-                </option>
-              ))}
-            </select>
-            <textarea placeholder="Description" className="w-full rounded-lg border py-2 pl-2"></textarea>
-          </div>
-          <div className="shadow-xl p-6 flex flex-col gap-2 border w-1/2 rounded-lg">
-            <p className="text-[1.2vw]">Summary</p>
-            <div className="flex flex-row justify-between w-full">
-              <p className="text-[1.1vw]">Sub Total</p>
-              <p className="text-[1.1vw]">{Amount}</p>
-            </div>
-            <div className="flex flex-row justify-between w-full">
-              <p className="text-[1.1vw]">Total Tax Amount</p>
-              <p className="text-[1.1vw]">{Tax}</p>
-            </div>
-            <div className="flex flex-row justify-between w-full">
-              <p className="text-[1.1vw]">Total Amount</p>
-              <p className="text-[1.1vw]">{parseFloat((Amount + Tax).toFixed(2))}</p>
-            </div>
-            <div className="border border-gray-400"></div>
-            <div className="flex justify-between mt-1 w-full">
-              <p className="text-[1.1vw]">Discount</p>
-              <input className="rounded-lg border text-center" value={Discount} onChange={(e) => setDiscount(e.target.value)} type="text" />
-            </div>
-            <div className="border border-gray-400"></div>
-            <div className="flex w-full flex-row items-center justify-between">
-              <p className="text-[1.1vw]">Grand Total</p>
-              <p className="text-[1.1vw]">{parseFloat((Amount + Tax - Discount).toFixed(2))}</p>
-            </div>
-            <button onClick={sendProjectData} style={{borderRadius : "10px"}} className="rounded-lg bg-sky-700 hover:bg-sky-800 text-white p-[6px]">Add Project & Generate Quote</button>
-          </div>
         </div>
-        <br />
+      </div>
+      <div className="flex flex-row gap-3 justify-between w-full">
+        <div className="flex flex-col gap-2 w-1/2 rounded mt-3 p-6 shadow-xl border">
+          <select className="border p-2 rounded w-1/2 h-16">
+            <option value="">Bank Details</option>
+            {bankDetails.map((data, index) => (
+              <option key={index} value={data}>
+                {data}
+              </option>
+            ))}
+          </select>
+          <textarea placeholder="Description" className="w-full rounded-lg border py-2 pl-2"></textarea>
+          <select className="border p-2 rounded w-1/2 h-16">
+            <option value="">Terms & Conditions</option>
+            {termsConditions.map((data, index) => (
+              <option key={index} value={data}>
+                {data}
+              </option>
+            ))}
+          </select>
+          <textarea placeholder="Description" className="w-full rounded-lg border py-2 pl-2"></textarea>
+        </div>
+        <div className="shadow-xl p-6 flex flex-col gap-2 border w-1/2 rounded-lg">
+          <p className="text-[1.2vw]">Summary</p>
+          <div className="flex flex-row justify-between w-full">
+            <p className="text-[1.1vw]">Sub Total</p>
+            <p className="text-[1.1vw]">{amount.toFixed(2)}</p>
+          </div>
+          <div className="flex flex-row justify-between w-full">
+            <p className="text-[1.1vw]">Total Tax Amount</p>
+            <p className="text-[1.1vw]">{tax.toFixed(2)}</p>
+          </div>
+          <div className="flex flex-row justify-between w-full">
+            <p className="text-[1.1vw]">Total Amount</p>
+            <p className="text-[1.1vw]">{(amount + tax).toFixed(2)}</p>
+          </div>
+          <div className="border border-gray-400"></div>
+          <div className="flex justify-between mt-1 w-full">
+            <p className="text-[1.1vw]">Discount</p>
+            <input
+              className="rounded-lg border text-center"
+              value={discount}
+              onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+              type="text"
+            />
+          </div>
+          <div className="border border-gray-400"></div>
+          <div className="flex w-full flex-row items-center justify-between">
+            <p className="text-[1.1vw]">Grand Total</p>
+            <p className="text-[1.1vw]">{(amount + tax - discount).toFixed(2)}</p>
+          </div>
+          <button
+            onClick={sendProjectData}
+            style={{ borderRadius: "10px" }}
+            className="rounded-lg bg-sky-700 hover:bg-sky-800 text-white p-[6px]"
+          >
+            Add Project & Generate Quote
+          </button>
+          <button
+            onClick={generatePDF}
+            style={{ borderRadius: "10px" }}
+            className="rounded-lg bg-green-600 hover:bg-green-700 text-white p-[6px] mt-2"
+          >
+            Download Quotation PDF
+          </button>
+        </div>
+      </div>
+      <br />
     </div>
-  )
+  );
 }
 
 export default AddProjectForm;
