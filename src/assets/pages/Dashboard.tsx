@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, React, useEffect } from "react";
 import Card from "./CardPage";
 import DeadlineCard from "../compoonents/DeadlineCard";
 import TaskCard from "../compoonents/TaskCard";
@@ -50,7 +50,7 @@ const Dashboard: React.FC = () => {
 
       {/* Summary Cards Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card title="Orders" value={120} color="bg-blue-500" />
+        <Card  title="Orders"  value={120} color="bg-blue-500" className="w-full max-w-sm"/>
         <Card title="Total Value" value={500000} color="bg-green-500" isCurrency />
         <Card title="Payment Received" value={320000} color="bg-purple-500" isCurrency />
         <Card title="Payment Due" value={180000} color="bg-red-500" isCurrency />
