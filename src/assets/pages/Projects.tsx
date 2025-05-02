@@ -127,6 +127,7 @@ export default function Projects() {
       additionalItems: deepClone(parseSafely(row[14], [])),
       goodsArray: deepClone(parseSafely(row[15], [])),
       tailorsArray: deepClone(parseSafely(row[16], [])),
+      projectAddress : row[17],
     }));
 
     return projects;
@@ -140,68 +141,85 @@ export default function Projects() {
     return data.message;
   };
 
+  const [deleted, setDeleted] = useState(false);
+  
+  // Fetch Payments when 'projectData' is ready
+  
+  // --- Fetch Projects ---
   useEffect(() => {
-    async function fetchPayments() {
-      const data = await fetchPaymentData();
-      dispatch(setPaymentData(data));
-
-      if (data !== undefined && projectData) {
-        const projectWisePayments = [];
-
-        projectData.forEach((project) => {
-          const filtered = data.filter((item) => item[0] === project.projectName);
-          const total = filtered.reduce((acc, curr) => {
-            const amount = parseFloat(curr[1]);
-            return acc + (isNaN(amount) ? 0 : amount);
-          }, 0);
-          projectWisePayments.push(total);
-        });
-
-        setProjectPayments(projectWisePayments);
+    const fetchProjects = async () => {
+      try {
+        const data = await fetchProjectData();
+        dispatch(setProjects(data));
+        setprojects(data);
+      } catch (error) {
+        console.error('Failed to fetch projects:', error);
       }
-
-      setAdded(true);
+    };
+  
+    if (!projects.length) {
+      fetchProjects();
     }
-
-    if (!added) {
+  }, [dispatch, projects.length]);
+  
+  // --- Fetch Tasks ---
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const data = await fetchTaskData();
+        dispatch(setTasks(data));
+        setTaskData(data);
+        setDeleted(false); // reset deleted after refreshing
+      } catch (error) {
+        console.error('Failed to fetch tasks:', error);
+      }
+    };
+  
+    if (!tasks.length || deleted) {
+      fetchTasks();
+    }
+  }, [dispatch, tasks.length, deleted]);
+  
+  // --- Fetch Payments after Projects are available ---
+  useEffect(() => {
+    const fetchPayments = async () => {
+      try {
+        const data = await fetchPaymentData();
+        dispatch(setPaymentData(data));
+  
+        if (data && projectData?.length) {
+          const projectWisePayments = projectData.map((project) => {
+            const total = data
+              .filter((item) => item[0] === project.projectName)
+              .reduce((acc, curr) => {
+                const amount = parseFloat(curr[1]);
+                return acc + (isNaN(amount) ? 0 : amount);
+              }, 0);
+            return total;
+          });
+  
+          setProjectPayments(projectWisePayments);
+        }
+  
+        setAdded(true);
+      } catch (error) {
+        console.error('Failed to fetch payments:', error);
+      }
+    };
+  
+    if (!added && projectData?.length) {
       fetchPayments();
     }
   }, [dispatch, added, projectData]);
-
+  
+  // --- API fetching functions ---
   const fetchTaskData = async () => {
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks");
     const data = await response.json();
-    return data.body;
+    return data.body || [];
   };
-
-  const [deleted, setDeleted] = useState(false);
-
-  useEffect(() => {
-    async function getData() {
-      const data = await fetchProjectData();
-      dispatch(setProjects(data));
-      setprojects(projectData);
-    }
-    if (projects.length === 0) {
-      getData();
-    } else {
-      setprojects(projectData);
-    }
-  }, [projectData, dispatch]);
-
-  useEffect(() => {
-    async function taskData() {
-      const data = await fetchTaskData();
-      dispatch(setTasks(data));
-      setTaskData(data);
-    }
-
-    if (tasks.length === 0) {
-      taskData();
-    } else {
-      setTaskData(tasks);
-    }
-  }, [dispatch, tasks, deleted]);
+  
+  
 
   const [filteredTasks, setTaskNames] = useState([]);
 

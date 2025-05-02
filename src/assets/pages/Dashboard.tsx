@@ -17,24 +17,33 @@ const Dashboard: React.FC = () => {
     const tasks  = useSelector((state: RootState) => state.data.tasks);
     const projects  = useSelector((state: RootState) => state.data.projects);
 
-  useEffect(() => {
-    const fetchdata = async () => {
-      let data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks", {credentials : "include"});
-      const taskData = await data.json();
-      dispatch(setTasks(taskData.body));
-
-      data = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata", {credentials : "include"});
-      const projectData = await data.json();
-      dispatch(setProjects(projectData.body));
-    }
-    if(tasks.length == 0 || projects.length == 0){
-      fetchdata();
-    }else{
-      setTasks(tasks);
-      setProjects(projects);
-    }
-
-  }, [dispatch, refresh]);
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const [taskRes, projectRes] = await Promise.all([
+            fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks", { credentials: "include" }),
+            fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata", { credentials: "include" }),
+          ]);
+    
+          if (!taskRes.ok || !projectRes.ok) {
+            throw new Error("Failed to fetch data");
+          }
+    
+          const taskData = await taskRes.json();
+          const projectData = await projectRes.json();
+    
+          dispatch(setTasks(taskData.body || []));
+          dispatch(setProjects(projectData.body || []));
+        } catch (error) {
+          console.error("Error fetching data:", error);
+        }
+      };
+    
+      if (tasks.length === 0 || projects.length === 0) {
+        fetchData();
+      }
+    }, [tasks.length, projects.length, dispatch, refresh]);
+    
 
   return (
     <div className="p-6 md:mt-0 mt-20 bg-gray-100 min-h-screen">

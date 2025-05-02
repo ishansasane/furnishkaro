@@ -1,5 +1,12 @@
 import { Target } from "lucide-react";
 import React from "react";
+import { FaPlus } from "react-icons/fa";
+import { useDispatch } from "react-redux";
+import { setInteriorData } from "../../Redux/dataSlice";
+import { useState } from "react";
+import { setSalesAssociateData } from "../../Redux/dataSlice";
+
+
 
 const EditProjectDetails = ({
   selectedCustomer,
@@ -19,25 +26,119 @@ const EditProjectDetails = ({
   setProjectDate,
   setAdditionalRequests,
   additionalRequests,
-  projectData
+  projectData,
+  setsalesdata
 }) => {
 
-  const setInterior = (e) => {
-    if (e.target.value === "") {
-      setInteriorArray(null);
-    } else {
-      const customerObj = interior.find(c => c[0] === e.target.value);
-      setInteriorArray(customerObj);
+  async function fetchInteriors() {
+    try {
+      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getinteriordata", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      return data.body;
+    } catch (error) {
+      console.error("Error fetching interiors:", error);
+      return [];
     }
   }
-  const setSalesAssociate = (e) => {
-    if (e.target.value === "") {
-      setSalesAssociateArray(null);
+
+  const [isOpen, setIsOpen] = useState(false);
+
+  const dispatch = useDispatch();
+  const [interiorData, setInterior] = useState([]);
+
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phonenumber, setPhoneNumber] = useState("");
+  const [address, setAddress] = useState("");
+
+  const handleSubmit = async () => {
+    const url = "https://sheeladecor.netlify.app/.netlify/functions/server/sendinteriordata";
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ name, email, phonenumber, address }),
+    });
+
+    if (response.status === 200) {
+      const data = await fetchInteriors();
+    
+      // 1. Update Redux store
+      dispatch(setInteriorData(data));
+    
+      // 2. Update local state
+      setInterior(data);
+      
+      // 3. Update localStorage cache
+      localStorage.setItem("interiorData", JSON.stringify({ data, time: Date.now() }));
+    
+      // 4. Close modal and notify
+      setIsOpen(false);
+      alert("Interior added successfully");
     } else {
-      const customerObj = salesdata.find(c => c[0] === e.target.value);
-      setSalesAssociateArray(customerObj);
+      alert("Error saving interior");
+    }
+    
+  };
+
+  const [isSalesOpen, setIsSalesOpen] = useState(false);
+
+  async function fetchSalesAssociates() {
+    try {
+      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsalesassociatedata", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      return Array.isArray(data.body) ? data.body : [];
+    } catch (error) {
+      console.error("Error fetching sales associates:", error);
+      return [];
     }
   }
+
+  const [salesname, salesSetName] = useState("");
+  const [salesemail, salesSetEmail] = useState("");
+  const [salesphonenumber, salesSetPhoneNumber] = useState("");
+  const [salesaddress, salesSetAddress] = useState("");
+
+  const handleSalesSubmit = async () => {
+    const url = "https://sheeladecor.netlify.app/.netlify/functions/server/sendsalesassociatedata";
+    const method = "POST";
+
+    const response = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ name, email, phonenumber, address }),
+    });
+
+    if (response.status === 200) {
+      const data = await fetchSalesAssociates();
+    
+      // 1. Update Redux store
+      dispatch(setSalesAssociateData(data));
+      setsalesdata(data);
+      // 3. Update localStorage cache
+      localStorage.setItem("salesAssociateData", JSON.stringify({ data, time: Date.now() }));
+    
+      // 4. Close modal and notify
+      setIsOpen(false);
+      alert("Sales Associate added successfully");
+    } else {
+      alert("Error saving sales associate");
+    }
+    
+  };
+
   return (
     <div className="flex flex-col gap-3 w-full rounded-xl shadow-2xl border-2 border-gray-200 px-3 py-3">
       <p className="text-[1.3vw] font-semibold">Project Details</p>
@@ -92,7 +193,10 @@ const EditProjectDetails = ({
       {/* Dropdowns for Interior & Sales Associate */}
       <div className="flex flex-row w-full gap-2">
         <div className="flex flex-col w-1/2">
-          <p className="text-[1vw]">Interior Name (optional)</p>
+            <div className="flex flex-row gap-3 px-2">
+              <p className="text-[1vw]">Select Interior</p>
+              <button className="mb-3" onClick={() => setIsOpen(true)}><FaPlus size={18} className="hover:text-sky-800 text-sky-600"/></button>
+            </div>
           <select
             className="border p-2 rounded w-full"
             value={JSON.stringify(interiorArray)}
@@ -108,7 +212,10 @@ const EditProjectDetails = ({
         </div>
 
         <div className="flex flex-col w-1/2">
-          <p className="text-[1vw]">Sales Associate (optional)</p>
+            <div className="flex flex-row gap-3 px-2">
+              <p className="text-[1vw]">Select Sales Associate</p>
+              <button className="mb-3" onClick={() => setIsSalesOpen(true)}><FaPlus size={18} className="hover:text-sky-800 text-sky-600"/></button>
+            </div>
           <select
             className="border p-2 rounded w-full"
             value={JSON.stringify(salesAssociateArray)}
@@ -146,6 +253,65 @@ const EditProjectDetails = ({
           />
         </div>
       </div>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/50">
+          <div className="bg-white w-[300px] p-6 rounded-xl shadow-xl text-center">
+          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 mt-10 z-50 w-full max-w-md">
+          <div className="bg-white p-6 rounded shadow-md w-full border">
+            <h2 className="text-xl font-bold mb-4">{"Add Interior"}</h2>
+            <input className={` border p-2 rounded w-full mb-2`} placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
+            <input className="border p-2 rounded w-full mb-2" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <input className="border p-2 rounded w-full mb-2" placeholder="Phone Number" value={phonenumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+            <input className="border p-2 rounded w-full mb-2" placeholder="Address" value={address} onChange={(e) => setAddress(e.target.value)} />
+            <div className="flex justify-end gap-2 mt-4">
+              <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={() => setIsOpen(false)}>
+                Cancel
+              </button>
+              <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleSubmit}>
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+            <div className="flex flex-row justify-between">
+              <button 
+                onClick={() => setIsOpen(false)} 
+                style={{ borderRadius : "6px"}}
+                className="px-3 py-1 text-white bg-sky-600 hover:bg-sky-700"
+              >
+                Add
+              </button>
+              <button 
+                onClick={() => setIsOpen(false)} 
+                className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {
+        isSalesOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/50">
+          <div className="bg-white p-6 rounded shadow-md w-[500px] border">
+            <h2 className="text-xl font-bold mb-4">{"Add Sales Associate"}</h2>
+            <input className={`border p-2 rounded w-full mb-2`} placeholder="Name" value={salesname} onChange={(e) => salesSetName(e.target.value)} />
+            <input className="border p-2 rounded w-full mb-2" placeholder="Email" value={salesemail} onChange={(e) => salesSetEmail(e.target.value)} />
+            <input className="border p-2 rounded w-full mb-2" placeholder="Phone Number" value={salesphonenumber} onChange={(e) => salesSetPhoneNumber(e.target.value)} />
+            <input className="border p-2 rounded w-full mb-2" placeholder="Address" value={salesaddress} onChange={(e) => salesSetAddress(e.target.value)} />
+            <div className="flex justify-end gap-2 mt-4">
+              <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={() => setIsSalesOpen(false)}>
+                Cancel
+        </button>
+              <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleSalesSubmit}>
+                Save
+              </button>
+            </div>
+          </div>
+        </div>
+        )
+      }
     </div>
   );
 };

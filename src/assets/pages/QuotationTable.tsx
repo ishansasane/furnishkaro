@@ -114,8 +114,8 @@ const QuotationTable = ({
         <p className="text-[1.1vw] font-semibold">Miscellaneous</p>
         <div className="flex w-full flex-col">
           <div className="flex flex-row justify-between items-center mt-4">
-            <button className="flex flex-row gap-2 rounded-xl bg-sky-50 hover:bg-sky-100 items-center px-2 py-1" onClick={handleAddMiscItem}>
-              <FaPlus className="text-sky-500 mt-1" /> Add Item
+            <button className="flex flex-row gap-2 !rounded-xl bg-sky-50 hover:bg-sky-100 items-center px-2 py-1" onClick={handleAddMiscItem}>
+              <FaPlus className="text-sky-500 mt-1 !rounded-xl" /> Add Item
             </button>
           </div>
 
