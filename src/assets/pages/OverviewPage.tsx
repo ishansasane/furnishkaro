@@ -3,7 +3,7 @@ import { setTaskDialogOpen } from '../Redux/dataSlice';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
-const OverviewPage = ({ setNavState, projectData, status, setStatus, tasks, tailorsArray, setTailorsArray, goodsArray, setGoodsArray }) => {
+const OverviewPage = ({ interiorArray, salesAssociateArray, setNavState, projectData, status, setStatus, tasks, tailorsArray, setTailorsArray, goodsArray, setGoodsArray, projectDate, setPRojectDate }) => {
   const dueAmount = projectData.totalAmount + projectData.totalTax - projectData.paid;
   const dispatch = useDispatch();
   const taskDialogOpen = useSelector(( state : RootState) => state.data.taskDialogOpen);
@@ -88,7 +88,7 @@ const OverviewPage = ({ setNavState, projectData, status, setStatus, tasks, tail
     <div className='flex flex-col'>
       <div className='flex flex-row justify-between items-center'>
         <p className='text-[1.4vw] font-semibold'>Project Name : {projectData.projectName}</p>
-        <p className='text-[1.1vw]'>Delivery Date : <input className='rounded-lg border px-2 py-2' type="date" value={projectData.projectDate} /></p>
+        <p className='text-[1.1vw]'>Delivery Date : <input className='rounded-lg border px-2 py-2' type="date" value={projectDate} onChange={(e) => setPRojectDate(e.target.value)}/></p>
       </div>
 
       <div className='flex flex-row justify-between gap-3 h-[25vw]'>
@@ -212,17 +212,19 @@ const OverviewPage = ({ setNavState, projectData, status, setStatus, tasks, tail
         <div className='flex flex-col justify-between w-1/3 gap-2 ml-2'>
           {[{
             title: "Interior Information",
-            data: projectData.interiorArray
+            data: interiorArray
           }, {
             title: "Sales Associate Information",
-            data: projectData.salesAssociateArray
+            data: salesAssociateArray
           }].map((section, idx) => (
             <div key={idx} className='flex flex-col p-3 border rounded-lg h-[12.5vw]'>
-              <p className='text-[1.2vw]'>{section.title}</p>
               <div className='flex flex-row justify-between'>
+                <p className='text-[1.2vw]'>{section.title}</p>
+                <button onClick={() => setNavState("Customer & Project Details")} style={{ borderRadius : "8px" }} className='text-white bg-sky-600 px-2 h-8'>View</button>
+              </div>
+              <div className='flex flex-row justify-between mt-2'>
                 <p className='text-[1.1vw]'>{section.data[0]}</p>
                 <p className='text-[1.1vw]'>{section.data[2]}</p>
-                <button className='text-white bg-sky-600 px-2 h-8'>View</button>
               </div>
             </div>
           ))}

@@ -1,6 +1,6 @@
 import { Divide } from 'lucide-react';
 import React, { useEffect } from 'react';
-import { FaPlus, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
 
 const MaterialSelectionComponent = ({
   selections,
@@ -19,9 +19,30 @@ const MaterialSelectionComponent = ({
   handleDesignNoChange,
   handleReferenceChange,
   handleGroupDelete,
-  projectData
+  projectData,
+  setAvailableAreas
 }) => {
 
+  const addArea = async (name) => {
+    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/addArea", {
+      method : "POST",
+      credentials : "include",
+      headers : {
+        "content-type" : "application/json"
+      },
+      body : JSON.stringify({ name : name }),
+    });
+    console.log(name);
+
+    if(response.status == 200){
+      const newareas = [...availableAreas];
+      newareas.push([name]);
+      setAvailableAreas(newareas)
+      alert("Area Added");
+    }else{
+      alert("Error");
+    }
+  }
 
   return (
     <div className="flex flex-col bg-white p-6 rounded-lg shadow-lg">
@@ -31,25 +52,55 @@ const MaterialSelectionComponent = ({
         {/* Left Column: Area Selection */}
         <div className="w-[20vw]">
           <p className="text-[1.1vw]">Area</p>
-          {selections.map((selection, index) => (
-            <div key={index} className="flex items-center gap-2 mb-4">
-              <select
-                className="border border-gray-300 p-2 rounded-lg w-full focus:ring-2 focus:ring-blue-400"
-                value={selection.area ? selection.area : projectData}
-                onChange={(e) => handleAreaChange(index, e.target.value)}
-              >
-                <option value="">Select Area</option>
-                {availableAreas.map((area) => (
-                  <option key={area} value={area}>
-                    {area}
-                  </option>
-                ))}
-              </select>
-              <button className="text-red-500 hover:text-red-700" onClick={() => handleRemoveArea(index)}>
-                <FaTrash size={18} />
-              </button>
-            </div>
+          {selections.map((selection, index) => {
+  const currentArea = selection.area || "";
+
+  return (
+    <div key={index} className="flex items-center gap-2 mb-4">
+      <div className="flex flex-col gap-2 w-full">
+
+        {/* Select Dropdown */}
+        <select
+          className="border border-gray-300 p-2 rounded-lg w-full focus:ring-2 focus:ring-blue-400"
+          value={currentArea}
+          onChange={(e) => {
+            if (e.target.value === "__add_new__") {
+              // Open prompt to add new area
+              const newArea = prompt("Enter new Area name:");
+              if (newArea && newArea.trim() !== "") {
+                addArea(newArea.trim()); // Your existing function
+                handleAreaChange(index, newArea.trim()); // Set new area
+              }
+            } else {
+              handleAreaChange(index, e.target.value);
+            }
+          }}
+        >
+          <option value="">Select Area</option>
+          {/* Special Option to Add New */}
+          <option value="__add_new__">➕ Add New Area</option>
+
+          {/* Existing Areas */}
+          {availableAreas.map((area) => (
+            <option key={area} value={area}>
+              {area[0]}
+            </option>
           ))}
+        </select>
+
+      </div>
+
+      {/* Remove Area Button */}
+      <button
+        className="text-red-500 hover:text-red-700 mt-2"
+        onClick={() => handleRemoveArea(index)}
+      >
+        <FaTrash size={18} />
+      </button>
+    </div>
+  );
+})}
+
           <button
             className="flex items-center gap-2 bg-blue-500 text-white px-3 py-1 hover:bg-blue-600 transition"
             onClick={handleAddArea}
@@ -103,7 +154,10 @@ const MaterialSelectionComponent = ({
 
                       {/* Company */}
                       <div>
-                        <p>Company</p>
+                        <div className='flex flex-row gap-3'>
+                          <p className='text-[1vw]'>Company</p>
+                          <button className='mb-3'><FaPlus size={18} className='text-sky-600 hover:text-sky-800'/></button>
+                        </div>
                         <select
                           className="border p-2 rounded w-full"
                           value={element.company}
@@ -120,7 +174,10 @@ const MaterialSelectionComponent = ({
 
                       {/* Catalogue */}
                       <div>
-                        <p>Catalogue</p>
+                      <div className='flex flex-row gap-3'>
+                          <p className='text-[1vw]'>Catalogue</p>
+                          <button className='mb-3'><FaPlus size={18} className='text-sky-600 hover:text-sky-800'/></button>
+                        </div>
                         <select
                           className="border p-2 rounded w-full"
                           value={element.catalogue}
@@ -137,7 +194,10 @@ const MaterialSelectionComponent = ({
 
                       {/* Design No */}
                       <div>
-                        <p>Design No</p>
+                      <div className='flex flex-row gap-3'>
+                          <p className='text-[1vw]'>Design No.</p>
+                          <button className='mb-3'><FaPlus size={18} className='text-sky-600 hover:text-sky-800'/></button>
+                        </div>
                         <select
                           className="border p-2 rounded w-full"
                           value={element.designNo}

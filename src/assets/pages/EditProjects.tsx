@@ -17,6 +17,7 @@ import PaymentsSection from "./PaymentSection";
 import TailorsSection from "./TailorsSection";
 import { AnimatePresence, motion } from "framer-motion";
 import TaskDialog from "../compoonents/TaskDialog";
+import { useCallback } from "react";
 
 const EditProjects = ({ projectData, index, goBack, projects, Tax, setTax, Amount, setAmount, Discount, setDiscount }) => {
 
@@ -62,7 +63,7 @@ const EditProjects = ({ projectData, index, goBack, projects, Tax, setTax, Amoun
       totalAmount : number;
       remark : string;
     }
-    const availableAreas = ["Living Room", "Kitchen", "Bedroom", "Bathroom"];
+    const [availableAreas, setAvailableAreas] = useState([]);
     
         interface AreaSelection {
           area: string;
@@ -127,6 +128,7 @@ const EditProjects = ({ projectData, index, goBack, projects, Tax, setTax, Amoun
     const [user, setUser] = useState("");
     const [projectDate, setPRojectDate] = useState("");
     const [additionalRequests, setAdditionalRequests] = useState("");
+    const [projectAddress, setProjectAddress] = useState("");
 
     const fetchTaskData = async () => {
       const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks");
@@ -161,7 +163,25 @@ const EditProjects = ({ projectData, index, goBack, projects, Tax, setTax, Amoun
             return [];
           }
       };
-  
+      
+      async function fetchAllAreas(){
+        try {
+          const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getAreas", {
+            credentials: "include",
+          });
+      
+          if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+      
+          const data = await response.json();
+          return Array.isArray(data.body) ? data.body : [];
+        } catch (error) {
+          console.error("Error fetching Areas:", error);
+          return [];
+        }      
+      }
+
       async function fetchCatalogues(){
         try {
           const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getcatalogues", {
@@ -248,81 +268,92 @@ const EditProjects = ({ projectData, index, goBack, projects, Tax, setTax, Amoun
         setInteriorArray(projectData.interiorArray);
         setSalesAssociateArray(projectData.salesAssociateArray);
         setProjectReference(projectData.projectReference);
+        setProjectAddress(projectData.projectAddres);
         if(Object.isFrozen(additionalItems)){
           console.log("frozen");
         }
       }, [projectData]);
       
-      
 
-      useEffect(() => {
-        async function getData() {
-          const data = await fetchInteriors();
-          dispatch(setInteriorData(data));
-          setinterior(data);
-        }
-        async function getitemsdata() {
-          const response = await fetch(
-            "https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts",
-            { credentials: "include" }
+      const useFetchData = () => {
+        const fetchAndSetData = useCallback(
+          async (fetchFn, dispatchFn, localStateSetter, storeData, keyName = "") => {
+            try {
+              const oneHour = 3600 * 1000; // 1 hour in ms
+              let shouldFetch = true;
+      
+              if (keyName) {
+                const cached = localStorage.getItem(keyName);
+                if (cached) {
+                  const { data, time } = JSON.parse(cached);
+      
+                  // If cache is valid
+                  if (Date.now() - time < oneHour) {
+                    dispatch(dispatchFn(data));
+                    if (localStateSetter) localStateSetter(data);
+                    shouldFetch = false; // No need to fetch from server
+                  } else {
+                    localStorage.removeItem(keyName); // expired cache
+                  }
+                }
+              }
+      
+              // If store is empty or cache expired, fetch fresh
+              if (shouldFetch || storeData.length === 0) {
+                const data = await fetchFn();
+                dispatch(dispatchFn(data));
+                if (localStateSetter) localStateSetter(data);
+      
+                if (keyName) {
+                  localStorage.setItem(keyName, JSON.stringify({ data, time: Date.now() }));
+                }
+              }
+            } catch (error) {
+              console.error(`Error fetching ${keyName || 'data'}:`, error);
+            }
+          },
+          [dispatch]
+        );
+      
+        useEffect(() => {
+          fetchAndSetData(fetchInteriors, setInteriorData, setinterior, interiorData, "interiorData");
+      
+          fetchAndSetData(
+            async () => {
+              const response = await fetch(
+                "https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts",
+                { credentials: "include" }
+              );
+              const data = await response.json();
+              return data.body || [];
+            },
+            setItemData,
+            setsingleitems,
+            items,
+            "itemsData"
           );
-          const data = await response.json();
-          const items = data.body || [];
-          dispatch(setItemData(items));
-          setsingleitems(items);
-        }
-        if (interiorData.length === 0) {
-          getData();
-        }
-        if (items.length === 0) {
-          getitemsdata();
-        }
-      }, [dispatch]);
       
-      useEffect(() => {
-        async function getData() {
-          const data = await fetchSalesAssociates();
-          dispatch(setSalesAssociateData(data));
-          setsalesdata(data);
-        }
-        if (salesAssociateData.length === 0) {
-          getData();
-        }
-      }, [dispatch]);
+          fetchAndSetData(fetchSalesAssociates, setSalesAssociateData, setsalesdata, salesAssociateData, "salesAssociateData");
       
-      useEffect(() => {
-        async function getData() {
-          const data = await fetchProductGroups();
-          dispatch(setProducts(data));
-          setAvailableProductGroups(data);
-        }
-        if (products.length === 0) {
-          getData();
-        }
-      }, [dispatch]);
+          fetchAndSetData(fetchProductGroups, setProducts, setAvailableProductGroups, products, "productsData");
       
-      useEffect(() => {
-        async function getData() {
-          const data = await fetchCatalogues();
-          dispatch(setCatalogs(data));
-        }
-        if (catalogueData.length === 0) {
-          getData();
-        }
-      }, [dispatch]);
+          fetchAndSetData(fetchCatalogues, setCatalogs, null, catalogueData, "catalogueData");
       
-      useEffect(() => {
-        async function getData() {
-          const data = await fetchCustomers();
-          dispatch(setCustomerData(data));
-          setcustomers(data);
-        }
-        if (customerData.length === 0) {
-          getData();
-        }
-      }, [dispatch]);
+          fetchAndSetData(fetchCustomers, setCustomerData, setcustomers, customerData, "customerData");
+      
+        }, [
+          fetchAndSetData,
+          interiorData.length,
+          items.length,
+          salesAssociateData.length,
+          products.length,
+          catalogueData.length,
+          customerData.length,
+        ]);
+      };
+      
 
-
+  useFetchData();
 
   const handleAreaChange = (mainindex, newArea) => {
     // Clone the selections array to avoid direct mutation of state
@@ -887,6 +918,7 @@ const handleItemRemarkChange = (i, remark) => {
       setAdditionaItems(deepClone(projectData.additionalItems));
       setGoodsArray(deepClone(projectData.goodsArray));
       setTailorsArray(deepClone(projectData.tailorsArray));
+      console.log(projectData.goodsArray);
     }, [projectData]);
 
   
@@ -937,34 +969,89 @@ const fetchTailorData = async () => {
 const hasFetchedPayments = useRef(false);
 const [added, setAdded] = useState(false);
 useEffect(() => {
-  async function fetchPayments() {
-    const data = await fetchPaymentData();
-    dispatch(setPaymentData(data));
+  // Use a flag to check if data has been fetched already
+  async function fetchData() {
+    try {
+      // Fetch and dispatch payments data
+      const paymentData = await fetchPaymentData();
+      if (paymentData !== undefined) {
+        // Dispatch payment data to the store
+        dispatch(setPaymentData(paymentData));
 
-    // Sum the values at index 1
-    if(data != undefined){
-      const total = data.reduce((acc, curr) => {
-        const amount = parseFloat(curr[1]);
-        return acc + (isNaN(amount) ? 0 : amount);
-      }, 0);
-  
-      setReceived(total);
+        // Calculate the total sum for received payments
+        const total = paymentData.reduce((acc, curr) => {
+          const amount = parseFloat(curr[1]);
+          return acc + (isNaN(amount) ? 0 : amount);
+        }, 0);
+
+        // Update state with the received total amount
+        setReceived(total);
+      }
+
+      // Fetch and dispatch tailor data
+      const tailorData = await fetchTailorData();
+      if (tailorData !== undefined) {
+        // Dispatch tailor data to the store
+        dispatch(setTailorData(tailorData));
+      }
+
+      // Mark that data has been added to avoid repeated fetch
+      setAdded(true);
+
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      // Optionally, set an error state or show a notification if needed
     }
-    setAdded(true);
   }
+
+  // Fetch data only if it hasn't been fetched yet
   if (!added) {
-    fetchPayments();
+    fetchData();
   }
-}, [dispatch, added, fetchPaymentData]);
+}, [added, dispatch, fetchPaymentData, fetchTailorData]);
+
+
+
+
 useEffect(() => {
-  async function fetchtailors() {
-    const data = await fetchTailorData();
-    dispatch(setTailorData(data));
+  async function getAreas() {
+    try {
+      // Check localStorage first to avoid unnecessary API calls
+      const cachedData = localStorage.getItem("areasData");
+      const oneHour = 3600 * 1000; // 1 hour expiration for cached data
+
+      if (cachedData) {
+        const { data, time } = JSON.parse(cachedData);
+
+        if (Date.now() - time < oneHour) {
+          // Use cached data if it hasn't expired
+          setAvailableAreas(data);
+          return;
+        } else {
+          // Remove expired data from localStorage
+          localStorage.removeItem("areasData");
+        }
+      }
+
+      // If no valid cached data, fetch from the API
+      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getAreas");
+      const data = await response.json();
+      setAvailableAreas(data.body);
+
+      // Cache the fresh data
+      localStorage.setItem("areasData", JSON.stringify({ data: data.body, time: Date.now() }));
+
+    } catch (error) {
+      console.error("Error fetching areas:", error);
+    }
   }
-  if (!added) {
-    fetchtailors();
+
+  // Fetch areas only if not already loaded
+  if (availableAreas.length === 0) {
+    getAreas();
   }
-}, [dispatch, added, fetchTailorData]);
+}, [availableAreas.length]);// Only re-run when availableAreas length changes
+
 
 const addPaymentFunction = async () => {
 
@@ -1128,17 +1215,19 @@ useEffect(() => {
             salesAssociateArray : JSON.stringify(salesAssociateArray),
             additionalItems : JSON.stringify(additionalItems),
             goodsArray : JSON.stringify(goodsArray),
-            tailorsArray : JSON.stringify(tailorsArray)
+            tailorsArray : JSON.stringify(tailorsArray),
+            projectAddress : JSON.stringify(projectAddress),
           }),
         }
       );
   
       if (response.status === 200) {
-        alert("Project Added");
+        alert("Project Edited");
+        goBack();
       } else {
         const errorText = await response.text(); // Get error details
         console.error("Error response:", errorText);
-        alert("Error: Failed to add project");
+        alert("Error: Failed to edit project");
       }
     } catch (error) {
       console.error("Fetch error:", error);
@@ -1176,6 +1265,10 @@ useEffect(() => {
             setTailorsArray={setTailorsArray}
             goodsArray={goodsArray}
             setGoodsArray={setGoodsArray}
+            projectDate={projectDate}
+            setPRojectDate={setPRojectDate}
+            interiorArray={interiorArray}
+            salesAssociateArray={salesAssociateArray}
             />
             <div className="flex flex-row justify-between mt-3">
                 <button onClick={() => setNavState("Tasks")} style={{ borderRadius : "8px" }} className="rounded-lg border px-2 h-8 bg-white">Back</button>
@@ -1191,6 +1284,7 @@ useEffect(() => {
                 selectedCustomer={selectedCustomer}
                 setSelectedCustomer={setSelectedCustomer}
                 projectData={projectData}
+                setcustomers={setcustomers}
                 />
                 <EditProjectDetails
                 selectedCustomer={selectedCustomer}
@@ -1211,6 +1305,7 @@ useEffect(() => {
                 setAdditionalRequests={setAdditionalRequests}
                 additionalRequests={additionalRequests}
                 projectData={projectData}
+                setSalesData={setsalesdata}
                 />
                 <div className="flex flex-row justify-between">
                     <button onClick={() => setNavState("Overview")} style={{ borderRadius : "8px" }} className="rounded-lg border px-2 h-8 bg-white">Back</button>
@@ -1238,6 +1333,7 @@ useEffect(() => {
                   handleReferenceChange={handleReferenceChange}
                   handleGroupDelete = {handleGroupDelete}
                   projectData={projectData}
+                  setAvailableAreas={setAvailableAreas}
                 />
               <div className="flex flex-row justify-between">
                     <button onClick={() => setNavState("Customer & Project Details")} style={{ borderRadius : "8px" }} className="rounded-lg border px-2 h-8 bg-white">Back</button>
@@ -1453,18 +1549,21 @@ useEffect(() => {
     </div>
         <div className="flex flex-row gap-3 justify-between w-full">
           <div className="flex flex-col gap-2 w-1/2 rounded mt-3 p-6 shadow-xl border">
-  `          <select
-              className="border p-2 rounded w-1/2 h-16"
-              value={""}
-              
-            >
-              <option value="">Bank Details</option>
-              {bankDetails.map((data, index) => (
-                <option key={index} value={data}>
-                  {data}
-                </option>
-              ))}
-            </select>
+            <div className="flex flex-row justify-between">
+              <select
+                className="border p-2 rounded w-1/2 h-16"
+                value={""}
+                
+              >
+                <option value="">Bank Details</option>
+                {bankDetails.map((data, index) => (
+                  <option key={index} value={data}>
+                    {data}
+                  </option>
+                ))}
+              </select>
+              <button><FaPlus size={18} className="text-sky-600 hover:text-sky-800"/></button>
+            </div>
             <textarea placeholder="Description" className="w-full rounded-lg border py-2 pl-2"></textarea>
             <select
               className="border p-2 rounded w-1/2 h-16"
@@ -1534,30 +1633,30 @@ useEffect(() => {
                   <th>Remark</th>
                 </tr>
                 <tbody>
-  {goodsArray.map((goods, index) => {
+  {goodsArray != undefined && goodsArray.map((goods, index) => {
     const selection = selections[goods.mainindex];
-    const collection = selection?.areacollection[goods.groupIndex];
+    const collection = selection?.areacollection?.[goods.groupIndex];
 
     return (
       <tr key={index} className="text-center rounded-md">
         <td>{index + 1}</td>
-        <td>{selection.area || "-"}</td>
-        <td>{goods.item[0]}</td>
-        <td>{collection.company}</td>
-        <td>{collection.catalogue[0]}</td>
-        <td>{collection.designNo}</td>
+        <td>{selection?.area || ""}</td>
+        <td>{goods?.item?.[0] || ""}</td>
+        <td>{collection?.company || ""}</td>
+        <td>{collection?.catalogue?.[0] || ""}</td>
+        <td>{collection?.designNo || ""}</td>
         <td>
           <input
             type="date"
             className="border pl-2 rounded-lg w-[8vw] px-1 py-1 text-center mt-2"
-            value={goods.date}
+            value={goods?.date || ""}
             onChange={(e) => setGoodsDate(index, e.target.value)}
           />
         </td>
         <td>
           <select
             className="border px-2 py-1 mt-2 rounded w-full"
-            value={goods.status}
+            value={goods?.status || ""}
             onChange={(e) => setGoodsStatus(index, e.target.value)}
           >
             <option value="">Pending</option>
@@ -1572,7 +1671,7 @@ useEffect(() => {
           <input
             type="text"
             className="border pl-2 rounded-lg w-[5vw] px-1 py-1 text-center mt-2"
-            value={goods.orderID}
+            value={goods?.orderID || ""}
             onChange={(e) => setGoodsOrderID(index, e.target.value)}
           />
         </td>
@@ -1580,7 +1679,7 @@ useEffect(() => {
           <input
             type="text"
             className="border pl-2 rounded-lg w-[8vw] px-1 py-1 text-center mt-2"
-            value={goods.remark}
+            value={goods?.remark || ""}
             onChange={(e) => setGoodsRemark(index, e.target.value)}
           />
         </td>
@@ -1588,6 +1687,7 @@ useEffect(() => {
     );
   })}
 </tbody>
+
 
             </table>
 

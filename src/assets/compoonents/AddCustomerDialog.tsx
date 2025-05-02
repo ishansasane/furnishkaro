@@ -86,7 +86,21 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
 
     if (response.status === 200) {
       const data = await fetchCustomers();
+
+      // 1. Update Redux store
       dispatch(setCustomerData(data));
+    
+      // 3. Update localStorage cache
+      localStorage.setItem("customerData", JSON.stringify({ data, time: Date.now() }));
+    
+      // 4. Clear form
+      setName("");
+      setAddress("");
+      setMobile("");
+      setEmail("");
+      setAlternateNumber("");
+    
+      // 5. Show success
       alert(editing ? "Customer Updated Successfully" : "Customer added successfully");
     } else {
       alert(editing ? "Error in updating customer" : "Error in adding customer");

@@ -33,7 +33,6 @@ function AddProjectForm() {
   const [interior, setInterior] = useState<any[]>([]);
   const [salesData, setSalesData] = useState<any[]>([]);
 
-  const availableAreas = ["Living Room", "Kitchen", "Bedroom", "Bathroom"];
   const [availableProductGroups, setAvailableProductGroups] = useState<any[]>([]);
 
   const catalogueData = useSelector((state: RootState) => state.data.catalogs);
@@ -48,6 +47,9 @@ function AddProjectForm() {
   const [discount, setDiscount] = useState(0);
 
   const [additionalItems, setAdditionalItems] = useState<Additional[]>([]);
+
+  const [projectAddress, setProjectAddress] = useState(null);
+
   interface Additional {
     name: string;
     quantity: number;
@@ -94,23 +96,32 @@ function AddProjectForm() {
   }
 
   interface Goods {
-    date: string;
-    status: string;
-    orderID: string;
-    remark: string;
+    pg;
+    date;
+    status;
+    orderID;
+    remark;
+    mainindex;
+    groupIndex;
+    item;
   }
 
-  interface Tailor {
-    rate: number;
-    tailorData: string[];
-    status: string;
-    remark: string;
+  interface Tailor{
+    pg;
+    rate;
+    tailorData;
+    status;
+    remark;
+    mainindex;
+    groupIndex;
+    item;
   }
 
   const [goodsArray, setGoodsArray] = useState<Goods[]>([]);
   const [tailorsArray, setTailorsArray] = useState<Tailor[]>([]);
 
   const [selections, setSelections] = useState<AreaSelection[]>([]);
+  const [availableAreas, setAvailableAreas] = useState([]);
 
   const getItemsData = async () => {
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts");
@@ -215,65 +226,83 @@ function AddProjectForm() {
     setSelections(updatedSelections);
   };
 
-      const handleProductGroupChange = (mainindex: number, i: number, product: string) => {
-        const updatedSelections = [...selections];
-      
-        // Ensure areacollection exists
-        if (!updatedSelections[mainindex].areacollection) {
-          updatedSelections[mainindex].areacollection = [];
-        }
-      
-        // Ensure the specific index exists
-        if (!updatedSelections[mainindex].areacollection[i]) {
-          updatedSelections[mainindex].areacollection[i] = {
-            productGroup: null,
-            items: [""],
-            catalogue: [],
-            company: null,
-            designNo: null,
-            reference: null,
-            measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
-            additionalItems: [],
-            totalAmount: [],
-            totalTax: []
-          };
-        }
-      
-        // Parse the product group string
-        const newproduct = product.split(",");
-        // Update selections
-        updatedSelections[mainindex].areacollection[i].productGroup = newproduct;
-        
-        const pg = newproduct;
-        if (!Array.isArray(pg) || pg.length < 2) return null;
-
-        const relevantPG = pg.length > 2 ? pg.slice(1, -2) : [];
-        const matchedItems = relevantPG.map((pgItem) => {
-          const matched = items.find((item) => item[0] === pgItem);
-          return matched || pgItem;
-        });
-
-        const validMatchedItems = matchedItems.filter((el) => Array.isArray(el));
-        updatedSelections[mainindex].areacollection[i].items = validMatchedItems;
-        setSelections(updatedSelections);
-        // ✅ Set goodsArray to have exactly the same number of items
-        const updatedGoodsArray = items.map(() => ({
-          date: "",
-          status: "Pending",
-          orderID: "",
-          remark: "NA"
-        }));
-        setGoodsArray(updatedGoodsArray); 
-
-        const newtailorsArray = updatedSelections[mainindex].areacollection[i].items.filter(item => item[2] == "Tailoring").map(() => ({
-            rate: 0,
-            tailorData: [""],
-            status : "Pending",
-            remark: "NA"
-          }));
-        setTailorsArray(newtailorsArray);
+  const handleProductGroupChange = (mainindex: number, i: number, product: string) => {
+    const updatedSelections = [...selections];
+  
+    if (!updatedSelections[mainindex].areacollection) {
+      updatedSelections[mainindex].areacollection = [];
+    }
+  
+    if (!updatedSelections[mainindex].areacollection[i]) {
+      updatedSelections[mainindex].areacollection[i] = {
+        productGroup: null,
+        items: [],
+        catalogue: [],
+        company: null,
+        designNo: null,
+        reference: null,
+        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+        additionalItems: [],
+        totalAmount: [],
+        totalTax: []
       };
-      
+    }
+  
+    const newproduct = product.split(",");
+    updatedSelections[mainindex].areacollection[i].productGroup = newproduct;
+  
+    const pg = newproduct;
+    if (!Array.isArray(pg) || pg.length < 2) return;
+  
+    const relevantPG = pg.length > 2 ? pg.slice(1, -2) : [];
+  
+    const newMatchedItems = relevantPG.map(pgItem =>
+      items.find(item => item[0] === pgItem)
+    ).filter(item => Array.isArray(item));
+  
+    updatedSelections[mainindex].areacollection[i].items = newMatchedItems;
+    setSelections(updatedSelections);
+  
+    // Remove old entries for this area and group index
+    const filteredGoods = goodsArray.filter(
+      g => !(g.mainindex === mainindex && g.groupIndex === i)
+    );
+  
+    const newGoods = newMatchedItems.map((item, itemindex) => ({
+      mainindex,
+      groupIndex: i,
+      pg: newproduct,
+      date: "",
+      status: "Pending",
+      orderID: "",
+      remark: "NA",
+      item : item,
+    }));
+  
+    setGoodsArray([...filteredGoods, ...newGoods]);
+  
+    const filteredTailors = tailorsArray.filter(
+      t => !(t.mainindex === mainindex && t.groupIndex === i)
+    );
+  
+    const newTailors = newMatchedItems
+      .filter(item => item[2] === "Tailoring")
+      .map((item, itemIndex) => ({
+        mainindex,
+        groupIndex: i,
+        pg: newproduct,
+        rate: 0,
+        tailorData: [""],
+        status: "Pending",
+        remark: "NA",
+        item : item,
+      }));
+  
+    setTailorsArray([...filteredTailors, ...newTailors]);
+
+    console.log(tailorsArray);
+    console.log(goodsArray);
+  };
       
     
     const handleCatalogueChange = (mainindex: number,i : number, catalogue) => {
@@ -343,31 +372,71 @@ function AddProjectForm() {
       setSelections(updatedSelection);
     }
 
-    const handleAddNewGroup = (mainindex) => {
-      // Clone the selections array to avoid direct mutation of state
+    const handleAddNewGroup = (mainindex: number, productGroupString = "") => {
       const updatedSelections = [...selections];
     
-      // Ensure the area exists before proceeding
-      if (updatedSelections[mainindex] && updatedSelections[mainindex].area) {
-        // Add a new group to the `areacollection` array for the selected area
-        updatedSelections[mainindex].areacollection.push({
-          productGroup: "",
-          company: "",
-          catalogue: [],
-          designNo: "",
-          reference: "",
-          measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"},
-          items : [""],
-          additionalItems : [],
-          totalAmount : [],
-          totalTax : []
-        });
-    
-        // Update the state with the new selections array
-        setSelections(updatedSelections);
+      if (!updatedSelections[mainindex]?.areacollection) {
+        updatedSelections[mainindex].areacollection = [];
       }
-    };
     
+      const groupIndex = updatedSelections[mainindex].areacollection.length;
+    
+      // Parse product group string (can be empty initially)
+      const productGroupArray = productGroupString ? productGroupString.split(",") : [];
+    
+      const relevantPG = productGroupArray.length > 2 ? productGroupArray.slice(1, -2) : [];
+    
+      const matchedItems = relevantPG
+        .map(pgName => items.find(item => item[0] === pgName))
+        .filter(item => Array.isArray(item));
+    
+      // Add the new group
+      updatedSelections[mainindex].areacollection.push({
+        productGroup: productGroupArray,
+        company: "",
+        catalogue: [],
+        designNo: "",
+        reference: "",
+        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+        items: matchedItems,
+        additionalItems: [],
+        totalAmount: [],
+        totalTax: []
+      });
+    
+      setSelections(updatedSelections);
+    
+      // Create new goodsArray entries
+      const newGoods = matchedItems.map(item => ({
+        mainindex,
+        groupIndex,
+        pg: productGroupArray,
+        date: "",
+        status: "Pending",
+        orderID: "",
+        remark: "NA",
+        item : item,
+      }));
+    
+      // Create new tailorsArray entries
+      const newTailors = matchedItems
+        .filter(item => item[2] === "Tailoring")
+        .map(item => ({
+          mainindex,
+          groupIndex,
+          pg: productGroupArray,
+          rate: 0,
+          tailorData: [""],
+          status: "Pending",
+          remark: "NA",
+          item : item
+        }));
+    
+      // Add new entries
+      setGoodsArray(prev => [...prev, ...newGoods]);
+      setTailorsArray(prev => [...prev, ...newTailors]);
+    };
+
     const handleGroupDelete = (mainindex : number, index : number) => {
       const updatedSelection = [...selections];
       if(updatedSelection[mainindex].areacollection[index]){
@@ -592,6 +661,7 @@ function AddProjectForm() {
           additionalItems: JSON.stringify(additionalItems),
           goodsArray: JSON.stringify(goodsArray),
           tailorsArray: JSON.stringify(tailorsArray),
+          projectAddress : JSON.stringify(projectAddress),
         }),
       });
       if (response.status === 200) {
@@ -608,72 +678,109 @@ function AddProjectForm() {
   };
 
   const [goodsItems, setGoodsItems] = useState<any[]>([]);
-
   useEffect(() => {
-    async function getData() {
-      const data = await fetchInteriors();
-      dispatch(setInteriorData(data));
-      setInterior(data);
-    }
-    async function getItemsData() {
-      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts", {
-        credentials: "include",
-      });
+    const fetchAndDispatch = async (
+      fetchFn: () => Promise<any>,
+      dispatchFn: (data: any) => void,
+      key: string,
+      setStateFn?: (data: any) => void
+    ) => {
+      try {
+        const oneHour = 3600 * 1000; // 1 hour
+        let shouldFetch = true;
+  
+        const cached = localStorage.getItem(key);
+        if (cached) {
+          const { data, time } = JSON.parse(cached);
+  
+          if (Date.now() - time < oneHour) {
+            dispatch(dispatchFn(data));
+            setStateFn?.(data);
+            shouldFetch = false; // No need to fetch fresh
+          } else {
+            localStorage.removeItem(key); // Expired, clean it
+          }
+        }
+  
+        if (shouldFetch) {
+          const freshData = await fetchFn();
+          dispatch(dispatchFn(freshData));
+          setStateFn?.(freshData);
+          localStorage.setItem(key, JSON.stringify({ data: freshData, time: Date.now() }));
+        }
+        
+      } catch (error) {
+        console.error(`Error fetching ${key}:`, error);
+      }
+    };
+  
+    const fetchAllData = async () => {
+      await Promise.all([
+        fetchAndDispatch(fetchInteriors, setInteriorData, "interiorData", setInterior),
+        fetchAndDispatch(
+          async () => {
+            const response = await fetch(
+              "https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts",
+              { credentials: "include" }
+            );
+            const result = await response.json();
+            return result.body || [];
+          },
+          setItemData,
+          "itemsData",
+          setSingleItems
+        ),
+        fetchAndDispatch(fetchSalesAssociates, setSalesAssociateData, "salesAssociateData", setSalesData),
+        fetchAndDispatch(fetchProductGroups, setProducts, "productsData", setAvailableProductGroups),
+        fetchAndDispatch(fetchCatalogues, setCatalogs, "catalogueData"),
+        fetchAndDispatch(fetchCustomers, setCustomerData, "customerData", setCustomers)
+      ]);
+    };
+  
+    fetchAllData(); // Call everything at once
+  
+  }, [dispatch]);
+  
+
+useEffect(() => {
+  async function getAreas() {
+    try {
+      // Check localStorage first to avoid unnecessary API calls
+      const cachedData = localStorage.getItem("areasData");
+      const oneHour = 3600 * 1000; // 1 hour expiration for cached data
+
+      if (cachedData) {
+        const { data, time } = JSON.parse(cachedData);
+
+        if (Date.now() - time < oneHour) {
+          // Use cached data if it hasn't expired
+          setAvailableAreas(data);
+          return;
+        } else {
+          // Remove expired data from localStorage
+          localStorage.removeItem("areasData");
+        }
+      }
+
+      // If no valid cached data, fetch from the API
+      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getAreas");
       const data = await response.json();
-      const items = data.body || [];
-      dispatch(setItemData(items));
-      setSingleItems(items);
-    }
-    if (interiorData.length === 0) {
-      getData();
-    }
-    if (items.length === 0) {
-      getItemsData();
-    }
-  }, [dispatch, interiorData, items]);
+      setAvailableAreas(data.body);
 
-  useEffect(() => {
-    async function getData() {
-      const data = await fetchSalesAssociates();
-      dispatch(setSalesAssociateData(data));
-      setSalesData(data);
-    }
-    if (salesAssociateData.length === 0) {
-      getData();
-    }
-  }, [dispatch, salesAssociateData]);
+      // Cache the fresh data
+      localStorage.setItem("areasData", JSON.stringify({ data: data.body, time: Date.now() }));
 
-  useEffect(() => {
-    async function getData() {
-      const data = await fetchProductGroups();
-      dispatch(setProducts(data));
-      setAvailableProductGroups(data);
+    } catch (error) {
+      console.error("Error fetching areas:", error);
     }
-    if (products.length === 0) {
-      getData();
-    }
-  }, [dispatch, products]);
+  }
 
-  useEffect(() => {
-    async function getData() {
-      const data = await fetchCatalogues();
-      dispatch(setCatalogs(data));
-    }
-    if (catalogueData.length === 0) {
-      getData();
-    }
-  }, [dispatch, catalogueData]);
+  // Fetch areas only if not already loaded
+  if (availableAreas.length === 0) {
+    getAreas();
+  }
+}, [availableAreas.length]); // Only re-run when availableAreas length changes
 
-  useEffect(() => {
-    async function getData() {
-      const data = await fetchCustomers();
-      dispatch(setCustomerData(data));
-      setCustomers(data);
-    }
-    if (customerData.length === 0) {
-      getData();
-    }
-  }, [dispatch, customerData]);
 
   const bankDetails = ["123213", "!23123213", "123132"];
   const termsConditions = ["sadsdsad", "Adasdad"];
@@ -812,6 +919,7 @@ function AddProjectForm() {
         selectedCustomer={selectedCustomer}
         setSelectedCustomer={setSelectedCustomer}
         projectData={projectData}
+        setCustomers={setCustomers}
       />
       <ProjectDetails
         selectedCustomer={selectedCustomer}
@@ -831,6 +939,9 @@ function AddProjectForm() {
         setProjectDate={setProjectDate}
         setAdditionalRequests={setAdditionalRequests}
         additionalRequests={additionalRequests}
+        projectAddress={projectAddress}
+        setProjectAddress={setProjectAddress}
+        setSalesData={setSalesData}
       />
       <MaterialSelectionComponent
         selections={selections}
@@ -849,6 +960,7 @@ function AddProjectForm() {
         handleDesignNoChange={handleDesignNoChange}
         handleReferenceChange={handleReferenceChange}
         handleGroupDelete={handleGroupDelete}
+        setAvailableAreas={setAvailableAreas}
       />
       <MeasurementSection
         selections={selections}
