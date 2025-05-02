@@ -9,7 +9,8 @@ interface CardProps {
 
 const Card: React.FC<CardProps> = ({ title, value, color, isCurrency = false }) => {
   return (
-    <div className="flex items-center bg-white shadow-md rounded-lg p-4 w-full max-w-sm">
+    <div className="flex items-center bg-transparent shadow border border-zinc-790 rounded-lg p-2 w-full max-w-sm">
+
       {/* Vertical Colored Line */}
       <div className={`w-2 h-full ${color} rounded-l-lg`}></div>
 

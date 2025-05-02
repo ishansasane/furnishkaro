@@ -46,7 +46,7 @@ const MaterialSelectionComponent = ({
 
   return (
     <div className="flex flex-col bg-white p-6 rounded-lg shadow-lg">
-      <p className="text-[1.3vw] font-semibold">Material Selection</p>
+      <p className=" font-semibold">Material Selection</p>
 
       <div className="flex flex-row gap-5">
         {/* Left Column: Area Selection */}
@@ -112,14 +112,14 @@ const MaterialSelectionComponent = ({
         {/* Right Column: Product Group Selection */}
         <div className="w-[80vw]">
           <div className="flex flex-row items-center justify-between">
-            <p className="text-[1.1vw]">Select Product Groups</p>
+            <p className="">Select Product Groups</p>
           </div>
 
           {selections.map((selection, mainindex) =>
             
             <div key={mainindex} className="mb-4 border p-3 rounded-lg shadow-sm bg-gray-50">
               <div className="flex flex-row justify-between">
-                <p className="text-[1.1vw]">{selection.area}</p>
+                <p className="">{selection.area}</p>
                 <button
                 className="mb-3 text-lg px-2 py-2 text-white bg-sky-600"
                 style={{ borderRadius: '10px' }}

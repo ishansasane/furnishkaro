@@ -140,12 +140,12 @@ const ProjectDetails = ({
 
   return (
     <div className="flex flex-col gap-3 w-full rounded-xl shadow-2xl border-2 border-gray-200 px-3 py-3">
-      <p className="text-[1.2vw]">Project Details</p>
+      <p className="">Project Details</p>
 
       {/* Reference & Project Name */}
       <div className="flex flex-row w-full gap-2">
         <div className="flex flex-col w-1/2">
-          <p className="text-[1vw]">Reference (optional)</p>
+          <p className="">Reference (optional)</p>
           <input
             type="text"
             className="border p-2 rounded w-full"
@@ -154,7 +154,7 @@ const ProjectDetails = ({
           />
         </div>
         <div className="flex flex-col w-1/2">
-          <p className="text-[1vw]">Project Name (type a unique name)</p>
+          <p className="">Project Name (type a unique name)</p>
           <input
             type="text"
             className="border p-2 rounded w-full"
@@ -168,7 +168,7 @@ const ProjectDetails = ({
       {selectedCustomer && (
         <div className="flex flex-row w-full gap-2">
           <div className="flex flex-col w-full">
-            <p className="text-[1vw]">Address</p>
+            <p className="">Address</p>
             <input
               type="text"
               className="border p-2 rounded w-full"
@@ -183,7 +183,7 @@ const ProjectDetails = ({
       {selectedCustomer && (
         <div className="flex flex-row w-full gap-2">
           <div className="flex flex-col w-full">
-            <p className="text-[1vw]">Any Additional Requests (optional)</p>
+            <p className="">Any Additional Requests (optional)</p>
             <input type="text" value={additionalRequests} onChange={(e) => setAdditionalRequests(e.target.value)} className="border p-2 rounded w-full" />
           </div>
         </div>
@@ -196,6 +196,7 @@ const ProjectDetails = ({
                       <p className="text-[1vw]">Select Interior</p>
                       <button className="mb-3" onClick={() => setIsOpen(true)}><FaPlus size={18} className="hover:text-sky-800 text-sky-600"/></button>
                     </div>
+          <p className="">Interior Name (optional)</p>
           <select
             className="border p-2 rounded w-full"
             value={interiorArray}
@@ -215,6 +216,7 @@ const ProjectDetails = ({
             <p className="text-[1vw]">Select Sales Associate</p>
             <button className="mb-3"><FaPlus size={18} className="hover:text-sky-800 text-sky-600"/></button>
           </div>
+          <p className="">Sales Associate (optional)</p>
           <select
             className="border p-2 rounded w-full"
             value={salesAssociateArray}
@@ -233,7 +235,7 @@ const ProjectDetails = ({
       {/* Select User */}
       <div className="flex flex-row w-full gap-2">
         <div className="flex flex-col w-1/2">
-          <p className="text-[1vw]">Select User</p>
+          <p className="">Select User</p>
           <input
             type="text"
             className="border p-2 rounded w-full"
@@ -242,7 +244,7 @@ const ProjectDetails = ({
           />
         </div>
         <div className="flex flex-col w-1/2">
-          <p className="text-[1vw]">Project Date</p>
+          <p className="">Project Date</p>
           <input
             type="date"
             className="border p-2 rounded w-full"
