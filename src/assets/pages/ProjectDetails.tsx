@@ -26,15 +26,7 @@ const ProjectDetails = ({
 
       {/* Reference & Project Name */}
       <div className="flex flex-row w-full gap-2">
-        <div className="flex flex-col w-1/2">
-          <p className="">Reference (optional)</p>
-          <input
-            type="text"
-            className="border p-2 rounded w-full"
-            value={projectReference}
-            onChange={(e) => setProjectReference(e.target.value)}
-          />
-        </div>
+        
         <div className="flex flex-col w-1/2">
           <p className="">Project Name (type a unique name)</p>
           <input
@@ -42,6 +34,15 @@ const ProjectDetails = ({
             className="border p-2 rounded w-full"
             value={projectName}
             onChange={(e) => setProjectName(e.target.value)}
+          />
+        </div>
+        <div className="flex flex-col w-1/2">
+          <p className="">Reference (optional)</p>
+          <input
+            type="text"
+            className="border p-2 rounded w-full"
+            value={projectReference}
+            onChange={(e) => setProjectReference(e.target.value)}
           />
         </div>
       </div>

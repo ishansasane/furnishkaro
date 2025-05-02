@@ -35,12 +35,12 @@ interface Project {
 
 // Status filter options
 const statusFilters = [
-  "all",
-  "approved",
-  "good pending",
-  "goods complete",
-  "tailor complete",
-  "tailor pending",
+  "All",
+  "Approved",
+  "Goods Pending",
+  "Goods Complete",
+  "Tailor Complete",
+  "Tailor Pending",
 ] as const;
 
 export default function Projects() {
