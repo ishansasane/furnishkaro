@@ -117,7 +117,7 @@ const ProjectDetails = ({
         method,
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ name, email, phonenumber, address }),
+        body: JSON.stringify({ name : salesname, email : salesemail, phonenumber : salesphonenumber, address : salesaddress }),
       });
   
       if (response.status === 200) {
@@ -196,7 +196,6 @@ const ProjectDetails = ({
                       <p className="text-[1vw]">Select Interior</p>
                       <button className="mb-3" onClick={() => setIsOpen(true)}><FaPlus size={18} className="hover:text-sky-800 text-sky-600"/></button>
                     </div>
-          <p className="">Interior Name (optional)</p>
           <select
             className="border p-2 rounded w-full"
             value={interiorArray}
@@ -214,9 +213,8 @@ const ProjectDetails = ({
         <div className="flex flex-col w-1/2">
           <div className="flex flex-row gap-3 px-2">
             <p className="text-[1vw]">Select Sales Associate</p>
-            <button className="mb-3"><FaPlus size={18} className="hover:text-sky-800 text-sky-600"/></button>
+            <button className="mb-3" onClick={() => setIsSalesOpen(true)}><FaPlus size={18} className="hover:text-sky-800 text-sky-600"/></button>
           </div>
-          <p className="">Sales Associate (optional)</p>
           <select
             className="border p-2 rounded w-full"
             value={salesAssociateArray}
