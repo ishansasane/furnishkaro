@@ -78,7 +78,7 @@ const MaterialSelectionComponent = ({
         >
           <option value="">Select Area</option>
           {/* Special Option to Add New */}
-          <option value="__add_new__">➕ Add New Area</option>
+          <option value="__add_new__">➕ Add New Space</option>
 
           {/* Existing Areas */}
           {availableAreas.map((area) => (
@@ -95,14 +95,14 @@ const MaterialSelectionComponent = ({
         className="text-red-500 hover:text-red-700 mt-2"
         onClick={() => handleRemoveArea(index)}
       >
-        <FaTrash size={18} />
+        <FaTrash size={18} /> 
       </button>
     </div>
   );
 })}
 
           <button
-            className="flex items-center gap-2 bg-blue-500 text-white px-3 py-1 hover:bg-blue-600 transition"
+            className="flex !rounded-xl items-center gap-2 bg-blue-500 text-white px-3 py-1 hover:bg-blue-600 transition"
             onClick={handleAddArea}
           >
             <FaPlus /> Add Area
@@ -155,7 +155,7 @@ const MaterialSelectionComponent = ({
                       {/* Company */}
                       <div>
                         <div className='flex flex-row gap-3'>
-                          <p className='text-[1vw]'>Company</p>
+                          <p className=''>Company</p>
                           <button className='mb-3'><FaPlus size={18} className='text-sky-600 hover:text-sky-800'/></button>
                         </div>
                         <select
@@ -175,7 +175,7 @@ const MaterialSelectionComponent = ({
                       {/* Catalogue */}
                       <div>
                       <div className='flex flex-row gap-3'>
-                          <p className='text-[1vw]'>Catalogue</p>
+                          <p className=''>Catalogue</p>
                           <button className='mb-3'><FaPlus size={18} className='text-sky-600 hover:text-sky-800'/></button>
                         </div>
                         <select
@@ -195,7 +195,7 @@ const MaterialSelectionComponent = ({
                       {/* Design No */}
                       <div>
                       <div className='flex flex-row gap-3'>
-                          <p className='text-[1vw]'>Design No.</p>
+                          <p className=''>Design No.</p>
                           <button className='mb-3'><FaPlus size={18} className='text-sky-600 hover:text-sky-800'/></button>
                         </div>
                         <select
