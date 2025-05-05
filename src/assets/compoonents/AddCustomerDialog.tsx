@@ -3,6 +3,8 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store";
 import { setCustomerData } from "../Redux/dataSlice";
+import { useNavigate } from "react-router-dom";
+
 
 interface Customer {
   name: string;
@@ -42,6 +44,7 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
   editing,
   setEditing
 }) => {
+  const navigate = useNavigate();
   const [name, setName] = useState(editing ? editing[0] : "");
   const [mobile, setMobile] = useState(editing ? editing[1] : "");
   const [address, setAddress] = useState(editing ? editing[3] : "");
@@ -149,10 +152,7 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
         <div className="flex justify-end gap-2">
           <button
             className="bg-gray-500 text-white px-4 py-2 rounded"
-            onClick={() => {
-              setEditing(null);
-              setDialogOpen(false);
-            }}
+            onClick={() => navigate(-1)}  
           >
             Cancel
           </button>

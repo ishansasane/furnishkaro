@@ -23,11 +23,11 @@ const QuotationTable = ({
 }) => {
   return (
     <div className="flex flex-col p-6 border rounded-lg w-full shadow-2xl">
-      <p className="text-[1.1vw]">Quotation</p>
+      <p className=" ">Quotation</p>
       <div className="flex flex-col gap-3 w-full">
         {selections.map((selection, mainindex) => (
           <div key={mainindex} className="w-full">
-            <p className="text-[1.1vw] font-semibold mb-2">{selection.area}</p>
+            <p className="  font-semibold mb-2">{selection.area}</p>
             <table className="w-full border-collapse mb-6 text-[0.95vw]">
               <thead>
                 <tr className="flex justify-between w-full bg-gray-100 p-2 border-b font-semibold">
@@ -111,7 +111,7 @@ const QuotationTable = ({
 
       {/* Misc Section */}
       <div className="border p-6 rounded-lg w-full flex flex-col">
-        <p className="text-[1.1vw] font-semibold">Miscellaneous</p>
+        <p className=" font-semibold">Miscellaneous</p>
         <div className="flex w-full flex-col">
           <div className="flex flex-row justify-between items-center mt-4">
             <button className="flex flex-row gap-2 !rounded-xl bg-sky-50 hover:bg-sky-100 items-center px-2 py-1" onClick={handleAddMiscItem}>
@@ -121,7 +121,7 @@ const QuotationTable = ({
 
           <table className="mt-3 w-full">
             <thead>
-              <tr className="ml-3 flex text-[1.1vw] w-full justify-between">
+              <tr className="ml-3 flex  w-full justify-between">
                 <td className="w-[3vw]">SR</td>
                 <td className="w-[6vw]">Item Name</td>
                 <td className="w-[6vw]">Quantity</td>
@@ -178,26 +178,26 @@ const QuotationTable = ({
         <div className="shadow-xl p-6 flex flex-col gap-2 border w-1/2 rounded-lg">
           <p className="text-[1.2vw]">Summary</p>
           <div className="flex flex-row justify-between w-full">
-            <p className="text-[1.1vw]">Sub Total</p>
-            <p className="text-[1.1vw]">{Amount}</p>
+            <p className=" ">Sub Total</p>
+            <p className=" ">{Amount}</p>
           </div>
           <div className="flex flex-row justify-between w-full">
-            <p className="text-[1.1vw]">Total Tax Amount</p>
-            <p className="text-[1.1vw]">{Tax}</p>
+            <p className=" ">Total Tax Amount</p>
+            <p className=" ">{Tax}</p>
           </div>
           <div className="flex flex-row justify-between w-full">
-            <p className="text-[1.1vw]">Total Amount</p>
-            <p className="text-[1.1vw]">{parseFloat((Amount + Tax).toFixed(2))}</p>
+            <p className=" ">Total Amount</p>
+            <p className=" ">{parseFloat((Amount + Tax).toFixed(2))}</p>
           </div>
           <div className="border border-gray-400"></div>
           <div className="flex justify-between mt-1 w-full">
-            <p className="text-[1.1vw]">Discount</p>
+            <p className=" ">Discount</p>
             <input className="rounded-lg border text-center" value={Discount} onChange={(e) => setDiscount(e.target.value)} type="text" />
           </div>
           <div className="border border-gray-400"></div>
           <div className="flex w-full flex-row items-center justify-between">
-            <p className="text-[1.1vw]">Grand Total</p>
-            <p className="text-[1.1vw]">{parseFloat((Amount + Tax - Discount).toFixed(2))}</p>
+            <p className=" ">Grand Total</p>
+            <p className=" ">{parseFloat((Amount + Tax - Discount).toFixed(2))}</p>
           </div>
           <button onClick={sendProjectData} className="rounded-lg bg-sky-700 hover:bg-sky-800 text-white p-[6px]" style={{ borderRadius: "10px" }}>
             Add Project & Generate Quote

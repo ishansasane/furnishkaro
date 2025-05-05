@@ -23,26 +23,29 @@ const MeasurementSection: React.FC<MeasurementSectionProps> = ({
   handlequantitychange
 }) => {
   return (
-    <div className="rounded-lg border shadow-2xl w-full flex flex-col p-6">
-      <p className="text-[1.3vw] font-semibold">Measurements</p>
-      <div className="flex flex-row gap-2">
-        <div className="flex flex-col border rounded-lg w-[15vw]">
-          <p className="text-[1.1vw] pl-5 pt-2">Area</p>
+    <div className="rounded-lg border shadow-2xl w-full flex flex-col p-4 sm:p-6">
+      <p className="text-lg sm:text-xl font-semibold">Measurements</p>
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+        <div className="flex flex-col border rounded-lg w-full sm:w-1/4">
+          <p className="pl-4 pt-2 text-sm sm:text-base">Area</p>
           {selections.map((selection, index) => (
-            <div key={index} className="flex items-center pl-5">
-              <p className="text-[1.1vw]">{selection.area}</p>
-              <button className={`${selection.area == "" ? "hidden" : ""} mb-3 text-red-500 hover:text-red-700`} onClick={() => handleRemoveArea(index)}>
+            <div key={index} className="flex items-center pl-4 py-2">
+              <p className="text-sm sm:text-base">{selection.area}</p>
+              <button
+                className={`${selection.area == "" ? "hidden" : ""} ml-2 text-red-500 hover:text-red-700`}
+                onClick={() => handleRemoveArea(index)}
+              >
                 <FaTrash />
               </button>
             </div>
           ))}
         </div>
-        <div className="w-[85vw] flex flex-col border rounded-lg">
-          <div className="flex p-2 gap-3">
-            <p className="text-[1.1vw] mt-2">Default Unit</p>
-            <div className="flex items-center gap-2 mb-4">
+        <div className="w-full sm:w-3/4 flex flex-col border rounded-lg">
+          <div className="flex flex-col sm:flex-row p-2 gap-3 items-start sm:items-center">
+            <p className="text-sm sm:text-base mt-2">Default Unit</p>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               <select
-                className="border border-gray-300 p-2 rounded-lg w-full focus:ring-2 focus:ring-blue-400"
+                className="border border-gray-300 p-2 rounded-lg w-full text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
                 value=""
               >
                 {units.map((unit) => (
@@ -53,32 +56,39 @@ const MeasurementSection: React.FC<MeasurementSectionProps> = ({
               </select>
             </div>
           </div>
-          <div className="flex flex-col p-3">
+          <div className="flex flex-col p-3 gap-4">
             {selections.map((selection, mainindex) => (
-              <div key={mainindex} className="">
-                <p className="text-[1.2vw]">{selection.area}</p>
-                {selection.areacollection.map((collection, index) => (
-                  <div key={index} className="flex p-3 justify-between border rounded-lg">
-                    <div className="flex gap-2">
-                      <div className="flex flex-col gap-2">
-                        <p className="text-[1.1vw]">Product Group</p>
-                        <input type="text" className="w-[10vw] rounded-lg border px-2 py-2" value={collection.productGroup[0]} />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <p className="text-[1.1vw]">Reference</p>
-                        <input
-                          type="text"
-                          onChange={(e) => handleReferenceChange(mainindex, index, e.target.value)}
-                          className="rounded-lg border px-2 py-2 w-[10vw]"
-                          value={collection.reference}
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <p className="text-[1.1vw]">Measurement</p>
-                        <div className="flex items-center gap-2 mb-4">
+              <div key={mainindex} className="flex flex-col gap-2">
+                <p className="text-base sm:text-lg font-medium">{selection.area}</p>
+                <div className="flex flex-col gap-4">
+                  {selection.areacollection.map((collection, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-col sm:flex-row p-3 border rounded-lg gap-3 sm:gap-4"
+                    >
+                      <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full">
+                        <div className="flex flex-col gap-2 w-full sm:w-1/5">
+                          <p className="text-sm sm:text-base">Product Group</p>
+                          <input
+                            type="text"
+                            className="w-full rounded-lg border px-2 py-2 text-sm sm:text-base"
+                            value={collection.productGroup[0]}
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2 w-full sm:w-1/5">
+                          <p className="text-sm sm:text-base">Reference</p>
+                          <input
+                            type="text"
+                            onChange={(e) => handleReferenceChange(mainindex, index, e.target.value)}
+                            className="w-full rounded-lg border px-2 py-2 text-sm sm:text-base"
+                            value={collection.reference}
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2 w-full sm:w-1/5">
+                          <p className="text-sm sm:text-base">Measurement</p>
                           <select
                             onChange={(e) => handleunitchange(mainindex, index, e.target.value)}
-                            className="border border-gray-300 p-2 rounded-lg w-full focus:ring-2 focus:ring-blue-400"
+                            className="border border-gray-300 p-2 rounded-lg w-full text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
                             value={collection.measurement.unit == undefined ? "" : collection.measurement.unit}
                           >
                             {units.map((unit) => (
@@ -88,44 +98,44 @@ const MeasurementSection: React.FC<MeasurementSectionProps> = ({
                             ))}
                           </select>
                         </div>
+                        <div className="flex flex-col gap-2 w-full sm:w-1/6">
+                          <p className="text-sm sm:text-base">Width</p>
+                          <input
+                            onChange={(e) => handlewidthchange(mainindex, index, e.target.value)}
+                            type="text"
+                            className="w-full rounded-lg border px-2 py-2 text-sm sm:text-base"
+                            value={collection.measurement.width}
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2 w-full sm:w-1/6">
+                          <p className="text-sm sm:text-base">Height</p>
+                          <input
+                            onChange={(e) => handleheightchange(mainindex, index, e.target.value)}
+                            type="text"
+                            className="w-full rounded-lg border px-2 py-2 text-sm sm:text-base"
+                            value={collection.measurement.height}
+                          />
+                        </div>
+                        <div className="flex flex-col gap-2 w-full sm:w-1/6">
+                          <p className="text-sm sm:text-base">Quantity</p>
+                          <input
+                            type="text"
+                            onChange={(e) => handlequantitychange(mainindex, index, e.target.value)}
+                            className="w-full rounded-lg border px-2 py-2 text-sm sm:text-base"
+                            value={collection.measurement.quantity}
+                          />
+                        </div>
                       </div>
-                      <div className="flex flex-col gap-2">
-                        <p className="text-[1.1vw]">Width</p>
-                        <input
-                          onChange={(e) => handlewidthchange(mainindex, index, e.target.value)}
-                          type="text"
-                          className="rounded-lg border px-2 py-2 w-[6vw]"
-                          value={collection.measurement.width}
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <p className="text-[1.1vw]">Height</p>
-                        <input
-                          onChange={(e) => handleheightchange(mainindex, index, e.target.value)}
-                          type="text"
-                          className="rounded-lg border px-2 py-2 w-[6vw]"
-                          value={collection.measurement.height}
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <p className="text-[1.1vw]">Quantity</p>
-                        <input
-                          type="text"
-                          onChange={(e) => {handlequantitychange(mainindex, index, e.target.value); }}
-                          className="rounded-lg border px-2 py-2 w-[6vw]"
-                          value={collection.measurement.quantity}
-                        />
+                      <div className="flex flex-col gap-2 sm:w-1/6">
+                        <p className="text-sm sm:text-base sm:block hidden">Actions</p>
+                        <div className="flex flex-row gap-2">
+                          <FaTrash className="text-red-500 cursor-pointer hover:text-red-700" />
+                          <FaPlus className="text-blue-500 cursor-pointer hover:text-blue-700" />
+                        </div>
                       </div>
                     </div>
-                    <div className="flex flex-col">
-                      <p className="text-[1.1vw]">Actions</p>
-                      <div className="flex flex-row gap-2">
-                        <FaTrash className="text-red-500" />
-                        <FaPlus className="text-blue-500" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             ))}
           </div>
