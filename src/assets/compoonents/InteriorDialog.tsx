@@ -44,8 +44,8 @@ const InteriorDialog: React.FC<InteriorDialogProps> = ({ setDialogOpen, setRefre
   };
 
   return (
-    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 mt-10 z-50 w-full max-w-md">
-      <div className="bg-white p-6 rounded shadow-md w-full border">
+    <div className="absolute  top-0 left-1/2 transform -translate-x-1/2 mt-10 z-50 w-full max-w-md">
+      <div className="bg-white  p-6 rounded shadow-md w-full border">
         <h2 className="text-xl font-bold mb-4">{editingInterior ? "Edit Interior" : "Add Interior"}</h2>
         <input className={`${editingInterior ? "hidden" : "none"} border p-2 rounded w-full mb-2`} placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
         <input className="border p-2 rounded w-full mb-2" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />

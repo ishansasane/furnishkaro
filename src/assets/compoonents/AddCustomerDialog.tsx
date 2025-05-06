@@ -43,6 +43,7 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
   editing,
   setEditing
 }) => {
+  const navigate = useNavigate();
   const [name, setName] = useState(editing ? editing[0] : "");
   const [mobile, setMobile] = useState(editing ? editing[1] : "");
   const [address, setAddress] = useState(editing ? editing[3] : "");

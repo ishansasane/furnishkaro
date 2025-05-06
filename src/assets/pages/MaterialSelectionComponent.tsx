@@ -123,21 +123,21 @@ const MaterialSelectionComponent = ({
 
   const addArea = async (name) => {
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/addArea", {
-      method : "POST",
-      credentials : "include",
-      headers : {
-        "content-type" : "application/json"
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "content-type": "application/json"
       },
-      body : JSON.stringify({ name : name }),
+      body: JSON.stringify({ name: name }),
     });
     console.log(name);
 
-    if(response.status == 200){
+    if (response.status === 200) {
       const newareas = [...availableAreas];
       newareas.push([name]);
-      setAvailableAreas(newareas)
+      setAvailableAreas(newareas);
       alert("Area Added");
-    }else{
+    } else {
       alert("Error");
     }
   }
@@ -243,64 +243,56 @@ const MaterialSelectionComponent = ({
   }
 
   return (
-    <div className="flex flex-col bg-white p-6 rounded-lg shadow-lg">
-      <p className=" font-semibold">Material Selection</p>
+    <div className="flex flex-col bg-white p-4 sm:p-6 rounded-lg shadow-lg">
+      <p className="text-lg sm:text-xl font-semibold">Material Selection</p>
 
-      <div className="flex flex-row gap-5">
+      <div className="flex flex-col sm:flex-row gap-4 sm:gap-5">
         {/* Left Column: Area Selection */}
-        <div className="w-[20vw]">
-          <p className="text-[1.1vw]">Area</p>
+        <div className="w-full sm:w-1/4">
+          <p className="text-sm sm:text-base">Area</p>
           {selections.map((selection, index) => {
-  const currentArea = selection.area || "";
+            const currentArea = selection.area || "";
 
-  return (
-    <div key={index} className="flex items-center gap-2 mb-4">
-      <div className="flex flex-col gap-2 w-full">
-
-        {/* Select Dropdown */}
-        <select
-          className="border border-gray-300 p-2 rounded-lg w-full focus:ring-2 focus:ring-blue-400"
-          value={currentArea}
-          onChange={(e) => {
-            if (e.target.value === "__add_new__") {
-              // Open prompt to add new area
-              const newArea = prompt("Enter new Area name:");
-              if (newArea && newArea.trim() !== "") {
-                addArea(newArea.trim()); // Your existing function
-                handleAreaChange(index, newArea.trim()); // Set new area
-              }
-            } else {
-              handleAreaChange(index, e.target.value);
-            }
-          }}
-        >
-          <option value="">Select Area</option>
-          {/* Special Option to Add New */}
-          <option value="__add_new__">➕ Add New Space</option>
-
-          {/* Existing Areas */}
-          {availableAreas.map((area) => (
-            <option key={area} value={area}>
-              {area[0]}
-            </option>
-          ))}
-        </select>
-
-      </div>
-
-      {/* Remove Area Button */}
-      <button
-        className="text-red-500 hover:text-red-700 mt-2"
-        onClick={() => handleRemoveArea(index)}
-      >
-        <FaTrash size={18} /> 
-      </button>
-    </div>
-  );
-})}
-
+            return (
+              <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mb-4">
+                <div className="flex flex-col gap-2 w-full">
+                  {/* Select Dropdown */}
+                  <select
+                    className="border border-gray-300 p-2 sm:p-3 rounded-lg w-full text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
+                    value={currentArea}
+                    onChange={(e) => {
+                      if (e.target.value === "__add_new__") {
+                        const newArea = prompt("Enter new Area name:");
+                        if (newArea && newArea.trim() !== "") {
+                          addArea(newArea.trim());
+                          handleAreaChange(index, newArea.trim());
+                        }
+                      } else {
+                        handleAreaChange(index, e.target.value);
+                      }
+                    }}
+                  >
+                    <option value="">Select Area</option>
+                    <option value="__add_new__">➕ Add New Space</option>
+                    {availableAreas.map((area) => (
+                      <option key={area} value={area}>
+                        {area[0]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                {/* Remove Area Button */}
+                <button
+                  className="text-red-500 hover:text-red-700 mt-2 sm:mt-0"
+                  onClick={() => handleRemoveArea(index)}
+                >
+                  <FaTrash size={18} />
+                </button>
+              </div>
+            );
+          })}
           <button
-            className="flex !rounded-xl items-center gap-2 bg-blue-500 text-white px-3 py-1 hover:bg-blue-600 transition"
+            className="flex rounded-xl items-center gap-2 bg-blue-500 text-white px-3 py-2 text-sm sm:text-base hover:bg-blue-600 transition"
             onClick={handleAddArea}
           >
             <FaPlus /> Add Area
@@ -308,38 +300,33 @@ const MaterialSelectionComponent = ({
         </div>
 
         {/* Right Column: Product Group Selection */}
-        <div className="w-[80vw]">
+        <div className="w-full sm:w-3/4">
           <div className="flex flex-row items-center justify-between">
-            <p className="">Select Product Groups</p>
+            <p className="text-sm sm:text-base">Select Product Groups</p>
           </div>
 
-          {selections.map((selection, mainindex) =>
-            
+          {selections.map((selection, mainindex) => (
             <div key={mainindex} className="mb-4 border p-3 rounded-lg shadow-sm bg-gray-50">
-              <div className="flex flex-row justify-between">
-                <p className="">{selection.area}</p>
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                <p className="text-base sm:text-lg font-medium">{selection.area}</p>
                 <button
-                className="mb-3 text-lg px-2 py-2 text-white bg-sky-600"
-                style={{ borderRadius: '10px' }}
-                onClick={() => handleAddNewGroup(mainindex)}
-              >
-                Add New Group
-              </button>
+                  className="mt-2 sm:mt-0 rounded-lg px-3 py-2 text-sm sm:text-base text-white bg-sky-600 hover:bg-sky-700"
+                  onClick={() => handleAddNewGroup(mainindex)}
+                >
+                  Add New Group
+                </button>
               </div>
               {selection.area ? (
-              selection.areacollection.map((element, i) => (
-                <div key={i} className="mb-4 border p-3 rounded-lg shadow-sm bg-gray-50">
-                  <div className="gap-3">
-                    <div className="flex justify-between items-center gap-2">
+                selection.areacollection.map((element, i) => (
+                  <div key={i} className="mt-3 border p-3 rounded-lg shadow-sm bg-gray-50">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                       {/* Product Group */}
-                      <div>
-                        <p>Product Group</p>
+                      <div className="flex flex-col w-full sm:w-1/5">
+                        <p className="text-sm sm:text-base">Product Group</p>
                         <select
-                          className="border p-2 rounded w-full"
+                          className="border p-2 sm:p-3 rounded w-full text-sm sm:text-base"
                           value={element.productGroup}
-                          onChange={(e) =>
-                            {handleProductGroupChange(mainindex, i, e.target.value); }
-                          }
+                          onChange={(e) => handleProductGroupChange(mainindex, i, e.target.value)}
                         >
                           <option value="">Select Product Group</option>
                           {availableProductGroups.map((product, index) => (
@@ -351,15 +338,22 @@ const MaterialSelectionComponent = ({
                       </div>
 
                       {/* Company */}
+<<<<<<< HEAD
                       <div>
                         <div className='flex flex-row gap-3'>
                           <p className=''>Company</p>
                           <button className='mb-3' onClick={() => setIsCompantyOpen(true)}><FaPlus size={18} className='text-sky-600 hover:text-sky-800'/></button>
+=======
+                      <div className="flex flex-col w-full sm:w-1/5">
+                        <div className="flex flex-row justify-between items-center">
+                          <p className="text-sm sm:text-base">Company</p>
+                          <button className="p-1"><FaPlus size={16} className="text-sky-600 hover:text-sky-800" /></button>
+>>>>>>> 24abb975e252266d10b7f7ea6ed98ad8833bb22f
                         </div>
                         <select
-                          className="border p-2 rounded w-full"
+                          className="border p-2 sm:p-3 rounded w-full text-sm sm:text-base"
                           value={element.company}
-                          onChange={(e) => handleCompanyChange(mainindex,i, e.target.value)}
+                          onChange={(e) => handleCompanyChange(mainindex, i, e.target.value)}
                         >
                           <option value="">Select Company</option>
                           {companyData.map((company, index) => (
@@ -371,13 +365,20 @@ const MaterialSelectionComponent = ({
                       </div>
 
                       {/* Catalogue */}
+<<<<<<< HEAD
                       <div>
                       <div className='flex flex-row gap-3'>
                           <p className=''>Catalogue</p>
                           <button className='mb-3' onClick={() => setIsCatalogueOpen(true)}><FaPlus size={18} className='text-sky-600 hover:text-sky-800'/></button>
+=======
+                      <div className="flex flex-col w-full sm:w-1/5">
+                        <div className="flex flex-row justify-between items-center">
+                          <p className="text-sm sm:text-base">Catalogue</p>
+                          <button className="p-1"><FaPlus size={16} className="text-sky-600 hover:text-sky-800" /></button>
+>>>>>>> 24abb975e252266d10b7f7ea6ed98ad8833bb22f
                         </div>
                         <select
-                          className="border p-2 rounded w-full"
+                          className="border p-2 sm:p-3 rounded w-full text-sm sm:text-base"
                           value={element.catalogue}
                           onChange={(e) => handleCatalogueChange(mainindex, i, e.target.value)}
                         >
@@ -391,13 +392,20 @@ const MaterialSelectionComponent = ({
                       </div>
 
                       {/* Design No */}
+<<<<<<< HEAD
                       <div>
                       <div className='flex flex-row gap-3'>
                           <p className=''>Design No.</p>
                           <button className='mb-3' onClick={() => setIsDesignNoOpen(true)}><FaPlus size={18} className='text-sky-600 hover:text-sky-800'/></button>
+=======
+                      <div className="flex flex-col w-full sm:w-1/5">
+                        <div className="flex flex-row justify-between items-center">
+                          <p className="text-sm sm:text-base">Design No.</p>
+                          <button className="p-1"><FaPlus size={16} className="text-sky-600 hover:text-sky-800" /></button>
+>>>>>>> 24abb975e252266d10b7f7ea6ed98ad8833bb22f
                         </div>
                         <select
-                          className="border p-2 rounded w-full"
+                          className="border p-2 sm:p-3 rounded w-full text-sm sm:text-base"
                           value={element.designNo}
                           onChange={(e) => handleDesignNoChange(mainindex, i, e.target.value)}
                         >
@@ -411,29 +419,33 @@ const MaterialSelectionComponent = ({
                       </div>
 
                       {/* Reference */}
-                      <div>
-                        <p>Reference/Notes</p>
+                      <div className="flex flex-col w-full sm:w-1/5">
+                        <p className="text-sm sm:text-base">Reference/Notes</p>
                         <input
                           type="text"
                           value={element.reference}
                           placeholder="Enter reference..."
-                          onChange={(e) =>
-                            handleReferenceChange(mainindex,i , e.target.value)
-                          }
-                          className="pl-2 w-[10vw] h-[2.6vw] border-2 border-gray-300 rounded-md"
+                          onChange={(e) => handleReferenceChange(mainindex, i, e.target.value)}
+                          className="border p-2 sm:p-3 rounded w-full text-sm sm:text-base"
                         />
                       </div>
-                      <div className='text-red-600 hover:text-red-800'>
-                          <button onClick={(e) => handleGroupDelete(mainindex, i)}>
-                            <FaTrash />
-                          </button>
+
+                      {/* Delete Button */}
+                      <div className="flex flex-col w-full sm:w-auto">
+                        <p className="text-sm sm:text-base sm:block hidden">Delete</p>
+                        <button
+                          onClick={(e) => handleGroupDelete(mainindex, i)}
+                          className="text-red-600 hover:text-red-800 p-1"
+                        >
+                          <FaTrash size={16} />
+                        </button>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))
-            ) : <div></div>}</div>
-          )}
+                ))
+              ) : <div></div>}
+            </div>
+          ))}
         </div>
       </div>
       {isCompanyOpen && (

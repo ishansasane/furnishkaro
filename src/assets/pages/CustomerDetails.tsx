@@ -104,14 +104,14 @@ const CustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer, pro
     <div className="flex flex-col gap-3 px-3 py-3 rounded-xl shadow-xl w-full border-gray-200 border-2 mt-3">
       <p className="">Customer Details</p>
 
-      <div className="flex flex-row justify-between gap-2">
+      <div className="flex md:!flex-nowrap flex-wrap flex-row justify-between gap-2">
         {/* Select Customer */}
-        <div className="flex flex-col w-1/2">
-          <div className="flex flex-row gap-3 px-2">
+        <div className="flex  flex-col md:!w-1/2 w-full">
+          <div className="flex  flex-row gap-3 px-2">
             <p className="">Select Customer</p>
             <button className="mb-3 flex items-center px-2 py-1 border-1 border-blue-400 text-blue-500 font-semibold !rounded-xl hover:bg-blue-50 transition" onClick={() => setIsOpen(true)}>
-        <span className="mr-2 flex items-center justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none">+</span> Customer
-    </button>
+          <span className="mr-2 flex items-center justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none">+</span> Customer
+          </button>
           </div>
           <select
             className="border p-2 rounded w-full"
@@ -130,8 +130,8 @@ const CustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer, pro
 
         {/* Email Field */}
         {selectedCustomer && (
-          <div className="flex flex-col w-1/2">
-            <p className="text-[1vw]">Email (optional)</p>
+          <div className="flex flex-col md:!w-1/2 w-full">
+            <p className="">Email (optional)</p>
             <input
               type="text"
               className="border p-2 rounded w-full"
@@ -144,9 +144,9 @@ const CustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer, pro
 
       {/* Phone and Alternate Phone */}
       {selectedCustomer && (
-        <div className="flex flex-row justify-between gap-2">
-          <div className="flex flex-col w-1/2">
-            <p className="text-[1vw]">Phone Number</p>
+        <div className="flex md:!flex-nowrap flex-wrap flex-row justify-between gap-2">
+          <div className="flex flex-col md:!w-1/2 w-full">
+            <p className="">Phone Number</p>
             <input
               type="text"
               className="border p-2 rounded w-full"
@@ -154,8 +154,8 @@ const CustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer, pro
               readOnly
             />
           </div>
-          <div className="flex flex-col w-1/2">
-            <p className="text-[1vw]">Alternate Phone Number (optional)</p>
+          <div className="flex flex-col md:!w-1/2 w-full">
+            <p className="">Alternate Phone Number (optional)</p>
             <input
               type="text"
               className="border p-2 rounded w-full"

@@ -111,11 +111,11 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Inquiry Section */}
-      <div className="bg-white shadow-lg rounded-xl p-6 mt-10">
+      <div className="bg-white  shadow-lg rounded-xl p-6 mt-10">
         <h2 className="text-xl font-semibold text-gray-800 mb-4">📩 Inquiries</h2>
 
         {/* Scrollable Horizontal List */}
-        <div className="flex gap-6 overflow-x-auto pb-4">
+        <div className="flex flex-wrap gap-6 overflow-x-auto pb-4">
           <InquiryCard
             project="E-commerce Website"
             comments="Client wants a Shopify integration."

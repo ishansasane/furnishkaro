@@ -975,25 +975,13 @@ useEffect(() => {
         handleGroupDelete={handleGroupDelete}
       />
       <div className="flex flex-col p-6 border rounded-lg w-full shadow-2xl">
-        <p className="text-[1.1vw]">Quotation</p>
+        <p className="">Quotation</p>
         <div className="flex flex-col gap-3 w-full">
           {selections.map((selection, mainIndex) => (
             <div key={mainIndex} className="w-full">
-              <p className="text-[1.1vw] font-semibold mb-2">{selection.area}</p>
+              <p className="font-semibold mb-2">{selection.area}</p>
               <table className="w-full border-collapse mb-6 text-[0.95vw]">
-                <thead>
-                  <tr className="flex justify-between w-full bg-gray-100 p-2 border-b font-semibold">
-                    <td className="w-[10%]">Sr. No.</td>
-                    <td className="w-[45%]">Product Name</td>
-                    <td className="w-[45%]">Size</td>
-                    <td className="w-[20%]">MRP</td>
-                    <td className="w-[20%]">Quantity</td>
-                    <td className="w-[20%]">Subtotal</td>
-                    <td className="w-[20%]">Tax Rate (%)</td>
-                    <td className="w-[20%]">Tax Amount</td>
-                    <td className="w-[20%]">Total</td>
-                  </tr>
-                </thead>
+                
                 <tbody>
                   {selection.areacollection && selection.areacollection.length > 0 ? (
                     selection.areacollection.map((collection, collectionIndex) => {
@@ -1058,160 +1046,236 @@ useEffect(() => {
             </div>
           ))}
         </div>
-        <div className="border p-6 rounded-lg w-full flex flex-col">
-          <p className="text-[1.1vw] font-semibold">Miscellaneous</p>
-          <div className="flex w-full flex-col">
-            <div className="flex flex-row justify-between items-center mt-4">
-              <button
-                className="flex flex-row gap-2 rounded-xl bg-sky-50 hover:bg-sky-100 items-center px-2 py-1"
-                onClick={handleAddMiscItem}
-              >
-                <FaPlus className="text-sky-500 mt-1" />
-                Add Item
+        <div className="border p-4 sm:p-6 rounded-lg w-full flex flex-col">
+  <p className="font-semibold text-lg sm:text-xl">Miscellaneous</p>
+  <div className="flex w-full flex-col">
+    <div className="flex flex-row justify-between items-center mt-4">
+      <button
+        className="flex flex-row gap-2 rounded-xl bg-sky-50 hover:bg-sky-100 items-center px-2 py-1 text-sm sm:text-base"
+        onClick={handleAddMiscItem}
+      >
+        <FaPlus className="text-sky-500" />
+        Add Item
+      </button>
+    </div>
+    <div className="mt-3 w-full overflow-x-auto">
+      <table className="w-full hidden sm:table">
+        <thead>
+          <tr className="flex flex-wrap w-full justify-between text-sm sm:text-base">
+            <td className="w-12 text-center">SR</td>
+            <td className="w-24">Item Name</td>
+            <td className="w-20">Quantity</td>
+            <td className="w-20">Rate</td>
+            <td className="w-20">Net Rate</td>
+            <td className="w-20">Tax (%)</td>
+            <td className="w-20">Tax Amount</td>
+            <td className="w-20">Total Amount</td>
+            <td className="w-24">Remark</td>
+            <td className="w-20 text-center">Actions</td>
+          </tr>
+        </thead>
+        <tbody className="flex flex-col w-full">
+          {additionalItems.map((item, i) => (
+            <tr key={i} className="w-full flex flex-row justify-between mt-2 text-sm sm:text-base">
+              <td className="text-center w-12">{i + 1}</td>
+              <td className="w-24">
+                <input
+                  onChange={(e) => handleItemNameChange(i, e.target.value)}
+                  className="pl-2 w-full border rounded-lg text-sm"
+                  value={item.name || ""}
+                  type="text"
+                />
+              </td>
+              <td className="w-20">
+                <input
+                  onChange={(e) => handleItemQuantityChange(i, e.target.value)}
+                  className="pl-2 w-full border rounded-lg text-sm"
+                  value={item.quantity || ""}
+                  type="text"
+                />
+              </td>
+              <td className="w-20">
+                <input
+                  onChange={(e) => handleItemRateChange(i, e.target.value)}
+                  className="pl-2 w-full border rounded-lg text-sm"
+                  value={item.rate || ""}
+                  type="text"
+                />
+              </td>
+              <td className="w-20 text-center">{item.netRate.toFixed(2)}</td>
+              <td className="w-20">
+                <input
+                  onChange={(e) => handleItemTaxChange(i, e.target.value)}
+                  className="pl-2 w-full border rounded-lg text-sm"
+                  value={item.tax || ""}
+                  type="text"
+                />
+              </td>
+              <td className="w-20 text-center">{item.taxAmount.toFixed(2)}</td>
+              <td className="w-20 text-center">{item.totalAmount.toFixed(2)}</td>
+              <td className="w-24">
+                <input
+                  onChange={(e) => handleItemRemarkChange(i, e.target.value)}
+                  className="pl-2 w-full border rounded-lg text-sm"
+                  value={item.remark || ""}
+                  type="text"
+                />
+              </td>
+              <td className="w-20 text-center">
+                <button onClick={() => handleDeleteMiscItem(i)}>
+                  <FaTrash className="text-red-500 hover:text-red-600" />
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      {/* Mobile view: Card layout */}
+      <div className="sm:hidden flex flex-col gap-4 mt-4">
+        {additionalItems.map((item, i) => (
+          <div key={i} className="border rounded-lg p-4 flex flex-col gap-2 text-sm">
+            <div className="flex justify-between">
+              <span className="font-semibold">SR: {i + 1}</span>
+              <button onClick={() => handleDeleteMiscItem(i)}>
+                <FaTrash className="text-red-500 hover:text-red-600" />
               </button>
             </div>
-            <table className="mt-3 w-full">
-              <thead>
-                <tr className="ml-3 flex text-[1.1vw] w-full justify-between">
-                  <td className="w-[3vw]">SR</td>
-                  <td className="w-[6vw]">Item Name</td>
-                  <td className="w-[6vw]">Quantity</td>
-                  <td className="w-[6vw]">Rate</td>
-                  <td className="w-[6vw]">Net Rate</td>
-                  <td className="w-[6vw]">Tax (%)</td>
-                  <td className="w-[6vw]">Tax Amount</td>
-                  <td className="w-[6vw]">Total Amount</td>
-                  <td className="w-[6vw]">Remark</td>
-                  <td className="w-[6vw]">Actions</td>
-                </tr>
-              </thead>
-              <tbody className="flex flex-col w-full">
-                {additionalItems.map((item, i) => (
-                  <tr key={i} className="w-full flex flex-row justify-between mt-2">
-                    <td className="text-center w-[3vw]">{i + 1}</td>
-                    <td>
-                      <input
-                        onChange={(e) => handleItemNameChange(i, e.target.value)}
-                        className="pl-2 w-[6vw] border rounded-lg"
-                        value={item.name || ""}
-                        type="text"
-                      />
-                    </td>
-                    <td>
-                      <input
-                        onChange={(e) => handleItemQuantityChange(i, e.target.value)}
-                        className="pl-2 w-[6vw] border rounded-lg"
-                        value={item.quantity || ""}
-                        type="text"
-                      />
-                    </td>
-                    <td>
-                      <input
-
-
-                        onChange={(e) => handleItemRateChange(i, e.target.value)}
-                        className="pl-2 w-[6vw] border rounded-lg"
-                        value={item.rate || ""}
-                        type="text"
-                      />
-                    </td>
-                    <td className="w-[6vw] text-center">{item.netRate.toFixed(2)}</td>
-                    <td>
-                      <input
-                        onChange={(e) => handleItemTaxChange(i, e.target.value)}
-                        className="pl-2 w-[6vw] border rounded-lg"
-                        value={item.tax || ""}
-                        type="text"
-                      />
-                    </td>
-                    <td className="w-[6vw] text-center">{item.taxAmount.toFixed(2)}</td>
-                    <td className="w-[6vw] text-center">{item.totalAmount.toFixed(2)}</td>
-                    <td>
-                      <input
-                        onChange={(e) => handleItemRemarkChange(i, e.target.value)}
-                        className="pl-2 w-[6vw] border rounded-lg"
-                        value={item.remark || ""}
-                        type="text"
-                      />
-                    </td>
-                    <td className="w-[6vw] text-center">
-                      <button onClick={() => handleDeleteMiscItem(i)}>
-                        <FaTrash className="text-red-500 hover:text-red-600" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div>
+              <label className="block font-medium">Item Name</label>
+              <input
+                onChange={(e) => handleItemNameChange(i, e.target.value)}
+                className="pl-2 w-full border rounded-lg"
+                value={item.name || ""}
+                type="text"
+              />
+            </div>
+            <div>
+              <label className="block font-medium">Quantity</label>
+              <input
+                onChange={(e) => handleItemQuantityChange(i, e.target.value)}
+                className="pl-2 w-full border rounded-lg"
+                value={item.quantity || ""}
+                type="text"
+              />
+            </div>
+            <div>
+              <label className="block font-medium">Rate</label>
+              <input
+                onChange={(e) => handleItemRateChange(i, e.target.value)}
+                className="pl-2 w-full border rounded-lg"
+                value={item.rate || ""}
+                type="text"
+              />
+            </div>
+            <div>
+              <label className="block font-medium">Net Rate</label>
+              <span>{item.netRate.toFixed(2)}</span>
+            </div>
+            <div>
+              <label className="block font-medium">Tax (%)</label>
+              <input
+                onChange={(e) => handleItemTaxChange(i, e.target.value)}
+                className="pl-2 w-full border rounded-lg"
+                value={item.tax || ""}
+                type="text"
+              />
+            </div>
+            <div>
+              <label className="block font-medium">Tax Amount</label>
+              <span>{item.taxAmount.toFixed(2)}</span>
+            </div>
+            <div>
+              <label className="block font-medium">Total Amount</label>
+              <span>{item.totalAmount.toFixed(2)}</span>
+            </div>
+            <div>
+              <label className="block font-medium">Remark</label>
+              <input
+                onChange={(e) => handleItemRemarkChange(i, e.target.value)}
+                className="pl-2 w-full border rounded-lg"
+                value={item.remark || ""}
+                type="text"
+              />
+            </div>
           </div>
-        </div>
+        ))}
       </div>
-      <div className="flex flex-row gap-3 justify-between w-full">
-        <div className="flex flex-col gap-2 w-1/2 rounded mt-3 p-6 shadow-xl border">
-          <select className="border p-2 rounded w-1/2 h-16">
-            <option value="">Bank Details</option>
-            {bankDetails.map((data, index) => (
-              <option key={index} value={data}>
-                {data}
-              </option>
-            ))}
-          </select>
-          <textarea placeholder="Description" className="w-full rounded-lg border py-2 pl-2"></textarea>
-          <select className="border p-2 rounded w-1/2 h-16">
-            <option value="">Terms & Conditions</option>
-            {termsConditions.map((data, index) => (
-              <option key={index} value={data}>
-                {data}
-              </option>
-            ))}
-          </select>
-          <textarea placeholder="Description" className="w-full rounded-lg border py-2 pl-2"></textarea>
-        </div>
-        <div className="shadow-xl p-6 flex flex-col gap-2 border w-1/2 rounded-lg">
-          <p className="text-[1.2vw]">Summary</p>
-          <div className="flex flex-row justify-between w-full">
-            <p className="text-[1.1vw]">Sub Total</p>
-            <p className="text-[1.1vw]">{amount.toFixed(2)}</p>
-          </div>
-          <div className="flex flex-row justify-between w-full">
-            <p className="text-[1.1vw]">Total Tax Amount</p>
-            <p className="text-[1.1vw]">{tax.toFixed(2)}</p>
-          </div>
-          <div className="flex flex-row justify-between w-full">
-            <p className="text-[1.1vw]">Total Amount</p>
-            <p className="text-[1.1vw]">{(amount + tax).toFixed(2)}</p>
-          </div>
-          <div className="border border-gray-400"></div>
-          <div className="flex justify-between mt-1 w-full">
-            <p className="text-[1.1vw]">Discount</p>
-            <input
-              className="rounded-lg border text-center"
-              value={discount}
-              onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
-              type="text"
-            />
-          </div>
-          <div className="border border-gray-400"></div>
-          <div className="flex w-full flex-row items-center justify-between">
-            <p className="text-[1.1vw]">Grand Total</p>
-            <p className="text-[1.1vw]">{(amount + tax - discount).toFixed(2)}</p>
-          </div>
-          <button
-            onClick={sendProjectData}
-            style={{ borderRadius: "10px" }}
-            className="rounded-lg bg-sky-700 hover:bg-sky-800 text-white p-[6px]"
-          >
-            Add Project & Generate Quote
-          </button>
-          <button
-            onClick={generatePDF}
-            style={{ borderRadius: "10px" }}
-            className="rounded-lg bg-green-600 hover:bg-green-700 text-white p-[6px] mt-2"
-          >
-            Download Quotation PDF
-          </button>
-        </div>
+    </div>
+  </div>
+</div>
       </div>
+      <div className="flex flex-col sm:flex-row gap-3 justify-between w-full">
+  <div className="flex flex-col gap-4 w-full sm:w-1/2 rounded mt-3 p-4 sm:p-6 shadow-xl border">
+    <select className="border p-2 rounded w-full sm:w-1/2 h-12 sm:h-16 text-sm sm:text-base">
+      <option value="">Bank Details</option>
+      {bankDetails.map((data, index) => (
+        <option key={index} value={data}>
+          {data}
+        </option>
+      ))}
+    </select>
+    <textarea
+      placeholder="Description"
+      className="w-full rounded-lg border py-2 pl-2 text-sm sm:text-base"
+      rows="4"
+    ></textarea>
+    <select className="border p-2 rounded w-full sm:w-1/2 h-12 sm:h-16 text-sm sm:text-base">
+      <option value="">Terms & Conditions</option>
+      {termsConditions.map((data, index) => (
+        <option key={index} value={data}>
+          {data}
+        </option>
+      ))}
+    </select>
+    <textarea
+      placeholder="Description"
+      className="w-full rounded-lg border py-2 pl-2 text-sm sm:text-base"
+      rows="4"
+    ></textarea>
+  </div>
+  <div className="shadow-xl p-4 sm:p-6 flex flex-col gap-4 border w-full sm:w-1/2 rounded-lg">
+    <p className="text-lg sm:text-xl font-semibold">Summary</p>
+    <div className="flex flex-row justify-between w-full">
+      <p className="text-sm sm:text-base">Sub Total</p>
+      <p className="text-sm sm:text-base">{amount.toFixed(2)}</p>
+    </div>
+    <div className="flex flex-row justify-between w-full">
+      <p className="text-sm sm:text-base">Total Tax Amount</p>
+      <p className="text-sm sm:text-base">{tax.toFixed(2)}</p>
+    </div>
+    <div className="flex flex-row justify-between w-full">
+      <p className="text-sm sm:text-base">Total Amount</p>
+      <p className="text-sm sm:text-base">{(amount + tax).toFixed(2)}</p>
+    </div>
+    <div className="border border-gray-400"></div>
+    <div className="flex justify-between items-center mt-1 w-full">
+      <p className="text-sm sm:text-base">Discount</p>
+      <input
+        className="rounded-lg border text-center w-24 sm:w-32 text-sm sm:text-base"
+        value={discount}
+        onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+        type="text"
+      />
+    </div>
+    <div className="border border-gray-400"></div>
+    <div className="flex w-full flex-row items-center justify-between">
+      <p className="text-sm sm:text-base">Grand Total</p>
+      <p className="text-sm sm:text-base">{(amount + tax - discount).toFixed(2)}</p>
+    </div>
+    <button
+      onClick={sendProjectData}
+      className="rounded-lg bg-sky-700 hover:bg-sky-800 text-white p-2 sm:p-3 text-sm sm:text-base"
+    >
+      Add Project & Generate Quote
+    </button>
+    <button
+      onClick={generatePDF}
+      className="rounded-lg bg-green-600 hover:bg-green-700 text-white p-2 sm:p-3 text-sm sm:text-base"
+    >
+      Download Quotation PDF
+    </button>
+  </div>
+</div>
       <br />
     </div>
   );
