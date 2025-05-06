@@ -94,7 +94,7 @@ export default function Customers() {
       dispatch(setCustomerData(data));
       setCustomers(customerData); // ✅ Ensure it's always an array
     }
-    if(isDialogOpen || reset){
+    if(reset){
       getCustomers();
       setDialogOpen(false);
       setreset(false);
@@ -188,6 +188,8 @@ export default function Customers() {
           setDialogOpen={setDialogOpen}
           editing={editing}
           setEditing={setEditing}
+          reset={reset}
+          setReset={setreset}
         />
       )}
     </div>

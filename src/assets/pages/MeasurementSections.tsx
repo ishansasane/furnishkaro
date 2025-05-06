@@ -10,6 +10,8 @@ interface MeasurementSectionProps {
   handlewidthchange: (mainIndex: number, index: number, value: string) => void;
   handleheightchange: (mainIndex: number, index: number, value: string) => void;
   handlequantitychange: (mainIndex: number, index: number, value: string) => void;
+  setSelections: (selections: any[]) => void;
+  handleGroupDelete: (mainIndex: number, index: number) => void;
 }
 
 const MeasurementSection: React.FC<MeasurementSectionProps> = ({
@@ -20,8 +22,12 @@ const MeasurementSection: React.FC<MeasurementSectionProps> = ({
   handleunitchange,
   handlewidthchange,
   handleheightchange,
-  handlequantitychange
+  handlequantitychange,
+  setSelections,
+  handleGroupDelete
 }) => {
+  
+  
   return (
     <div className="rounded-lg border shadow-2xl w-full flex flex-col p-6">
       <p className="text-[1.3vw] font-semibold">Measurements</p>
@@ -115,13 +121,6 @@ const MeasurementSection: React.FC<MeasurementSectionProps> = ({
                           className="rounded-lg border px-2 py-2 w-[6vw]"
                           value={collection.measurement.quantity}
                         />
-                      </div>
-                    </div>
-                    <div className="flex flex-col">
-                      <p className="text-[1.1vw]">Actions</p>
-                      <div className="flex flex-row gap-2">
-                        <FaTrash className="text-red-500" />
-                        <FaPlus className="text-blue-500" />
                       </div>
                     </div>
                   </div>

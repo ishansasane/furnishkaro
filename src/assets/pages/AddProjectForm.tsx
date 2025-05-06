@@ -971,6 +971,8 @@ useEffect(() => {
         handlewidthchange={handleWidthChange}
         handleheightchange={handleHeightChange}
         handlequantitychange={handleQuantityChangeMain}
+        setSelections={setSelections}
+        handleGroupDelete={handleGroupDelete}
       />
       <div className="flex flex-col p-6 border rounded-lg w-full shadow-2xl">
         <p className="text-[1.1vw]">Quotation</p>

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store";
 import { setCustomerData } from "../Redux/dataSlice";
+import { useNavigate } from "react-router-dom";
 
 interface Customer {
   name: string;
@@ -50,6 +51,8 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
 
   const dispatch = useDispatch();
   const customerData = useSelector((state: RootState) => state.data.customers);
+
+  const navigate = useNavigate();
 
   async function sendcustomerData() {
     const phonenumber = mobile;
@@ -106,6 +109,9 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
       alert(editing ? "Error in updating customer" : "Error in adding customer");
     }
 
+    if(!editing){
+      navigate("/customers");   
+    }
     setEditing(null);
     setDialogOpen(false);
   }
@@ -150,6 +156,9 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
           <button
             className="bg-gray-500 text-white px-4 py-2 rounded"
             onClick={() => {
+              if(!editing){
+                navigate("/customers");
+              }
               setEditing(null);
               setDialogOpen(false);
             }}
