@@ -93,11 +93,10 @@ const MaterialSelectionComponent = ({
               </div>
             );
           })}
-          <button
-            className="flex rounded-xl items-center gap-2 bg-blue-500 text-white px-3 py-2 text-sm sm:text-base hover:bg-blue-600 transition"
-            onClick={handleAddArea}
-          >
-            <FaPlus /> Add Area
+          
+          
+        <button className="mb-3 flex items-center px-2 py-1 border-1 border-blue-400 text-blue-500 font-semibold !rounded-xl hover:bg-blue-50 transition"  onClick={handleAddArea}>
+          <span className="mr-2 flex items-center justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none">+</span> Add Area
           </button>
         </div>
 
