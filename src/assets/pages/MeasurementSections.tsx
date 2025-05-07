@@ -140,13 +140,8 @@ const MeasurementSection: React.FC<MeasurementSectionProps> = ({
                         </div>
                       </div>
                     </div>
-<<<<<<< HEAD
-                  </div>
-                ))}
-=======
                   ))}
                 </div>
->>>>>>> 24abb975e252266d10b7f7ea6ed98ad8833bb22f
               </div>
             ))}
           </div>

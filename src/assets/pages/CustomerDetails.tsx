@@ -102,7 +102,7 @@ const CustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer, pro
 
   return (
     <div className="flex flex-col gap-3 px-3 py-3 rounded-xl shadow-xl w-full border-gray-200 border-2 mt-3">
-      <p className="">Customer Details</p>
+      <p className="font-semibold text-[1.4vw]">Customer Details</p>
 
       <div className="flex md:!flex-nowrap flex-wrap flex-row justify-between gap-2">
         {/* Select Customer */}

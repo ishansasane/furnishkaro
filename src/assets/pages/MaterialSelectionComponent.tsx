@@ -338,17 +338,10 @@ const MaterialSelectionComponent = ({
                       </div>
 
                       {/* Company */}
-<<<<<<< HEAD
                       <div>
                         <div className='flex flex-row gap-3'>
                           <p className=''>Company</p>
                           <button className='mb-3' onClick={() => setIsCompantyOpen(true)}><FaPlus size={18} className='text-sky-600 hover:text-sky-800'/></button>
-=======
-                      <div className="flex flex-col w-full sm:w-1/5">
-                        <div className="flex flex-row justify-between items-center">
-                          <p className="text-sm sm:text-base">Company</p>
-                          <button className="p-1"><FaPlus size={16} className="text-sky-600 hover:text-sky-800" /></button>
->>>>>>> 24abb975e252266d10b7f7ea6ed98ad8833bb22f
                         </div>
                         <select
                           className="border p-2 sm:p-3 rounded w-full text-sm sm:text-base"
@@ -365,17 +358,10 @@ const MaterialSelectionComponent = ({
                       </div>
 
                       {/* Catalogue */}
-<<<<<<< HEAD
                       <div>
                       <div className='flex flex-row gap-3'>
                           <p className=''>Catalogue</p>
                           <button className='mb-3' onClick={() => setIsCatalogueOpen(true)}><FaPlus size={18} className='text-sky-600 hover:text-sky-800'/></button>
-=======
-                      <div className="flex flex-col w-full sm:w-1/5">
-                        <div className="flex flex-row justify-between items-center">
-                          <p className="text-sm sm:text-base">Catalogue</p>
-                          <button className="p-1"><FaPlus size={16} className="text-sky-600 hover:text-sky-800" /></button>
->>>>>>> 24abb975e252266d10b7f7ea6ed98ad8833bb22f
                         </div>
                         <select
                           className="border p-2 sm:p-3 rounded w-full text-sm sm:text-base"
@@ -392,17 +378,10 @@ const MaterialSelectionComponent = ({
                       </div>
 
                       {/* Design No */}
-<<<<<<< HEAD
                       <div>
                       <div className='flex flex-row gap-3'>
                           <p className=''>Design No.</p>
                           <button className='mb-3' onClick={() => setIsDesignNoOpen(true)}><FaPlus size={18} className='text-sky-600 hover:text-sky-800'/></button>
-=======
-                      <div className="flex flex-col w-full sm:w-1/5">
-                        <div className="flex flex-row justify-between items-center">
-                          <p className="text-sm sm:text-base">Design No.</p>
-                          <button className="p-1"><FaPlus size={16} className="text-sky-600 hover:text-sky-800" /></button>
->>>>>>> 24abb975e252266d10b7f7ea6ed98ad8833bb22f
                         </div>
                         <select
                           className="border p-2 sm:p-3 rounded w-full text-sm sm:text-base"

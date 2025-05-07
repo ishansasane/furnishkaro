@@ -53,8 +53,6 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
   const dispatch = useDispatch();
   const customerData = useSelector((state: RootState) => state.data.customers);
 
-  const navigate = useNavigate();
-
   async function sendcustomerData() {
     const phonenumber = mobile;
     let date = undefined;

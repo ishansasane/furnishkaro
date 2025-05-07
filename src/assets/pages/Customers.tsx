@@ -102,16 +102,6 @@ export default function Customers() {
   }, [reset, editing]);
 
   // Close dropdown on any click
-  useEffect(() => {
-    function handleClickAnywhere() {
-      setOpenDropdown(null);
-    }
-
-    document.addEventListener("mousedown", handleClickAnywhere);
-    return () => {
-      document.removeEventListener("mousedown", handleClickAnywhere);
-    };
-  }, []);
 
   return (
     <div className="p-6 bg-gray-50 md:mt-0 mt-20 h-screen">
@@ -126,7 +116,10 @@ export default function Customers() {
         </button>
       </div>
 
-      <div className="bg-white p-5 rounded-md shadow overflow-x-auto">
+      <div className="bg-white p-5 rounded-md shadow overflow-x-auto" onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenDropdown(null);
+                      }}>
         <div className="mb-4">
           <input
             type="text"
@@ -137,7 +130,10 @@ export default function Customers() {
           />
         </div>
 
-        <table className="w-full border-collapse border border-gray-300">
+        <table className="w-full border-collapse border border-gray-300" onClick={(e) => {
+                        e.stopPropagation();
+                        setOpenDropdown(null);
+                      }}>
           <thead className="bg-sky-50">
             <tr className="text-gray-600">
               <th className="px-4 py-2">Customer Name</th>
