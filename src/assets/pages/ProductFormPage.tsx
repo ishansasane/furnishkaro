@@ -1,8 +1,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { setItemData } from "../Redux/dataSlice";
+
+
+const getItemsData = async () => {
+  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts");
+  const data = await response.json();
+  return data.body;
+}
 
 const ProductFormPage: React.FC = () => {
   const navigate = useNavigate();
+
+  const dispatch = useDispatch();
 
   const initialFormState = {
     productName: "",
@@ -14,18 +25,21 @@ const ProductFormPage: React.FC = () => {
     publish: false,
     accessory: false,
   };
-
-  const [formData, setFormData] = useState(initialFormState);
-  const [savedData, setSavedData] = useState<typeof formData | null>(null);
+  const groupTypes = [["Fabric", ["Meter"]], ["Area Based", ["Sq.Feet"]], ["Running Length based", ["Meter", "Feet"]], ["Piece Based", ["Piece", "Items", "Sets"]], ["Fixed Length Items", ["Piece"]], ["Fixed Area Items", ["Piece", "Roll"]], ["Tailoring", ["Parts", "Sq.Feet"]]]
+  const [groupType, setGroupType] = useState([]);
   const [showForm, setShowForm] = useState(true);
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+  const [selectedGroupType, setSelectedGroupType] = useState("");
+  const [sellingUnit, setSellingUnit] = useState("");
+
+  const selectedUnits = groupTypes.find((type) => type[0] === selectedGroupType)?.[1] || [];
+
+  const [productName, setProductName] = useState("");
+  const [description, setDescription] = useState("");
+  const [mrp, setMrp] = useState("");
+  const [taxRate, setTaxRate] = useState("");
+  const [publish, setPublish] = useState(false);
+  const [accessory, setAccessory] = useState(false);
 
   const handleToggle = (field: "publish" | "accessory") => {
     setFormData((prev) => ({ ...prev, [field]: !prev[field] }));
@@ -35,24 +49,40 @@ const ProductFormPage: React.FC = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("https://your-backend-api.com/products", {
+      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
+        body : JSON.stringify({
+          productName,
+          description,
+          groupTypes: selectedGroupType,
+          sellingUnit,
+          mrp,
+          taxRate,})
       });
 
       if (!response.ok) {
         throw new Error("Failed to save product");
       }
-
+      
       const result = await response.json();
-      setSavedData(formData);
       console.log("Saved to backend:", result);
-
+      
+      // Fetch updated data
+      const data = await getItemsData();
+      
+      // 1. Update Redux store
+      dispatch(setItemData(data));
+      
+      // 3. Update localStorage
+      localStorage.setItem("itemData", JSON.stringify({ data, time: Date.now() }));
+      
+      // 4. Notify and redirect
       alert("Product saved successfully!");
-      navigate("/masters/items"); // redirect after success
+      navigate("/masters/items");
+      
     } catch (error) {
       console.error("Error saving product:", error);
       alert("Failed to save product. Please try again.");
@@ -77,6 +107,9 @@ const ProductFormPage: React.FC = () => {
     );
   }
 
+  
+  
+
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-semibold mb-4">Product Details</h2>
@@ -88,8 +121,8 @@ const ProductFormPage: React.FC = () => {
           <input
             type="text"
             name="productName"
-            value={formData.productName}
-            onChange={handleChange}
+            value={productName}
+            onChange={(e) => setProductName(e.target.value)}
             placeholder="Enter Product Name"
             className="w-full p-2 border rounded-md"
             required
@@ -100,47 +133,53 @@ const ProductFormPage: React.FC = () => {
           <label className="block font-medium">Description</label>
           <textarea
             name="description"
-            value={formData.description}
-            onChange={handleChange}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
             placeholder="Enter Description"
             className="w-full p-2 border rounded-md"
           />
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block font-medium">
-              Group Type <span className="text-red-500">*</span>
-            </label>
-            <select
-              name="groupType"
-              value={formData.groupType}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              required
-            >
-              <option value="">Select Group Type</option>
-              <option value="type1">Type 1</option>
-              <option value="type2">Type 2</option>
-            </select>
-          </div>
+        <div>
+        <label className="block font-medium">
+          Group Type <span className="text-red-500">*</span>
+        </label>
+        <select
+          name="groupType"
+          value={selectedGroupType}
+          onChange={(e) => setSelectedGroupType(e.target.value)}
+          className="w-full p-2 border rounded-md"
+          required
+        >
+          <option value="">Select Group Type</option>
+          {groupTypes.map(([label]) => (
+            <option key={label} value={label}>
+              {label}
+            </option>
+          ))}
+        </select>
+      </div>
 
-          <div>
-            <label className="block font-medium">
-              Selling Unit <span className="text-red-500">*</span>
-            </label>
-            <select
-              name="sellingUnit"
-              value={formData.sellingUnit}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md"
-              required
-            >
-              <option value="">Select Selling Unit</option>
-              <option value="unit1">Unit 1</option>
-              <option value="unit2">Unit 2</option>
-            </select>
-          </div>
+      <div>
+        <label className="block font-medium">
+          Selling Unit <span className="text-red-500">*</span>
+        </label>
+        <select
+          name="sellingUnit"
+          value={sellingUnit}
+          onChange={(e) => setSellingUnit(e.target.value)}
+          className="w-full p-2 border rounded-md"
+          required
+        >
+          <option value="">Select Selling Unit</option>
+          {selectedUnits.map((unit) => (
+            <option key={unit} value={unit}>
+              {unit}
+            </option>
+          ))}
+        </select>
+      </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
@@ -149,8 +188,8 @@ const ProductFormPage: React.FC = () => {
             <input
               type="text"
               name="mrp"
-              value={formData.mrp}
-              onChange={handleChange}
+              value={mrp}
+              onChange={(e) => setMrp(e.target.value)}
               placeholder="Enter MRP"
               className="w-full p-2 border rounded-md"
             />
@@ -160,8 +199,8 @@ const ProductFormPage: React.FC = () => {
             <input
               type="text"
               name="taxRate"
-              value={formData.taxRate}
-              onChange={handleChange}
+              value={taxRate}
+              onChange={(e) => setTaxRate(e.target.value)}
               placeholder="Enter Tax Rate"
               className="w-full p-2 border rounded-md"
             />
@@ -173,8 +212,8 @@ const ProductFormPage: React.FC = () => {
             <label className="font-medium">Publish</label>
             <input
               type="checkbox"
-              checked={formData.publish}
-              onChange={() => handleToggle("publish")}
+              checked={publish}
+              onChange={(e) => setPublish(e.target.checked)}
               className="w-5 h-5"
             />
           </div>
@@ -182,8 +221,8 @@ const ProductFormPage: React.FC = () => {
             <label className="font-medium">Accessory</label>
             <input
               type="checkbox"
-              checked={formData.accessory}
-              onChange={() => handleToggle("accessory")}
+              checked={accessory}
+              onChange={(e) => setAccessory(e.target.checked)}
               className="w-5 h-5"
             />
           </div>
