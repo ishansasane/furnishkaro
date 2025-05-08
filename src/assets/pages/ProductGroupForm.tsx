@@ -1,14 +1,38 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../Redux/store";
+import { setProducts } from "../Redux/dataSlice";
+
+async function fetchProductGroups() {
+  try {
+    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getallproductgroup", {
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return Array.isArray(data.body) ? data.body : [];
+  } catch (error) {
+    console.error("Error fetching product groups:", error);
+    return [];
+  }
+}
 
 const ProductGroupForm: React.FC = () => {
   const navigate = useNavigate();
   const [groupName, setGroupName] = useState("");
-  const [mainProduct, setMainProduct] = useState("");
-  const [addonProduct, setAddonProduct] = useState("");
+  const [mainProduct, setMainProduct] = useState([]);
+  const [addonProduct, setAddonProduct] = useState([]);
   const [color, setColor] = useState("#ffffff");
   const [status, setStatus] = useState(true);
   const [needsTailoring, setNeedsTailoring] = useState(false);
+
+  const dispatch = useDispatch();
+  const items = useSelector((state: RootState) => state.data.items);
 
   const handleAddGroup = async () => {
     const groupData = {
@@ -23,22 +47,34 @@ const ProductGroupForm: React.FC = () => {
     console.log("Group Data to Submit:", groupData); // for debugging
 
     try {
-      const response = await fetch("https://your-backend-api.com/product-groups", {
+      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/addproductgroup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(groupData),
+        body: JSON.stringify({ groupName, mainProducts: mainProduct, addonProducts : addonProduct, color, needsTailoring })
       });
 
       if (!response.ok) {
         throw new Error("Failed to save product group");
       }
-
+      
       const result = await response.json();
       console.log("Saved Group:", result);
+      
+      // 1. Re-fetch the updated product groups
+      const data = await fetchProductGroups();
+      
+      // 2. Update Redux store
+      dispatch(setProducts(data));
+      
+      // 3. Update localStorage
+      localStorage.setItem("productGroupData", JSON.stringify({ data, time: Date.now() }));
+      
+      // 4. Alert and navigate
       alert("Product Group saved successfully!");
       navigate("/masters/product-groups");
+      
     } catch (error) {
       console.error("Error saving product group:", error);
       alert("Failed to save product group. Please try again.");
@@ -86,8 +122,11 @@ const ProductGroupForm: React.FC = () => {
               required
             >
               <option value="">Select Main Product</option>
-              <option value="Product1">Product 1</option>
-              <option value="Product2">Product 2</option>
+              {items.map((item, index) => (
+                <option key={index} value={item[0]}>
+                  {item[0]}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -107,8 +146,11 @@ const ProductGroupForm: React.FC = () => {
               className="w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Select Addon Product</option>
-              <option value="Addon1">Addon 1</option>
-              <option value="Addon2">Addon 2</option>
+              {items.map((item, index) => (
+                <option key={index} value={item[0]}>
+                  {item[0]}
+                </option>
+              ))}
             </select>
           </div>
         </div>

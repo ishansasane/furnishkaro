@@ -102,7 +102,7 @@ const CustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer, pro
 
   return (
     <div className="flex flex-col gap-3 px-3 py-3 rounded-xl shadow-xl w-full border-gray-200 border-2 mt-3">
-      <p className="">Customer Details</p>
+      <p className="font-semibold text-[1.4vw]">Customer Details</p>
 
       <div className="flex md:!flex-nowrap flex-wrap flex-row justify-between gap-2">
         {/* Select Customer */}
@@ -110,15 +110,15 @@ const CustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer, pro
           <div className="flex  flex-row gap-3 px-2">
             <p className="">Select Customer</p>
             <button className="mb-3 flex items-center px-2 py-1 border-1 border-blue-400 text-blue-500 font-semibold !rounded-xl hover:bg-blue-50 transition" onClick={() => setIsOpen(true)}>
-          <span className="mr-2 flex items-center justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none">+</span> Customer
+            <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">+</span> Customer
           </button>
           </div>
           <select
-            className="border p-2 rounded w-full"
+            className="border border-black p-2 rounded w-full opacity-50"
             value={selectedCustomer ? JSON.stringify(selectedCustomer) : ""}
             onChange={handleCustomerChange}
           >
-            <option value="">Select Customer</option>
+            <option value="" className="">Select Customer</option>
             {Array.isArray(customers) &&
               customers.map((customer, index) => (
                 <option key={index} value={JSON.stringify(customer)}>

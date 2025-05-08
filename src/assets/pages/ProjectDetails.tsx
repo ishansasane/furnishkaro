@@ -140,7 +140,7 @@ const ProjectDetails = ({
 
   return (
     <div className="flex flex-col gap-3 w-full rounded-xl shadow-2xl border-2 border-gray-200 px-3 py-3">
-      <p className="">Project Details</p>
+      <p className="text-[1.4vw] font-semibold">Project Details</p>
 
       {/* Reference & Project Name */}
       <div className="flex flex-row w-full gap-2">
@@ -152,6 +152,7 @@ const ProjectDetails = ({
             className="border p-2 rounded w-full"
             value={projectName}
             onChange={(e) => setProjectName(e.target.value)}
+            placeholder="Project Name"
           />
         </div>
         <div className="flex flex-col w-1/2">
@@ -161,6 +162,7 @@ const ProjectDetails = ({
             className="border p-2 rounded w-full"
             value={projectReference}
             onChange={(e) => setProjectReference(e.target.value)}
+            placeholder="Reference"
           />
         </div>
       </div>
@@ -175,6 +177,7 @@ const ProjectDetails = ({
               className="border p-2 rounded w-full"
               value={projectAddress ? projectAddress : ""}
               onChange={(e) => setProjectAddress(e.target.value)}
+              placeholder="Address"
             />
           </div>
         </div>
@@ -185,7 +188,7 @@ const ProjectDetails = ({
         <div className="flex flex-row w-full gap-2">
           <div className="flex flex-col w-full">
             <p className="">Any Additional Requests (optional)</p>
-            <input type="text" value={additionalRequests} onChange={(e) => setAdditionalRequests(e.target.value)} className="border p-2 rounded w-full" />
+            <input placeholder="Additional Requests" type="text" value={additionalRequests} onChange={(e) => setAdditionalRequests(e.target.value)} className="border p-2 rounded w-full" />
           </div>
         </div>
       )}
@@ -195,11 +198,12 @@ const ProjectDetails = ({
         <div className="flex flex-col w-1/2">
                     <div className="flex flex-row gap-3 px-2">
                       <p className="">Select Interior</p>
-                      <button className="mb-3" onClick={() => setIsOpen(true)}> <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">+</span></button>
-
+                      <button className="mb-3 flex items-center px-2 py-1 border-1 border-blue-400 text-blue-500 font-semibold !rounded-xl hover:bg-blue-50 transition" onClick={() => setIsOpen(true)}>
+            <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">+</span> Interior
+          </button>
                     </div>
           <select
-            className="border p-2 rounded w-full"
+            className="border border-black p-2 rounded opacity-50 w-full"
             value={interiorArray}
             onChange={(e) => {setInteriorArray(e.target.value);}}
           >
@@ -215,10 +219,12 @@ const ProjectDetails = ({
         <div className="flex flex-col w-1/2">
           <div className="flex flex-row gap-3 px-2">
             <p className="">Select Sales Associate</p>
-            <button className="mb-3"><span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">+</span></button>
+            <button className="mb-3 flex items-center px-2 py-1 border-1 border-blue-400 text-blue-500 font-semibold !rounded-xl hover:bg-blue-50 transition" >
+            <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">+</span>Sales Associate
+          </button>
           </div>
           <select
-            className="border p-2 rounded w-full"
+            className="border border-black p-2 rounded opacity-50 w-full"
             value={salesAssociateArray}
             onChange={(e) => setSalesAssociateArray(e.target.value)}
           >
@@ -241,13 +247,14 @@ const ProjectDetails = ({
             className="border p-2 rounded w-full"
             value={user}
             onChange={(e) => setUser(e.target.value)}
+            placeholder="User Name"
           />
         </div>
         <div className="flex flex-col w-1/2">
           <p className="">Project Date</p>
           <input
             type="date"
-            className="border p-2 rounded w-full"
+            className="border p-2 opacity-50 rounded w-full"
             value={projectDate}
             onChange={(e) => setProjectDate(e.target.value)}
           />

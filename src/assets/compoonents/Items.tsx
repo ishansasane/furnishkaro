@@ -13,16 +13,29 @@ const getItemsData = async () => {
 }
 
 const Items = () => {
+  const groupTypes = [["Fabric", ["Meter"]], ["Area Based", ["Sq.Feet"]], ["Running Length based", ["Meter", "Feet"]], ["Piece Based", ["Piece", "Items", "Sets"]], ["Fixed Length Items", ["Piece"]], ["Fixed Area Items", ["Piece", "Roll"]], ["Tailoring", ["Parts", "Sq.Feet"]]]
   const [search, setSearch] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [items, setItems] = useState([]);
   const [deleted, setDeleted] = useState(false);
   const [editing, setEditing] = useState(false);
-  const [name, setName] = useState("");
+  const [productName, setProductName] = useState("");
   const navigate = useNavigate();
+
+  const [description, setDescription] = useState("");
+  const [groupType, setGroupType] = useState("");
+  const [sellingUnit, setSellingUnit] = useState("");
+  const [mrp, setMrp] = useState("");
+  const [taxRate, setTaxRate] = useState("");
+  const [publish, setPublish] = useState(false);
+  const [accessory, setAccessory] = useState(false);
 
   const dispatch = useDispatch();
   const itemData = useSelector((state: RootState) => state.data.items);
+
+  const [selectedGroupType, setSelectedGroupType] = useState("");
+  
+  const selectedUnits = groupTypes.find((type) => type[0] === selectedGroupType)?.[1] || [];
 
   const [openMenu, setOpenMenu] = useState(-1); // Track which dropdown is open
   const menuRefs = useRef<(HTMLDivElement | null)[]>([]); // Refs for dropdown menus
@@ -32,10 +45,16 @@ const Items = () => {
     setOpenMenu(openMenu === index ? -1 : index); // Toggle menu for the clicked row
   };
 
-  const editMenu = (name: string) => {
+  const editMenu = (item) => {
+    console.log(item);
     setIsFormOpen(true);
     setEditing(true);
-    setName(name);
+    setProductName(item[0]);
+    setDescription(item[1]);
+    setSelectedGroupType(item[2]);
+    setSellingUnit(item[3]);
+    setMrp(item[4]);
+    setTaxRate(item[5]);
   }
 
   // Close dropdown when clicking outside
@@ -75,24 +94,30 @@ const Items = () => {
       }
     }
   }, [openMenu]);
-
   useEffect(() => {
-    async function fetchData() {
-      const data = await getItemsData();
-      dispatch(setItemData(data));
-      setItems(itemData);
-    }
-    if (itemData != undefined) {
-      if (itemData.length == 0) {
-        fetchData();
-      } else {
-        setItems(itemData);
+    const fetchData = async () => {
+      const cached = localStorage.getItem("itemData");
+      const oneHour = 60 * 60 * 1000;
+  
+      if (cached) {
+        const { data, time } = JSON.parse(cached);
+        if (Date.now() - time < oneHour && Array.isArray(data)) {
+          dispatch(setItemData(data));
+          setItems(data);
+          return;
+        }
       }
-    } else {
-      setItemData([]);
-      setItems([]);
-    }
-  }, [isFormOpen, deleted, itemData, dispatch]);
+  
+      // Fetch fresh data from backend
+      const freshData = await getItemsData();
+      dispatch(setItemData(freshData));
+      setItems(freshData);
+      localStorage.setItem("itemData", JSON.stringify({ data: freshData, time: Date.now() }));
+    };
+  
+    fetchData();
+  }, [isFormOpen, deleted, dispatch]);
+  
 
   const deleteItem = async (name: string) => {
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletesingleproduct", {
@@ -206,18 +231,8 @@ const Items = () => {
   };
 
   const editItemData = async () => {
-    const newItem = {
-      id: items.length + 1,
-      name: formData.productName,
-      description: formData.productDetails,
-      costingType: formData.sellingUnit,
-      groupType: formData.groupType,
-      entryDate: new Date().toLocaleDateString(),
-      additionalInputs: formData.additionalInputs,
-      sideDropdown: formData.sideDropdown,
-      mrp: formData.mrp,
-      taxrate: formData.taxRate
-    };
+
+
 
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/updatesingleproduct", {
       method: "POST",
@@ -226,39 +241,48 @@ const Items = () => {
       },
       credentials: "include",
       body: JSON.stringify({
-        productName: name,
-        description: newItem.description,
-        groupTypes: newItem.groupType,
-        sellingUnit: newItem.costingType,
-        mrp: newItem.mrp,
-        taxRate: newItem.taxrate
+        productName: productName,
+        description: description,
+        groupTypes: selectedGroupType,
+        sellingUnit: sellingUnit,
+        mrp: mrp,
+        taxRate: taxRate
       })
     });
     if (response.status === 200) {
       alert("Item Updated");
+    
+      // Fetch updated items list
+      const data = await getItemsData();
+    
+      // 1. Update Redux store
+      dispatch(setItemData(data));
+    
+      // 2. Update local state
+      setItems(data);
+    
+      // 3. Update localStorage
+      localStorage.setItem("itemData", JSON.stringify({ data, time: Date.now() }));
+    
+      // 4. Reset UI and form states
       setIsFormOpen(false);
+      setEditing(false);
+      setOpenMenu(-1);
+      setFormData({
+        productName: "",
+        productDetails: "",
+        groupType: "",
+        sellingUnit: "",
+        mrp: "",
+        taxRate: "",
+        additionalInputs: {},
+        sideDropdown: ""
+      });
+    
     } else {
       alert("Error");
     }
-    const data = await getItemsData();
-    dispatch(setItemData(data));
-    setItems(itemData);
-
-    setIsFormOpen(false);
-    setEditing(false);
-    setOpenMenu(-1);
-
-    // Reset form fields
-    setFormData({
-      productName: "",
-      productDetails: "",
-      groupType: "",
-      sellingUnit: "",
-      mrp: "",
-      taxRate: "",
-      additionalInputs: {},
-      sideDropdown: ""
-    });
+    
   }
 
   const handleSubmit = async () => {
@@ -348,99 +372,138 @@ const Items = () => {
         </div>
 
         {isFormOpen && (
-          <div className="bg-white shadow rounded-lg p-4">
-            <h1 className="text-xl font-semibold mb-4">{editing ? "Edit Task" : "Add Task"}</h1>
-            <form>
-              <div className={`${editing ? "hidden" : "block"}`}>
-                <label className="block mb-2">Product Name</label>
+            <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
+            <h2 className="text-2xl font-semibold mb-4">Product Details</h2>
+            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); }}>
+              <div>
+                <label className="block font-medium">
+                  Product Name <span className="text-red-500">*</span>
+                </label>
                 <input
                   type="text"
-                  className="w-full p-2 border rounded mb-4"
-                  value={formData.productName}
-                  onChange={(e) => setFormData({ ...formData, productName: e.target.value })}
+                  name="productName"
+                  value={productName}
+                  placeholder="Enter Product Name"
+                  className="w-full p-2 border rounded-md"
+                  required
                 />
               </div>
-              <label className="block mb-2">Product Details</label>
-              <textarea
-                className="w-full p-2 border rounded mb-4"
-                value={formData.productDetails}
-                onChange={(e) => setFormData({ ...formData, productDetails: e.target.value })}
-              ></textarea>
-              <label className="block mb-2">Group Type</label>
+      
+              <div>
+                <label className="block font-medium">Description</label>
+                <textarea
+                  name="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Enter Description"
+                  className="w-full p-2 border rounded-md"
+                />
+              </div>
+      
+              <div className="grid grid-cols-2 gap-4">
+              <div>
+              <label className="block font-medium">
+                Group Type <span className="text-red-500">*</span>
+              </label>
               <select
-                className="w-full p-2 border rounded mb-4"
-                value={formData.groupType}
-                onChange={handleGroupChange}
+                name="groupType"
+                value={selectedGroupType}
+                onChange={(e) => setSelectedGroupType(e.target.value)}
+                className="w-full p-2 border rounded-md"
+                required
               >
                 <option value="">Select Group Type</option>
-                {groupOptions.map((option) => (
-                  <option key={option} value={option}>{option}</option>
+                {groupTypes.map(([label]) => (
+                  <option key={label} value={label}>
+                    {label}
+                  </option>
                 ))}
               </select>
-              <label className="block mb-2">Selling Unit</label>
+            </div>
+      
+            <div>
+              <label className="block font-medium">
+                Selling Unit <span className="text-red-500">*</span>
+              </label>
               <select
-                className="w-full p-2 border rounded mb-4"
-                value={formData.sellingUnit}
-                onChange={(e) => setFormData({ ...formData, sellingUnit: e.target.value })}
-                disabled={!formData.groupType}
+                name="sellingUnit"
+                value={sellingUnit}
+                onChange={(e) => setSellingUnit(e.target.value)}
+                className="w-full p-2 border rounded-md"
+                required
               >
-                {formData.groupType && sellingUnits[formData.groupType]?.map((unit: string) => (
-                  <option key={unit} value={unit}>{unit}</option>
+                <option value="">Select Selling Unit</option>
+                {selectedUnits.map((unit) => (
+                  <option key={unit} value={unit}>
+                    {unit}
+                  </option>
                 ))}
               </select>
-              {formData.groupType && additionalFields[formData.groupType] && (
-                <>
-                  <h3 className="text-lg font-semibold mt-4">Additional Information</h3>
-                  {additionalFields[formData.groupType].map((field: string) => (
-                    <div key={field} className="flex space-x-4">
-                      <div className={`w-${field === "Threshold For Parts Calculation" && formData.groupType === "Fabric" ? "full" : "1/2"}`}>
-                        <label className="block mb-2">{field}</label>
-                        <input
-                          type="text"
-                          className="w-full p-2 border rounded mb-4"
-                          value={formData.additionalInputs[field] || ""}
-                          onChange={(e) => handleAdditionalInputChange(field, e.target.value)}
-                        />
-                      </div>
-                      {!(field === "Threshold For Parts Calculation" && formData.groupType === "Fabric") && (
-                        <div className="w-1/2">
-                          <label className="block mb-2">Unit</label>
-                          <select
-                            className="w-full p-2 border rounded mb-4"
-                            value={formData.sideDropdown}
-                            onChange={(e) => setFormData({ ...formData, sideDropdown: e.target.value })}
-                          >
-                            {sideDropdownOptions[formData.groupType]?.map((option: string) => (
-                              <option key={option} value={option}>{option}</option>
-                            ))}
-                          </select>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </>
-              )}
-              <label className="block mb-2">MRP</label>
-              <input
-                type="number"
-                className="w-full p-2 border rounded mb-4"
-                value={formData.mrp}
-                onChange={(e) => setFormData({ ...formData, mrp: e.target.value })}
-              />
-              <label className="block mb-2">Tax Rate</label>
-              <input
-                type="number"
-                className="w-full p-2 border rounded mb-4"
-                value={formData.taxRate}
-                onChange={(e) => setFormData({ ...formData, taxRate: e.target.value })}
-              />
-              <button
-                type="button"
-                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                onClick={editing ? editItemData : handleSubmit}
-              >
-                Save Item
-              </button>
+            </div>
+              </div>
+      
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-medium">MRP</label>
+                  <input
+                    type="text"
+                    name="mrp"
+                    value={mrp}
+                    onChange={(e) => setMrp(e.target.value)}
+                    placeholder="Enter MRP"
+                    className="w-full p-2 border rounded-md"
+                  />
+                </div>
+                <div>
+                  <label className="block font-medium">Tax Rate</label>
+                  <input
+                    type="text"
+                    name="taxRate"
+                    value={taxRate}
+                    onChange={(e) => setTaxRate(e.target.value)}
+                    placeholder="Enter Tax Rate"
+                    className="w-full p-2 border rounded-md"
+                  />
+                </div>
+              </div>
+      
+              <div className="flex items-center space-x-6">
+                <div className="flex items-center space-x-2">
+                  <label className="font-medium">Publish</label>
+                  <input
+                    type="checkbox"
+                    checked={publish}
+                    onChange={(e) => setPublish(e.target.checked)}
+                    className="w-5 h-5"
+                  />
+                </div>
+                <div className="flex items-center space-x-2">
+                  <label className="font-medium">Accessory</label>
+                  <input
+                    type="checkbox"
+                    checked={accessory}
+                    onChange={(e) => setAccessory(e.target.checked)}
+                    className="w-5 h-5"
+                  />
+                </div>
+              </div>
+      
+              <div className="flex gap-2 justify-end space-x-4">
+                <button
+                  type="button"
+                  onClick={() => { setIsFormOpen(false); setEditing(false); setProductName(""); setDescription(""); setGroupType(""); setSellingUnit(""); setMrp(""); setTaxRate(""); }}
+                  className="px-4 py-2 border !rounded-lg"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-blue-600 text-white !rounded-lg"
+                  onClick={editItemData}
+                >
+                  Save
+                </button>
+              </div>
             </form>
           </div>
         )}
@@ -490,7 +553,7 @@ const Items = () => {
                     >
                       <button
                         className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                        onClick={() => editMenu(item[0])}
+                        onClick={() => editMenu(item)}
                       >
                         Edit
                       </button>

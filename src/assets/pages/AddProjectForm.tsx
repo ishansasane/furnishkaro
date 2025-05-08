@@ -1051,7 +1051,7 @@ useEffect(() => {
   <div className="flex w-full flex-col">
     <div className="flex flex-row justify-between items-center mt-4">
       <button
-        className="flex flex-row gap-2 rounded-xl bg-sky-50 hover:bg-sky-100 items-center px-2 py-1 text-sm sm:text-base"
+        className="flex flex-row gap-2 !rounded-md bg-sky-50 hover:bg-sky-100 items-center px-2 py-1 text-sm sm:text-base"
         onClick={handleAddMiscItem}
       >
         <FaPlus className="text-sky-500" />
@@ -1264,13 +1264,13 @@ useEffect(() => {
     </div>
     <button
       onClick={sendProjectData}
-      className="rounded-lg bg-sky-700 hover:bg-sky-800 text-white p-2 sm:p-3 text-sm sm:text-base"
+      className="!rounded-lg bg-sky-700 hover:bg-sky-800 text-white p-2 sm:p-3 text-sm sm:text-base"
     >
       Add Project & Generate Quote
     </button>
     <button
       onClick={generatePDF}
-      className="rounded-lg bg-green-600 hover:bg-green-700 text-white p-2 sm:p-3 text-sm sm:text-base"
+      className="!rounded-lg bg-green-600 hover:bg-green-700 text-white p-2 sm:p-3 text-sm sm:text-base"
     >
       Download Quotation PDF
     </button>

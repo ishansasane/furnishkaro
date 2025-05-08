@@ -141,7 +141,7 @@ const EditProjectDetails = ({
 
   return (
     <div className="flex flex-col gap-3 w-full rounded-xl shadow-2xl border-2 border-gray-200 px-3 py-3">
-      <p className="text-[1.3vw] font-semibold">Project Details</p>
+      <p className="text-[1.4vw] font-semibold">Project Details</p>
 
       {/* Reference & Project Name */}
       <div className="flex flex-row w-full gap-2">

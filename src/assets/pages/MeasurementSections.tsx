@@ -134,9 +134,9 @@ const MeasurementSection: React.FC<MeasurementSectionProps> = ({
                       </div>
                       <div className="flex flex-col gap-2 sm:w-1/6">
                         <p className="text-sm sm:text-base sm:block hidden">Actions</p>
-                        <div className="flex flex-row gap-2">
+                        <div className="flex items-center flex-row gap-2">
                           <FaTrash className="text-red-500 cursor-pointer hover:text-red-700" />
-                          <FaPlus className="text-blue-500 cursor-pointer hover:text-blue-700" />
+                          <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">+</span>
                         </div>
                       </div>
                     </div>
