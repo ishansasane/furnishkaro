@@ -214,10 +214,8 @@ const ProjectDetails = ({
 
         <div className="flex flex-col w-1/2">
           <div className="flex flex-row gap-3 px-2">
-
             <p className="">Select Sales Associate</p>
-            <button className="mb-3" onClick={() => setIsSalesOpen(true)}><span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">+</span></button>
-
+            <button className="mb-3"><span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">+</span></button>
           </div>
           <select
             className="border p-2 rounded w-full"

@@ -1,6 +1,11 @@
 import { Divide } from 'lucide-react';
 import React, { useEffect } from 'react';
+import { useState } from 'react';
 import { FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
+import { useDispatch, useSelector } from 'react-redux';
+import { setCatalogs } from '../Redux/dataSlice';
+import { RootState } from '../Redux/store';
+import { setCompanyData, setDesignData } from '../Redux/dataSlice';
 
 const MaterialSelectionComponent = ({
   selections,
@@ -23,6 +28,99 @@ const MaterialSelectionComponent = ({
   setAvailableAreas
 }) => {
 
+  const dispatch = useDispatch();
+
+  const fetchCompanyData = async () => {
+    try {
+      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getCompany", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      return Array.isArray(data.body) ? data.body : [];
+    }
+    catch (error) { 
+      console.error("Error fetching company data:", error);
+      return [];
+    }
+  };
+
+  const fetchDesignData = async () => {
+    try {
+      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getDesign", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      return Array.isArray(data.body) ? data.body : [];
+    } catch (error) {
+      console.error("Error fetching brand data:", error);
+      return [];
+    }
+  }; 
+
+  const companyData = useSelector((state: RootState) => state.data.companyData);
+  const designData = useSelector((state: RootState) => state.data.designData);
+
+  const ONE_HOUR = 3600 * 1000;
+  
+  const useInitialFetch = (dispatch, setCompanyData, setDesignData) => {
+    useEffect(() => {
+      const fetchAndCache = async (key, fetchFn, dispatchFn) => {
+        const cached = localStorage.getItem(key);
+        const now = Date.now();
+  
+        if (cached) {
+          const { data, time } = JSON.parse(cached);
+          if (now - time < ONE_HOUR) {
+            dispatch(dispatchFn(data));
+            return;
+          }
+        }
+  
+        try {
+          const data = await fetchFn();
+          dispatch(dispatchFn(data));
+          localStorage.setItem(key, JSON.stringify({ data, time: now }));
+        } catch (error) {
+          console.error(`Failed to fetch ${key}:`, error);
+        }
+      };
+  
+      fetchAndCache("companyData", fetchCompanyData, setCompanyData);
+      fetchAndCache("designData", fetchDesignData, setDesignData);
+    }, [dispatch]);
+  };
+  
+
+  useInitialFetch(dispatch, setCompanyData, setDesignData);
+
+  const [isCompanyOpen, setIsCompantyOpen] = useState(false);
+
+  const [isCatalogueOpen, setIsCatalogueOpen] = useState(false); 
+
+  const [isDesignNoOpen, setIsDesignNoOpen] = useState(false);
+
+  async function fetchCatalogues() {
+    try {
+      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getcatalogues", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const data = await response.json();
+      return Array.isArray(data.body) ? data.body : [];
+    } catch (error) {
+      console.error("Error fetching catalogues:", error);
+      return [];
+    }
+  }
+
   const addArea = async (name) => {
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/addArea", {
       method: "POST",
@@ -42,6 +140,106 @@ const MaterialSelectionComponent = ({
     } else {
       alert("Error");
     }
+  }
+
+  const [catalogueName, setCatalogueName] = useState("");
+  const [catalogueDescription, setCatalogueDescription] = useState("");
+
+  const [companyName, setCompanyName] = useState("");
+  const [designName, setDesignName] = useState("");
+
+  const addCatalogue = async () => {
+
+    
+    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/addcatalogue", {
+      method : "POST",
+      credentials : "include",
+      headers : {
+        "content-type" : "application/json"
+      },
+      body : JSON.stringify({ catalogueName : catalogueName, description : catalogueDescription }),
+    });
+
+    if (response.status === 200) {
+      const data = await fetchCatalogues();
+    
+      // 1. Update Redux store
+      dispatch(setCatalogs(data));
+    
+      // 2. Update local state
+      setCatalogs(data);
+    
+      // 3. Update localStorage
+      localStorage.setItem("catalogueData", JSON.stringify({ data, time: Date.now() }));
+      
+      setCatalogueName("");
+      setCatalogueDescription("");
+
+      setIsCatalogueOpen(false);
+      // 4. Notify user
+      alert("Catalogue Added");
+    } else {
+      alert("Error");
+    }
+    
+  }
+
+  const addCompany = async () => {
+
+    const date = new Date();
+
+    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/sendCompany", {
+      method : "POST",
+      credentials : "include",
+      headers : {
+        "content-type" : "application/json"
+      },
+      body : JSON.stringify({ companyName, date }),
+    });
+
+    if (response.status === 200) {
+      const data = await fetchCompanyData();  // ✅ FIXED
+    
+      dispatch(setCompanyData(data));         // Redux
+      setCompanyData(data);                   // Local State
+      localStorage.setItem("companyData", JSON.stringify({ data, time: Date.now() })); // Storage
+    
+      setIsCompantyOpen(false);
+      alert("Company Added");
+    }
+     else {
+      alert("Error");
+    }
+    
+  }
+
+  const addDesign = async () => {
+
+    const date = new Date();
+
+    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/sendDesign", {
+      method : "POST",
+      credentials : "include",
+      headers : {
+        "content-type" : "application/json"
+      },
+      body : JSON.stringify({ designName, date }),
+    });
+
+    if (response.status === 200) {
+      const data = await fetchDesignData();   // ✅ FIXED
+    
+      dispatch(setDesignData(data));          // Redux
+      setDesignData(data);                    // Local State
+      localStorage.setItem("designData", JSON.stringify({ data, time: Date.now() })); // Storage
+    
+      setIsDesignNoOpen(false);
+      alert("Design Added");
+    }
+    else {
+      alert("Error");
+    }
+    
   }
 
   return (
@@ -150,9 +348,9 @@ const MaterialSelectionComponent = ({
                           onChange={(e) => handleCompanyChange(mainindex, i, e.target.value)}
                         >
                           <option value="">Select Company</option>
-                          {availableCompanies.map((company, index) => (
-                            <option key={index} value={company}>
-                              {company}
+                          {companyData.map((company, index) => (
+                            <option key={index} value={company[0]}>
+                              {company[0]}
                             </option>
                           ))}
                         </select>
@@ -190,9 +388,9 @@ const MaterialSelectionComponent = ({
                           onChange={(e) => handleDesignNoChange(mainindex, i, e.target.value)}
                         >
                           <option value="">Select Design No</option>
-                          {designNo.map((design, index) => (
-                            <option key={index} value={design}>
-                              {design}
+                          {designData.map((design, index) => (
+                            <option key={index} value={design[0]}>
+                              {design[0]}
                             </option>
                           ))}
                         </select>
@@ -228,6 +426,58 @@ const MaterialSelectionComponent = ({
           ))}
         </div>
       </div>
+      {isCompanyOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/50">
+        <div className="w-[300px] p-6 rounded-xl shadow-xl text-center bg-white">
+          <p className="text-[1.3vw]">Add Company</p>
+          <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} className='w-full rounded-lg border p-2 pl-2 mb-3'/>
+            <div className="w-full flex flex-row justify-between">
+              <button style={{ borderRadius : "6px" }} onClick={addCompany} className="px-2 py-1 text-white bg-sky-600 hover:bg-sky-700">Add</button>
+              <button 
+                onClick={() => setIsCompantyOpen(false)} 
+                className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {isCatalogueOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/50">
+        <div className="w-[300px] p-6 rounded-xl shadow-xl text-center bg-white ">
+        <p className="text-[1.3vw]">Add Catalogue</p>
+        <input type="text" value={catalogueName} onChange={(e) => setCatalogueName(e.target.value)} className='w-full rounded-lg border p-2 pl-2 mb-3' placeholder='Name'/>
+        <input type="text" value={catalogueDescription} onChange={(e) => setCatalogueDescription(e.target.value)} className='w-full rounded-lg border p-2 pl-2 mb-3' placeholder='Description'/>
+            <div className="w-full flex flex-row justify-between">
+              <button onClick={addCatalogue} style={{ borderRadius : "6px" }} className="px-2 py-1 text-white bg-sky-600 hover:bg-sky-700">Add</button>
+              <button 
+                onClick={() => setIsCatalogueOpen(false)} 
+                className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {isDesignNoOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/50">
+        <div className="w-[300px] p-6 rounded-xl shadow-xl text-center bg-white">
+        <p className="text-[1.3vw]">Add Design No</p>
+        <input type="text" value={designName} onChange={(e) => setDesignName(e.target.value)} className='w-full rounded-lg border p-2 pl-2 mb-3'/>
+            <div className="w-full flex flex-row justify-between">
+              <button style={{ borderRadius : "6px" }} onClick={addDesign} className="px-2 py-1 text-white bg-sky-600 hover:bg-sky-700">Add</button>
+              <button 
+                onClick={() => setIsDesignNoOpen(false)} 
+                className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
