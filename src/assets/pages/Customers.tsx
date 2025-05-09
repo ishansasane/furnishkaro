@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setCustomerData } from "../Redux/dataSlice";
 import AddCustomerDialog from "../compoonents/AddCustomerDialog";
 import { useNavigate } from "react-router-dom";
+import CustomerDashboard from "./CustomerDashboard";
 
 interface Customer {
   name: string;
@@ -103,9 +104,13 @@ export default function Customers() {
 
   // Close dropdown on any click
 
+  const [customerDashboard, setCustomerDashboard] = useState(false);
+
+  const [customerDashboardData, setCustomerDashboardData] = useState<Customer>(null);
+
   return (
-    <div className="p-6 bg-gray-50 md:mt-0 mt-20 h-screen">
-      <div className="flex flex-wrap justify-between items-center mb-4">
+    <div className={`p-6 bg-gray-50 md:mt-0 mt-20 h-screen`}>
+      <div className={`flex flex-wrap justify-between items-center mb-4 ${customerDashboard ? "hidden" : ""}`}>
         <h1 className="text-2xl font-bold">👥 Customers</h1>
         <button
           className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2"
@@ -116,7 +121,7 @@ export default function Customers() {
         </button>
       </div>
 
-      <div className="bg-white p-5 rounded-md shadow overflow-x-auto" onClick={(e) => {
+      <div className={`bg-white p-5 rounded-md shadow overflow-x-auto ${customerDashboard ? "hidden" : ""}`} onClick={(e) => {
                         e.stopPropagation();
                         setOpenDropdown(null);
                       }}>
@@ -147,7 +152,7 @@ export default function Customers() {
           <tbody>
             {customers.length > 0 ? (
               customers.map((customer, index) => (
-                <tr key={index} className="hover:bg-sky-50">
+                <tr key={index} className="hover:bg-sky-50" onClick={() => {setCustomerDashboard(true); setCustomerDashboardData(customer);}}>
                   <td className="px-4 py-2">{customer[0]}</td>
                   <td className="px-4 py-2">{customer[1]}</td>
                   <td className="px-6 py-2">{customer[4]}</td>
@@ -208,6 +213,15 @@ export default function Customers() {
           setReset={setreset}
         />
       )}
+      {
+        customerDashboard && (
+          <CustomerDashboard
+            setCustomerDashboardData={setCustomerDashboardData}
+            customerDashboardData={customerDashboardData}
+            setCustomerDashboard={setCustomerDashboard}
+          />
+        )
+      }
     </div>
   );
 }

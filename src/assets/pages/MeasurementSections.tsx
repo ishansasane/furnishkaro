@@ -62,15 +62,15 @@ const MeasurementSection: React.FC<MeasurementSectionProps> = ({
               </select>
             </div>
           </div>
-          <div className="flex flex-col p-3 gap-4">
+          <div className="flex flex-col p-3 gap-4 w-full">
             {selections.map((selection, mainindex) => (
-              <div key={mainindex} className="flex flex-col gap-2">
+              <div key={mainindex} className="flex flex-col gap-2 w-full">
                 <p className="text-base sm:text-lg font-medium">{selection.area}</p>
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-4 w-full">
                   {selection.areacollection.map((collection, index) => (
                     <div
                       key={index}
-                      className="flex flex-col sm:flex-row p-3 border rounded-lg gap-3 sm:gap-4"
+                      className="flex flex-col sm:flex-row p-3 border rounded-lg gap-3 sm:gap-4 w-full justify-between"
                     >
                       <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full">
                         <div className="flex flex-col gap-2 w-full sm:w-1/5">
@@ -133,11 +133,6 @@ const MeasurementSection: React.FC<MeasurementSectionProps> = ({
                         </div>
                       </div>
                       <div className="flex flex-col gap-2 sm:w-1/6">
-                        <p className="text-sm sm:text-base sm:block hidden">Actions</p>
-                        <div className="flex items-center flex-row gap-2">
-                          <FaTrash className="text-red-500 cursor-pointer hover:text-red-700" />
-                          <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">+</span>
-                        </div>
                       </div>
                     </div>
                   ))}
