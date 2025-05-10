@@ -33,10 +33,10 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
 }) => {
 
   const editPaymentData = (data) => {
-    setPayment(data[1]);
-    setPaymentDate(data[2]);
-    setPaymentMode(data[3]);
-    setPaymentRemarks(data[4]);
+    setPayment(data[2]);
+    setPaymentDate(data[3]);
+    setPaymentMode(data[4]);
+    setPaymentRemarks(data[5]);
     setEditPayments(data); 
     setAddPayment(true);
   }
@@ -47,7 +47,7 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
       <div className="flex flex-row w-full justify-between gap-3">
         <div className="border rounded-lg w-1/4 p-3">
           <p className="text-[1.3vw] text-gray-500">Total Amount</p>
-          <p className="text-[1.3vw]">{(Amount + Tax).toFixed(2)}</p>
+          <p className="text-[1.3vw]">{(Amount + Tax).toFixed(2)}</p> 
         </div>
         <div className="border rounded-lg w-1/4 p-3">
           <p className="text-[1.3vw] text-gray-500">Payment Received</p>
@@ -87,7 +87,7 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
           </thead>
           <tbody>
           {paymentData
-            ?.filter(data => data[0] === projectData.projectName)
+            ?.filter(data => data[1] === projectData.projectName)
             .map((data, index) => (
               <tr key={index} className="border-t">
                 <td className="p-2">{data[1]}</td>

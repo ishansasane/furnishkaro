@@ -980,7 +980,7 @@ useEffect(() => {
 
         // Calculate the total sum for received payments
         const total = paymentData.reduce((acc, curr) => {
-          const amount = parseFloat(curr[1]);
+          const amount = parseFloat(curr[2]);
           return acc + (isNaN(amount) ? 0 : amount);
         }, 0);
 
@@ -1061,7 +1061,7 @@ const addPaymentFunction = async () => {
     headers : {
       "content-type" : "application/json"
     },
-    body : JSON.stringify({ Name : projectData.projectName, Received : payment, ReceivedDate : paymentDate, PaymentMode : paymentMode, Remarks : paymentRemarks })
+    body : JSON.stringify({ customerName : projectData.customerLink[0],  Name : projectData.projectName, Received : payment, ReceivedDate : paymentDate, PaymentMode : paymentMode, Remarks : paymentRemarks })
   })
   if(response.status == 200){
     alert("Payment added");

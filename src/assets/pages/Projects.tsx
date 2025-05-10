@@ -146,21 +146,40 @@ export default function Projects() {
   // Fetch Payments when 'projectData' is ready
   
   // --- Fetch Projects ---
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const data = await fetchProjectData();
-        dispatch(setProjects(data));
-        setprojects(data);
-      } catch (error) {
-        console.error('Failed to fetch projects:', error);
+useEffect(() => {
+  const fetchProjects = async () => {
+    const cached = localStorage.getItem("projectData");
+    const now = Date.now();
+
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      const timeDiff = now - parsed.time;
+
+      // Use cached data if it's less than 5 minutes old
+      if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
+        dispatch(setProjects(parsed.data));
+        setprojects(parsed.data);
+        return;
       }
-    };
-  
-    if (!projects.length) {
-      fetchProjects();
     }
-  }, [dispatch, projects.length]);
+
+    try {
+      const data = await fetchProjectData();
+      dispatch(setProjects(data));
+      setprojects(data);
+      localStorage.setItem("projectData", JSON.stringify({ data, time: now }));
+    } catch (error) {
+      console.error("Failed to fetch projects:", error);
+    }
+  };
+
+  if (!projects.length) {
+    fetchProjects();
+  } else {
+    setprojects(projects); // use redux state directly
+  }
+}, [dispatch, projects]);
+
   
   // --- Fetch Tasks ---
   useEffect(() => {

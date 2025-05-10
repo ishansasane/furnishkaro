@@ -74,39 +74,47 @@ export default function Customers() {
     }
   }
 
-  useEffect(() => {
-    async function getCustomers() {
-      const data = await fetchCustomers();
-      dispatch(setCustomerData(data));
-      setCustomers(customerData);
-      count = 0;
-    }
-    if (customerData.length === 0 && count <= 2) {
-      getCustomers();
-      count++;
-    } else {
-      setCustomers(customerData);
-    }
-  }, [customerData, dispatch]);
-
-  useEffect(() => {
-    async function getCustomers() {
-      const data = await fetchCustomers();
-      dispatch(setCustomerData(data));
-      setCustomers(customerData);
-    }
-    if(reset){
-      getCustomers();
-      setDialogOpen(false);
-      setreset(false);
-    }
-  }, [reset, editing]);
-
-  // Close dropdown on any click
-
+  
   const [customerDashboard, setCustomerDashboard] = useState(false);
 
   const [customerDashboardData, setCustomerDashboardData] = useState<Customer>(null);
+
+useEffect(() => {
+  const fetchData = async () => {
+    // Check localStorage first
+    const cached = localStorage.getItem("customerData");
+    const now = Date.now();
+
+    if (cached && !reset) {
+      const parsed = JSON.parse(cached);
+      const timeDiff = now - parsed.time;
+
+      // Use cached data if it's fresh (e.g., within 5 minutes)
+      if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
+        dispatch(setCustomerData(parsed.data));
+        setCustomers(parsed.data);
+        return;
+      }
+    }
+
+    // If no cached data or reset triggered, fetch from server
+    const data = await fetchCustomers();
+    dispatch(setCustomerData(data));
+    setCustomers(data);
+    localStorage.setItem("customerData", JSON.stringify({ data, time: now }));
+
+    if (reset) {
+      setDialogOpen(false);
+      setreset(false);
+    }
+  };
+
+  fetchData();
+}, [reset, dispatch, customerDashboard]);
+
+
+  // Close dropdown on any click
+
 
   return (
     <div className={`p-6 bg-gray-50 md:mt-0 mt-20 h-screen`}>
