@@ -209,9 +209,9 @@ useEffect(() => {
         if (data && projectData?.length) {
           const projectWisePayments = projectData.map((project) => {
             const total = data
-              .filter((item) => item[0] === project.projectName)
+              .filter((item) => item[1] === project.projectName)
               .reduce((acc, curr) => {
-                const amount = parseFloat(curr[1]);
+                const amount = parseFloat(curr[2]);
                 return acc + (isNaN(amount) ? 0 : amount);
               }, 0);
             return total;
