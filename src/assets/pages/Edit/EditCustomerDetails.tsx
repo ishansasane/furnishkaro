@@ -115,10 +115,11 @@ const EditCustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer,
         <div className="flex flex-col w-1/2">
           <div className="flex flex-row gap-3 px-2">
             <p className="text-[1vw]">Select Customer</p>
-            <button className="mb-3" onClick={() => setIsOpen(true)}><FaPlus size={18} className="hover:text-sky-800 text-sky-600"/></button>
-          </div>
+            <button className="mb-3 flex items-center px-2 py-1 border-1 border-blue-400 text-blue-500 font-semibold !rounded-xl hover:bg-blue-50 transition" onClick={() => setIsOpen(true)}>
+            <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">+</span> Customer
+          </button></div>
           <select
-            className="border p-2 rounded w-full"
+            className="border border-black p-2 rounded w-full opacity-50"
             value={JSON.stringify(selectedCustomer)}
             onChange={(e) => setSelectedCustomer(JSON.parse(e.target.value))}
           >

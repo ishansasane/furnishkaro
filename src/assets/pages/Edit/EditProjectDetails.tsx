@@ -195,8 +195,9 @@ const EditProjectDetails = ({
         <div className="flex flex-col w-1/2">
             <div className="flex flex-row gap-3 px-2">
               <p className="text-[1vw]">Select Interior</p>
-              <button className="mb-3" onClick={() => setIsOpen(true)}><FaPlus size={18} className="hover:text-sky-800 text-sky-600"/></button>
-            </div>
+               <button className="mb-3 flex items-center px-2 py-1 border-1 border-blue-400 text-blue-500 font-semibold !rounded-xl hover:bg-blue-50 transition" onClick={() => setIsOpen(true)}>
+            <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">+</span> Interior
+          </button> </div>
           <select
             className="border p-2 rounded w-full"
             value={JSON.stringify(interiorArray)}
@@ -214,10 +215,11 @@ const EditProjectDetails = ({
         <div className="flex flex-col w-1/2">
             <div className="flex flex-row gap-3 px-2">
               <p className="text-[1vw]">Select Sales Associate</p>
-              <button className="mb-3" onClick={() => setIsSalesOpen(true)}><FaPlus size={18} className="hover:text-sky-800 text-sky-600"/></button>
-            </div>
+              <button className="mb-3 flex items-center px-2 py-1 border-1 border-blue-400 text-blue-500 font-semibold !rounded-xl hover:bg-blue-50 transition" >
+            <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">+</span>Sales Associate
+          </button></div>
           <select
-            className="border p-2 rounded w-full"
+            className="border border-black p-2 rounded w-full opacity-50"
             value={JSON.stringify(salesAssociateArray)}
             onChange={(e) => setSalesAssociateArray(JSON.parse(e.target.value))}
           >
