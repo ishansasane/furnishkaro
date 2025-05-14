@@ -32,7 +32,11 @@ const Dashboard: React.FC = () => {
       body: JSON.stringify({ title: name }),
     });
 
-    setRefresh(true);
+    if(refresh){
+      setRefresh(false);
+    }else{
+      setRefresh(true);
+    }
     setSelectedTask(null);
   };
 
