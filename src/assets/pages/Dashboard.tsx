@@ -18,6 +18,24 @@ const Dashboard: React.FC = () => {
     const [totalPayment, setTotalPayment] = useState(0);
     const [discount, setDiscount] = useState(0);
 
+    const [selectedTask, setSelectedTask] = useState([]);
+
+    const [refresh, setRefresh] = useState(true);
+
+  const deleteTask = async (name: string) => {
+    await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletetask", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ title: name }),
+    });
+
+    setRefresh(true);
+    setSelectedTask(null);
+  };
+
 useEffect(() => {
   const fetchTasks = async () => {
     try {
@@ -39,7 +57,7 @@ useEffect(() => {
   if (tasks.length === 0) {
     fetchTasks();
   }
-}, [tasks.length, dispatch]);
+}, [tasks.length, dispatch, refresh]);
 
   const fetchProjectData = async () => {
     const response = await fetch(
@@ -196,6 +214,33 @@ useEffect(() => {
   fetchData();
 }, [dispatch]);
 
+  const handleMarkAsCompleted = async (status, name) => {
+    // Splitting Date & Time
+    const date = isEditing[3]
+
+    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/updatetask", {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        title: name,
+        status,
+      }),
+    });
+
+    if (response.status === 200) {
+      alert("Task updated");
+    } else {
+      alert("Error updating task");
+    }
+    if(refresh){
+      setRefresh(false);
+    }else{
+      setRefresh(true);
+    }
+  };
 
    return (
     <div className="p-6 md:mt-0 mt-20 bg-gray-100 min-h-screen">
@@ -283,9 +328,9 @@ useEffect(() => {
             <h2 className="text-xl font-bold mb-2 text-gray-800">📝 {selectedTask[0]}</h2>
             <p className="text-sm text-gray-600 mb-4">By {selectedTask[4]}</p>
             <div className="space-y-3 p-3 text-gray-700 text-sm">
-              <p className="flex justify-between"><strong>Priority :</strong> <span className={`inline-block px-2 py-1 rounded text-white ${selectedTask[5].toLowerCase() === 'high' ? 'bg-red-500' : selectedTask[5].toLowerCase() === 'medium' ? 'bg-yellow-500' : 'bg-green-500'}`}>{selectedTask[5]}</span></p>
+              <p className="flex justify-between"><strong>Priority :</strong> <span className={`inline-block px-2 py-1 rounded text-white ${selectedTask[6].toLowerCase() === 'high' ? 'bg-red-500' : selectedTask[6].toLowerCase() === 'medium' ? 'bg-yellow-500' : 'bg-green-500'}`}>{selectedTask[6]}</span></p>
               <hr />
-              <p className="flex justify-between"><strong>Status :</strong> <span className={`inline-block px-2 py-1 rounded text-white ${selectedTask[6].toLowerCase() === 'completed' ? 'bg-green-500' : 'bg-gray-500'}`}>{selectedTask[6]}</span></p>
+              <p className="flex justify-between"><strong>Status :</strong> <span className={`inline-block px-2 py-1 rounded text-white ${selectedTask[7].toLowerCase() === 'completed' ? 'bg-green-500' : 'bg-gray-500'}`}>{selectedTask[7]}</span></p>
               <hr />
               <p className="flex justify-between"><strong>Project :</strong> <span className="text-blue-600">{selectedTask[1]}</span></p>
               <hr />
@@ -298,13 +343,13 @@ useEffect(() => {
             </div>
             <div className="flex justify-between mt-6">  
               <button
-                onClick={handleDelete}
+                onClick={() => deleteTask(selectedTask[0])}
                 className="bg-white border !border-red-500 text-red-500 px-4 py-2 !rounded-lg hover:!bg-red-500 hover:!text-white transition-colors"
               >
                 Delete
               </button>
               <button
-                onClick={handleMarkAsCompleted}
+                onClick={() => handleMarkAsCompleted(selectedTask[6], selectedTask[0])}
                 className="flex items-center bg-gray-200 text-gray-700 px-4 py-2 !rounded-lg hover:bg-gray-300 transition-colors"
               >
                 <span className="mr-2">✔</span> Mark As Completed
@@ -316,5 +361,4 @@ useEffect(() => {
     </div>
   );
 };
-
 export default Dashboard;
