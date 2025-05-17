@@ -127,7 +127,7 @@ useEffect(() => {
   };
 
     fetchAndSetTasks();
-}, [dispatch, taskData, refresh]);
+}, [dispatch, refresh]);
 
 useEffect(() => {
   const fetchAndSetProjects = async () => {
@@ -270,8 +270,8 @@ useEffect(() => {
                         <button
                           className="w-full text-left px-3 py-2 hover:bg-gray-100 flex items-center gap-2"
                           onClick={() => {
-                            editData(task[0]);
                             setOpenDropdown(null);
+                            setDialogOpen(true);
                             setediting(task);
                           }}
                         >

@@ -8,6 +8,16 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store.ts";
 import { setTasks, setProjects, setPaymentData } from "../Redux/dataSlice.ts";
 
+const fetchTaskData = async () => {
+  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks");
+  const data = await response.json();
+  if(data.body){
+    return data.body;
+  }else{
+    return [];
+  }
+};
+
 const Dashboard: React.FC = () => {
   const [isTaskDialogOpen, setTaskDialogOpen] = useState<boolean>(false);
     const dispatch = useDispatch();
@@ -22,8 +32,9 @@ const Dashboard: React.FC = () => {
 
     const [refresh, setRefresh] = useState(true);
 
-  const deleteTask = async (name: string) => {
-    await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletetask", {
+const deleteTask = async (name: string) => {
+  try {
+    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletetask", {
       method: "POST",
       headers: {
         "content-type": "application/json",
@@ -32,13 +43,36 @@ const Dashboard: React.FC = () => {
       body: JSON.stringify({ title: name }),
     });
 
-    if(refresh){
-      setRefresh(false);
-    }else{
-      setRefresh(true);
+    if (response.status === 200) {
+      alert("Task deleted");
+
+      // Fetch updated tasks
+      const updatedTasks = await fetchTaskData();
+      const sortedTasks = updatedTasks.sort(
+        (a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime()
+      );
+
+      // Update Redux and local state
+      dispatch(setTasks(sortedTasks));
+
+      // Optionally cache the updated tasks
+      localStorage.setItem("taskData", JSON.stringify({ data: sortedTasks, time: Date.now() }));
+
+      // Reset selected task
+      setSelectedTask(null);
+
+      // Toggle refresh to update other components if needed
+      setRefresh(prev => !prev);
+    } else {
+      alert("Error deleting task");
     }
-    setSelectedTask(null);
-  };
+    setTaskDialogOpen(false);
+  } catch (error) {
+    console.error("Error deleting task:", error);
+    alert("Something went wrong while deleting the task.");
+  }
+};
+
 
 useEffect(() => {
   const fetchTasks = async () => {
@@ -218,10 +252,8 @@ useEffect(() => {
   fetchData();
 }, [dispatch]);
 
-  const handleMarkAsCompleted = async (status, name) => {
-    // Splitting Date & Time
-    const date = isEditing[3]
-
+const handleMarkAsCompleted = async (status, name) => {
+  try {
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/updatetask", {
       method: "POST",
       headers: {
@@ -235,16 +267,31 @@ useEffect(() => {
     });
 
     if (response.status === 200) {
-      alert("Task updated");
+      alert("Task marked as completed");
+
+      // Refetch updated tasks
+      const updatedTasks = await fetchTaskData();
+      const sortedTasks = updatedTasks.sort(
+        (a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime()
+      );
+
+      dispatch(setTasks(sortedTasks));
+
+      // Optionally update localStorage
+      localStorage.setItem("taskData", JSON.stringify({ data: sortedTasks, time: Date.now() }));
     } else {
       alert("Error updating task");
     }
-    if(refresh){
-      setRefresh(false);
-    }else{
-      setRefresh(true);
-    }
-  };
+    
+    setTaskDialogOpen(false);
+    // Toggle refresh state to trigger any related effects
+    setRefresh(prev => !prev);
+
+  } catch (error) {
+    console.error("Error marking task as completed:", error);
+    alert("Something went wrong while updating the task.");
+  }
+};
 
    return (
     <div className="p-6 md:mt-0 mt-20 bg-gray-100 min-h-screen">
@@ -353,7 +400,7 @@ useEffect(() => {
                 Delete
               </button>
               <button
-                onClick={() => handleMarkAsCompleted(selectedTask[6], selectedTask[0])}
+                onClick={() => handleMarkAsCompleted("Completed", selectedTask[0])}
                 className="flex items-center bg-gray-200 text-gray-700 px-4 py-2 !rounded-lg hover:bg-gray-300 transition-colors"
               >
                 <span className="mr-2">✔</span> Mark As Completed
