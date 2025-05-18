@@ -734,8 +734,6 @@ const handlequantitychange = (mainIndex, index, quantity) => {
 
 };
 
-
-
 const handleunitchange = (mainindex : number, index : number, unit) => {
   const updatedSelection = [...selections];
   updatedSelection[mainindex].areacollection[index].measurement.unit = unit;
@@ -786,7 +784,6 @@ const handleQuantityChange = async (
   setAmount(totalAmount);
 };
 
-
 const handleItemQuantityChange = (i, quantity) => {
   const updated = [...additionalItems];
   updated[i].quantity = quantity;
@@ -795,6 +792,7 @@ const handleItemQuantityChange = (i, quantity) => {
   updated[i].totalAmount = parseFloat(((updated[i].netRate) + Number(updated[i].taxAmount)).toFixed(2)); // Total Amount
   setAdditionaItems(updated);
 };
+
 const handleAddMiscItem = () => {
   setAdditionaItems(prev => [
     ...prev,
@@ -978,15 +976,19 @@ useEffect(() => {
         // Dispatch payment data to the store
         dispatch(setPaymentData(paymentData));
 
-        // Calculate the total sum for received payments
+        // Calculate the total sum for received payments for the current project
         const total = paymentData.reduce((acc, curr) => {
-          const amount = parseFloat(curr[2]);
-          return acc + (isNaN(amount) ? 0 : amount);
+          if (curr[1] === projectData.projectName) {
+            const amount = parseFloat(curr[2]);
+            return acc + (isNaN(amount) ? 0 : amount);
+          }
+          return acc;
         }, 0);
 
         // Update state with the received total amount
         setReceived(total);
       }
+
 
       // Fetch and dispatch tailor data
       const tailorData = await fetchTailorData();

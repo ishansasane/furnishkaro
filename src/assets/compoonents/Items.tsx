@@ -119,45 +119,88 @@ const Items = () => {
   }, [isFormOpen, deleted, dispatch]);
   
 
-  const deleteItem = async (name: string) => {
-    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletesingleproduct", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({ productName: name })
-    });
-    const data = await getItemsData();
-    dispatch(setItemData(data));
-    setItems(itemData);
-    
-    setDeleted(!deleted);
-    setOpenMenu(-1);
-  }
+const deleteItem = async (name: string) => {
+  try {
+    // Delete request
+    const response = await fetch(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/deletesingleproduct",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ productName: name }),
+      }
+    );
 
-  const duplicateItem = async (item: Array<string>) => {
-    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        productName: item[0],
-        description: item[1],
-        groupTypes: item[2],
-        sellingUnit: item[3],
-        mrp: item[4],
-        taxRate: item[5]
-      })
-    });
-    const data = await getItemsData();
-    dispatch(setItemData(data));
-    setItems(itemData);
-    setDeleted(!deleted);
+    if (!response.ok) {
+      throw new Error("Failed to delete the item");
+    }
+
+    // Refetch updated items
+    const updatedData = await getItemsData();
+
+    // Update Redux and local state
+    dispatch(setItemData(updatedData));
+    setItems(updatedData);
+
+    // Update cache
+    localStorage.setItem(
+      "itemData",
+      JSON.stringify({ data: updatedData, time: Date.now() })
+    );
+
+    // UI updates
+    setDeleted((prev) => !prev);
     setOpenMenu(-1);
+  } catch (err) {
+    console.error("Error deleting item:", err);
   }
+};
+
+const duplicateItem = async (item: Array<string>) => {
+  try {
+    const response = await fetch(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          productName: item[0],
+          description: item[1],
+          groupTypes: item[2],
+          sellingUnit: item[3],
+          mrp: item[4],
+          taxRate: item[5],
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to duplicate the item");
+    }
+
+    const updatedData = await getItemsData();
+
+    // Update state and cache
+    dispatch(setItemData(updatedData));
+    setItems(updatedData);
+    localStorage.setItem(
+      "itemData",
+      JSON.stringify({ data: updatedData, time: Date.now() })
+    );
+
+    setDeleted((prev) => !prev);
+    setOpenMenu(-1);
+  } catch (err) {
+    console.error("Error duplicating item:", err);
+  }
+};
+
 
   const groupOptions: string[] = [
     "Fabric",
@@ -230,104 +273,51 @@ const Items = () => {
     });
   };
 
-  const editItemData = async () => {
+const editItemData = async () => {
+  try {
+    const response = await fetch(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/updatesingleproduct",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          productName,
+          description,
+          groupTypes: selectedGroupType,
+          sellingUnit,
+          mrp,
+          taxRate,
+        }),
+      }
+    );
 
-
-
-    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/updatesingleproduct", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        productName: productName,
-        description: description,
-        groupTypes: selectedGroupType,
-        sellingUnit: sellingUnit,
-        mrp: mrp,
-        taxRate: taxRate
-      })
-    });
-    if (response.status === 200) {
-      alert("Item Updated");
-    
-      // Fetch updated items list
-      const data = await getItemsData();
-    
-      // 1. Update Redux store
-      dispatch(setItemData(data));
-    
-      // 2. Update local state
-      setItems(data);
-    
-      // 3. Update localStorage
-      localStorage.setItem("itemData", JSON.stringify({ data, time: Date.now() }));
-    
-      // 4. Reset UI and form states
-      setIsFormOpen(false);
-      setEditing(false);
-      setOpenMenu(-1);
-      setFormData({
-        productName: "",
-        productDetails: "",
-        groupType: "",
-        sellingUnit: "",
-        mrp: "",
-        taxRate: "",
-        additionalInputs: {},
-        sideDropdown: ""
-      });
-    
-    } else {
-      alert("Error");
-    }
-    
-  }
-
-  const handleSubmit = async () => {
-    const newItem = {
-      id: items.length + 1,
-      name: formData.productName,
-      description: formData.productDetails,
-      costingType: formData.sellingUnit,
-      groupType: formData.groupType,
-      entryDate: new Date().toLocaleDateString(),
-      additionalInputs: formData.additionalInputs,
-      sideDropdown: formData.sideDropdown,
-      mrp: formData.mrp,
-      taxrate: formData.taxRate
-    };
-
-    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        productName: newItem.name,
-        description: newItem.description,
-        groupTypes: newItem.groupType,
-        sellingUnit: newItem.costingType,
-        mrp: newItem.mrp,
-        taxRate: newItem.taxrate
-      })
-    });
-    const data = await getItemsData();
-    dispatch(setItemData(data));
-    setItems(itemData);
-
-    if (response.status === 200) {
-      alert("Item Added");
-      setIsFormOpen(false);
-    } else {
-      alert("Error");
+    if (!response.ok) {
+      throw new Error("Failed to update item");
     }
 
+    alert("Item Updated");
+
+    const updatedData = await getItemsData();
+
+    // 1. Update global state
+    dispatch(setItemData(updatedData));
+
+    // 2. Update local state
+    setItems(updatedData);
+
+    // 3. Refresh cache
+    localStorage.setItem(
+      "itemData",
+      JSON.stringify({ data: updatedData, time: Date.now() })
+    );
+
+    // 4. Reset UI/form state
     setIsFormOpen(false);
-
-    // Reset form fields
+    setEditing(false);
+    setOpenMenu(-1);
     setFormData({
       productName: "",
       productDetails: "",
@@ -336,9 +326,78 @@ const Items = () => {
       mrp: "",
       taxRate: "",
       additionalInputs: {},
-      sideDropdown: ""
+      sideDropdown: "",
     });
+
+  } catch (error) {
+    console.error("Edit error:", error);
+    alert("Something went wrong while updating the item.");
+  }
+};
+
+
+const handleSubmit = async () => {
+  const newItem = {
+    id: items.length + 1,
+    name: formData.productName,
+    description: formData.productDetails,
+    costingType: formData.sellingUnit,
+    groupType: formData.groupType,
+    entryDate: new Date().toLocaleDateString(),
+    additionalInputs: formData.additionalInputs,
+    sideDropdown: formData.sideDropdown,
+    mrp: formData.mrp,
+    taxrate: formData.taxRate,
   };
+
+  try {
+    const response = await fetch(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          productName: newItem.name,
+          description: newItem.description,
+          groupTypes: newItem.groupType,
+          sellingUnit: newItem.costingType,
+          mrp: newItem.mrp,
+          taxRate: newItem.taxrate,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to add new item");
+    }
+
+    const updatedData = await getItemsData();
+
+    dispatch(setItemData(updatedData));
+    setItems(updatedData);
+    localStorage.setItem("itemData", JSON.stringify({ data: updatedData, time: Date.now() }));
+
+    alert("Item Added");
+    setIsFormOpen(false);
+    setFormData({
+      productName: "",
+      productDetails: "",
+      groupType: "",
+      sellingUnit: "",
+      mrp: "",
+      taxRate: "",
+      additionalInputs: {},
+      sideDropdown: "",
+    });
+
+  } catch (error) {
+    console.error("Error adding item:", error);
+    alert("Error adding item");
+  }
+};
 
   return (
     <div className="bg-gray-50 min-h-screen pt-20 md:p-4">

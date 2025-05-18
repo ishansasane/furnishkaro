@@ -635,47 +635,134 @@ function AddProjectForm() {
   const [selectedMainIndex, setSelectedMainIndex] = useState<number | null>(null);
   const [selectedCollectionIndex, setSelectedCollectionIndex] = useState<number | null>(null);
 
-  const sendProjectData = async () => {
-    try {
-      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/sendprojectdata", {
-        method: "POST",
+    const fetchProjectData = async () => {
+    const response = await fetch(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
+      {
         credentials: "include",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          projectName: projectName,
-          customerLink: JSON.stringify(selectedCustomer),
-          projectReference: projectReference,
-          status: status,
-          totalAmount: amount,
-          totalTax: tax,
-          paid: paid,
-          discount: discount,
-          createdBy: user,
-          allData: JSON.stringify(selections),
-          projectDate: projectDate,
-          additionalRequests: additionalRequests,
-          interiorArray: JSON.stringify(interiorArray),
-          salesAssociateArray: JSON.stringify(salesAssociateArray),
-          additionalItems: JSON.stringify(additionalItems),
-          goodsArray: JSON.stringify(goodsArray),
-          tailorsArray: JSON.stringify(tailorsArray),
-          projectAddress : JSON.stringify(projectAddress),
-        }),
-      });
-      if (response.status === 200) {
-        alert("Project Added");
-      } else {
-        const errorText = await response.text();
-        console.error("Error response:", errorText);
-        alert("Error: Failed to add project");
       }
-    } catch (error) {
-      console.error("Fetch error:", error);
-      alert("Error: Network issue or server not responding");
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
     }
+
+    const data = await response.json();
+
+    if (!data.body || !Array.isArray(data.body)) {
+      throw new Error("Invalid data format: Expected an array in data.body");
+    }
+
+    const parseSafely = (value: any, fallback: any) => {
+      try {
+        return typeof value === "string" ? JSON.parse(value) : value || fallback;
+      } catch (error) {
+        console.warn("Invalid JSON:", value, error);
+        return fallback;
+      }
+    };
+
+    const deepClone = (obj: any) => JSON.parse(JSON.stringify(obj));
+
+    const fixBrokenArray = (input: any): string[] => {
+      if (Array.isArray(input)) return input;
+      if (typeof input !== "string") return [];
+
+      try {
+        const fixed = JSON.parse(input);
+        if (Array.isArray(fixed)) return fixed;
+        return [];
+      } catch {
+        try {
+          const cleaned = input
+            .replace(/^\[|\]$/g, "")
+            .split(",")
+            .map((item: string) => item.trim().replace(/^"+|"+$/g, ""));
+          return cleaned;
+        } catch {
+          return [];
+        }
+      }
+    };
+
+    const projects = data.body.map((row: any[]) => ({
+      projectName: row[0],
+      customerLink: parseSafely(row[1], []),
+      projectReference: row[2] || "",
+      status: row[3] || "",
+      totalAmount: parseFloat(row[4]) || 0,
+      totalTax: parseFloat(row[5]) || 0,
+      paid: parseFloat(row[6]) || 0,
+      discount: parseFloat(row[7]) || 0,
+      createdBy: row[8] || "",
+      allData: deepClone(parseSafely(row[9], [])),
+      projectDate: row[10] || "",
+      additionalRequests: parseSafely(row[11], []),
+      interiorArray: fixBrokenArray(row[12]),
+      salesAssociateArray: fixBrokenArray(row[13]),
+      additionalItems: deepClone(parseSafely(row[14], [])),
+      goodsArray: deepClone(parseSafely(row[15], [])),
+      tailorsArray: deepClone(parseSafely(row[16], [])),
+      projectAddress : row[17],
+    }));
+
+    return projects;
   };
+
+const sendProjectData = async () => {
+  try {
+    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/sendprojectdata", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        projectName,
+        customerLink: JSON.stringify(selectedCustomer),
+        projectReference,
+        status,
+        totalAmount: amount,
+        totalTax: tax,
+        paid,
+        discount,
+        createdBy: user,
+        allData: JSON.stringify(selections),
+        projectDate,
+        additionalRequests,
+        interiorArray: JSON.stringify(interiorArray),
+        salesAssociateArray: JSON.stringify(salesAssociateArray),
+        additionalItems: JSON.stringify(additionalItems),
+        goodsArray: JSON.stringify(goodsArray),
+        tailorsArray: JSON.stringify(tailorsArray),
+        projectAddress: JSON.stringify(projectAddress),
+      }),
+    });
+
+    if (response.status === 200) {
+      alert("Project Added");
+
+      // ✅ Fetch updated project data
+      const updatedData = await fetchProjectData();
+
+      // ✅ Update Redux and local state
+      dispatch(setProjects(updatedData));
+      setProjects(updatedData);
+
+      // ✅ Update localStorage cache
+      localStorage.setItem("projectData", JSON.stringify({ data: updatedData, time: Date.now() }));
+
+    } else {
+      const errorText = await response.text();
+      console.error("Error response:", errorText);
+      alert("Error: Failed to add project");
+    }
+  } catch (error) {
+    console.error("Fetch error:", error);
+    alert("Error: Network issue or server not responding");
+  }
+};
+
 
   const [goodsItems, setGoodsItems] = useState<any[]>([]);
   useEffect(() => {
