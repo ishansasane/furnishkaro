@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store";
 import { setCustomerData, setPaymentData, setProjects } from "../Redux/dataSlice";
+import { Link } from 'react-router-dom';
 
 async function fetchCustomers() {
   try {
@@ -282,21 +283,21 @@ useEffect(() => {
         <div className='flex flex-row w-full justify-between items-center'>
             <div className='flex flex-col gap-1'>
                 <p className='text-[1.6vw] font-semibold'>{customerName}</p>
-                <p className='text-[0.8vw]'>Dashboard  •  Customers  •  {customerName}</p>
+                <div className='text-[0.8vw] flex flex-row gap-2'><Link to="/" className='!no-underline text-black'>Dashboard</Link>  •  <Link to="/customers" onClick={() => setCustomerDashboard(false)} className='!no-underline text-black'>Customers</Link>  •  {customerName}</div>
             </div>
             <button style={{ "borderRadius" : "6px" }} className='text-white px-2 py-1 bg-sky-600 hover:bg-sky-700' onClick={() => setCustomerDashboard(false)}>Cancel</button>
         </div>
         <div className='flex flex-row w-full justify-between gap-3'>
             <div className='flex flex-col border rounded-xl p-3 w-1/3'>
-                <p className='text-[1.2vw] text-gray-600'>Active Orders</p>
+                <p className='text-[1.2vw] text-sky-700'>Active Orders</p>
                 <p className='text-[1.1vw]'>{activeOrders}</p>
             </div>
             <div className='flex flex-col border rounded-xl p-3 w-1/3'>
-                <p className='text-[1.2vw] text-gray-600'>Payment Received</p>
+                <p className='text-[1.2vw] text-green-600'>Payment Received</p>
                 <p className='text-[1.1vw]'>{receivedPayment}</p>
             </div>
             <div className='flex flex-col border rounded-xl p-3 w-1/3'>
-                <p className='text-[1.2vw] text-gray-600'>Payment Due</p>
+                <p className='text-[1.2vw] text-red-500'>Payment Due</p>
                 <p className='text-[1.1vw]'>{duePayment - receivedPayment}</p>
             </div>
         </div>
@@ -321,8 +322,8 @@ useEffect(() => {
                     <td>{duePayment}</td>
                     <td>{receivedPayment}</td>
                     <td>{duePayment - receivedPayment}</td>
-                    <td>{project.projectDate}</td>
-                    <td>{project.quote}</td>
+                    <td className='py-2'>{project.projectDate}</td>
+                    <td className='py-2'>{project.quote}</td>
                 </tr>
                 ))}
             </tbody>

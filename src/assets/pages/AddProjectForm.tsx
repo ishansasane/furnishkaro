@@ -1062,7 +1062,7 @@ useEffect(() => {
         handleGroupDelete={handleGroupDelete}
       />
       <div className="flex flex-col p-6 border rounded-lg w-full shadow-2xl">
-        <p className="">Quotation</p>
+        <p className="text-[1.3vw] font-semibold">Quotation</p>
         <div className="flex flex-col gap-3 w-full">
           {selections.map((selection, mainIndex) => (
             <div key={mainIndex} className="w-full">

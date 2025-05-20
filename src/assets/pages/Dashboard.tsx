@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import Card from "./CardPage";
 import DeadlineCard from "../compoonents/DeadlineCard";
 import TaskCard from "../compoonents/TaskCard";
@@ -6,7 +6,9 @@ import InquiryCard from "../compoonents/InquiryCard";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store.ts";
-import { setTasks, setProjects, setPaymentData } from "../Redux/dataSlice.ts";
+import { setTasks, setProjects, setPaymentData, setProjectFlag } from "../Redux/dataSlice.ts";
+import TaskDialog from "../compoonents/TaskDialog.tsx";
+import { AnimatePresence, motion } from "framer-motion";
 
 const fetchTaskData = async () => {
   const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks");
@@ -24,6 +26,7 @@ const Dashboard: React.FC = () => {
     const tasks  = useSelector((state: RootState) => state.data.tasks);
     const projects  = useSelector((state: RootState) => state.data.projects);
     const paymentData = useSelector((state : RootState) => state.data.paymentData);
+    const projectsData = useSelector((state : RootState) => state.data.projects);
 
     const [totalPayment, setTotalPayment] = useState(0);
     const [discount, setDiscount] = useState(0);
@@ -255,6 +258,7 @@ useEffect(() => {
   fetchData();
 }, [dispatch]);
 
+const [taskDialogOpen, setTaskDialog] = useState(false);
 
 const handleMarkAsCompleted = async (status, name) => {
   try {
@@ -297,14 +301,59 @@ const handleMarkAsCompleted = async (status, name) => {
   }
 };
 
+useEffect(() => {
+  const fetchProjects = async () => {
+    try {
+      const cached = localStorage.getItem("projectData");
+      const now = Date.now();
+      const cacheExpiry = 5 * 60 * 1000; // 5 minutes
+
+      if (cached) {
+        const parsed = JSON.parse(cached);
+
+        const isCacheValid = parsed?.data?.length > 0 && (now - parsed.time) < cacheExpiry;
+
+        if (isCacheValid) {
+          dispatch(setProjects(parsed.data));
+          return;
+        }
+      }
+
+      // If no valid cache, fetch fresh data
+      const freshData = await fetchProjectData();
+
+      if (Array.isArray(freshData)) {
+        dispatch(setProjects(freshData));
+        localStorage.setItem("projectData", JSON.stringify({ data: freshData, time: now }));
+      } else {
+        console.warn("Fetched project data is not an array:", freshData);
+      }
+
+    } catch (error) {
+      console.error("Failed to fetch projects:", error);
+
+      // Optional fallback to stale cache if fetch fails
+      const fallbackCache = localStorage.getItem("projectData");
+      if (fallbackCache) {
+        const parsed = JSON.parse(fallbackCache);
+        if (parsed?.data?.length > 0) {
+          dispatch(setProjects(parsed.data));
+        }
+      }
+    }
+  };
+
+  fetchProjects();
+}, [dispatch]);
+
    return (
     <div className="p-6 md:mt-0 mt-20 bg-gray-100 min-h-screen">
 
       {/* Summary Cards Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card  title="Orders"  value={projects.length} color="bg-blue-500" className="w-full max-w-sm"/>
-        <Card title="Total Value" value={totalPayment - discount} color="bg-green-500" isCurrency />
-        <Card title="Payment Received" value={received} color="bg-purple-500" isCurrency />
+        <Card title="Total Value" value={totalPayment - discount} color="bg-purple-500" isCurrency />
+        <Card title="Payment Received" value={received} color="bg-green-500" isCurrency />
         <Card title="Payment Due" value={totalPayment - received - discount} color="bg-red-500" isCurrency />
       </div>
 
@@ -312,7 +361,7 @@ const handleMarkAsCompleted = async (status, name) => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-10">
         {/* Project Deadlines */}
         <div className="bg-white shadow-lg rounded-xl p-6">
-          <h2 className="text-xl font-semibold mb-4 text-gray-800">📅 Project Deadlines</h2>
+          <p className="text-[1.7vw] font-semibold mb-4 text-gray-800">📅 Project Deadlines</p>
           <div className="space-y-4">
             {projects != undefined && projects.map((project, index) => (
               <DeadlineCard project={project.projectName} date={project.projectDate} key={index} />
@@ -322,28 +371,52 @@ const handleMarkAsCompleted = async (status, name) => {
 
         {/* Tasks */}
         <div className="bg-white shadow-lg rounded-xl p-6 col-span-2">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex flex-row w-full justify-between items-center mb-4">
             <Link to="/tasks" className="!no-underline">
-              <h1 className="text-xl font-semibold text-gray-800">📝 Tasks</h1>
+              <p className="text-[1.7vw] font-semibold text-gray-800">Tasks</p>
             </Link>
+            <button onClick={() => setTaskDialog(true)} style={{ borderRadius : "6px" }} className="mb-2 bg-sky-600 text-white hover:bg-sky-700 px-2 py-1">Add Task</button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto h-96 pr-2">
             {tasks.map((task, index) => (
               <div key={index} onClick={() => { setSelectedTask(task); setTaskDialogOpen(true); }}>
                 <TaskCard
-                  task={task[0]}
-                  description={task[1]}
-                  date={task[2]}
-                  time={task[3]}
-                  assignee={task[4]}
-                  priority={task[5]}
-                  status={task[6]}
+                    taskData={task}
                 />
               </div>
             ))}
           </div>
         </div>
       </div>
+            <AnimatePresence>
+        {taskDialogOpen && (
+          <>
+            <motion.div
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => (setTaskDialog(false))}
+            />
+            <motion.div
+              className="fixed inset-0 z-50 flex items-center justify-center"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3 }}
+            >
+              <TaskDialog
+                onClose={() => setTaskDialog(false)}
+                projectData={projectsData}
+                setTaskDialogOpen={setTaskDialog}
+                taskDialogOpen={taskDialogOpen}
+                setProjectFlag={setProjectFlag}
+                dashboard={true}
+              />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* Inquiries */}
       <div className="bg-white shadow-lg rounded-xl p-6 mt-10">
@@ -383,7 +456,7 @@ const handleMarkAsCompleted = async (status, name) => {
             <h2 className="text-xl font-bold mb-2 text-gray-800">📝 {selectedTask[0]}</h2>
             <p className="text-sm text-gray-600 mb-4">By {selectedTask[4]}</p>
             <div className="space-y-3 p-3 text-gray-700 text-sm">
-              <p className="flex justify-between"><strong>Priority :</strong> <span className={`inline-block px-2 py-1 rounded text-white ${selectedTask[6].toLowerCase() === 'high' ? 'bg-red-500' : selectedTask[6].toLowerCase() === 'medium' ? 'bg-yellow-500' : 'bg-green-500'}`}>{selectedTask[6]}</span></p>
+              <p className="flex justify-between"><strong>Priority :</strong> <span className={`inline-block px-2 py-1 rounded text-white ${selectedTask[6].toLowerCase() === 'high' ? 'bg-red-500' : selectedTask[6].toLowerCase() === 'moderate' ? 'bg-yellow-500' : 'bg-green-500'}`}>{selectedTask[6]}</span></p>
               <hr />
               <p className="flex justify-between"><strong>Status :</strong> <span className={`inline-block px-2 py-1 rounded text-white ${selectedTask[7].toLowerCase() === 'completed' ? 'bg-green-500' : 'bg-gray-500'}`}>{selectedTask[7]}</span></p>
               <hr />

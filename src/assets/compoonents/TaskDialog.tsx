@@ -19,7 +19,7 @@ const fetchTaskData = async () => {
   }
 };
 
-const TaskDialog: React.FC<TaskDialogProps> = ({ setAdded, onClose, isEditing, setediting, name, setrefresh, projectData, taskDialogOpen, setProjectFlag, setTaskDialogOpen }) => {
+const TaskDialog: React.FC<TaskDialogProps> = ({ setAdded, onClose, isEditing, setediting, name, setrefresh, projectData, taskDialogOpen, setProjectFlag, setTaskDialogOpen, dashboard }) => {
   const [taskName, setTaskName] = useState(undefined);
   const [description, setDescription] = useState(undefined);
   const [dateTime, setDateTime] = useState(undefined);
@@ -48,7 +48,7 @@ const addTask = async () => {
     alert("Please select a date and time");
     return;
   }
-
+  
   try {
     const now = new Date();
     const date = now.toISOString().slice(0, 16); // Extract ISO datetime
@@ -150,7 +150,9 @@ const editTask = async () => {
     const flag = taskDialogOpen;
     if(flag){
       dispatch(setProjectFlag(true));
-      navigate("/projects");
+      if(!dispatch){
+        navigate("/projects");
+      }
       dispatch(setTaskDialogOpen(false));
     }
     setediting(null);

@@ -526,27 +526,6 @@ const handleSubmit = async () => {
                 </div>
               </div>
       
-              <div className="flex items-center space-x-6">
-                <div className="flex items-center space-x-2">
-                  <label className="font-medium">Publish</label>
-                  <input
-                    type="checkbox"
-                    checked={publish}
-                    onChange={(e) => setPublish(e.target.checked)}
-                    className="w-5 h-5"
-                  />
-                </div>
-                <div className="flex items-center space-x-2">
-                  <label className="font-medium">Accessory</label>
-                  <input
-                    type="checkbox"
-                    checked={accessory}
-                    onChange={(e) => setAccessory(e.target.checked)}
-                    className="w-5 h-5"
-                  />
-                </div>
-              </div>
-      
               <div className="flex gap-2 justify-end space-x-4">
                 <button
                   type="button"

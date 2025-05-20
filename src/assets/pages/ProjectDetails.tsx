@@ -251,7 +251,7 @@ const ProjectDetails = ({
           />
         </div>
         <div className="flex flex-col w-1/2">
-          <p className="">Project Date</p>
+          <p className="">Project Deadline</p>
           <input
             type="date"
             className="border p-2 opacity-50 rounded w-full"
