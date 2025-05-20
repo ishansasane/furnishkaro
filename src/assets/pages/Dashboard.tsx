@@ -171,16 +171,25 @@ useEffect(() => {
     return projects;
   };
 
-useEffect(() => {
-  const fetchProjects = async () => {
-    try {
-      const projectRes = await fetchProjectData();
+    const fetchPaymentData = async () => {
+      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getPayments"); 
+      const data = await response.json();
+      return data.message;
+    }
 
+    const [received, setReceived] = useState(0);
+
+    useEffect(() => {
+
+  const fetchData = async () => {
+    try {
+      // Step 1: Fetch Projects
+      const projectRes = await fetchProjectData();
       const projects = projectRes;
 
       dispatch(setProjects(projects));
 
-      // Calculate totalTax + totalAmount
+      // Calculate total tax, amount, and discount
       let totalTax = 0;
       let totalAmount = 0;
       let discount = 0;
@@ -191,29 +200,13 @@ useEffect(() => {
         discount += parseFloat(project.discount);
       });
 
-      setTotalPayment(totalAmount + totalTax); // Optional: add to previous if needed
+      setTotalPayment(totalAmount + totalTax);
       setDiscount(discount);
-    } catch (error) {
-      console.error("Error fetching projects:", error);
-    }
-  };
 
-  fetchProjects();
-}, [projects.length, dispatch]);
+      // Create a Set of valid project names
+      const validProjectNames = new Set(projects.map(project => project.projectName));
 
-
-
-    const fetchPaymentData = async () => {
-      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getPayments"); 
-      const data = await response.json();
-      return data.message;
-    }
-
-    const [received, setReceived] = useState(0);
-
-useEffect(() => {
-  const fetchData = async () => {
-    try {
+      // Step 2: Fetch Payments (from cache or fresh)
       const cached = localStorage.getItem("paymentData");
       const now = Date.now();
 
@@ -224,33 +217,44 @@ useEffect(() => {
         if (timeDiff < 5 * 60 * 1000 && parsed.data?.length) {
           dispatch(setPaymentData(parsed.data));
 
-          const total = parsed.data.reduce((acc, curr) => {
-            const amount = parseFloat(curr[2]);
-            return acc + (isNaN(amount) ? 0 : amount);
+          const totalReceived = parsed.data.reduce((acc, payment) => {
+            const projectName = payment[1];
+            const amount = parseFloat(payment[2]);
+            return validProjectNames.has(projectName)
+              ? acc + (isNaN(amount) ? 0 : amount)
+              : acc;
           }, 0);
-          setReceived(total);
+
+          setReceived(totalReceived);
           return;
         }
       }
 
+      // If no valid cache, fetch fresh payments
       const paymentData = await fetchPaymentData();
+
       if (paymentData) {
         dispatch(setPaymentData(paymentData));
         localStorage.setItem("paymentData", JSON.stringify({ data: paymentData, time: now }));
 
-        const total = paymentData.reduce((acc, curr) => {
-          const amount = parseFloat(curr[2]);
-          return acc + (isNaN(amount) ? 0 : amount);
+        const totalReceived = paymentData.reduce((acc, payment) => {
+          const projectName = payment[1];
+          const amount = parseFloat(payment[2]);
+          return validProjectNames.has(projectName)
+            ? acc + (isNaN(amount) ? 0 : amount)
+            : acc;
         }, 0);
-        setReceived(total);
+
+        setReceived(totalReceived);
       }
     } catch (error) {
-      console.error("Error fetching payment data:", error);
+      console.error("Error fetching data:", error);
     }
   };
 
   fetchData();
 }, [dispatch]);
+
 
 const handleMarkAsCompleted = async (status, name) => {
   try {

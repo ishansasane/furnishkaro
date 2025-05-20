@@ -52,7 +52,7 @@ const EditProjects = ({ projectData, index, goBack, projects, Tax, setTax, Amoun
 
     const [additionalItems, setAdditionaItems] = useState<additional[]>([]);
 
-    const [editPayments, setEditPayments] = useState([]);
+    const [editPayments, setEditPayments] = useState(undefined);
     interface additional{
       name : string;
       quantity : number;
@@ -967,50 +967,55 @@ const fetchTailorData = async () => {
 const hasFetchedPayments = useRef(false);
 const [added, setAdded] = useState(false);
 useEffect(() => {
-  // Use a flag to check if data has been fetched already
-  async function fetchData() {
+  let isMounted = true; // To avoid state updates on unmounted component
+
+  const fetchAndStoreData = async () => {
     try {
-      // Fetch and dispatch payments data
-      const paymentData = await fetchPaymentData();
-      if (paymentData !== undefined) {
-        // Dispatch payment data to the store
+      // Parallel fetch
+      const [paymentData, tailorData] = await Promise.all([
+        fetchPaymentData(),
+        fetchTailorData()
+      ]);
+
+      // --- PAYMENT DATA ---
+      if (paymentData && isMounted) {
         dispatch(setPaymentData(paymentData));
 
-        // Calculate the total sum for received payments for the current project
-        const total = paymentData.reduce((acc, curr) => {
-          if (curr[1] === projectData.projectName) {
-            const amount = parseFloat(curr[2]);
-            return acc + (isNaN(amount) ? 0 : amount);
+        // Compute total payment for this project
+        const totalReceived = paymentData.reduce((sum, record) => {
+          const [_, projectName, amountStr] = record;
+          if (projectName === projectData.projectName) {
+            const amount = parseFloat(amountStr);
+            return sum + (isNaN(amount) ? 0 : amount);
           }
-          return acc;
+          return sum;
         }, 0);
 
-        // Update state with the received total amount
-        setReceived(total);
+        setReceived(totalReceived);
       }
 
-
-      // Fetch and dispatch tailor data
-      const tailorData = await fetchTailorData();
-      if (tailorData !== undefined) {
-        // Dispatch tailor data to the store
+      // --- TAILOR DATA ---
+      if (tailorData && isMounted) {
         dispatch(setTailorData(tailorData));
       }
 
-      // Mark that data has been added to avoid repeated fetch
-      setAdded(true);
-
+      // Prevent re-fetching
+      if (isMounted) setAdded(true);
     } catch (error) {
-      console.error("Error fetching data:", error);
-      // Optionally, set an error state or show a notification if needed
+      console.error("❌ Failed to fetch payment or tailor data:", error);
+      // Optional: showToast("Error loading data")
     }
+  };
+
+  if (!added) {
+    fetchAndStoreData();
   }
 
-  // Fetch data only if it hasn't been fetched yet
-  if (!added) {
-    fetchData();
-  }
-}, [added, dispatch, fetchPaymentData, fetchTailorData]);
+  return () => {
+    isMounted = false; // Cleanup for async calls
+  };
+}, [added, dispatch, projectData.projectName]);
+
 
 
 
@@ -1056,31 +1061,57 @@ useEffect(() => {
 
 
 const addPaymentFunction = async () => {
+  const isEdit = typeof editProjects !== "undefined";
 
-  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/addPayment", {
-    credentials : "include",
-    method : "POST",
-    headers : {
-      "content-type" : "application/json"
-    },
-    body : JSON.stringify({ customerName : projectData.customerLink[0],  Name : projectData.projectName, Received : payment, ReceivedDate : paymentDate, PaymentMode : paymentMode, Remarks : paymentRemarks })
-  })
-  if(response.status == 200){
-    alert("Payment added");
-    setAddPayment(false);
-    setPayment(0);
-    setPaymentDate("");
-    setPaymentMode("");
-    setPaymentRemarks("");
-    if(added){
-      setAdded(false);
-    }else{
-      setAdded(true);
+  const url = isEdit
+    ? "https://sheeladecor.netlify.app/.netlify/functions/server/updateProjects"
+    : "https://sheeladecor.netlify.app/.netlify/functions/server/addPayment";
+
+  const payload = isEdit
+    ? {
+        customerName: projectData.customerLink[0],
+        Name: projectData.projectName,
+        Received: payment,
+        ReceivedDate: paymentDate,
+        PaymentMode: paymentMode,
+        Remarks: paymentRemarks,// send this if backend needs it
+      }
+    : {
+        customerName: projectData.customerLink[0],
+        Name: projectData.projectName,
+        Received: payment,
+        ReceivedDate: paymentDate,
+        PaymentMode: paymentMode,
+        Remarks: paymentRemarks,
+      };
+
+  try {
+    const response = await fetch(url, {
+      credentials: "include",
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.status === 200) {
+      alert(isEdit ? "Payment updated" : "Payment added");
+      setAddPayment(false);
+      setPayment(0);
+      setPaymentDate("");
+      setPaymentMode("");
+      setPaymentRemarks("");
+      setAdded(prev => !prev);
+    } else {
+      alert("Error");
     }
-  }else{
-    alert("Error");
+  } catch (error) {
+    console.error("Fetch error:", error);
+    alert("Network or server error");
   }
-}
+};
+
 
 const deletePayment = async (p, pd, pm, re) => {
   const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletePayment", {
@@ -1751,8 +1782,9 @@ useEffect(() => {
                 <input type="text" value={paymentRemarks} className="border-1 rounded-lg pl-2 h-8" onChange={(e) => setPaymentRemarks(e.target.value)}/>
               </div>
               <div className="flex flex-row justify-end gap-3">
-                <button onClick={() => setCancelPayment()} style={{ borderRadius : "8px" }} className="border-2 border-sky-700 text-sky-600 bg-white px-2 h-8">Close</button>
-                <button onClick={() => addPaymentFunction()} style={{ borderRadius : "8px" }} className="text-white bg-sky-600 hover:bg-sky-700 px-2 h-8">Add Payment</button>
+                <button onClick={() => {if(editPayments != undefined){ setEditPayments(undefined); } setCancelPayment()}} style={{ borderRadius : "8px" }} className="border-2 border-sky-700 text-sky-600 bg-white px-2 h-8">Close</button>
+                <button onClick={() => addPaymentFunction()} style={{ borderRadius : "8px" }} className={`${editPayments == undefined ? "" : "hidden"} text-white bg-sky-600 hover:bg-sky-700 px-2 h-8`}>Add Payment</button>
+                <button onClick={() => addPaymentFunction()} style={{ borderRadius : "8px" }} className={`${editPayments != undefined ? "" : "hidden"} text-white bg-sky-600 hover:bg-sky-700 px-2 h-8`}>Edit Payment</button>
               </div>
             </div>
           }
