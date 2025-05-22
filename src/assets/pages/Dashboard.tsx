@@ -350,7 +350,7 @@ useEffect(() => {
     <div className="p-6 md:mt-0 mt-20 bg-gray-100 min-h-screen">
 
       {/* Summary Cards Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
         <Card  title="Orders"  value={projects.length} color="bg-blue-500" className="w-full max-w-sm"/>
         <Card title="Total Value" value={totalPayment - discount} color="bg-purple-500" isCurrency />
         <Card title="Payment Received" value={received} color="bg-green-500" isCurrency />
@@ -358,9 +358,9 @@ useEffect(() => {
       </div>
 
       {/* Deadlines & Tasks */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-10">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 mt-2">
         {/* Project Deadlines */}
-        <div className="bg-white shadow-lg rounded-xl p-6">
+        <div className="bg-white shadow-md rounded-xl p-6">
           <p className="text-[1.7vw] font-semibold mb-4 text-gray-800">📅 Project Deadlines</p>
           <div className="space-y-4">
             {projects != undefined && projects.map((project, index) => (
@@ -370,14 +370,14 @@ useEffect(() => {
         </div>
 
         {/* Tasks */}
-        <div className="bg-white shadow-lg rounded-xl p-6 col-span-2">
+        <div className="bg-white shadow-md rounded-xl p-6 col-span-2">
           <div className="flex flex-row w-full justify-between items-center mb-4">
             <Link to="/tasks" className="!no-underline">
               <p className="text-[1.7vw] font-semibold text-gray-800">Tasks</p>
             </Link>
             <button onClick={() => setTaskDialog(true)} style={{ borderRadius : "6px" }} className="mb-2 bg-sky-600 text-white hover:bg-sky-700 px-2 py-1">Add Task</button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto h-96 pr-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto max-h-[90vh] pr-2">
             {tasks.map((task, index) => (
               <div key={index} onClick={() => { setSelectedTask(task); setTaskDialogOpen(true); }}>
                 <TaskCard
@@ -419,7 +419,7 @@ useEffect(() => {
       </AnimatePresence>
 
       {/* Inquiries */}
-      <div className="bg-white shadow-lg rounded-xl p-6 mt-10">
+      <div className="bg-white shadow-md rounded-xl p-6 mt-2">
         <h2 className="text-xl font-semibold text-gray-800 mb-4">📩 Inquiries</h2>
         <div className="flex flex-wrap gap-6 overflow-x-auto pb-4">
           <InquiryCard
