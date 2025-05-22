@@ -62,7 +62,7 @@ const Dashboard: React.FC = () => {
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Welcome, User 👋</h1>
         <Link to="/add-project">
-          <button className="bg-indigo-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-indigo-700 transition-transform transform hover:scale-105">
+          <button className="bg-indigo-600  text-white px-5 py-2 !rounded-lg shadow-md hover:bg-indigo-700 transition-transform transform hover:scale-105">
             + Add Project
           </button>
         </Link>
@@ -141,7 +141,7 @@ const Dashboard: React.FC = () => {
 
       {/* Floating Modal */}
       {isTaskDialogOpen && selectedTask && (
-        <div className="fixed inset-0 backdrop-blur-sm bg-black/50  bg-opacity-50 flex items-center justify-center z-50">
+        <div className=" fixed inset-0  backdrop-blur-sm bg-black/50  bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-md relative border border-gray-200">
             <button
               onClick={() => setTaskDialogOpen(false)}
@@ -151,7 +151,7 @@ const Dashboard: React.FC = () => {
             </button>
             <h2 className="text-xl font-bold mb-2 text-gray-800">📝 {selectedTask[0]}</h2>
             <p className="text-sm text-gray-600 mb-4">By {selectedTask[4]}</p>
-            <div className="space-y-3 p-3 text-gray-700 text-sm">
+            <div className="space-y-3  p-3 text-gray-700 text-sm">
               <p className="flex justify-between"><strong>Priority :</strong> <span className={`inline-block px-2 py-1 rounded text-white ${selectedTask[5].toLowerCase() === 'high' ? 'bg-red-500' : selectedTask[5].toLowerCase() === 'medium' ? 'bg-yellow-500' : 'bg-green-500'}`}>{selectedTask[5]}</span></p>
               <hr />
               <p className="flex justify-between"><strong>Status :</strong> <span className={`inline-block px-2 py-1 rounded text-white ${selectedTask[6].toLowerCase() === 'completed' ? 'bg-green-500' : 'bg-gray-500'}`}>{selectedTask[6]}</span></p>

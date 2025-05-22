@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
@@ -96,25 +97,25 @@ function AddProjectForm() {
   }
 
   interface Goods {
-    pg;
-    date;
-    status;
-    orderID;
-    remark;
-    mainindex;
-    groupIndex;
-    item;
+    pg: any;
+    date: any;
+    status: any;
+    orderID: any;
+    remark: any;
+    mainindex: any;
+    groupIndex: any;
+    item: any;
   }
 
-  interface Tailor{
-    pg;
-    rate;
-    tailorData;
-    status;
-    remark;
-    mainindex;
-    groupIndex;
-    item;
+  interface Tailor {
+    pg: any;
+    rate: any;
+    tailorData: any;
+    status: any;
+    remark: any;
+    mainindex: any;
+    groupIndex: any;
+    item: any;
   }
 
   const [goodsArray, setGoodsArray] = useState<Goods[]>([]);
@@ -242,9 +243,9 @@ function AddProjectForm() {
         designNo: null,
         reference: null,
         measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
-        additionalItems: [],
         totalAmount: [],
-        totalTax: []
+        totalTax: [],
+        quantities: [],
       };
     }
   
@@ -263,12 +264,11 @@ function AddProjectForm() {
     updatedSelections[mainindex].areacollection[i].items = newMatchedItems;
     setSelections(updatedSelections);
   
-    // Remove old entries for this area and group index
     const filteredGoods = goodsArray.filter(
       g => !(g.mainindex === mainindex && g.groupIndex === i)
     );
   
-    const newGoods = newMatchedItems.map((item, itemindex) => ({
+    const newGoods = newMatchedItems.map((item) => ({
       mainindex,
       groupIndex: i,
       pg: newproduct,
@@ -276,7 +276,7 @@ function AddProjectForm() {
       status: "Pending",
       orderID: "",
       remark: "NA",
-      item : item,
+      item: item,
     }));
   
     setGoodsArray([...filteredGoods, ...newGoods]);
@@ -287,7 +287,7 @@ function AddProjectForm() {
   
     const newTailors = newMatchedItems
       .filter(item => item[2] === "Tailoring")
-      .map((item, itemIndex) => ({
+      .map((item) => ({
         mainindex,
         groupIndex: i,
         pg: newproduct,
@@ -295,158 +295,185 @@ function AddProjectForm() {
         tailorData: [""],
         status: "Pending",
         remark: "NA",
-        item : item,
+        item: item,
       }));
   
     setTailorsArray([...filteredTailors, ...newTailors]);
-
-    console.log(tailorsArray);
-    console.log(goodsArray);
   };
-      
     
-    const handleCatalogueChange = (mainindex: number,i : number, catalogue) => {
-      const updatedSelections = [...selections];
-    
-      if (!updatedSelections[mainindex].areacollection) {
-        updatedSelections[mainindex].areacollection = [];
-      }
-    
-      if (!updatedSelections[mainindex].areacollection[i]) {
-        updatedSelections[mainindex].areacollection[i] = { productGroup: null, items : [""],  catalogue: [], company: null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] };
-      }
-    
-      updatedSelections[mainindex].areacollection[i].catalogue = catalogue;
-      setSelections(updatedSelections);
-      console.log(goodsArray);
-      console.log(tailorsArray);
-    };
-    
-    const handleCompanyChange = (mainindex: number,i : number, company: string) => {
-      const updatedSelections = [...selections];
-    
-      if (!updatedSelections[mainindex].areacollection) {
-        updatedSelections[mainindex].areacollection = [];
-      }
-    
-      if (!updatedSelections[mainindex].areacollection[i]) {
-        updatedSelections[mainindex].areacollection[i] = { productGroup: null, items : [""], catalogue: [], company: null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] };
-      }
-    
-      updatedSelections[mainindex].areacollection[i].company = company;
-      setSelections(updatedSelections);
-
-      console.log(updatedSelections);
-    };
-
-    const handleDesignNoChange = (mainindex : number,i : number, designNo) => {
-      const updatedSelections = [...selections];
-
-      if(!updatedSelections[mainindex].areacollection){
-        updatedSelections[mainindex].areacollection = [];
-      }
-
-      if(!updatedSelections[mainindex].areacollection[i]){
-        updatedSelections[mainindex].areacollection[i] = { productGroup : null, items : [""], catalogue : [], company : null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] };
-      }
-
-      updatedSelections[mainindex].areacollection[i].designNo = designNo;
-      setSelections(updatedSelections);
-
-      console.log(updatedSelections);
+  const handleCatalogueChange = (mainindex: number, i: number, catalogue: any) => {
+    const updatedSelections = [...selections];
+  
+    if (!updatedSelections[mainindex].areacollection) {
+      updatedSelections[mainindex].areacollection = [];
     }
-
-    const handleReferenceChange = (mainindex : number, i : number, reference) => {
-      const updatedSelection = [...selections];
-
-      if(!updatedSelection[mainindex].areacollection){
-        updatedSelection[mainindex].areacollection = [];
-      }
-
-      if(!updatedSelection[mainindex].areacollection[i]){
-        updatedSelection[mainindex].areacollection[i] = { productGroup : null, items : [""], catalogue : [], company : null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] }
-      }
-
-      updatedSelection[mainindex].areacollection[i].reference = reference;
-
-      setSelections(updatedSelection);
-    }
-
-    const handleAddNewGroup = (mainindex: number, productGroupString = "") => {
-      const updatedSelections = [...selections];
-    
-      if (!updatedSelections[mainindex]?.areacollection) {
-        updatedSelections[mainindex].areacollection = [];
-      }
-    
-      const groupIndex = updatedSelections[mainindex].areacollection.length;
-    
-      // Parse product group string (can be empty initially)
-      const productGroupArray = productGroupString ? productGroupString.split(",") : [];
-    
-      const relevantPG = productGroupArray.length > 2 ? productGroupArray.slice(1, -2) : [];
-    
-      const matchedItems = relevantPG
-        .map(pgName => items.find(item => item[0] === pgName))
-        .filter(item => Array.isArray(item));
-    
-      // Add the new group
-      updatedSelections[mainindex].areacollection.push({
-        productGroup: productGroupArray,
-        company: "",
+  
+    if (!updatedSelections[mainindex].areacollection[i]) {
+      updatedSelections[mainindex].areacollection[i] = {
+        productGroup: null,
+        items: [""],
         catalogue: [],
-        designNo: "",
-        reference: "",
+        company: null,
+        designNo: null,
+        reference: null,
         measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
-        items: matchedItems,
-        additionalItems: [],
         totalAmount: [],
-        totalTax: []
-      });
+        totalTax: [],
+        quantities: [],
+      };
+    }
+  
+    updatedSelections[mainindex].areacollection[i].catalogue = catalogue;
+    setSelections(updatedSelections);
+  };
     
-      setSelections(updatedSelections);
-    
-      // Create new goodsArray entries
-      const newGoods = matchedItems.map(item => ({
+  const handleCompanyChange = (mainindex: number, i: number, company: string) => {
+    const updatedSelections = [...selections];
+  
+    if (!updatedSelections[mainindex].areacollection) {
+      updatedSelections[mainindex].areacollection = [];
+    }
+  
+    if (!updatedSelections[mainindex].areacollection[i]) {
+      updatedSelections[mainindex].areacollection[i] = {
+        productGroup: null,
+        items: [""],
+        catalogue: [],
+        company: null,
+        designNo: null,
+        reference: null,
+        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+        totalAmount: [],
+        totalTax: [],
+        quantities: [],
+      };
+    }
+  
+    updatedSelections[mainindex].areacollection[i].company = company;
+    setSelections(updatedSelections);
+  };
+
+  const handleDesignNoChange = (mainindex: number, i: number, designNo: string) => {
+    const updatedSelections = [...selections];
+
+    if (!updatedSelections[mainindex].areacollection) {
+      updatedSelections[mainindex].areacollection = [];
+    }
+
+    if (!updatedSelections[mainindex].areacollection[i]) {
+      updatedSelections[mainindex].areacollection[i] = {
+        productGroup: null,
+        items: [""],
+        catalogue: [],
+        company: null,
+        designNo: null,
+        reference: null,
+        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+        totalAmount: [],
+        totalTax: [],
+        quantities: [],
+      };
+    }
+
+    updatedSelections[mainindex].areacollection[i].designNo = designNo;
+    setSelections(updatedSelections);
+  };
+
+  const handleReferenceChange = (mainindex: number, i: number, reference: string) => {
+    const updatedSelections = [...selections];
+
+    if (!updatedSelections[mainindex].areacollection) {
+      updatedSelections[mainindex].areacollection = [];
+    }
+
+    if (!updatedSelections[mainindex].areacollection[i]) {
+      updatedSelections[mainindex].areacollection[i] = {
+        productGroup: null,
+        items: [""],
+        catalogue: [],
+        company: null,
+        designNo: null,
+        reference: null,
+        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+        totalAmount: [],
+        totalTax: [],
+        quantities: [],
+      };
+    }
+
+    updatedSelections[mainindex].areacollection[i].reference = reference;
+    setSelections(updatedSelections);
+  };
+
+  const handleAddNewGroup = (mainindex: number, productGroupString = "") => {
+    const updatedSelections = [...selections];
+  
+    if (!updatedSelections[mainindex]?.areacollection) {
+      updatedSelections[mainindex].areacollection = [];
+    }
+  
+    const groupIndex = updatedSelections[mainindex].areacollection.length;
+  
+    const productGroupArray = productGroupString ? productGroupString.split(",") : [];
+  
+    const relevantPG = productGroupArray.length > 2 ? productGroupArray.slice(1, -2) : [];
+  
+    const matchedItems = relevantPG
+      .map(pgName => items.find(item => item[0] === pgName))
+      .filter(item => Array.isArray(item));
+  
+    updatedSelections[mainindex].areacollection.push({
+      productGroup: productGroupArray,
+      company: "",
+      catalogue: [],
+      designNo: "",
+      reference: "",
+      measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+      items: matchedItems,
+      totalAmount: [],
+      totalTax: [],
+      quantities: [],
+    });
+  
+    setSelections(updatedSelections);
+  
+    const newGoods = matchedItems.map(item => ({
+      mainindex,
+      groupIndex,
+      pg: productGroupArray,
+      date: "",
+      status: "Pending",
+      orderID: "",
+      remark: "NA",
+      item: item,
+    }));
+  
+    const newTailors = matchedItems
+      .filter(item => item[2] === "Tailoring")
+      .map(item => ({
         mainindex,
         groupIndex,
         pg: productGroupArray,
-        date: "",
+        rate: 0,
+        tailorData: [""],
         status: "Pending",
-        orderID: "",
         remark: "NA",
-        item : item,
+        item: item,
       }));
-    
-      // Create new tailorsArray entries
-      const newTailors = matchedItems
-        .filter(item => item[2] === "Tailoring")
-        .map(item => ({
-          mainindex,
-          groupIndex,
-          pg: productGroupArray,
-          rate: 0,
-          tailorData: [""],
-          status: "Pending",
-          remark: "NA",
-          item : item
-        }));
-    
-      // Add new entries
-      setGoodsArray(prev => [...prev, ...newGoods]);
-      setTailorsArray(prev => [...prev, ...newTailors]);
-    };
+  
+    setGoodsArray(prev => [...prev, ...newGoods]);
+    setTailorsArray(prev => [...prev, ...newTailors]);
+  };
 
-    const handleGroupDelete = (mainindex : number, index : number) => {
-      const updatedSelection = [...selections];
-      if(updatedSelection[mainindex].areacollection[index]){
-        updatedSelection[mainindex].areacollection.splice(index, 1);
-      }
-
-      setSelections(updatedSelection);
+  const handleGroupDelete = (mainindex: number, index: number) => {
+    const updatedSelections = [...selections];
+    if (updatedSelections[mainindex].areacollection[index]) {
+      updatedSelections[mainindex].areacollection.splice(index, 1);
     }
+    setSelections(updatedSelections);
+  };
     
-    const units = ["Inches (in)", "Centimeter (cm)", "Meters (m)", "Feet (ft)"];
+  const units = ["Inches (in)", "Centimeter (cm)", "Meters (m)", "Feet (ft)"];
 
   const handleWidthChange = (mainindex: number, index: number, width: string) => {
     const updatedSelections = [...selections];
@@ -661,7 +688,7 @@ function AddProjectForm() {
           additionalItems: JSON.stringify(additionalItems),
           goodsArray: JSON.stringify(goodsArray),
           tailorsArray: JSON.stringify(tailorsArray),
-          projectAddress : JSON.stringify(projectAddress),
+          projectAddress: JSON.stringify(projectAddress),
         }),
       });
       if (response.status === 200) {
@@ -686,7 +713,7 @@ function AddProjectForm() {
       setStateFn?: (data: any) => void
     ) => {
       try {
-        const oneHour = 3600 * 1000; // 1 hour
+        const oneHour = 3600 * 1000;
         let shouldFetch = true;
   
         const cached = localStorage.getItem(key);
@@ -696,9 +723,9 @@ function AddProjectForm() {
           if (Date.now() - time < oneHour) {
             dispatch(dispatchFn(data));
             setStateFn?.(data);
-            shouldFetch = false; // No need to fetch fresh
+            shouldFetch = false;
           } else {
-            localStorage.removeItem(key); // Expired, clean it
+            localStorage.removeItem(key);
           }
         }
   
@@ -708,7 +735,6 @@ function AddProjectForm() {
           setStateFn?.(freshData);
           localStorage.setItem(key, JSON.stringify({ data: freshData, time: Date.now() }));
         }
-        
       } catch (error) {
         console.error(`Error fetching ${key}:`, error);
       }
@@ -737,50 +763,40 @@ function AddProjectForm() {
       ]);
     };
   
-    fetchAllData(); // Call everything at once
-  
+    fetchAllData();
   }, [dispatch]);
-  
 
-useEffect(() => {
-  async function getAreas() {
-    try {
-      // Check localStorage first to avoid unnecessary API calls
-      const cachedData = localStorage.getItem("areasData");
-      const oneHour = 3600 * 1000; // 1 hour expiration for cached data
+  useEffect(() => {
+    async function getAreas() {
+      try {
+        const cachedData = localStorage.getItem("areasData");
+        const oneHour = 3600 * 1000;
 
-      if (cachedData) {
-        const { data, time } = JSON.parse(cachedData);
+        if (cachedData) {
+          const { data, time } = JSON.parse(cachedData);
 
-        if (Date.now() - time < oneHour) {
-          // Use cached data if it hasn't expired
-          setAvailableAreas(data);
-          return;
-        } else {
-          // Remove expired data from localStorage
-          localStorage.removeItem("areasData");
+          if (Date.now() - time < oneHour) {
+            setAvailableAreas(data);
+            return;
+          } else {
+            localStorage.removeItem("areasData");
+          }
         }
+
+        const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getAreas");
+        const data = await response.json();
+        setAvailableAreas(data.body);
+
+        localStorage.setItem("areasData", JSON.stringify({ data: data.body, time: Date.now() }));
+      } catch (error) {
+        console.error("Error fetching areas:", error);
       }
-
-      // If no valid cached data, fetch from the API
-      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getAreas");
-      const data = await response.json();
-      setAvailableAreas(data.body);
-
-      // Cache the fresh data
-      localStorage.setItem("areasData", JSON.stringify({ data: data.body, time: Date.now() }));
-
-    } catch (error) {
-      console.error("Error fetching areas:", error);
     }
-  }
 
-  // Fetch areas only if not already loaded
-  if (availableAreas.length === 0) {
-    getAreas();
-  }
-}, [availableAreas.length]); // Only re-run when availableAreas length changes
-
+    if (availableAreas.length === 0) {
+      getAreas();
+    }
+  }, [availableAreas.length]);
 
   const bankDetails = ["123213", "!23123213", "123132"];
   const termsConditions = ["sadsdsad", "Adasdad"];
@@ -791,13 +807,11 @@ useEffect(() => {
     const pageHeight = doc.internal.pageSize.getHeight();
     let yOffset = 20;
 
-    // Header
     doc.setFontSize(18);
     doc.setFont("helvetica", "bold");
     doc.text("Quotation", pageWidth / 2, yOffset, { align: "center" });
     yOffset += 10;
 
-    // Company Details
     doc.setFontSize(12);
     doc.setFont("helvetica", "normal");
     doc.text("Sheela Decor", 20, yOffset);
@@ -809,7 +823,6 @@ useEffect(() => {
     doc.text("Phone: +123 456 7890", 20, yOffset);
     yOffset += 10;
 
-    // Customer and Project Details
     doc.setFontSize(10);
     doc.text(`Quotation Date: ${projectDate || "N/A"}`, 20, yOffset);
     doc.text(`Project: ${projectName || "N/A"}`, pageWidth - 80, yOffset);
@@ -818,7 +831,6 @@ useEffect(() => {
     doc.text(`Reference: ${projectReference || "N/A"}`, pageWidth - 80, yOffset);
     yOffset += 15;
 
-    // Quotation Table
     const tableData: any[] = [];
     let srNo = 1;
 
@@ -851,7 +863,6 @@ useEffect(() => {
       }
     });
 
-    // Miscellaneous Items
     additionalItems.forEach((item, i) => {
       tableData.push([
         srNo++,
@@ -880,7 +891,6 @@ useEffect(() => {
 
     yOffset = (doc as any).lastAutoTable.finalY + 10;
 
-    // Summary
     doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
     doc.text("Summary", 20, yOffset);
@@ -896,12 +906,10 @@ useEffect(() => {
     yOffset += 7;
     doc.text(`Grand Total: ${(amount + tax - discount).toFixed(2)}`, pageWidth - 80, yOffset);
 
-    // Footer
     yOffset = pageHeight - 20;
     doc.setFontSize(8);
     doc.text("Thank you for your business!", pageWidth / 2, yOffset, { align: "center" });
 
-    // Save PDF
     doc.save(`Quotation_${projectName || "Project"}_${projectDate || "Date"}.pdf`);
   };
 
@@ -980,8 +988,7 @@ useEffect(() => {
           {selections.map((selection, mainIndex) => (
             <div key={mainIndex} className="w-full">
               <p className="font-semibold mb-2">{selection.area}</p>
-              <table className="w-full border-collapse mb-6 text-[0.95vw]">
-                
+              <table className="w-full border-collapse mb-6 text-xs sm:text-sm">
                 <tbody>
                   {selection.areacollection && selection.areacollection.length > 0 ? (
                     selection.areacollection.map((collection, collectionIndex) => {
@@ -997,14 +1004,25 @@ useEffect(() => {
                         const key = `${mainIndex}-${collectionIndex}-${itemIndex}`;
                         const qty = selection.areacollection[collectionIndex]?.quantities?.[itemIndex] || 0;
                         return (
-                          <tr key={key} className="flex justify-between w-full border-b p-2">
-                            <td className="w-[10%]">{itemIndex + 1}</td>
-                            <td className="w-[45%]">{item[0] + " * " + collection.measurement.quantity}</td>
-                            <td className="w-[45%]">
-                              {collection.measurement.width + " x " + collection.measurement.height + " " + collection.measurement.unit}
+                          <tr
+                            key={key}
+                            className="flex flex-col sm:flex-row justify-between w-full border-b p-2 sm:p-4"
+                          >
+                            <td className="w-full sm:w-[10%] text-xs sm:text-sm">{itemIndex + 1}</td>
+                            <td className="w-full sm:w-[45%] text-xs sm:text-sm">
+                              {item[0] + " * " + collection.measurement.quantity}
                             </td>
-                            <td className="w-[20%]">{(item[4] * parseFloat(collection.measurement.quantity)).toFixed(2)}</td>
-                            <td className="w-[20%]">
+                            <td className="w-full sm:w-[45%] text-xs sm:text-sm">
+                              {collection.measurement.width +
+                                " x " +
+                                collection.measurement.height +
+                                " " +
+                                collection.measurement.unit}
+                            </td>
+                            <td className="w-full sm:w-[20%] text-xs sm:text-sm">
+                              {(item[4] * parseFloat(collection.measurement.quantity)).toFixed(2)}
+                            </td>
+                            <td className="w-full sm:w-[20%]">
                               <div className="flex flex-col">
                                 <input
                                   type="text"
@@ -1021,22 +1039,28 @@ useEffect(() => {
                                       itemIndex
                                     )
                                   }
-                                  className="border w-[40%] px-2 py-1 rounded"
+                                  className="border w-full sm:w-2/5 px-2 py-1 rounded text-xs sm:text-sm"
                                 />
-                                <p className="text-[0.8vw] text-gray-600">{item[3]}</p>
+                                <p className="text-[10px] sm:text-xs text-gray-600">{item[3]}</p>
                               </div>
                             </td>
-                            <td className="w-[20%]">{item[4] * (parseFloat(collection.measurement.quantity) * qty)}</td>
-                            <td className="w-[20%]">{item[5]}</td>
-                            <td className="w-[20%]">{collection.totalTax[itemIndex]?.toFixed(2) || "0.00"}</td>
-                            <td className="w-[20%]">{collection.totalAmount[itemIndex]?.toFixed(2) || "0.00"}</td>
+                            <td className="w-full sm:w-[20%] text-xs sm:text-sm">
+                              {(item[4] * parseFloat(collection.measurement.quantity) * qty).toFixed(2)}
+                            </td>
+                            <td className="w-full sm:w-[20%] text-xs sm:text-sm">{item[5]}</td>
+                            <td className="w-full sm:w-[20%] text-xs sm:text-sm">
+                              {collection.totalTax[itemIndex] ? collection.totalTax[itemIndex].toFixed(2) : "0.00"}
+                            </td>
+                            <td className="w-full sm:w-[20%] text-xs sm:text-sm">
+                              {collection.totalAmount[itemIndex] ? collection.totalAmount[itemIndex].toFixed(2) : "0.00"}
+                            </td>
                           </tr>
                         );
                       });
                     })
                   ) : (
                     <tr>
-                      <td colSpan={9} className="text-center py-2 text-gray-500">
+                      <td colSpan={9} className="text-center py-2 text-gray-500 text-sm sm:text-base">
                         No product data available.
                       </td>
                     </tr>
@@ -1047,235 +1071,234 @@ useEffect(() => {
           ))}
         </div>
         <div className="border p-4 sm:p-6 rounded-lg w-full flex flex-col">
-  <p className="font-semibold text-lg sm:text-xl">Miscellaneous</p>
-  <div className="flex w-full flex-col">
-    <div className="flex flex-row justify-between items-center mt-4">
-      <button
-        className="flex flex-row gap-2 !rounded-md bg-sky-50 hover:bg-sky-100 items-center px-2 py-1 text-sm sm:text-base"
-        onClick={handleAddMiscItem}
-      >
-        <FaPlus className="text-sky-500" />
-        Add Item
-      </button>
-    </div>
-    <div className="mt-3 w-full overflow-x-auto">
-      <table className="w-full hidden sm:table">
-        <thead>
-          <tr className="flex flex-wrap w-full justify-between text-sm sm:text-base">
-            <td className="w-12 text-center">SR</td>
-            <td className="w-24">Item Name</td>
-            <td className="w-20">Quantity</td>
-            <td className="w-20">Rate</td>
-            <td className="w-20">Net Rate</td>
-            <td className="w-20">Tax (%)</td>
-            <td className="w-20">Tax Amount</td>
-            <td className="w-20">Total Amount</td>
-            <td className="w-24">Remark</td>
-            <td className="w-20 text-center">Actions</td>
-          </tr>
-        </thead>
-        <tbody className="flex flex-col w-full">
-          {additionalItems.map((item, i) => (
-            <tr key={i} className="w-full flex flex-row justify-between mt-2 text-sm sm:text-base">
-              <td className="text-center w-12">{i + 1}</td>
-              <td className="w-24">
-                <input
-                  onChange={(e) => handleItemNameChange(i, e.target.value)}
-                  className="pl-2 w-full border rounded-lg text-sm"
-                  value={item.name || ""}
-                  type="text"
-                />
-              </td>
-              <td className="w-20">
-                <input
-                  onChange={(e) => handleItemQuantityChange(i, e.target.value)}
-                  className="pl-2 w-full border rounded-lg text-sm"
-                  value={item.quantity || ""}
-                  type="text"
-                />
-              </td>
-              <td className="w-20">
-                <input
-                  onChange={(e) => handleItemRateChange(i, e.target.value)}
-                  className="pl-2 w-full border rounded-lg text-sm"
-                  value={item.rate || ""}
-                  type="text"
-                />
-              </td>
-              <td className="w-20 text-center">{item.netRate.toFixed(2)}</td>
-              <td className="w-20">
-                <input
-                  onChange={(e) => handleItemTaxChange(i, e.target.value)}
-                  className="pl-2 w-full border rounded-lg text-sm"
-                  value={item.tax || ""}
-                  type="text"
-                />
-              </td>
-              <td className="w-20 text-center">{item.taxAmount.toFixed(2)}</td>
-              <td className="w-20 text-center">{item.totalAmount.toFixed(2)}</td>
-              <td className="w-24">
-                <input
-                  onChange={(e) => handleItemRemarkChange(i, e.target.value)}
-                  className="pl-2 w-full border rounded-lg text-sm"
-                  value={item.remark || ""}
-                  type="text"
-                />
-              </td>
-              <td className="w-20 text-center">
-                <button onClick={() => handleDeleteMiscItem(i)}>
-                  <FaTrash className="text-red-500 hover:text-red-600" />
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {/* Mobile view: Card layout */}
-      <div className="sm:hidden flex flex-col gap-4 mt-4">
-        {additionalItems.map((item, i) => (
-          <div key={i} className="border rounded-lg p-4 flex flex-col gap-2 text-sm">
-            <div className="flex justify-between">
-              <span className="font-semibold">SR: {i + 1}</span>
-              <button onClick={() => handleDeleteMiscItem(i)}>
-                <FaTrash className="text-red-500 hover:text-red-600" />
+          <p className="font-semibold text-lg sm:text-xl">Miscellaneous</p>
+          <div className="flex w-full flex-col">
+            <div className="flex flex-row justify-between items-center mt-4">
+              <button
+                className="flex flex-row gap-2 !rounded-md bg-sky-50 hover:bg-sky-100 items-center px-2 py-1 text-sm sm:text-base"
+                onClick={handleAddMiscItem}
+              >
+                <FaPlus className="text-sky-500" />
+                Add Item
               </button>
             </div>
-            <div>
-              <label className="block font-medium">Item Name</label>
-              <input
-                onChange={(e) => handleItemNameChange(i, e.target.value)}
-                className="pl-2 w-full border rounded-lg"
-                value={item.name || ""}
-                type="text"
-              />
-            </div>
-            <div>
-              <label className="block font-medium">Quantity</label>
-              <input
-                onChange={(e) => handleItemQuantityChange(i, e.target.value)}
-                className="pl-2 w-full border rounded-lg"
-                value={item.quantity || ""}
-                type="text"
-              />
-            </div>
-            <div>
-              <label className="block font-medium">Rate</label>
-              <input
-                onChange={(e) => handleItemRateChange(i, e.target.value)}
-                className="pl-2 w-full border rounded-lg"
-                value={item.rate || ""}
-                type="text"
-              />
-            </div>
-            <div>
-              <label className="block font-medium">Net Rate</label>
-              <span>{item.netRate.toFixed(2)}</span>
-            </div>
-            <div>
-              <label className="block font-medium">Tax (%)</label>
-              <input
-                onChange={(e) => handleItemTaxChange(i, e.target.value)}
-                className="pl-2 w-full border rounded-lg"
-                value={item.tax || ""}
-                type="text"
-              />
-            </div>
-            <div>
-              <label className="block font-medium">Tax Amount</label>
-              <span>{item.taxAmount.toFixed(2)}</span>
-            </div>
-            <div>
-              <label className="block font-medium">Total Amount</label>
-              <span>{item.totalAmount.toFixed(2)}</span>
-            </div>
-            <div>
-              <label className="block font-medium">Remark</label>
-              <input
-                onChange={(e) => handleItemRemarkChange(i, e.target.value)}
-                className="pl-2 w-full border rounded-lg"
-                value={item.remark || ""}
-                type="text"
-              />
+            <div className="mt-3 w-full overflow-x-auto">
+              <table className="w-full hidden sm:table">
+                <thead>
+                  <tr className="flex flex-wrap w-full justify-between text-sm sm:text-base">
+                    <td className="w-12 text-center">SR</td>
+                    <td className="w-24">Item Name</td>
+                    <td className="w-20">Quantity</td>
+                    <td className="w-20">Rate</td>
+                    <td className="w-20">Net Rate</td>
+                    <td className="w-20">Tax (%)</td>
+                    <td className="w-20">Tax Amount</td>
+                    <td className="w-20">Total Amount</td>
+                    <td className="w-24">Remark</td>
+                    <td className="w-20 text-center">Actions</td>
+                  </tr>
+                </thead>
+                <tbody className="flex flex-col w-full">
+                  {additionalItems.map((item, i) => (
+                    <tr key={i} className="w-full flex flex-row justify-between mt-2 text-sm sm:text-base">
+                      <td className="text-center w-12">{i + 1}</td>
+                      <td className="w-24">
+                        <input
+                          onChange={(e) => handleItemNameChange(i, e.target.value)}
+                          className="pl-2 w-full border rounded-lg text-sm"
+                          value={item.name || ""}
+                          type="text"
+                        />
+                      </td>
+                      <td className="w-20">
+                        <input
+                          onChange={(e) => handleItemQuantityChange(i, e.target.value)}
+                          className="pl-2 w-full border rounded-lg text-sm"
+                          value={item.quantity || ""}
+                          type="text"
+                        />
+                      </td>
+                      <td className="w-20">
+                        <input
+                          onChange={(e) => handleItemRateChange(i, e.target.value)}
+                          className="pl-2 w-full border rounded-lg text-sm"
+                          value={item.rate || ""}
+                          type="text"
+                        />
+                      </td>
+                      <td className="w-20 text-center">{item.netRate.toFixed(2)}</td>
+                      <td className="w-20">
+                        <input
+                          onChange={(e) => handleItemTaxChange(i, e.target.value)}
+                          className="pl-2 w-full border rounded-lg text-sm"
+                          value={item.tax || ""}
+                          type="text"
+                        />
+                      </td>
+                      <td className="w-20 text-center">{item.taxAmount.toFixed(2)}</td>
+                      <td className="w-20 text-center">{item.totalAmount.toFixed(2)}</td>
+                      <td className="w-24">
+                        <input
+                          onChange={(e) => handleItemRemarkChange(i, e.target.value)}
+                          className="pl-2 w-full border rounded-lg text-sm"
+                          value={item.remark || ""}
+                          type="text"
+                        />
+                      </td>
+                      <td className="w-20 text-center">
+                        <button onClick={() => handleDeleteMiscItem(i)}>
+                          <FaTrash className="text-red-500 hover:text-red-600" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <div className="sm:hidden flex flex-col gap-4 mt-4">
+                {additionalItems.map((item, i) => (
+                  <div key={i} className="border rounded-lg p-4 flex flex-col gap-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="font-semibold">SR: {i + 1}</span>
+                      <button onClick={() => handleDeleteMiscItem(i)}>
+                        <FaTrash className="text-red-500 hover:text-red-600" />
+                      </button>
+                    </div>
+                    <div>
+                      <label className="block font-medium">Item Name</label>
+                      <input
+                        onChange={(e) => handleItemNameChange(i, e.target.value)}
+                        className="pl-2 w-full border rounded-lg"
+                        value={item.name || ""}
+                        type="text"
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-medium">Quantity</label>
+                      <input
+                        onChange={(e) => handleItemQuantityChange(i, e.target.value)}
+                        className="pl-2 w-full border rounded-lg"
+                        value={item.quantity || ""}
+                        type="text"
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-medium">Rate</label>
+                      <input
+                        onChange={(e) => handleItemRateChange(i, e.target.value)}
+                        className="pl-2 w-full border rounded-lg"
+                        value={item.rate || ""}
+                        type="text"
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-medium">Net Rate</label>
+                      <span>{item.netRate.toFixed(2)}</span>
+                    </div>
+                    <div>
+                      <label className="block font-medium">Tax (%)</label>
+                      <input
+                        onChange={(e) => handleItemTaxChange(i, e.target.value)}
+                        className="pl-2 w-full border rounded-lg"
+                        value={item.tax || ""}
+                        type="text"
+                      />
+                    </div>
+                    <div>
+                      <label className="block font-medium">Tax Amount</label>
+                      <span>{item.taxAmount.toFixed(2)}</span>
+                    </div>
+                    <div>
+                      <label className="block font-medium">Total Amount</label>
+                      <span>{item.totalAmount.toFixed(2)}</span>
+                    </div>
+                    <div>
+                      <label className="block font-medium">Remark</label>
+                      <input
+                        onChange={(e) => handleItemRemarkChange(i, e.target.value)}
+                        className="pl-2 w-full border rounded-lg"
+                        value={item.remark || ""}
+                        type="text"
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        ))}
-      </div>
-    </div>
-  </div>
-</div>
+        </div>
       </div>
       <div className="flex flex-col sm:flex-row gap-3 justify-between w-full">
-  <div className="flex flex-col gap-4 w-full sm:w-1/2 rounded mt-3 p-4 sm:p-6 shadow-xl border">
-    <select className="border p-2 rounded w-full sm:w-1/2 h-12 sm:h-16 text-sm sm:text-base">
-      <option value="">Bank Details</option>
-      {bankDetails.map((data, index) => (
-        <option key={index} value={data}>
-          {data}
-        </option>
-      ))}
-    </select>
-    <textarea
-      placeholder="Description"
-      className="w-full rounded-lg border py-2 pl-2 text-sm sm:text-base"
-      rows="4"
-    ></textarea>
-    <select className="border p-2 rounded w-full sm:w-1/2 h-12 sm:h-16 text-sm sm:text-base">
-      <option value="">Terms & Conditions</option>
-      {termsConditions.map((data, index) => (
-        <option key={index} value={data}>
-          {data}
-        </option>
-      ))}
-    </select>
-    <textarea
-      placeholder="Description"
-      className="w-full rounded-lg border py-2 pl-2 text-sm sm:text-base"
-      rows="4"
-    ></textarea>
-  </div>
-  <div className="shadow-xl p-4 sm:p-6 flex flex-col gap-4 border w-full sm:w-1/2 rounded-lg">
-    <p className="text-lg sm:text-xl font-semibold">Summary</p>
-    <div className="flex flex-row justify-between w-full">
-      <p className="text-sm sm:text-base">Sub Total</p>
-      <p className="text-sm sm:text-base">{amount.toFixed(2)}</p>
-    </div>
-    <div className="flex flex-row justify-between w-full">
-      <p className="text-sm sm:text-base">Total Tax Amount</p>
-      <p className="text-sm sm:text-base">{tax.toFixed(2)}</p>
-    </div>
-    <div className="flex flex-row justify-between w-full">
-      <p className="text-sm sm:text-base">Total Amount</p>
-      <p className="text-sm sm:text-base">{(amount + tax).toFixed(2)}</p>
-    </div>
-    <div className="border border-gray-400"></div>
-    <div className="flex justify-between items-center mt-1 w-full">
-      <p className="text-sm sm:text-base">Discount</p>
-      <input
-        className="rounded-lg border text-center w-24 sm:w-32 text-sm sm:text-base"
-        value={discount}
-        onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
-        type="text"
-      />
-    </div>
-    <div className="border border-gray-400"></div>
-    <div className="flex w-full flex-row items-center justify-between">
-      <p className="text-sm sm:text-base">Grand Total</p>
-      <p className="text-sm sm:text-base">{(amount + tax - discount).toFixed(2)}</p>
-    </div>
-    <button
-      onClick={sendProjectData}
-      className="!rounded-lg bg-sky-700 hover:bg-sky-800 text-white p-2 sm:p-3 text-sm sm:text-base"
-    >
-      Add Project & Generate Quote
-    </button>
-    <button
-      onClick={generatePDF}
-      className="!rounded-lg bg-green-600 hover:bg-green-700 text-white p-2 sm:p-3 text-sm sm:text-base"
-    >
-      Download Quotation PDF
-    </button>
-  </div>
-</div>
+        <div className="flex flex-col gap-4 w-full sm:w-1/2 rounded mt-3 p-4 sm:p-6 shadow-xl border">
+          <select className="border p-2 rounded w-full sm:w-1/2 h-12 sm:h-16 text-sm sm:text-base">
+            <option value="">Bank Details</option>
+            {bankDetails.map((data, index) => (
+              <option key={index} value={data}>
+                {data}
+              </option>
+            ))}
+          </select>
+          <textarea
+            placeholder="Description"
+            className="w-full rounded-lg border py-2 pl-2 text-sm sm:text-base"
+            rows={4}
+          ></textarea>
+          <select className="border p-2 rounded w-full sm:w-1/2 h-12 sm:h-16 text-sm sm:text-base">
+            <option value="">Terms & Conditions</option>
+            {termsConditions.map((data, index) => (
+              <option key={index} value={data}>
+                {data}
+              </option>
+            ))}
+          </select>
+          <textarea
+            placeholder="Description"
+            className="w-full rounded-lg border py-2 pl-2 text-sm sm:text-base"
+            rows={4}
+          ></textarea>
+        </div>
+        <div className="shadow-xl p-4 sm:p-6 flex flex-col gap-4 border w-full sm:w-1/2 rounded-lg">
+          <p className="text-lg sm:text-xl font-semibold">Summary</p>
+          <div className="flex flex-row justify-between w-full">
+            <p className="text-sm sm:text-base">Sub Total</p>
+            <p className="text-sm sm:text-base">{amount.toFixed(2)}</p>
+          </div>
+          <div className="flex flex-row justify-between w-full">
+            <p className="text-sm sm:text-base">Total Tax Amount</p>
+            <p className="text-sm sm:text-base">{tax.toFixed(2)}</p>
+          </div>
+          <div className="flex flex-row justify-between w-full">
+            <p className="text-sm sm:text-base">Total Amount</p>
+            <p className="text-sm sm:text-base">{(amount + tax).toFixed(2)}</p>
+          </div>
+          <div className="border border-gray-400"></div>
+          <div className="flex justify-between items-center mt-1 w-full">
+            <p className="text-sm sm:text-base">Discount</p>
+            <input
+              className="rounded-lg border text-center w-24 sm:w-32 text-sm sm:text-base"
+              value={discount}
+              onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+              type="text"
+            />
+          </div>
+          <div className="border border-gray-400"></div>
+          <div className="flex w-full flex-row items-center justify-between">
+            <p className="text-sm sm:text-base">Grand Total</p>
+            <p className="text-sm sm:text-base">{(amount + tax - discount).toFixed(2)}</p>
+          </div>
+          <button
+            onClick={sendProjectData}
+            className="!rounded-lg bg-sky-700 hover:bg-sky-800 text-white p-2 sm:p-3 text-sm sm:text-base"
+          >
+            Add Project & Generate Quote
+          </button>
+          <button
+            onClick={generatePDF}
+            className="!rounded-lg bg-green-600 hover:bg-green-700 text-white p-2 sm:p-3 text-sm sm:text-base"
+          >
+            Download Quotation PDF
+          </button>
+        </div>
+      </div>
       <br />
     </div>
   );
