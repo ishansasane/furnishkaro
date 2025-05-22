@@ -286,7 +286,7 @@ function AddProjectForm() {
     );
   
     const newTailors = newMatchedItems
-      .filter(item => item[2] === "Tailoring")
+      .filter(item => item[7] == true)
       .map((item, itemIndex) => ({
         mainindex,
         groupIndex: i,
@@ -420,7 +420,7 @@ function AddProjectForm() {
     
       // Create new tailorsArray entries
       const newTailors = matchedItems
-        .filter(item => item[2] === "Tailoring")
+        .filter(item => item[7] == true)
         .map(item => ({
           mainindex,
           groupIndex,

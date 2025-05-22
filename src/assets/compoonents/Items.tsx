@@ -33,6 +33,8 @@ const Items = () => {
   const dispatch = useDispatch();
   const itemData = useSelector((state: RootState) => state.data.items);
 
+  const [needsTailoring, setNeedsTailoring] = useState(false);
+
   const [selectedGroupType, setSelectedGroupType] = useState("");
   
   const selectedUnits = groupTypes.find((type) => type[0] === selectedGroupType)?.[1] || [];
@@ -55,6 +57,7 @@ const Items = () => {
     setSellingUnit(item[3]);
     setMrp(item[4]);
     setTaxRate(item[5]);
+    setNeedsTailoring(item[6]);
   }
 
   // Close dropdown when clicking outside
@@ -176,6 +179,7 @@ const duplicateItem = async (item: Array<string>) => {
           sellingUnit: item[3],
           mrp: item[4],
           taxRate: item[5],
+          needsTailoring : item[6]
         }),
       }
     );
@@ -290,6 +294,7 @@ const editItemData = async () => {
           sellingUnit,
           mrp,
           taxRate,
+          needsTailoring
         }),
       }
     );
@@ -348,6 +353,7 @@ const handleSubmit = async () => {
     sideDropdown: formData.sideDropdown,
     mrp: formData.mrp,
     taxrate: formData.taxRate,
+    needsTailoring : needsTailoring
   };
 
   try {
@@ -366,6 +372,7 @@ const handleSubmit = async () => {
           sellingUnit: newItem.costingType,
           mrp: newItem.mrp,
           taxRate: newItem.taxrate,
+          needsTailoring
         }),
       }
     );
@@ -392,6 +399,7 @@ const handleSubmit = async () => {
       additionalInputs: {},
       sideDropdown: "",
     });
+    setNeedsTailoring(false);
 
   } catch (error) {
     console.error("Error adding item:", error);
@@ -524,6 +532,23 @@ const handleSubmit = async () => {
                     className="w-full p-2 border rounded-md"
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Needs Tailoring
+                  </label>
+                  <div
+                    className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer ${
+                      needsTailoring ? "bg-blue-500" : "bg-gray-300"
+                    }`}
+                    onClick={() => setNeedsTailoring(!needsTailoring)}
+                  >
+                    <div
+                      className={`w-5 h-5 bg-white rounded-full shadow-md transform ${
+                        needsTailoring ? "translate-x-6" : "translate-x-0"
+                      } transition`}
+                    />
+                  </div>
+                </div>
               </div>
       
               <div className="flex gap-2 justify-end space-x-4">
@@ -565,7 +590,7 @@ const handleSubmit = async () => {
               </tr>
             </thead>
             <tbody>
-              {items.map((item, index) => (
+              {items != undefined && items.map((item, index) => (
                 <tr key={index} className="border-t relative hover:bg-sky-50">
                   <td className="py-2 px-4">{item[0]}</td>
                   <td className="py-2 px-4">{item[1]}</td>
