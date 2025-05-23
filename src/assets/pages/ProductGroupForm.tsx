@@ -28,7 +28,7 @@ const ProductGroupForm: React.FC = () => {
   const [mainProduct, setMainProduct] = useState([]);
   const [addonProduct, setAddonProduct] = useState([]);
   const [color, setColor] = useState("#ffffff");
-  const [status, setStatus] = useState(true);
+  const [status, setStatus] = useState(false);
   const [needsTailoring, setNeedsTailoring] = useState(false);
 
   const dispatch = useDispatch();
@@ -39,9 +39,7 @@ const ProductGroupForm: React.FC = () => {
       groupName,
       mainProduct,
       addonProduct,
-      color,
       status,
-      needsTailoring,
     };
 
     console.log("Group Data to Submit:", groupData); // for debugging
@@ -52,7 +50,7 @@ const ProductGroupForm: React.FC = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ groupName, mainProducts: mainProduct, addonProducts : addonProduct, color, needsTailoring })
+        body: JSON.stringify({ groupName, mainProducts: mainProduct, addonProducts : addonProduct, status })
       });
 
       if (!response.ok) {
@@ -159,18 +157,6 @@ const ProductGroupForm: React.FC = () => {
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Color
-            </label>
-            <input
-              type="color"
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-              className="w-full h-10 border rounded-md"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
               Status
             </label>
             <div
@@ -186,29 +172,11 @@ const ProductGroupForm: React.FC = () => {
               />
             </div>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Needs Tailoring
-            </label>
-            <div
-              className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer ${
-                needsTailoring ? "bg-blue-500" : "bg-gray-300"
-              }`}
-              onClick={() => setNeedsTailoring(!needsTailoring)}
-            >
-              <div
-                className={`w-5 h-5 bg-white rounded-full shadow-md transform ${
-                  needsTailoring ? "translate-x-6" : "translate-x-0"
-                } transition`}
-              />
-            </div>
-          </div>
         </div>
 
         {/* Buttons */}
         <div className="flex justify-end gap-3 mt-4">
-          <button onClick={() => navigate("/masters/product-groups")} className="border px-4 py-2 rounded text-gray-700 hover:bg-gray-100">
+          <button onClick={() => {navigate("/masters/product-groups")}} className="border px-4 py-2 rounded text-gray-700 hover:bg-gray-100">
             Cancel
           </button>
           <button

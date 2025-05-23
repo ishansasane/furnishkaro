@@ -28,7 +28,7 @@ const TailorsSection: React.FC<TailorsSectionProps> = ({ updateTailorRate, updat
           </tr>
         </thead>
         <tbody>
-  {tailorsArray.map((tailor, index) => {
+  {tailorsArray != undefined && tailorsArray.map((tailor, index) => {
     if (!tailor.item || tailor.item[2] !== "Tailoring") return null;
 
     const selection = selections[tailor.mainindex];

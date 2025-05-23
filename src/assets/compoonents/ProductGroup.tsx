@@ -128,7 +128,7 @@ export default function ProductGroups() {
       method: "POST",
       headers: { "content-Type": "application/json" },
       credentials: "include",
-      body : JSON.stringify({ groupName, mainProducts: mainProduct, addonProducts : addonProduct, color, needsTailoring })
+      body : JSON.stringify({ groupName, mainProducts: mainProduct, addonProducts : addonProduct, status })
   });
   const data = await fetchProductGroups();
 
@@ -177,22 +177,20 @@ export default function ProductGroups() {
             <th className="px-4 py-3">Group Name</th>
             <th className="px-4 py-3">Main Products</th>
             <th className="px-4 py-3">Addon Products</th>
-            <th className="px-4 py-3">Color</th>
-            <th className="px-4 py-3">Needs Tailoring</th>
+            <th className="px-4 py-3">Status</th>
             <th className="px-4 py-3">Actions</th>
           </tr>
         </thead>
         <tbody>
-          {productGroups.length > 0 ? (
+          {productGroups != undefined ? (
             productGroups.map((group, index) => (
               <tr key={index} className="hover:bg-sky-50">
                 <td className="px-4 py-2">{group[0]}</td>
                 <td className="px-4 py-2">{group[1]}</td>
                 <td className="px-4 py-2">{group[2]}</td>
-                <td className="px-4 py-2">{group[3]}</td>
-                <td className="px-4 py-2">{group[4] == "true" ? "Yes" : "No"}</td>
+                <td className="px-4 py-2">{group[3] == "TRUE" ? "Available" : "Not Available"}</td>
                 <td className="px-4 py-2 flex gap-2">
-                  <button className="border px-2 py-1 rounded-md bg-gray-300" onClick={() => { setEditingGroup(group); setNeedsTailoring(group[4]); setColor(group[3]); setAddonProduct(group[2]); setMainProduct(group[1]); setGroupName(group[0]); setDialogOpen(true); }}>
+                  <button className="border px-2 py-1 rounded-md bg-gray-300" onClick={() => { setEditingGroup(group); setStatus(group[3]); setAddonProduct(group[2]); setMainProduct(group[1]); setGroupName(group[0]); setDialogOpen(true); }}>
                     <Edit size={16} />
                   </button>
                   <button className="border px-2 py-1 rounded-md bg-red-500 text-white" onClick={() => deleteProductGroup(group[0], setRefresh, refresh)}>
@@ -212,10 +210,7 @@ export default function ProductGroups() {
       {isDialogOpen &&  <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-black/30 z-50">
         <div className="max-w-4xl w-full mx-4 bg-white p-6 rounded-lg shadow-md">
       {/* Header */}
-      <h2 className="text-2xl font-semibold text-gray-800">New Product Group</h2>
-      <p className="text-gray-500 text-sm mb-6">
-        Dashboard &gt; Product Groups &gt; New Product Group
-      </p>
+      <h2 className="text-2xl font-semibold text-gray-800">Edit Product Group</h2>
 
       {/* Form */}
       <div className="space-y-4">
@@ -227,7 +222,6 @@ export default function ProductGroups() {
           <input
             type="text"
             value={groupName}
-            onChange={(e) => setGroupName(e.target.value)}
             placeholder="Enter Product Name"
             className="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
             required
@@ -287,23 +281,11 @@ export default function ProductGroups() {
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">
-              Color
-            </label>
-            <input
-              type="color"
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-              className="w-full h-10 border rounded-md"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
               Status
             </label>
             <div
               className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer ${
-                status ? "bg-blue-500" : "bg-gray-300"
+                status == "TRUE" ? "bg-blue-500" : "bg-gray-300"
               }`}
               onClick={() => setStatus(!status)}
             >
@@ -314,36 +296,18 @@ export default function ProductGroups() {
               />
             </div>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Needs Tailoring
-            </label>
-            <div
-              className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer ${
-                needsTailoring ? "bg-blue-500" : "bg-gray-300"
-              }`}
-              onClick={() => setNeedsTailoring(!needsTailoring)}
-            >
-              <div
-                className={`w-5 h-5 bg-white rounded-full shadow-md transform ${
-                  needsTailoring ? "translate-x-6" : "translate-x-0"
-                } transition`}
-              />
-            </div>
-          </div>
         </div>
 
         {/* Buttons */}
         <div className="flex justify-end gap-3 mt-4">
-          <button onClick={() => {setGroupName(""); setAddonProduct(""); setMainProduct(""); setColor(""); setNeedsTailoring(false); setDialogOpen(false);}} className="border px-4 py-2 rounded text-gray-700 hover:bg-gray-100">
+          <button onClick={() => {setGroupName(""); setAddonProduct(""); setMainProduct(""); setStatus(false); setDialogOpen(false);}} className="border px-4 py-2 rounded text-gray-700 hover:bg-gray-100">
             Cancel
           </button>
           <button
             onClick={handleEditGroup}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
           >
-            Add Group
+            Edit Group
           </button>
         </div>
       </div>

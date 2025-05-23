@@ -14,6 +14,10 @@ interface DeadlineCardProps {
           <p className=" text-gray-600">Project Date :</p>
           <p className="">{date}</p>
         </div>
+        <div className="w-full flex flex-row justify-between flex-wrap items-center">
+          <p className=" text-gray-600">Items :</p>
+          <p className="">{}</p>
+        </div>
       </div>
     );
   };

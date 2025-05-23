@@ -29,6 +29,8 @@ const ProductFormPage: React.FC = () => {
   const [groupType, setGroupType] = useState([]);
   const [showForm, setShowForm] = useState(true);
 
+  const [needsTailoring, setNeedsTailoring] = useState(false);
+
   const [selectedGroupType, setSelectedGroupType] = useState("");
   const [sellingUnit, setSellingUnit] = useState("");
 
@@ -48,6 +50,8 @@ const ProductFormPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
+    const date = new Date();
+
     try {
       const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct", {
         method: "POST",
@@ -60,7 +64,10 @@ const ProductFormPage: React.FC = () => {
           groupTypes: selectedGroupType,
           sellingUnit,
           mrp,
-          taxRate,})
+          taxRate,
+          date,
+          needsTailoring
+          })
       });
 
       if (!response.ok) {
@@ -195,7 +202,7 @@ const ProductFormPage: React.FC = () => {
             />
           </div>
           <div>
-            <label className="block font-medium">Tax Rate</label>
+            <label className="block font-medium">Tax Rate (%)</label>
             <input
               type="text"
               name="taxRate"
@@ -206,27 +213,23 @@ const ProductFormPage: React.FC = () => {
             />
           </div>
         </div>
-
-        <div className="flex items-center space-x-6">
-          <div className="flex items-center space-x-2">
-            <label className="font-medium">Publish</label>
-            <input
-              type="checkbox"
-              checked={publish}
-              onChange={(e) => setPublish(e.target.checked)}
-              className="w-5 h-5"
-            />
-          </div>
-          <div className="flex items-center space-x-2">
-            <label className="font-medium">Accessory</label>
-            <input
-              type="checkbox"
-              checked={accessory}
-              onChange={(e) => setAccessory(e.target.checked)}
-              className="w-5 h-5"
-            />
-          </div>
-        </div>
+          <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Needs Tailoring
+                  </label>
+                  <div
+                    className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer ${
+                      needsTailoring ? "bg-blue-500" : "bg-gray-300"
+                    }`}
+                    onClick={() => setNeedsTailoring(!needsTailoring)}
+                  >
+                    <div
+                      className={`w-5 h-5 bg-white rounded-full shadow-md transform ${
+                        needsTailoring ? "translate-x-6" : "translate-x-0"
+                      } transition`}
+                    />
+                  </div>
+                </div>
 
         <div className="flex gap-2 justify-end space-x-4">
           <button

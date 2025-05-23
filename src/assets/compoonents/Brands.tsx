@@ -26,21 +26,39 @@ async function fetchBrands(){
 }
 
 // Delete a brand
-async function deleteBrand(brandName: string, setRefresh: (state: boolean) => void, refresh: boolean) {
-  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletebrand", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ brandName }),
-  });
+async function deleteBrand(
+  brandName: string,
+  fetchBrands: () => Promise<any>,    // function to fetch brand list
+  setBrands: (brands: any[]) => void  // state setter to update brands
+) {
+  try {
+    const response = await fetch(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/deletebrand",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ brandName }),
+      }
+    );
 
-  if (response.status === 200) {
-    alert("Brand deleted");
-    setRefresh(!refresh);
-  } else {
-    alert("Error deleting brand");
+    if (response.ok) {
+      alert("Brand deleted");
+
+      // Fetch updated brand list after deletion
+      const updatedBrands = await fetchBrands();
+      setBrands(updatedBrands);
+
+      // Toggle refresh state if needed    } else {
+      const errorText = await response.text();
+      alert(`Error deleting brand: ${errorText || response.statusText}`);
+    }
+  } catch (error) {
+    alert("Network or server error while deleting brand");
+    console.error("Delete brand error:", error);
   }
 }
+
 
 export default function Brands() {
   const [brands, setBrands] = useState([]);
@@ -53,32 +71,47 @@ export default function Brands() {
   const dispatch = useDispatch();
   const brandData = useSelector((state : RootState) => state.data.brands);
 
-  useEffect(() => {
-    async function getBrands() {
-      const data = await fetchBrands()
-      dispatch(setBrandData(data));
-      setBrands(brandData);
-    }
-    if (brandData.length === 0) {
-      // Fetch only when the page is opened for the first time
-      getBrands();
-    } else {
-      // Use Redux state directly for subsequent renders
-      setBrands(brandData);
-    }
-  }, [brandData, dispatch]);
+useEffect(() => {
+  const fetchAndSetBrands = async () => {
+    try {
+      // Check if brand data is cached in localStorage
+      const cached = localStorage.getItem("brandData");
+      const now = Date.now();
 
-  useEffect(() => {
-    async function getBrands() {
-      const data = await fetchBrands()
-      dispatch(setBrandData(data));
-      setBrands(brandData);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        const timeDiff = now - parsed.time;
+
+        // Use cache if less than 5 minutes old and has data
+        if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
+          dispatch(setBrandData(parsed.data));
+          setBrands(parsed.data);
+          return;
+        }
+      }
+
+      // If no valid cache, fetch fresh data
+      const data = await fetchBrands();
+
+      if (data && Array.isArray(data)) {
+        dispatch(setBrandData(data));
+        setBrands(data);
+        localStorage.setItem("brandData", JSON.stringify({ data, time: now }));
+      } else {
+        console.error("Fetched brand data is invalid:", data);
+      }
+    } catch (error) {
+      console.error("Error fetching brands:", error);
     }
-    if(refresh){
-      getBrands();
-      setRefresh(false);
-    }
-  }, [refresh])
+  };
+
+  if (!brandData || brandData.length === 0) {
+    fetchAndSetBrands();
+  } else {
+    setBrands(brandData); // Use from Redux if available
+  }
+}, [brandData, dispatch]);
+
 
   return (
     <div className="md:p-6 pt-20 h-full bg-gray-50">

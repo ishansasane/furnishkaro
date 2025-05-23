@@ -286,8 +286,8 @@ function AddProjectForm() {
     );
   
     const newTailors = newMatchedItems
-      .filter(item => item[2] === "Tailoring")
-      .map((item) => ({
+      .filter(item => item[7] == true)
+      .map((item, itemIndex) => ({
         mainindex,
         groupIndex: i,
         pg: newproduct,
@@ -405,73 +405,79 @@ function AddProjectForm() {
     setSelections(updatedSelections);
   };
 
-  const handleAddNewGroup = (mainindex: number, productGroupString = "") => {
-    const updatedSelections = [...selections];
-  
-    if (!updatedSelections[mainindex]?.areacollection) {
-      updatedSelections[mainindex].areacollection = [];
-    }
-  
-    const groupIndex = updatedSelections[mainindex].areacollection.length;
-  
-    const productGroupArray = productGroupString ? productGroupString.split(",") : [];
-  
-    const relevantPG = productGroupArray.length > 2 ? productGroupArray.slice(1, -2) : [];
-  
-    const matchedItems = relevantPG
-      .map(pgName => items.find(item => item[0] === pgName))
-      .filter(item => Array.isArray(item));
-  
-    updatedSelections[mainindex].areacollection.push({
-      productGroup: productGroupArray,
-      company: "",
-      catalogue: [],
-      designNo: "",
-      reference: "",
-      measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
-      items: matchedItems,
-      totalAmount: [],
-      totalTax: [],
-      quantities: [],
-    });
-  
-    setSelections(updatedSelections);
-  
-    const newGoods = matchedItems.map(item => ({
-      mainindex,
-      groupIndex,
-      pg: productGroupArray,
-      date: "",
-      status: "Pending",
-      orderID: "",
-      remark: "NA",
-      item: item,
-    }));
-  
-    const newTailors = matchedItems
-      .filter(item => item[2] === "Tailoring")
-      .map(item => ({
+    const handleAddNewGroup = (mainindex: number, productGroupString = "") => {
+      const updatedSelections = [...selections];
+    
+      if (!updatedSelections[mainindex]?.areacollection) {
+        updatedSelections[mainindex].areacollection = [];
+      }
+    
+      const groupIndex = updatedSelections[mainindex].areacollection.length;
+    
+      // Parse product group string (can be empty initially)
+      const productGroupArray = productGroupString ? productGroupString.split(",") : [];
+    
+      const relevantPG = productGroupArray.length > 2 ? productGroupArray.slice(1, -2) : [];
+    
+      const matchedItems = relevantPG
+        .map(pgName => items.find(item => item[0] === pgName))
+        .filter(item => Array.isArray(item));
+    
+      // Add the new group
+      updatedSelections[mainindex].areacollection.push({
+        productGroup: productGroupArray,
+        company: "",
+        catalogue: [],
+        designNo: "",
+        reference: "",
+        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+        items: matchedItems,
+        additionalItems: [],
+        totalAmount: [],
+        totalTax: []
+      });
+    
+      setSelections(updatedSelections);
+    
+      // Create new goodsArray entries
+      const newGoods = matchedItems.map(item => ({
         mainindex,
         groupIndex,
         pg: productGroupArray,
-        rate: 0,
-        tailorData: [""],
+        date: "",
         status: "Pending",
+        orderID: "",
         remark: "NA",
-        item: item,
+        item : item,
       }));
-  
-    setGoodsArray(prev => [...prev, ...newGoods]);
-    setTailorsArray(prev => [...prev, ...newTailors]);
-  };
+    
+      // Create new tailorsArray entries
+      const newTailors = matchedItems
+        .filter(item => item[7] == true)
+        .map(item => ({
+          mainindex,
+          groupIndex,
+          pg: productGroupArray,
+          rate: 0,
+          tailorData: [""],
+          status: "Pending",
+          remark: "NA",
+          item : item
+        }));
+    
+      // Add new entries
+      setGoodsArray(prev => [...prev, ...newGoods]);
+      setTailorsArray(prev => [...prev, ...newTailors]);
+    };
 
-  const handleGroupDelete = (mainindex: number, index: number) => {
-    const updatedSelections = [...selections];
-    if (updatedSelections[mainindex].areacollection[index]) {
-      updatedSelections[mainindex].areacollection.splice(index, 1);
+    const handleGroupDelete = (mainindex : number, index : number) => {
+      const updatedSelection = [...selections];
+      if(updatedSelection[mainindex].areacollection[index]){
+        updatedSelection[mainindex].areacollection.splice(index, 1);
+      }
+
+      setSelections(updatedSelection);
     }
-    setSelections(updatedSelections);
-  };
     
   const units = ["Inches (in)", "Centimeter (cm)", "Meters (m)", "Feet (ft)"];
 
@@ -662,47 +668,134 @@ function AddProjectForm() {
   const [selectedMainIndex, setSelectedMainIndex] = useState<number | null>(null);
   const [selectedCollectionIndex, setSelectedCollectionIndex] = useState<number | null>(null);
 
-  const sendProjectData = async () => {
-    try {
-      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/sendprojectdata", {
-        method: "POST",
+    const fetchProjectData = async () => {
+    const response = await fetch(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
+      {
         credentials: "include",
-        headers: {
-          "content-type": "application/json",
-        },
-        body: JSON.stringify({
-          projectName: projectName,
-          customerLink: JSON.stringify(selectedCustomer),
-          projectReference: projectReference,
-          status: status,
-          totalAmount: amount,
-          totalTax: tax,
-          paid: paid,
-          discount: discount,
-          createdBy: user,
-          allData: JSON.stringify(selections),
-          projectDate: projectDate,
-          additionalRequests: additionalRequests,
-          interiorArray: JSON.stringify(interiorArray),
-          salesAssociateArray: JSON.stringify(salesAssociateArray),
-          additionalItems: JSON.stringify(additionalItems),
-          goodsArray: JSON.stringify(goodsArray),
-          tailorsArray: JSON.stringify(tailorsArray),
-          projectAddress: JSON.stringify(projectAddress),
-        }),
-      });
-      if (response.status === 200) {
-        alert("Project Added");
-      } else {
-        const errorText = await response.text();
-        console.error("Error response:", errorText);
-        alert("Error: Failed to add project");
       }
-    } catch (error) {
-      console.error("Fetch error:", error);
-      alert("Error: Network issue or server not responding");
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
     }
+
+    const data = await response.json();
+
+    if (!data.body || !Array.isArray(data.body)) {
+      throw new Error("Invalid data format: Expected an array in data.body");
+    }
+
+    const parseSafely = (value: any, fallback: any) => {
+      try {
+        return typeof value === "string" ? JSON.parse(value) : value || fallback;
+      } catch (error) {
+        console.warn("Invalid JSON:", value, error);
+        return fallback;
+      }
+    };
+
+    const deepClone = (obj: any) => JSON.parse(JSON.stringify(obj));
+
+    const fixBrokenArray = (input: any): string[] => {
+      if (Array.isArray(input)) return input;
+      if (typeof input !== "string") return [];
+
+      try {
+        const fixed = JSON.parse(input);
+        if (Array.isArray(fixed)) return fixed;
+        return [];
+      } catch {
+        try {
+          const cleaned = input
+            .replace(/^\[|\]$/g, "")
+            .split(",")
+            .map((item: string) => item.trim().replace(/^"+|"+$/g, ""));
+          return cleaned;
+        } catch {
+          return [];
+        }
+      }
+    };
+
+    const projects = data.body.map((row: any[]) => ({
+      projectName: row[0],
+      customerLink: parseSafely(row[1], []),
+      projectReference: row[2] || "",
+      status: row[3] || "",
+      totalAmount: parseFloat(row[4]) || 0,
+      totalTax: parseFloat(row[5]) || 0,
+      paid: parseFloat(row[6]) || 0,
+      discount: parseFloat(row[7]) || 0,
+      createdBy: row[8] || "",
+      allData: deepClone(parseSafely(row[9], [])),
+      projectDate: row[10] || "",
+      additionalRequests: parseSafely(row[11], []),
+      interiorArray: fixBrokenArray(row[12]),
+      salesAssociateArray: fixBrokenArray(row[13]),
+      additionalItems: deepClone(parseSafely(row[14], [])),
+      goodsArray: deepClone(parseSafely(row[15], [])),
+      tailorsArray: deepClone(parseSafely(row[16], [])),
+      projectAddress : row[17],
+    }));
+
+    return projects;
   };
+
+const sendProjectData = async () => {
+  try {
+    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/sendprojectdata", {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({
+        projectName,
+        customerLink: JSON.stringify(selectedCustomer),
+        projectReference,
+        status,
+        totalAmount: amount,
+        totalTax: tax,
+        paid,
+        discount,
+        createdBy: user,
+        allData: JSON.stringify(selections),
+        projectDate,
+        additionalRequests,
+        interiorArray: JSON.stringify(interiorArray),
+        salesAssociateArray: JSON.stringify(salesAssociateArray),
+        additionalItems: JSON.stringify(additionalItems),
+        goodsArray: JSON.stringify(goodsArray),
+        tailorsArray: JSON.stringify(tailorsArray),
+        projectAddress: JSON.stringify(projectAddress),
+      }),
+    });
+
+    if (response.status === 200) {
+      alert("Project Added");
+
+      // ✅ Fetch updated project data
+      const updatedData = await fetchProjectData();
+
+      // ✅ Update Redux and local state
+      dispatch(setProjects(updatedData));
+      setProjects(updatedData);
+
+      // ✅ Update localStorage cache
+      localStorage.setItem("projectData", JSON.stringify({ data: updatedData, time: Date.now() }));
+
+    } else {
+      const errorText = await response.text();
+      console.error("Error response:", errorText);
+      alert("Error: Failed to add project");
+    }
+  } catch (error) {
+    console.error("Fetch error:", error);
+    alert("Error: Network issue or server not responding");
+  }
+};
+
 
   const [goodsItems, setGoodsItems] = useState<any[]>([]);
   useEffect(() => {
@@ -983,7 +1076,7 @@ function AddProjectForm() {
         handleGroupDelete={handleGroupDelete}
       />
       <div className="flex flex-col p-6 border rounded-lg w-full shadow-2xl">
-        <p className="">Quotation</p>
+        <p className="text-[1.3vw] font-semibold">Quotation</p>
         <div className="flex flex-col gap-3 w-full">
           {selections.map((selection, mainIndex) => (
             <div key={mainIndex} className="w-full">

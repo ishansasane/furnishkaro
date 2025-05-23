@@ -98,52 +98,95 @@ export default function Tasks() {
     }
   };
 
-  useEffect(() => {
-    async function getTasks() {
+useEffect(() => {
+  const fetchAndSetTasks = async () => {
+    try {
+      const cached = localStorage.getItem("taskData");
+      const now = Date.now();
+
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        const timeDiff = now - parsed.time;
+
+        if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
+          const sortedTasks = parsed.data.sort((a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime());
+          dispatch(setTasks(sortedTasks));
+          settasks(sortedTasks);
+          return;
+        }
+      }
+
       const data = await fetchTaskData();
-      const sortedTasks = data.sort((a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime());
+      const sorted = data.sort((a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime());
+      dispatch(setTasks(sorted));
+      settasks(sorted);
+      localStorage.setItem("taskData", JSON.stringify({ data: sorted, time: now }));
+    } catch (error) {
+      console.error("Failed to fetch tasks:", error);
+    }
+  };
+
+    fetchAndSetTasks();
+}, [dispatch, refresh]);
+
+useEffect(() => {
+  const fetchAndSetProjects = async () => {
+    try {
+      const cached = localStorage.getItem("projectData");
+      const now = Date.now();
+
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        const timeDiff = now - parsed.time;
+
+        if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
+          dispatch(setProjects(parsed.data));
+          setProjectData(parsed.data);
+          return;
+        }
+      }
+
+      const data = await fetchProjectData();
+      dispatch(setProjects(data));
+      setProjectData(data);
+      localStorage.setItem("projectData", JSON.stringify({ data, time: now }));
+    } catch (error) {
+      console.error("Failed to fetch projects:", error);
+    }
+  };
+
+  if (projectData.length === 0) {
+    if (projects.length === 0) fetchAndSetProjects();
+    else setProjectData(projects);
+  }
+}, [dispatch, projects]);
+
+// Refresh hook
+useEffect(() => {
+  const refreshData = async () => {
+    try {
+      const taskData = await fetchTaskData();
+      const sortedTasks = taskData.sort((a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime());
       dispatch(setTasks(sortedTasks));
       settasks(sortedTasks);
-    }
+      localStorage.setItem("taskData", JSON.stringify({ data: sortedTasks, time: Date.now() }));
 
-    async function getProjects() {
-      const data = await fetchProjectData();
-      dispatch(setProjects(data));
-      setProjectData(projects);
-    }
+      const projectData = await fetchProjectData();
+      dispatch(setProjects(projectData));
+      setProjectData(projectData);
+      localStorage.setItem("projectData", JSON.stringify({ data: projectData, time: Date.now() }));
 
-    if (!taskData) getTasks();
-    else settasks([...taskData].sort((a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime()));
-
-    if (projectData.length === 0) {
-      if (projects.length === 0) getProjects();
-      else setProjectData(projects);
-    }
-  }, [dispatch, taskData, projects]);
-
-  useEffect(() => {
-    async function getTasks() {
-      const data = await fetchTaskData();
-      dispatch(setTasks(data));
-      settasks(data);
-    }
-    async function getProjects() {
-      const data = await fetchProjectData();
-      dispatch(setProjects(data));
-      setProjectData(projects);
-    }
-
-    if (refresh) {
-      getTasks();
-      getProjects();
       setrefresh(false);
+    } catch (error) {
+      console.error("Error refreshing data:", error);
     }
-  }, [refresh]);
-
-  const editData = (n: string) => {
-    setName(n);
-    setDialogOpen(true);
   };
+
+  if (refresh) {
+    refreshData();
+  }
+}, [refresh]);
+
 
   const filterOptions = [
     { label: "All Tasks", value: "All Tasks" },
@@ -199,7 +242,7 @@ export default function Tasks() {
             </tr>
           </thead>
           <tbody>
-            {tasks.length != 0 && tasks.map((task, index) =>
+            {tasks != null && tasks.map((task, index) =>
               task[7] === `${filter}` || filter === "All Tasks" ? (
                 <tr key={index} className="hover:bg-sky-50">
                   <td className="px-4 py-2">{task[0]}</td>
@@ -227,8 +270,8 @@ export default function Tasks() {
                         <button
                           className="w-full text-left px-3 py-2 hover:bg-gray-100 flex items-center gap-2"
                           onClick={() => {
-                            editData(task[0]);
                             setOpenDropdown(null);
+                            setDialogOpen(true);
                             setediting(task);
                           }}
                         >
