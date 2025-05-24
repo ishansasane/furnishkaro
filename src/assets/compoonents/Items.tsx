@@ -417,7 +417,7 @@ const handleSubmit = async () => {
                 <ChevronFirst />
               </button>
             )}
-            <h1 className="text-2xl font-semibold">Items</h1>
+            <h1 className="text-2xl font-semibold">Products</h1>
           </div>
           <div className="flex items-center md:!gap-5 flex-wrap gap-2">
             <div className="dropdown">
@@ -433,7 +433,7 @@ const handleSubmit = async () => {
               className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
               onClick={() => navigate("/add-product")}
             >
-              <i className="fas fa-plus"></i> + Add Item
+              <i className="fas fa-plus"></i> + Add Product
             </button>
           </div>
         </div>
@@ -582,7 +582,7 @@ const handleSubmit = async () => {
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="text-gray-500 bg-sky-50">
-                <th className="py-3 px-4">Item Name</th>
+                <th className="py-3 px-4">Product Name</th>
                 <th className="py-3 px-4">Description</th>
                 <th className="py-3 px-4">Costing Type</th>
                 <th className="py-3 px-4">Group Type</th>

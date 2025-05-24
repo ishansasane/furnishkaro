@@ -19,7 +19,7 @@ const fetchTaskData = async () => {
   }
 };
 
-const TaskDialog: React.FC<TaskDialogProps> = ({ setAdded, onClose, isEditing, setediting, name, setrefresh, projectData, taskDialogOpen, setProjectFlag, setTaskDialogOpen, dashboard }) => {
+const TaskDialog: React.FC<TaskDialogProps> = ({ setAdded, onClose, isEditing, setediting, name, setrefresh, refresh, projectData, taskDialogOpen, setProjectFlag, setTaskDialogOpen, dashboard }) => {
   const [taskName, setTaskName] = useState(undefined);
   const [description, setDescription] = useState(undefined);
   const [dateTime, setDateTime] = useState(undefined);
@@ -48,10 +48,19 @@ const addTask = async () => {
     alert("Please select a date and time");
     return;
   }
-  
+
   try {
+    // Fetch current tasks to check for duplicates
+    const existingTasks = await fetchTaskData();
+    const isDuplicate = existingTasks.some(task => task[0]?.toLowerCase() === taskName.toLowerCase());
+
+    if (isDuplicate) {
+      alert("Task name already exists. Please choose a different name.");
+      return;
+    }
+
     const now = new Date();
-    const date = now.toISOString().slice(0, 16); // Extract ISO datetime
+    const date = now.toISOString().slice(0, 16); // creation timestamp
 
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/addtask", {
       method: "POST",
@@ -62,8 +71,8 @@ const addTask = async () => {
       body: JSON.stringify({
         title: taskName,
         description,
-        dateTime, // Actual selected date
-        date,     // Current date for log or creation
+        dateTime,
+        date,
         assigneeLink: assignee,
         projectLink: project,
         priority,
@@ -74,20 +83,20 @@ const addTask = async () => {
     if (response.status === 200) {
       alert("Task Added");
 
-      // Re-fetch tasks after adding
       const updatedTasks = await fetchTaskData();
       const sortedTasks = updatedTasks.sort(
         (a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime()
       );
 
       dispatch(setTasks(sortedTasks));
-
-      // Optional: update cache
       localStorage.setItem("taskData", JSON.stringify({ data: sortedTasks, time: Date.now() }));
 
-      // Reset & close dialog
       setediting(null);
-      setrefresh(true);
+      if(refresh){
+        setrefresh(false);
+      }else{
+        setrefresh(true);
+      }
       onClose();
     } else {
       alert("Error adding task");
@@ -97,6 +106,7 @@ const addTask = async () => {
     alert("Something went wrong while adding the task.");
   }
 };
+
 
 
 const editTask = async () => {
@@ -134,6 +144,7 @@ const editTask = async () => {
       localStorage.setItem("taskData", JSON.stringify({ data: sortedTasks, time: Date.now() }));
 
       // Close dialog & reset states
+
       setediting(null);
       setrefresh(true);
       onClose();
@@ -186,7 +197,7 @@ const editTask = async () => {
 
         {/* Date & Time */}
         <input
-          type="datetime-local"
+          type="date"
           value={dateTime}
           onChange={(e) => setDateTime(e.target.value)}
           className="w-full border p-2 rounded mb-3"

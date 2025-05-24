@@ -9,6 +9,7 @@ import { RootState } from "../Redux/store.ts";
 import { setTasks, setProjects, setPaymentData, setProjectFlag } from "../Redux/dataSlice.ts";
 import TaskDialog from "../compoonents/TaskDialog.tsx";
 import { AnimatePresence, motion } from "framer-motion";
+import EditProjects from "./EditProjects.tsx";
 
 const fetchTaskData = async () => {
   const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks");
@@ -24,12 +25,20 @@ const Dashboard: React.FC = () => {
   const [isTaskDialogOpen, setTaskDialogOpen] = useState<boolean>(false);
     const dispatch = useDispatch();
     const tasks  = useSelector((state: RootState) => state.data.tasks);
+    const [filteredTasks, setFilteredTasks] = useState([]);
     const projects  = useSelector((state: RootState) => state.data.projects);
     const paymentData = useSelector((state : RootState) => state.data.paymentData);
     const projectsData = useSelector((state : RootState) => state.data.projects);
+    const [Amount, setAmount] = useState(0);
+    const [Tax, setTax] = useState(0);
+    const [projectDiscount, setProjectDiscount] = useState(0);
+
+    const [index, setIndex] = useState(null);
+    const [flag, setFlag] = useState(false);
+    const [sendProject, setSendProject] = useState([]);
 
     const [totalPayment, setTotalPayment] = useState(0);
-    const [discount, setDiscount] = useState(0);
+    const [Discount, setDiscount] = useState(0);
 
     const [selectedTask, setSelectedTask] = useState([]);
 
@@ -78,27 +87,56 @@ const deleteTask = async (name: string) => {
 
 
 useEffect(() => {
+  let isMounted = true;
+
   const fetchTasks = async () => {
     try {
+      const cached = localStorage.getItem("taskData");
+      const now = Date.now();
+
+      if (cached && !refresh) {
+        const parsed = JSON.parse(cached);
+        const timeDiff = now - parsed.time;
+
+        if (timeDiff < 5 * 60 * 1000 && parsed.data?.length > 0) {
+          if (isMounted) {
+            const filtered = parsed.data.filter(task => task[7] !== "Completed");
+            dispatch(setTasks(parsed.data));
+            setFilteredTasks(filtered);
+          }
+          return;
+        }
+      }
+
       const taskRes = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks", {
         credentials: "include"
       });
 
       if (!taskRes.ok) {
-        throw new Error("Failed to fetch tasks");
+        throw new Error("❌ Failed to fetch tasks");
       }
 
       const taskData = await taskRes.json();
-      dispatch(setTasks(taskData.body || []));
+      const tasksList = taskData.body || [];
+
+      if (isMounted) {
+        const filtered = tasksList.filter(task => task[7] !== "Completed");
+        dispatch(setTasks(tasksList));
+        setFilteredTasks(filtered);
+        localStorage.setItem("taskData", JSON.stringify({ data: tasksList, time: now }));
+      }
     } catch (error) {
-      console.error("Error fetching tasks:", error);
+      console.error("❌ Error fetching tasks:", error);
     }
   };
 
-  if (tasks.length === 0) {
-    fetchTasks();
-  }
-}, [tasks.length, dispatch, refresh]);
+  fetchTasks();
+
+  return () => {
+    isMounted = false;
+  };
+}, [dispatch, refresh]);
+
 
   const fetchProjectData = async () => {
     const response = await fetch(
@@ -301,6 +339,9 @@ const handleMarkAsCompleted = async (status, name) => {
   }
 };
 
+const [editing, setediting] = useState(null);
+const [newrefresh, setrefresh] = useState(false);
+
 useEffect(() => {
   const fetchProjects = async () => {
     try {
@@ -346,25 +387,48 @@ useEffect(() => {
   fetchProjects();
 }, [dispatch]);
 
+const openProject = (selectedTask) => {
+  const name = selectedTask[5]; // Project name from the task
+
+  const index = projects.findIndex(project => project.projectName == name);
+
+  setIndex(index);
+
+  if (index !== -1) {
+    const matchedProject = projects[index];
+
+    setSendProject(matchedProject);
+    setTax(matchedProject.taxAmount);
+    setAmount(matchedProject.totalAmount);
+    setProjectDiscount(matchedProject.discount);
+    setTaskDialogOpen(false);
+    setFlag(true);
+  } else {
+    console.warn("No matching project found for:", name);
+  }
+};
+
+
+
    return (
     <div className="p-6 md:mt-0 mt-20 bg-gray-100 min-h-screen">
 
       {/* Summary Cards Section */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
+      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 ${flag ? "hidden" : ""}`}>
         <Card  title="Orders"  value={projects.length} color="bg-blue-500" className="w-full max-w-sm"/>
-        <Card title="Total Value" value={totalPayment - discount} color="bg-purple-500" isCurrency />
-        <Card title="Payment Received" value={received} color="bg-green-500" isCurrency />
-        <Card title="Payment Due" value={totalPayment - received - discount} color="bg-red-500" isCurrency />
+        <Card title="Total Value" value={Math.round((totalPayment - Discount))} color="bg-purple-500" isCurrency />
+        <Card title="Payment Received" value={Math.round(received)} color="bg-green-500" isCurrency />
+        <Card title="Payment Due" value={Math.round(totalPayment - received - Discount)} color="bg-red-500" isCurrency />
       </div>
 
       {/* Deadlines & Tasks */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 mt-2">
+      <div className={`${flag ? "hidden" : ""} grid grid-cols-1 lg:grid-cols-3 gap-2 mt-2`}>
         {/* Project Deadlines */}
         <div className="bg-white shadow-md rounded-xl p-6">
           <p className="md:text-[1.7vw] font-semibold mb-4 text-gray-800"> Project Deadlines</p>
           <div className="space-y-4">
             {projects != undefined && projects.map((project, index) => (
-              <DeadlineCard project={project.projectName} date={project.projectDate} key={index} />
+              <div onClick={() => {setSendProject(project); setIndex(index); setTax(project.taxAmount); setAmount(project.totalAmount); setProjectDiscount(project.discount); setFlag(true);}}><DeadlineCard setFlag={setFlag} setTax={setTax} setProjectDiscount={setProjectDiscount} setAmount={setAmount} setSendProject={setSendProject} index={index} setIndex={setIndex} project={project} projectName={project.projectName}  date={project.projectDate} key={index} /></div>
             ))}
           </div>
         </div>
@@ -378,7 +442,7 @@ useEffect(() => {
             <button onClick={() => setTaskDialog(true)} style={{ borderRadius : "6px" }} className="mb-2 bg-sky-600 text-white hover:bg-sky-700 px-2 md:text-[1.7vw] py-1">Add Task</button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto max-h-[90vh] pr-2">
-            {tasks.map((task, index) => (
+            {filteredTasks != undefined && filteredTasks.map((task, index) => (
               <div key={index} onClick={() => { setSelectedTask(task); setTaskDialogOpen(true); }}>
                 <TaskCard
                     taskData={task}
@@ -407,11 +471,14 @@ useEffect(() => {
             >
               <TaskDialog
                 onClose={() => setTaskDialog(false)}
-                projectData={projectsData}
+                projectData={projects}
                 setTaskDialogOpen={setTaskDialog}
                 taskDialogOpen={taskDialogOpen}
                 setProjectFlag={setProjectFlag}
                 dashboard={true}
+                setediting={setediting}
+                setrefresh={setRefresh}
+                refresh={refresh}
               />
             </motion.div>
           </>
@@ -419,8 +486,8 @@ useEffect(() => {
       </AnimatePresence>
 
       {/* Inquiries */}
-      <div className="bg-white shadow-md rounded-xl p-6 mt-2">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">Inquiries</h2>
+      <div className={`bg-white shadow-md rounded-xl p-6 mt-2 ${flag ? "hidden" : ""}`}>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">📩 Inquiries</h2>
         <div className="flex flex-wrap gap-6 overflow-x-auto pb-4">
           <InquiryCard
             project="E-commerce Website"
@@ -460,7 +527,7 @@ useEffect(() => {
               <hr />
               <p className="flex justify-between"><strong>Status :</strong> <span className={`inline-block px-2 py-1 rounded text-white ${selectedTask[7].toLowerCase() === 'completed' ? 'bg-green-500' : 'bg-gray-500'}`}>{selectedTask[7]}</span></p>
               <hr />
-              <p className="flex justify-between"><strong>Project :</strong> <span className="text-blue-600">{selectedTask[1]}</span></p>
+              <p onClick={() => openProject(selectedTask)} className="flex justify-between"><strong>Project :</strong> <span className="text-blue-600">{selectedTask[5]}</span></p>
               <hr />
               <p className="flex justify-between"><strong>Assignee :</strong> {selectedTask[4]}</p>
               <hr />
@@ -486,6 +553,24 @@ useEffect(() => {
           </div>
         </div>
       )}
+      {flag && (
+          <EditProjects
+            projectData={sendProject}
+            index={index}
+            goBack={() => {
+              setFlag(false);
+              dispatch(setProjectFlag(false));
+            }}
+            tasks={tasks}
+            projects={projects}
+            Tax={Tax}
+            setTax={setTax}
+            Amount={Amount}
+            setAmount={setAmount}
+            Discount={projectDiscount}
+            setDiscount={setProjectDiscount}
+          />
+        )}
     </div>
   );
 };

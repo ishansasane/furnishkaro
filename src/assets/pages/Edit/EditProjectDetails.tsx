@@ -246,7 +246,7 @@ const EditProjectDetails = ({
           />
         </div>
         <div className="flex flex-col w-1/2">
-          <p className="text-[1vw]">Project Date</p>
+          <p className="text-[1vw]">Project Deadline</p>
           <input
             type="date"
             className="border p-2 rounded w-full"
