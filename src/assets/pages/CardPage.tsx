@@ -18,7 +18,8 @@ const Card: React.FC<CardProps> = ({ title, value, color, isCurrency = false }) 
       <div className="ml-4">
         <h4 className="text-gray-600 text-sm font-semibold">{title}</h4>
         <p className="text-xl font-bold text-gray-900">
-          {isCurrency ? `₹${value.toLocaleString()}` : value}
+          {isCurrency ? `₹${value.toLocaleString('en-IN')}` : value.toLocaleString('en-IN')}
+
         </p>
       </div>
     </div>

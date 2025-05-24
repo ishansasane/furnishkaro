@@ -145,7 +145,7 @@ function SidebarContent({ mastersOpen, setMastersOpen, setMobileMenuOpen }: Side
           >
             <ul className="ml-8 mt-1 space-y-1">
               {[
-                ["Items", "/masters/items"],
+                ["Products", "/masters/items"],
                 ["Product Groups", "/masters/product-groups"],
                 ["Brands", "/masters/brands"],
                 ["Catalogues", "/masters/catalogues"],
