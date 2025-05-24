@@ -361,7 +361,7 @@ useEffect(() => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 mt-2">
         {/* Project Deadlines */}
         <div className="bg-white shadow-md rounded-xl p-6">
-          <p className="text-[1.7vw] font-semibold mb-4 text-gray-800">📅 Project Deadlines</p>
+          <p className="md:text-[1.7vw] font-semibold mb-4 text-gray-800"> Project Deadlines</p>
           <div className="space-y-4">
             {projects != undefined && projects.map((project, index) => (
               <DeadlineCard project={project.projectName} date={project.projectDate} key={index} />
@@ -370,12 +370,12 @@ useEffect(() => {
         </div>
 
         {/* Tasks */}
-        <div className="bg-white shadow-md rounded-xl p-1 col-span-2">
+        <div className="bg-white shadow-md rounded-xl p-3 col-span-2">
           <div className="flex flex-row w-full justify-between items-center mb-4">
             <Link to="/tasks" className="!no-underline">
-              <p className="text-[1.7vw] font-semibold text-gray-800">Tasks</p>
+              <p className="md:text-[1.7vw] font-semibold text-gray-800">Tasks</p>
             </Link>
-            <button onClick={() => setTaskDialog(true)} style={{ borderRadius : "6px" }} className="mb-2 bg-sky-600 text-white hover:bg-sky-700 px-2 py-1">Add Task</button>
+            <button onClick={() => setTaskDialog(true)} style={{ borderRadius : "6px" }} className="mb-2 bg-sky-600 text-white hover:bg-sky-700 px-2 md:text-[1.7vw] py-1">Add Task</button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto max-h-[90vh] pr-2">
             {tasks.map((task, index) => (
@@ -420,7 +420,7 @@ useEffect(() => {
 
       {/* Inquiries */}
       <div className="bg-white shadow-md rounded-xl p-6 mt-2">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4">📩 Inquiries</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Inquiries</h2>
         <div className="flex flex-wrap gap-6 overflow-x-auto pb-4">
           <InquiryCard
             project="E-commerce Website"
