@@ -212,35 +212,7 @@ const MaterialSelectionComponent = ({
     }
     
   }
-
-  const addDesign = async () => {
-
-    const date = new Date();
-
-    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/sendDesign", {
-      method : "POST",
-      credentials : "include",
-      headers : {
-        "content-type" : "application/json"
-      },
-      body : JSON.stringify({ designName, date }),
-    });
-
-    if (response.status === 200) {
-      const data = await fetchDesignData();   // ✅ FIXED
-    
-      dispatch(setDesignData(data));          // Redux
-      setDesignData(data);                    // Local State
-      localStorage.setItem("designData", JSON.stringify({ data, time: Date.now() })); // Storage
-    
-      setIsDesignNoOpen(false);
-      alert("Design Added");
-    }
-    else {
-      alert("Error");
-    }
-    
-  }
+  const [design, setDesign] = useState("");
 
   return (
     <div className="flex flex-col bg-white p-4 sm:p-6 rounded-lg shadow-lg">
@@ -385,20 +357,8 @@ const MaterialSelectionComponent = ({
                       <div>
                       <div className='flex flex-row gap-3'>
                           <p className=''>Design No.</p>
-                          <button className='mb-3' onClick={() => setIsDesignNoOpen(true)}><span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">+</span></button>
                         </div>
-                        <select
-                          className="border p-2 sm:p-3 rounded w-full text-sm sm:text-base"
-                          value={element.designNo}
-                          onChange={(e) => handleDesignNoChange(mainindex, i, e.target.value)}
-                        >
-                          <option value="">Select Design No</option>
-                          {designData.map((design, index) => (
-                            <option key={index} value={design[0]}>
-                              {design[0]}
-                            </option>
-                          ))}
-                        </select>
+                        <input type="text" placeholder='Design No' value={design} onChange={(e) => {handleDesignNoChange(mainindex, i, e.target.value); setDesign(e.target.value);}} className='border rounded-lg pl-2 py-2 w-24'/>
                       </div>
 
                       {/* Reference */}

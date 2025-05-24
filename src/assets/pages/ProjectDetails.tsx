@@ -26,7 +26,8 @@ const ProjectDetails = ({
   additionalRequests,
   projectAddress,
   setProjectAddress,
-  setSalesData
+  setSalesData,
+  setInterior
 }) => {
 
   async function fetchInteriors() {
@@ -48,7 +49,6 @@ const ProjectDetails = ({
   const [isOpen, setIsOpen] = useState(false);
 
   const dispatch = useDispatch();
-  const [interiorData, setInterior] = useState([]);
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -130,7 +130,7 @@ const ProjectDetails = ({
         localStorage.setItem("salesAssociateData", JSON.stringify({ data, time: Date.now() }));
       
         // 4. Close modal and notify
-        setIsOpen(false);
+        setIsSalesOpen(false);
         alert("Sales Associate added successfully");
       } else {
         alert("Error saving sales associate");
@@ -219,7 +219,7 @@ const ProjectDetails = ({
         <div className="flex flex-col w-1/2">
           <div className="flex flex-row gap-3 px-2">
             <p className="">Select Sales Associate</p>
-            <button className="mb-3 flex items-center px-2 py-1 border-1 border-blue-400 text-blue-500 font-semibold !rounded-xl hover:bg-blue-50 transition" >
+            <button onClick={() => setIsSalesOpen(true)} className="mb-3 flex items-center px-2 py-1 border-1 border-blue-400 text-blue-500 font-semibold !rounded-xl hover:bg-blue-50 transition" >
             <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">+</span>Sales Associate
           </button>
           </div>
@@ -271,7 +271,7 @@ const ProjectDetails = ({
             <input className="border p-2 rounded w-full mb-2" placeholder="Phone Number" value={phonenumber} onChange={(e) => setPhoneNumber(e.target.value)} />
             <input className="border p-2 rounded w-full mb-2" placeholder="Address" value={address} onChange={(e) => setAddress(e.target.value)} />
             <div className="flex justify-end gap-2 mt-4">
-              <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={() => setIsOpen(false)}>
+              <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={() => {setName(""); setEmail(""); setPhoneNumber(""); setAddress(""); setIsOpen(false);}}>
                 Cancel
               </button>
               <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleSubmit}>
@@ -308,7 +308,7 @@ const ProjectDetails = ({
             <input className="border p-2 rounded w-full mb-2" placeholder="Phone Number" value={salesphonenumber} onChange={(e) => salesSetPhoneNumber(e.target.value)} />
             <input className="border p-2 rounded w-full mb-2" placeholder="Address" value={salesaddress} onChange={(e) => salesSetAddress(e.target.value)} />
             <div className="flex justify-end gap-2 mt-4">
-              <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={() => setIsSalesOpen(false)}>
+              <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={() => {salesSetAddress(""); salesSetEmail(""); salesSetName(""); salesSetPhoneNumber(""); setIsSalesOpen(false); }}>
                 Cancel
               </button>
               <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleSalesSubmit}>

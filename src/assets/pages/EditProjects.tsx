@@ -384,7 +384,7 @@ const EditProjects = ({ projectData, index, goBack, projects, Tax, setTax, Amoun
         company: null,
         designNo: null,
         reference: null,
-        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+        measurement: { unit: "Centimeter (cm)", width: undefined, height: undefined, quantity: undefined },
         additionalItems: [],
         totalAmount: [],
         totalTax: []
@@ -464,7 +464,7 @@ const EditProjects = ({ projectData, index, goBack, projects, Tax, setTax, Amoun
         company: null,
         designNo: null,
         reference: null,
-        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+        measurement: { unit: "Centimeter (cm)", width: undefined, height: undefined, quantity: undefined },
         additionalItems: [],
         totalAmount: [],
         totalTax: []
@@ -488,7 +488,7 @@ const handleCompanyChange = (mainindex: number,i : number, company: string) => {
   }
 
   if (!updatedSelections[mainindex].areacollection[i]) {
-    updatedSelections[mainindex].areacollection[i] = { productGroup: null, items : [""], catalogue: null, company: null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] };
+    updatedSelections[mainindex].areacollection[i] = { productGroup: null, items : [""], catalogue: null, company: null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : undefined, height : undefined, quantity : undefined}, additionalItems : [], totalAmount : [], totalTax : [] };
   }
 
   updatedSelections[mainindex].areacollection[i].company = company;
@@ -503,7 +503,7 @@ const handleDesignNoChange = (mainindex : number,i : number, designNo) => {
   }
 
   if(!updatedSelections[mainindex].areacollection[i]){
-    updatedSelections[mainindex].areacollection[i] = { productGroup : null, items : [""], catalogue : null, company : null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] };
+    updatedSelections[mainindex].areacollection[i] = { productGroup : null, items : [""], catalogue : null, company : null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : undefined, height : undefined, quantity : undefined}, additionalItems : [], totalAmount : [], totalTax : [] };
   }
 
   updatedSelections[mainindex].areacollection[i].designNo = designNo;
@@ -520,7 +520,7 @@ const handleReferenceChange = (mainindex : number, i : number, reference) => {
   }
 
   if(!updatedSelection[mainindex].areacollection[i]){
-    updatedSelection[mainindex].areacollection[i] = { productGroup : null, items : [""], catalogue : null, company : null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : "0", height : "0", quantity : "0"}, additionalItems : [], totalAmount : [], totalTax : [] }
+    updatedSelection[mainindex].areacollection[i] = { productGroup : null, items : [""], catalogue : null, company : null, designNo : null, reference : null, measurement : {unit : "Centimeter (cm)", width : undefined, height : undefined, quantity : undefined}, additionalItems : [], totalAmount : [], totalTax : [] }
   }
 
   updatedSelection[mainindex].areacollection[i].reference = reference;
@@ -554,7 +554,7 @@ const handleAddNewGroup = (mainindex: number, productGroupString = "") => {
     catalogue: [],
     designNo: "",
     reference: "",
-    measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+    measurement: { unit: "Centimeter (cm)", width: undefined, height: undefined, quantity: undefined },
     items: matchedItems,
     additionalItems: [],
     totalAmount: [],

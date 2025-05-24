@@ -69,10 +69,10 @@ function AddProjectForm() {
 
   interface Measurements {
     unit: string;
-    width: string;
-    height: string;
-    quantity: string;
-    newquantity?: string;
+    width: number;
+    height: number;
+    quantity: number;
+    newquantity?: number;
   }
 
   interface CollectionArea {
@@ -242,7 +242,7 @@ function AddProjectForm() {
         company: null,
         designNo: null,
         reference: null,
-        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+        measurement: { unit: "Centimeter (cm)", width: undefined, height: undefined, quantity: undefined },
         totalAmount: [],
         totalTax: [],
         quantities: [],
@@ -316,7 +316,7 @@ function AddProjectForm() {
         company: null,
         designNo: null,
         reference: null,
-        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+        measurement: { unit: "Centimeter (cm)", width: undefined, height: undefined, quantity: undefined},
         totalAmount: [],
         totalTax: [],
         quantities: [],
@@ -342,7 +342,7 @@ function AddProjectForm() {
         company: null,
         designNo: null,
         reference: null,
-        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+        measurement: { unit: "Centimeter (cm)", width: undefined, height: undefined, quantity: undefined },
         totalAmount: [],
         totalTax: [],
         quantities: [],
@@ -368,7 +368,7 @@ function AddProjectForm() {
         company: null,
         designNo: null,
         reference: null,
-        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+        measurement: { unit: "Centimeter (cm)", width: undefined, height: undefined, quantity: undefined },
         totalAmount: [],
         totalTax: [],
         quantities: [],
@@ -394,7 +394,7 @@ function AddProjectForm() {
         company: null,
         designNo: null,
         reference: null,
-        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+        measurement: { unit: "Centimeter (cm)", width: undefined, height: undefined, quantity: undefined },
         totalAmount: [],
         totalTax: [],
         quantities: [],
@@ -430,7 +430,7 @@ function AddProjectForm() {
         catalogue: [],
         designNo: "",
         reference: "",
-        measurement: { unit: "Centimeter (cm)", width: "0", height: "0", quantity: "0" },
+        measurement: { unit: "Centimeter (cm)", width: undefined, height: undefined, quantity: undefined},
         items: matchedItems,
         additionalItems: [],
         totalAmount: [],
@@ -481,13 +481,13 @@ function AddProjectForm() {
     
   const units = ["Inches (in)", "Centimeter (cm)", "Meters (m)", "Feet (ft)"];
 
-  const handleWidthChange = (mainindex: number, index: number, width: string) => {
+  const handleWidthChange = (mainindex: number, index: number, width: number) => {
     const updatedSelections = [...selections];
     updatedSelections[mainindex].areacollection[index].measurement.width = width;
     setSelections(updatedSelections);
   };
 
-  const handleHeightChange = (mainindex: number, index: number, height: string) => {
+  const handleHeightChange = (mainindex: number, index: number, height: number) => {
     const updatedSelections = [...selections];
     updatedSelections[mainindex].areacollection[index].measurement.height = height;
     setSelections(updatedSelections);
@@ -507,7 +507,7 @@ function AddProjectForm() {
     return { totalTax, totalAmount };
   };
 
-  const handleQuantityChangeMain = (mainIndex: number, index: number, quantity: string) => {
+  const handleQuantityChangeMain = (mainIndex: number, index: number, quantity: number) => {
     const updatedSelections = [...selections];
     const areaCol = updatedSelections[mainIndex].areacollection[index];
     areaCol.measurement.quantity = quantity;
@@ -1025,6 +1025,7 @@ const sendProjectData = async () => {
       <ProjectDetails
         selectedCustomer={selectedCustomer}
         interior={interior}
+        setInterior={setInterior}
         salesdata={salesData}
         interiorArray={interiorArray}
         setInteriorArray={setInteriorArray}
