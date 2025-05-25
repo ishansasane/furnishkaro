@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../Redux/Store.ts";
+import { RootState, store } from "../Redux/Store.ts";
 import { setStoreData } from "../Redux/dataSlice.ts";
 import { useNavigate } from "react-router-dom";
+import StoreDialog from './StoreDialog.tsx';
 
 interface Store {
   name: string;
@@ -48,7 +49,7 @@ const Store: React.FC = () => {
     setEditingStore(null);
   };
 
-  const handleSaveStore = async () => {
+  const handleSaveStore = async (newStoreName, newStoreAddress, newStoreEmail, newStorePhone) => {
     const url = editingStore
       ? "https://sheeladecor.netlify.app/.netlify/functions/server/updatestore"
       : "https://sheeladecor.netlify.app/.netlify/functions/server/addstore";
@@ -121,14 +122,14 @@ const Store: React.FC = () => {
     } else {
       setStores(storeData || []);
     }
-  }, [dropdownOpen, refresh, dispatch, storeData]);
+  }, [refresh, dispatch, storeData]);
 
   return (
     <div style={{ backgroundColor: '#f0f2f5', borderRadius: '20px' }} className='p-6 mb-20 md:mt-0 mt-20'>
       <div className='flex-wrap' style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <h2 className='font-bold text-3xl'>Stores</h2>
         <button
-          onClick={() => navigate("/store-dialog")}
+          onClick={() => setIsAddStoreOpen(true)}
           style={{
             backgroundColor: '#1890ff',
             color: 'white',
@@ -215,6 +216,9 @@ const Store: React.FC = () => {
           </div>
         )}
       </div>
+      {
+        isAddStoreOpen && <StoreDialog onSave={handleSaveStore} setIsAddStoreOpen={setIsAddStoreOpen} editingStore={editingStore} setEditingStore={setEditingStore}/>
+      }
     </div>
   );
 };

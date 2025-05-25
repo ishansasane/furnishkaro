@@ -1,37 +1,31 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
-interface StoreDialogProps {
-  editingStore?: boolean;
-  initialName?: string;
-  initialPhone?: string;
-  initialEmail?: string;
-  initialAddress?: string;
-  onSave: (name: string, phone: string, email: string, address: string) => void;
-  onClose: () => void;
-}
 
-const StoreDialog: React.FC<StoreDialogProps> = ({
-  editingStore = false,
-  initialName = '',
-  initialPhone = '',
-  initialEmail = '',
-  initialAddress = '',
-  onSave,
-  onClose,
+
+const StoreDialog  = ({
+  editingStore ,
+  setEditingStore,
+  setIsAddStoreOpen,
+  onSave
 }) => {
     const navigate = useNavigate();
-  const [newStoreName, setNewStoreName] = useState(initialName);
-  const [newStorePhone, setNewStorePhone] = useState(initialPhone);
-  const [newStoreEmail, setNewStoreEmail] = useState(initialEmail);
-  const [newStoreAddress, setNewStoreAddress] = useState(initialAddress);
+  const [newStoreName, setNewStoreName] = useState("");
+  const [newStorePhone, setNewStorePhone] = useState("");
+  const [newStoreEmail, setNewStoreEmail] = useState("");
+  const [newStoreAddress, setNewStoreAddress] = useState("");
 
   const handleSaveStore = () => {
     onSave(newStoreName, newStorePhone, newStoreEmail, newStoreAddress);
   };
 
-  const handleCloseAddStore = () => {
-    onClose();
-  };
+  useEffect(() => {
+    if(editingStore != null){
+      setNewStoreAddress(editingStore[1]);
+      setNewStoreName(editingStore[0]);
+      setNewStoreEmail(editingStore[3]);
+      setNewStorePhone(editingStore[2]);
+    }
+  }, [editingStore])
 
   return (
     <div
@@ -52,7 +46,7 @@ const StoreDialog: React.FC<StoreDialogProps> = ({
       <h3 style={{ marginBottom: '15px', textAlign: 'center' }}>
         {editingStore ? 'Edit Store' : 'Add Store'}
       </h3>
-      {!editingStore && (
+      {editingStore == null && (
         <div style={{ marginBottom: '10px' }}>
           <label style={{ display: 'block', marginBottom: '5px' }}>Store Name:</label>
           <input
@@ -125,7 +119,7 @@ const StoreDialog: React.FC<StoreDialogProps> = ({
           Save
         </button>
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => {setEditingStore(null); setIsAddStoreOpen(false); }}
           style={{ padding: '8px 16px', borderRadius: '4px' }}
           className="bg-gray-500 text-white px-4 py-2 rounded"
         >
