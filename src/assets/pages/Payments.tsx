@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { FaEdit, FaPlus, FaTrash } from 'react-icons/fa'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../Redux/store'
-import { setPaymentData } from '../Redux/dataSlice'
+import { setPaymentData, setProjects } from '../Redux/dataSlice'
 import { useNavigate } from 'react-router-dom'
 
 const Payments = () => {
@@ -19,6 +19,7 @@ const Payments = () => {
     const [editPayments, setEditPayments] = useState(undefined);
 
     const paymentsData = useSelector((state : RootState) => state.data.paymentData);
+    const projects = useSelector(( state : RootState ) => state.data.projects)
     const [payment, setPayment] = useState(0);
     const [paymentDate, setPaymentDate] = useState("");
     const [paymentMode, setPaymentMode] = useState("");
@@ -31,45 +32,156 @@ const Payments = () => {
 
     const [deleted, setDeleted] = useState(true);
 
-    useEffect(() => {
-    let isMounted = true;
+    const [filteredPayments, setFilteredPayments] = useState([]);
 
-    const fetchPaymentInfo = async () => {
+      const fetchProjectData = async () => {
+    const response = await fetch(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
+      {
+        credentials: "include",
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!data.body || !Array.isArray(data.body)) {
+      throw new Error("Invalid data format: Expected an array in data.body");
+    }
+
+    const parseSafely = (value: any, fallback: any) => {
+      try {
+        return typeof value === "string" ? JSON.parse(value) : value || fallback;
+      } catch (error) {
+        console.warn("Invalid JSON:", value, error);
+        return fallback;
+      }
+    };
+
+    const deepClone = (obj: any) => JSON.parse(JSON.stringify(obj));
+
+    const fixBrokenArray = (input: any): string[] => {
+      if (Array.isArray(input)) return input;
+      if (typeof input !== "string") return [];
+
+      try {
+        const fixed = JSON.parse(input);
+        if (Array.isArray(fixed)) return fixed;
+        return [];
+      } catch {
         try {
-        const cached = localStorage.getItem("paymentData");
-        const now = Date.now();
-
-        if (cached) {
-            const parsed = JSON.parse(cached);
-            const timeDiff = now - parsed.time;
-
-            // If cache is fresh (within 5 mins), use it
-            if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
-            if (isMounted) {
-                dispatch(setPaymentData(parsed.data));
-            }
-            return;
-            }
+          const cleaned = input
+            .replace(/^\[|\]$/g, "")
+            .split(",")
+            .map((item: string) => item.trim().replace(/^"+|"+$/g, ""));
+          return cleaned;
+        } catch {
+          return [];
         }
-
-        // Fetch fresh data
-        const paymentData = await fetchPaymentData();
-
-        if (paymentData && isMounted) {
-            dispatch(setPaymentData(paymentData));
-            localStorage.setItem("paymentData", JSON.stringify({ data: paymentData, time: now }));
-        }
-        } catch (error) {
-        console.error("❌ Error fetching payment data:", error);
-        }
+      }
     };
 
-    fetchPaymentInfo();
+    const projects = data.body.map((row: any[]) => ({
+      projectName: row[0],
+      customerLink: parseSafely(row[1], []),
+      projectReference: row[2] || "",
+      status: row[3] || "",
+      totalAmount: parseFloat(row[4]) || 0,
+      totalTax: parseFloat(row[5]) || 0,
+      paid: parseFloat(row[6]) || 0,
+      discount: parseFloat(row[7]) || 0,
+      createdBy: row[8] || "",
+      allData: deepClone(parseSafely(row[9], [])),
+      projectDate: row[10] || "",
+      additionalRequests: parseSafely(row[11], []),
+      interiorArray: fixBrokenArray(row[12]),
+      salesAssociateArray: fixBrokenArray(row[13]),
+      additionalItems: deepClone(parseSafely(row[14], [])),
+      goodsArray: deepClone(parseSafely(row[15], [])),
+      tailorsArray: deepClone(parseSafely(row[16], [])),
+      projectAddress : row[17],
+    }));
 
-    return () => {
-        isMounted = false; // prevent state updates if unmounted
-    };
-    }, [dispatch, deleted]);
+    return projects;
+  };
+
+useEffect(() => {
+  let isMounted = true;
+  const now = Date.now();
+  const cacheExpiry = 5 * 60 * 1000; // 5 minutes
+
+  const fetchData = async () => {
+    try {
+      // === Fetch Project Data First ===
+      let finalProjects = [];
+
+      if (projects && projects.length > 0) {
+        finalProjects = projects;
+      } else {
+        const cachedProjects = localStorage.getItem("projectData");
+        if (cachedProjects) {
+          const parsed = JSON.parse(cachedProjects);
+          const isValid = parsed?.data?.length > 0 && (now - parsed.time) < cacheExpiry;
+          if (isValid) {
+            finalProjects = parsed.data;
+            dispatch(setProjects(parsed.data));
+          }
+        }
+
+        if (finalProjects.length === 0) {
+          const freshProjects = await fetchProjectData();
+          if (Array.isArray(freshProjects)) {
+            finalProjects = freshProjects;
+            dispatch(setProjects(freshProjects));
+            localStorage.setItem("projectData", JSON.stringify({ data: freshProjects, time: now }));
+          }
+        }
+      }
+
+      // === Fetch Payment Data Next ===
+      let finalPayments = [];
+
+      const cachedPayments = localStorage.getItem("paymentData");
+      if (cachedPayments) {
+        const parsed = JSON.parse(cachedPayments);
+        const isValid = parsed?.data?.length > 0 && (now - parsed.time) < cacheExpiry;
+        if (isValid) {
+          finalPayments = parsed.data;
+          dispatch(setPaymentData(parsed.data));
+        }
+      }
+
+      if (finalPayments.length === 0) {
+        const freshPayments = await fetchPaymentData();
+        if (Array.isArray(freshPayments)) {
+          finalPayments = freshPayments;
+          dispatch(setPaymentData(freshPayments));
+          localStorage.setItem("paymentData", JSON.stringify({ data: freshPayments, time: now }));
+        }
+      }
+
+      // === Filter Payments That Belong to Any Project ===
+      if (finalProjects.length > 0 && finalPayments.length > 0 && isMounted) {
+        const projectNames = finalProjects.map(p => p.projectName);
+        const filtered = finalPayments.filter(payment => projectNames.includes(payment[1]));
+        setFilteredPayments(filtered);
+      }
+
+    } catch (error) {
+      console.error("❌ Error fetching project or payment data:", error);
+    }
+  };
+
+  fetchData();
+
+  return () => {
+    isMounted = false;
+  };
+}, [dispatch, deleted]);
+
 
 const deletePayment = async (name, projectname, p, pd, pm, re) => {
   const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletePayment", {
@@ -182,7 +294,7 @@ const addPaymentFunction = async () => {
             </tr>
         </tbody>
         <tbody>
-            {paymentsData && paymentsData.map((payment, index) => (
+            {filteredPayments.length != 0 && filteredPayments.map((payment, index) => (
                 <tr className='hover:bg-sky-50' key={index}>
                     <td>{index + 1}</td>
                     <td>{payment[2]}</td>
