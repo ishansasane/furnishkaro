@@ -3,6 +3,7 @@ import { FaEdit, FaPlus, FaTrash } from 'react-icons/fa'
 import { useDispatch, useSelector } from 'react-redux'
 import { RootState } from '../Redux/store'
 import { setPaymentData } from '../Redux/dataSlice'
+import { useNavigate } from 'react-router-dom'
 
 const Payments = () => {
 
@@ -13,6 +14,7 @@ const Payments = () => {
     }
 
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const [editPayments, setEditPayments] = useState(undefined);
 
@@ -164,7 +166,8 @@ const addPaymentFunction = async () => {
   return (
     <div className='w-full p-6 flex flex-col justify-between items-center'>
         <div className="w-full justify-between flex flex-row">
-            <p className='text-[2vw] font-semibold'>Payments</p>
+            <p className='text-[1.6vw] font-semibold'>Payments</p>
+            <button onClick={() => navigate("/")} style={{ borderRadius : "6px"}} className='border rounded-lg text-white bg-sky-600 hover:bg-sky-700 px-2 h-10'>Dashboard</button>
         </div>
 <div className='w-full justify-between flex flex-col rounded-xl border p-3 mt-10 max-h-screen overflow-scroll'>
     <table className='w-full'>

@@ -40,6 +40,7 @@ import EditProjects from "./assets/pages/EditProjects.tsx";
 import AddCustomerDialog from "./assets/compoonents/AddCustomerDialog.tsx";
 import Areas from "./assets/compoonents/Areas.tsx";
 import Payments from "./assets/pages/Payments.tsx";
+import DuePage from "./assets/pages/DuePage.tsx";
 
 function App() {
   const [expanded, setExpanded] = useState(true);
@@ -77,6 +78,7 @@ function App() {
               <Route path="/store-dialog" element={<StoreDialog />} />
               <Route path="/add-customer" element={<AddCustomerDialog />} />
               <Route path="/paymentsPage" element={ <Payments /> } />
+              <Route path="/duePage" element={ <DuePage /> } />
 
               <Route path="/areas" element={ <Areas /> } />
 

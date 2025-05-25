@@ -1,4 +1,4 @@
-import { useState, useEffect, useSyncExternalStore } from "react";
+import { useState, useEffect } from "react";
 import Card from "./CardPage";
 import DeadlineCard from "../compoonents/DeadlineCard";
 import TaskCard from "../compoonents/TaskCard";
@@ -10,6 +10,7 @@ import { setTasks, setProjects, setPaymentData, setProjectFlag } from "../Redux/
 import TaskDialog from "../compoonents/TaskDialog.tsx";
 import { AnimatePresence, motion } from "framer-motion";
 import EditProjects from "./EditProjects.tsx";
+import { useNavigate } from "react-router-dom";
 
 const fetchTaskData = async () => {
   const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks");
@@ -32,6 +33,8 @@ const Dashboard: React.FC = () => {
     const [Amount, setAmount] = useState(0);
     const [Tax, setTax] = useState(0);
     const [projectDiscount, setProjectDiscount] = useState(0);
+
+    const navigate = useNavigate();
 
     const [index, setIndex] = useState(null);
     const [flag, setFlag] = useState(false);
@@ -415,10 +418,10 @@ const openProject = (selectedTask) => {
 
       {/* Summary Cards Section */}
       <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 ${flag ? "hidden" : ""}`}>
-        <Card  title="Orders"  value={projects.length} color="bg-blue-500" className="w-full max-w-sm"/>
+        <div className="flex" onClick={() => navigate("/projects")}><Card title="Orders"  value={projects.length} color="bg-blue-500" className="w-full max-w-sm"/></div>
         <Card title="Total Value" value={Math.round((totalPayment - Discount))} color="bg-purple-500" isCurrency />
-        <Card title="Payment Received" value={Math.round(received)} color="bg-green-500" isCurrency />
-        <Card title="Payment Due" value={Math.round(totalPayment - received - Discount)} color="bg-red-500" isCurrency />
+        <div className="flex" onClick={() => navigate("/paymentsPage")}><Card title="Payment Received" value={Math.round(received)} color="bg-green-500" isCurrency /></div>
+        <div className="flex" onClick={() => navigate("/duePage")}><Card title="Payment Due" value={Math.round(totalPayment - received - Discount)} color="bg-red-500" isCurrency /></div>
       </div>
 
       {/* Deadlines & Tasks */}
