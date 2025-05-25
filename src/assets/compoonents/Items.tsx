@@ -13,7 +13,7 @@ const getItemsData = async () => {
 }
 
 const Items = () => {
-  const groupTypes = [["Fabric", ["Meter"]], ["Area Based", ["Sq.Feet"]], ["Running Length based", ["Meter", "Feet"]], ["Piece Based", ["Piece", "Items", "Sets"]], ["Fixed Length Items", ["Piece"]], ["Fixed Area Items", ["Piece", "Roll"]], ["Tailoring", ["Parts", "Sq.Feet"]]]
+  const groupTypes = [["Fabric", ["Meter"]], ["Area Based", ["Sq.Feet"]], ["Running Length based", ["Meter", "Feet"]], ["Piece Based", ["Piece", "Items", "Sets"]], ["Fixed Length Items", ["Piece"]], ["Fixed Area Items", ["Piece", "Roll"]], ["Tailoring", ["Parts", "Sq.Feet"]]];
   const [search, setSearch] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [items, setItems] = useState([]);
@@ -34,17 +34,15 @@ const Items = () => {
   const itemData = useSelector((state: RootState) => state.data.items);
 
   const [needsTailoring, setNeedsTailoring] = useState(false);
-
   const [selectedGroupType, setSelectedGroupType] = useState("");
-  
   const selectedUnits = groupTypes.find((type) => type[0] === selectedGroupType)?.[1] || [];
 
-  const [openMenu, setOpenMenu] = useState(-1); // Track which dropdown is open
-  const menuRefs = useRef<(HTMLDivElement | null)[]>([]); // Refs for dropdown menus
-  const tableRef = useRef<HTMLDivElement>(null); // Ref for table container
+  const [openMenu, setOpenMenu] = useState(-1);
+  const menuRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const tableRef = useRef<HTMLDivElement>(null);
 
   const toggleMenu = (index: number) => {
-    setOpenMenu(openMenu === index ? -1 : index); // Toggle menu for the clicked row
+    setOpenMenu(openMenu === index ? -1 : index);
   };
 
   const editMenu = (item) => {
@@ -60,7 +58,6 @@ const Items = () => {
     setNeedsTailoring(item[6]);
   }
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -78,7 +75,6 @@ const Items = () => {
     };
   }, []);
 
-  // Scroll to make dropdown fully visible when opened
   useEffect(() => {
     if (openMenu !== -1 && menuRefs.current[openMenu]) {
       const dropdown = menuRefs.current[openMenu];
@@ -86,17 +82,15 @@ const Items = () => {
         const rect = dropdown.getBoundingClientRect();
         const viewportHeight = window.innerHeight;
 
-        // Check if dropdown is partially or fully outside the viewport
         if (rect.bottom > viewportHeight) {
-          // Scroll to bring the dropdown into view
           dropdown.scrollIntoView({ behavior: "smooth", block: "end" });
         } else if (rect.top < 0) {
-          // Scroll up if dropdown is above the viewport
           dropdown.scrollIntoView({ behavior: "smooth", block: "start" });
         }
       }
     }
   }, [openMenu]);
+
   useEffect(() => {
     const fetchData = async () => {
       const cached = localStorage.getItem("itemData");
@@ -111,7 +105,6 @@ const Items = () => {
         }
       }
   
-      // Fetch fresh data from backend
       const freshData = await getItemsData();
       dispatch(setItemData(freshData));
       setItems(freshData);
@@ -120,91 +113,80 @@ const Items = () => {
   
     fetchData();
   }, [isFormOpen, deleted, dispatch]);
-  
 
-const deleteItem = async (name: string) => {
-  try {
-    // Delete request
-    const response = await fetch(
-      "https://sheeladecor.netlify.app/.netlify/functions/server/deletesingleproduct",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ productName: name }),
+  const deleteItem = async (name: string) => {
+    try {
+      const response = await fetch(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/deletesingleproduct",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ productName: name }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete the item");
       }
-    );
 
-    if (!response.ok) {
-      throw new Error("Failed to delete the item");
+      const updatedData = await getItemsData();
+      dispatch(setItemData(updatedData));
+      setItems(updatedData);
+      localStorage.setItem(
+        "itemData",
+        JSON.stringify({ data: updatedData, time: Date.now() })
+      );
+
+      setDeleted((prev) => !prev);
+      setOpenMenu(-1);
+    } catch (err) {
+      console.error("Error deleting item:", err);
     }
+  };
 
-    // Refetch updated items
-    const updatedData = await getItemsData();
+  const duplicateItem = async (item: Array<string>) => {
+    try {
+      const response = await fetch(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            productName: item[0],
+            description: item[1],
+            groupTypes: item[2],
+            sellingUnit: item[3],
+            mrp: item[4],
+            taxRate: item[5],
+            needsTailoring: item[6]
+          }),
+        }
+      );
 
-    // Update Redux and local state
-    dispatch(setItemData(updatedData));
-    setItems(updatedData);
-
-    // Update cache
-    localStorage.setItem(
-      "itemData",
-      JSON.stringify({ data: updatedData, time: Date.now() })
-    );
-
-    // UI updates
-    setDeleted((prev) => !prev);
-    setOpenMenu(-1);
-  } catch (err) {
-    console.error("Error deleting item:", err);
-  }
-};
-
-const duplicateItem = async (item: Array<string>) => {
-  try {
-    const response = await fetch(
-      "https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          productName: item[0],
-          description: item[1],
-          groupTypes: item[2],
-          sellingUnit: item[3],
-          mrp: item[4],
-          taxRate: item[5],
-          needsTailoring : item[6]
-        }),
+      if (!response.ok) {
+        throw new Error("Failed to duplicate the item");
       }
-    );
 
-    if (!response.ok) {
-      throw new Error("Failed to duplicate the item");
+      const updatedData = await getItemsData();
+      dispatch(setItemData(updatedData));
+      setItems(updatedData);
+      localStorage.setItem(
+        "itemData",
+        JSON.stringify({ data: updatedData, time: Date.now() })
+      );
+
+      setDeleted((prev) => !prev);
+      setOpenMenu(-1);
+    } catch (err) {
+      console.error("Error duplicating item:", err);
     }
-
-    const updatedData = await getItemsData();
-
-    // Update state and cache
-    dispatch(setItemData(updatedData));
-    setItems(updatedData);
-    localStorage.setItem(
-      "itemData",
-      JSON.stringify({ data: updatedData, time: Date.now() })
-    );
-
-    setDeleted((prev) => !prev);
-    setOpenMenu(-1);
-  } catch (err) {
-    console.error("Error duplicating item:", err);
-  }
-};
-
+  };
 
   const groupOptions: string[] = [
     "Fabric",
@@ -277,135 +259,129 @@ const duplicateItem = async (item: Array<string>) => {
     });
   };
 
-const editItemData = async () => {
-  try {
-    const response = await fetch(
-      "https://sheeladecor.netlify.app/.netlify/functions/server/updatesingleproduct",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          productName,
-          description,
-          groupTypes: selectedGroupType,
-          sellingUnit,
-          mrp,
-          taxRate,
-          needsTailoring
-        }),
+  const editItemData = async () => {
+    try {
+      const response = await fetch(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/updatesingleproduct",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            productName,
+            description,
+            groupTypes: selectedGroupType,
+            sellingUnit,
+            mrp,
+            taxRate,
+            needsTailoring
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update item");
       }
-    );
 
-    if (!response.ok) {
-      throw new Error("Failed to update item");
+      alert("Item Updated");
+
+      const updatedData = await getItemsData();
+      dispatch(setItemData(updatedData));
+      setItems(updatedData);
+      localStorage.setItem(
+        "itemData",
+        JSON.stringify({ data: updatedData, time: Date.now() })
+      );
+
+      setIsFormOpen(false);
+      setEditing(false);
+      setOpenMenu(-1);
+      setFormData({
+        productName: "",
+        productDetails: "",
+        groupType: "",
+        sellingUnit: "",
+        mrp: "",
+        taxRate: "",
+        additionalInputs: {},
+        sideDropdown: "",
+      });
+    } catch (error) {
+      console.error("Edit error:", error);
+      alert("Something went wrong while updating the item.");
     }
-
-    alert("Item Updated");
-
-    const updatedData = await getItemsData();
-
-    // 1. Update global state
-    dispatch(setItemData(updatedData));
-
-    // 2. Update local state
-    setItems(updatedData);
-
-    // 3. Refresh cache
-    localStorage.setItem(
-      "itemData",
-      JSON.stringify({ data: updatedData, time: Date.now() })
-    );
-
-    // 4. Reset UI/form state
-    setIsFormOpen(false);
-    setEditing(false);
-    setOpenMenu(-1);
-    setFormData({
-      productName: "",
-      productDetails: "",
-      groupType: "",
-      sellingUnit: "",
-      mrp: "",
-      taxRate: "",
-      additionalInputs: {},
-      sideDropdown: "",
-    });
-
-  } catch (error) {
-    console.error("Edit error:", error);
-    alert("Something went wrong while updating the item.");
-  }
-};
-
-
-const handleSubmit = async () => {
-  const newItem = {
-    id: items.length + 1,
-    name: formData.productName,
-    description: formData.productDetails,
-    costingType: formData.sellingUnit,
-    groupType: formData.groupType,
-    entryDate: new Date().toLocaleDateString(),
-    additionalInputs: formData.additionalInputs,
-    sideDropdown: formData.sideDropdown,
-    mrp: formData.mrp,
-    taxrate: formData.taxRate,
-    needsTailoring : needsTailoring
   };
 
-  try {
-    const response = await fetch(
-      "https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          productName: newItem.name,
-          description: newItem.description,
-          groupTypes: newItem.groupType,
-          sellingUnit: newItem.costingType,
-          mrp: newItem.mrp,
-          taxRate: newItem.taxrate,
-          needsTailoring
-        }),
+  const handleSubmit = async () => {
+    const newItem = {
+      id: items.length + 1,
+      name: formData.productName,
+      description: formData.productDetails,
+      costingType: formData.sellingUnit,
+      groupType: formData.groupType,
+      entryDate: new Date().toLocaleDateString(),
+      additionalInputs: formData.additionalInputs,
+      sideDropdown: formData.sideDropdown,
+      mrp: formData.mrp,
+      taxrate: formData.taxRate,
+      needsTailoring: needsTailoring
+    };
+
+    try {
+      const response = await fetch(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            productName: newItem.name,
+            description: newItem.description,
+            groupTypes: newItem.groupType,
+            sellingUnit: newItem.costingType,
+            mrp: newItem.mrp,
+            taxRate: newItem.taxrate,
+            needsTailoring
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to add new item");
       }
-    );
 
-    if (!response.ok) {
-      throw new Error("Failed to add new item");
+      const updatedData = await getItemsData();
+      dispatch(setItemData(updatedData));
+      setItems(updatedData);
+      localStorage.setItem("itemData", JSON.stringify({ data: updatedData, time: Date.now() }));
+
+      alert("Item Added");
+      setIsFormOpen(false);
+      setFormData({
+        productName: "",
+        productDetails: "",
+        groupType: "",
+        sellingUnit: "",
+        mrp: "",
+        taxRate: "",
+        additionalInputs: {},
+        sideDropdown: "",
+      });
+      setNeedsTailoring(false);
+    } catch (error) {
+      console.error("Error adding item:", error);
+      alert("Error adding item");
     }
+  };
 
-    const updatedData = await getItemsData();
-
-    dispatch(setItemData(updatedData));
-    setItems(updatedData);
-    localStorage.setItem("itemData", JSON.stringify({ data: updatedData, time: Date.now() }));
-
-    alert("Item Added");
-    setIsFormOpen(false);
-    setFormData({
-      productName: "",
-      productDetails: "",
-      groupType: "",
-      sellingUnit: "",
-      mrp: "",
-      taxRate: "",
-      additionalInputs: {},
-      sideDropdown: "",
-    });
-    setNeedsTailoring(false);
-
-  } catch (error) {
-    console.error("Error adding item:", error);
-    alert("Error adding item");
-  }
-};
+  // Filter items by productName (item[0])
+  const filteredItems = items.filter((item) =>
+    item[0]?.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="bg-gray-50 min-h-screen pt-20 md:p-4">
@@ -439,7 +415,7 @@ const handleSubmit = async () => {
         </div>
 
         {isFormOpen && (
-            <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
+          <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
             <h2 className="text-2xl font-semibold mb-4">Product Details</h2>
             <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); }}>
               <div>
@@ -450,6 +426,7 @@ const handleSubmit = async () => {
                   type="text"
                   name="productName"
                   value={productName}
+                  onChange={(e) => setProductName(e.target.value)}
                   placeholder="Enter Product Name"
                   className="w-full p-2 border rounded-md"
                   required
@@ -468,45 +445,45 @@ const handleSubmit = async () => {
               </div>
       
               <div className="grid grid-cols-2 gap-4">
-              <div>
-              <label className="block font-medium">
-                Group Type <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="groupType"
-                value={selectedGroupType}
-                onChange={(e) => setSelectedGroupType(e.target.value)}
-                className="w-full p-2 border rounded-md"
-                required
-              >
-                <option value="">Select Group Type</option>
-                {groupTypes.map(([label]) => (
-                  <option key={label} value={label}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
+                <div>
+                  <label className="block font-medium">
+                    Group Type <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="groupType"
+                    value={selectedGroupType}
+                    onChange={(e) => setSelectedGroupType(e.target.value)}
+                    className="w-full p-2 border rounded-md"
+                    required
+                  >
+                    <option value="">Select Group Type</option>
+                    {groupTypes.map(([label]) => (
+                      <option key={label} value={label}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
       
-            <div>
-              <label className="block font-medium">
-                Selling Unit <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="sellingUnit"
-                value={sellingUnit}
-                onChange={(e) => setSellingUnit(e.target.value)}
-                className="w-full p-2 border rounded-md"
-                required
-              >
-                <option value="">Select Selling Unit</option>
-                {selectedUnits.map((unit) => (
-                  <option key={unit} value={unit}>
-                    {unit}
-                  </option>
-                ))}
-              </select>
-            </div>
+                <div>
+                  <label className="block font-medium">
+                    Selling Unit <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="sellingUnit"
+                    value={sellingUnit}
+                    onChange={(e) => setSellingUnit(e.target.value)}
+                    className="w-full p-2 border rounded-md"
+                    required
+                  >
+                    <option value="">Select Selling Unit</option>
+                    {selectedUnits.map((unit) => (
+                      <option key={unit} value={unit}>
+                        {unit}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
       
               <div className="grid grid-cols-2 gap-4">
@@ -554,7 +531,16 @@ const handleSubmit = async () => {
               <div className="flex gap-2 justify-end space-x-4">
                 <button
                   type="button"
-                  onClick={() => { setIsFormOpen(false); setEditing(false); setProductName(""); setDescription(""); setGroupType(""); setSellingUnit(""); setMrp(""); setTaxRate(""); }}
+                  onClick={() => {
+                    setIsFormOpen(false);
+                    setEditing(false);
+                    setProductName("");
+                    setDescription("");
+                    setGroupType("");
+                    setSellingUnit("");
+                    setMrp("");
+                    setTaxRate("");
+                  }}
                   className="px-4 py-2 border !rounded-lg"
                 >
                   Cancel
@@ -590,52 +576,60 @@ const handleSubmit = async () => {
               </tr>
             </thead>
             <tbody>
-              {items != undefined && items.map((item, index) => (
-                <tr key={index} className="border-t relative hover:bg-sky-50">
-                  <td className="py-2 px-4">{item[0]}</td>
-                  <td className="py-2 px-4">{item[1]}</td>
-                  <td className="py-2 px-4">{item[3]}</td>
-                  <td className="py-2 px-4">{item[2]}</td>
-                  <td className="py-2 px-4 relative">
-                    <button
-                      onClick={() => toggleMenu(index)}
-                      className="p-2 rounded hover:bg-gray-200 text-gray-600 text-xl"
-                      aria-expanded={openMenu === index}
-                      aria-controls={`menu-${index}`}
-                    >
-                      ⋮
-                    </button>
-                    <div
-                      id={`menu-${index}`}
-                      className={`absolute right-4 top-10 w-32 bg-white shadow-md border rounded-md z-50 transition-all duration-200 ease-in-out ${
-                        openMenu === index
-                          ? 'opacity-100 scale-100'
-                          : 'opacity-0 scale-95 pointer-events-none'
-                      }`}
-                      ref={(el) => (menuRefs.current[index] = el)}
-                    >
+              {filteredItems.length > 0 ? (
+                filteredItems.map((item, index) => (
+                  <tr key={index} className="border-t relative hover:bg-sky-50">
+                    <td className="py-2 px-4">{item[0]}</td>
+                    <td className="py-2 px-4">{item[1]}</td>
+                    <td className="py-2 px-4">{item[3]}</td>
+                    <td className="py-2 px-4">{item[2]}</td>
+                    <td className="py-2 px-4 relative">
                       <button
-                        className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                        onClick={() => editMenu(item)}
+                        onClick={() => toggleMenu(index)}
+                        className="p-2 rounded hover:bg-gray-200 text-gray-600 text-xl"
+                        aria-expanded={openMenu === index}
+                        aria-controls={`menu-${index}`}
                       >
-                        Edit
+                        ⋮
                       </button>
-                      <button
-                        className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                        onClick={() => duplicateItem(item)}
+                      <div
+                        id={`menu-${index}`}
+                        className={`absolute right-4 top-10 w-32 bg-white shadow-md border rounded-md z-50 transition-all duration-200 ease-in-out ${
+                          openMenu === index
+                            ? 'opacity-100 scale-100'
+                            : 'opacity-0 scale-95 pointer-events-none'
+                        }`}
+                        ref={(el) => (menuRefs.current[index] = el)}
                       >
-                        Duplicate
-                      </button>
-                      <button
-                        className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-100"
-                        onClick={() => deleteItem(item[0])}
-                      >
-                        Delete
-                      </button>
-                    </div>
+                        <button
+                          className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                          onClick={() => editMenu(item)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                          onClick={() => duplicateItem(item)}
+                        >
+                          Duplicate
+                        </button>
+                        <button
+                          className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-100"
+                          onClick={() => deleteItem(item[0])}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="text-center py-4">
+                    No items found.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>

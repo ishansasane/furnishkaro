@@ -5,8 +5,6 @@ import { RootState } from "../Redux/Store";
 import { useSelector, useDispatch } from "react-redux";
 import { setSalesAssociateData } from "../Redux/dataSlice";
 import { useNavigate } from "react-router-dom";
-  
-
 
 // Fetch Sales Associates
 async function fetchSalesAssociates() {
@@ -53,17 +51,17 @@ export default function SalesAssociates() {
   const [refresh, setRefresh] = useState(false);
 
   const dispatch = useDispatch();
-  const salesAssociateData = useSelector((state : RootState) => state.data.salesAssociates);
+  const salesAssociateData = useSelector((state: RootState) => state.data.salesAssociates);
 
   useEffect(() => {
     async function getSalesAssociates() {
       const data = await fetchSalesAssociates();
       dispatch(setSalesAssociateData(data));
-      setSalesAssociates(salesAssociateData);
+      setSalesAssociates(data);
     }
-    if(salesAssociateData.length == 0){
+    if (salesAssociateData.length === 0) {
       getSalesAssociates();
-    }else{
+    } else {
       setSalesAssociates(salesAssociateData);
     }
   }, [dispatch, salesAssociateData]);
@@ -72,18 +70,27 @@ export default function SalesAssociates() {
     async function getSalesAssociates() {
       const data = await fetchSalesAssociates();
       dispatch(setSalesAssociateData(data));
-      setSalesAssociates(salesAssociateData);
+      setSalesAssociates(data);
     }
-    if(refresh){
+    if (refresh) {
       getSalesAssociates();
       setRefresh(false);
     }
-  }, [refresh])
+  }, [refresh]);
+
+  // Filter by Name (index 0)
+  const filteredAssociates = salesAssociates.filter((sa) =>
+    sa[0]?.toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
     <div className="md:p-6 pt-20 h-full bg-gray-50">
       <div className="flex flex-wrap justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">🛒 Sales Associates</h1>
-        <button className="flex !rounded-lg items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md" onClick={() => navigate("/sales-associateDialog")}>
+        <button
+          className="flex !rounded-lg items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md"
+          onClick={() => navigate("/sales-associateDialog")}
+        >
           <Plus size={18} /> Add Sales Associate
         </button>
       </div>
@@ -97,44 +104,63 @@ export default function SalesAssociates() {
           className="border px-3 py-2 rounded-md w-full"
         />
       </div>
+
       <div className="bg-white overflow-x-auto shadow rounded-lg p-5">
-      <table className="w-full">
-        <thead className="bg-sky-50">
-          <tr>
-            <th className="px-4 py-3">Name</th>
-            <th className="px-4 py-3">Email</th>
-            <th className="px-4 py-3">Phone Number</th>
-            <th className="px-4 py-3">Address</th>
-            <th className="px-4 py-3">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {salesAssociates.length > 0 ? (
-            salesAssociates.map((salesAssociate, index) => (
-              <tr key={index} className="hover:bg-sky-50">
-                <td className="px-4 py-2">{salesAssociate[0]}</td>
-                <td className="px-4 py-2">{salesAssociate[1]}</td>
-                <td className="px-4 py-2">{salesAssociate[2]}</td>
-                <td className="px-4 py-2">{salesAssociate[3]}</td>
-                <td className="px-4 py-2 flex gap-2">
-                  <button className="border px-2 py-1 rounded-md bg-gray-300" onClick={() => { setEditingSalesAssociate(salesAssociate); setDialogOpen(true); }}>
-                    <Edit size={16} />
-                  </button>
-                  <button className="border px-2 py-1 rounded-md bg-red-500 text-white" onClick={() => deleteSalesAssociate(salesAssociate[0], setRefresh, refresh)}>
-                    <Trash2 size={16} />
-                  </button>
-                </td>
-              </tr>
-            ))
-          ) : (
+        <table className="w-full">
+          <thead className="bg-sky-50">
             <tr>
-              <td colSpan={5} className="text-center py-4">No sales associates found.</td>
+              <th className="px-4 py-3">Name</th>
+              <th className="px-4 py-3">Email</th>
+              <th className="px-4 py-3">Phone Number</th>
+              <th className="px-4 py-3">Address</th>
+              <th className="px-4 py-3">Actions</th>
             </tr>
-          )}
-        </tbody>
-      </table>
-</div>
-      {isDialogOpen && <SalesAssociateDialog setDialogOpen={setDialogOpen} setRefresh={setRefresh} refresh={refresh} editingSalesAssociate={editingSalesAssociate} setEditingSalesAssociate={setEditingSalesAssociate} />}
+          </thead>
+          <tbody>
+            {filteredAssociates.length > 0 ? (
+              filteredAssociates.map((sa, index) => (
+                <tr key={index} className="hover:bg-sky-50">
+                  <td className="px-4 py-2">{sa[0]}</td>
+                  <td className="px-4 py-2">{sa[1]}</td>
+                  <td className="px-4 py-2">{sa[2]}</td>
+                  <td className="px-4 py-2">{sa[3]}</td>
+                  <td className="px-4 py-2 flex gap-2">
+                    <button
+                      className="border px-2 py-1 rounded-md bg-gray-300"
+                      onClick={() => {
+                        setEditingSalesAssociate(sa);
+                        setDialogOpen(true);
+                      }}
+                    >
+                      <Edit size={16} />
+                    </button>
+                    <button
+                      className="border px-2 py-1 rounded-md bg-red-500 text-white"
+                      onClick={() => deleteSalesAssociate(sa[0], setRefresh, refresh)}
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={5} className="text-center py-4">No sales associates found.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {isDialogOpen && (
+        <SalesAssociateDialog
+          setDialogOpen={setDialogOpen}
+          setRefresh={setRefresh}
+          refresh={refresh}
+          editingSalesAssociate={editingSalesAssociate}
+          setEditingSalesAssociate={setEditingSalesAssociate}
+        />
+      )}
     </div>
   );
 }
