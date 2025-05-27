@@ -51,6 +51,8 @@ function AddProjectForm() {
 
   const [projectAddress, setProjectAddress] = useState(null);
 
+  const projects = useSelector(( state : RootState ) => state.data.projects);
+
   interface Additional {
     name: string;
     quantity: number;
@@ -77,7 +79,7 @@ function AddProjectForm() {
 
   interface CollectionArea {
     productGroup: any;
-    items: any[];
+    items: any;
     company: string | null;
     catalogue: any[];
     designNo: string | null;
@@ -252,14 +254,31 @@ function AddProjectForm() {
     const newproduct = product.split(",");
     updatedSelections[mainindex].areacollection[i].productGroup = newproduct;
   
+
     const pg = newproduct;
     if (!Array.isArray(pg) || pg.length < 2) return;
   
-    const relevantPG = pg.length > 2 ? pg.slice(1, -2) : [];
+    console.log(pg);
+
+    let relevantPG = pg.length > 2 ? pg.slice(1, -1) : null;
   
-    const newMatchedItems = relevantPG.map(pgItem =>
-      items.find(item => item[0] === pgItem)
-    ).filter(item => Array.isArray(item));
+    let newMatchedItems = null;
+
+    console.log(relevantPG);
+
+    if(relevantPG != null){
+      newMatchedItems = relevantPG.map(pgItem =>
+        items.find(item => item[0] === pgItem)
+      ).filter(item => Array.isArray(item));
+    }else{
+      newMatchedItems = [product];
+    }
+    console.log(newMatchedItems);
+
+    if(newMatchedItems.length == 0){
+      newMatchedItems = [product.split(",")];
+    }
+    console.log(newMatchedItems);
   
     updatedSelections[mainindex].areacollection[i].items = newMatchedItems;
     setSelections(updatedSelections);
@@ -737,6 +756,7 @@ function AddProjectForm() {
       goodsArray: deepClone(parseSafely(row[15], [])),
       tailorsArray: deepClone(parseSafely(row[16], [])),
       projectAddress : row[17],
+      date : row[18],
     }));
 
     return projects;
@@ -744,6 +764,29 @@ function AddProjectForm() {
 
 const sendProjectData = async () => {
   try {
+    // STEP 1: Get projects from Redux
+    let allProjects = projects;
+
+    // STEP 2: If Redux store has no projects, fetch them
+    if (!allProjects || allProjects.length === 0) {
+      allProjects = await fetchProjectData();
+      // Optional: Cache fetched data
+      dispatch(setProjects(allProjects));
+    }
+
+    // STEP 3: Check for duplicate project name
+    const isDuplicate = allProjects.some(
+      (project) => project.projectName?.toLowerCase().trim() === projectName?.toLowerCase().trim()
+    );
+
+    if (isDuplicate) {
+      alert(`Project "${projectName}" already exists.`);
+      return; // Stop sending
+    }
+
+    const date = Date.now();
+
+    // STEP 4: Proceed with sending project data
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/sendprojectdata", {
       method: "POST",
       credentials: "include",
@@ -769,6 +812,7 @@ const sendProjectData = async () => {
         goodsArray: JSON.stringify(goodsArray),
         tailorsArray: JSON.stringify(tailorsArray),
         projectAddress: JSON.stringify(projectAddress),
+        date
       }),
     });
 
@@ -797,67 +841,62 @@ const sendProjectData = async () => {
 };
 
 
+
   const [goodsItems, setGoodsItems] = useState<any[]>([]);
-  useEffect(() => {
-    const fetchAndDispatch = async (
-      fetchFn: () => Promise<any>,
-      dispatchFn: (data: any) => void,
-      key: string,
-      setStateFn?: (data: any) => void
-    ) => {
-      try {
-        const oneHour = 3600 * 1000;
-        let shouldFetch = true;
-  
-        const cached = localStorage.getItem(key);
-        if (cached) {
-          const { data, time } = JSON.parse(cached);
-  
-          if (Date.now() - time < oneHour) {
-            dispatch(dispatchFn(data));
-            setStateFn?.(data);
-            shouldFetch = false;
-          } else {
-            localStorage.removeItem(key);
-          }
+useEffect(() => {
+  const fetchAndDispatch = async (
+    fetchFn: () => Promise<any>,
+    dispatchFn: (data: any) => void,
+    key: string,
+    setStateFn?: (data: any) => void
+  ) => {
+    try {
+      const oneHour = 3600 * 1000;
+      let shouldFetch = true;
+
+      const cached = localStorage.getItem(key);
+      if (cached) {
+        const { data, time } = JSON.parse(cached);
+
+        if (Date.now() - time < oneHour) {
+          dispatch(dispatchFn(data));
+          setStateFn?.(data);
+          shouldFetch = false;
+        } else {
+          localStorage.removeItem(key);
         }
-  
-        if (shouldFetch) {
-          const freshData = await fetchFn();
-          dispatch(dispatchFn(freshData));
-          setStateFn?.(freshData);
-          localStorage.setItem(key, JSON.stringify({ data: freshData, time: Date.now() }));
-        }
-      } catch (error) {
-        console.error(`Error fetching ${key}:`, error);
       }
-    };
-  
-    const fetchAllData = async () => {
-      await Promise.all([
-        fetchAndDispatch(fetchInteriors, setInteriorData, "interiorData", setInterior),
-        fetchAndDispatch(
-          async () => {
-            const response = await fetch(
-              "https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts",
-              { credentials: "include" }
-            );
-            const result = await response.json();
-            return result.body || [];
-          },
-          setItemData,
-          "itemsData",
-          setSingleItems
-        ),
-        fetchAndDispatch(fetchSalesAssociates, setSalesAssociateData, "salesAssociateData", setSalesData),
-        fetchAndDispatch(fetchProductGroups, setProducts, "productsData", setAvailableProductGroups),
-        fetchAndDispatch(fetchCatalogues, setCatalogs, "catalogueData"),
-        fetchAndDispatch(fetchCustomers, setCustomerData, "customerData", setCustomers)
-      ]);
-    };
-  
-    fetchAllData();
-  }, [dispatch]);
+
+      if (shouldFetch) {
+        const freshData = await fetchFn();
+        dispatch(dispatchFn(freshData));
+        setStateFn?.(freshData);
+        localStorage.setItem(key, JSON.stringify({ data: freshData, time: Date.now() }));
+      }
+    } catch (error) {
+      console.error(`Error fetching ${key}:`, error);
+    }
+  };
+
+  const fetchAllData = async () => {
+    await Promise.all([
+      fetchAndDispatch(fetchInteriors, setInteriorData, "interiorData", setInterior),
+      fetchAndDispatch(
+        getItemsData, // ✅ using your function here
+        setItemData,
+        "itemsData",
+        setSingleItems
+      ),
+      fetchAndDispatch(fetchSalesAssociates, setSalesAssociateData, "salesAssociateData", setSalesData),
+      fetchAndDispatch(fetchProductGroups, setProducts, "productsData", setAvailableProductGroups),
+      fetchAndDispatch(fetchCatalogues, setCatalogs, "catalogueData"),
+      fetchAndDispatch(fetchCustomers, setCustomerData, "customerData", setCustomers)
+    ]);
+  };
+
+  fetchAllData();
+}, [dispatch]);
+
 
   useEffect(() => {
     async function getAreas() {
@@ -1063,6 +1102,7 @@ const sendProjectData = async () => {
         handleReferenceChange={handleReferenceChange}
         handleGroupDelete={handleGroupDelete}
         setAvailableAreas={setAvailableAreas}
+        singleItems={singleItems}
       />
       <MeasurementSection
         selections={selections}
@@ -1084,81 +1124,86 @@ const sendProjectData = async () => {
               <p className="font-semibold mb-2">{selection.area}</p>
               <table className="w-full border-collapse mb-6 text-xs sm:text-sm">
                 <tbody>
-                  {selection.areacollection && selection.areacollection.length > 0 ? (
-                    selection.areacollection.map((collection, collectionIndex) => {
-                      const pg = collection.productGroup;
-                      if (!Array.isArray(pg) || pg.length < 2) return null;
-                      const relevantPG = pg.length > 2 ? pg.slice(1, -2) : [];
-                      const matchedItems = relevantPG.map((pgItem) => {
-                        const matched = items.find((item) => item[0] === pgItem);
-                        return matched || pgItem;
-                      });
-                      const validMatchedItems = matchedItems.filter((el) => Array.isArray(el));
-                      return validMatchedItems.map((item, itemIndex) => {
-                        const key = `${mainIndex}-${collectionIndex}-${itemIndex}`;
-                        const qty = selection.areacollection[collectionIndex]?.quantities?.[itemIndex] || 0;
-                        return (
-                          <tr
-                            key={key}
-                            className="flex flex-col sm:flex-row justify-between w-full border-b p-2 sm:p-4"
-                          >
-                            <td className="w-full sm:w-[10%] text-xs sm:text-sm">{itemIndex + 1}</td>
-                            <td className="w-full sm:w-[45%] text-xs sm:text-sm">
-                              {item[0] + " * " + collection.measurement.quantity}
-                            </td>
-                            <td className="w-full sm:w-[45%] text-xs sm:text-sm">
-                              {collection.measurement.width +
-                                " x " +
-                                collection.measurement.height +
-                                " " +
-                                collection.measurement.unit}
-                            </td>
-                            <td className="w-full sm:w-[20%] text-xs sm:text-sm">
-                              {(item[4] * parseFloat(collection.measurement.quantity)).toFixed(2)}
-                            </td>
-                            <td className="w-full sm:w-[20%]">
-                              <div className="flex flex-col">
-                                <input
-                                  type="text"
-                                  value={selection.areacollection[collectionIndex]?.quantities?.[itemIndex] || ""}
-                                  onChange={(e) =>
-                                    handleQuantityChange(
-                                      key,
-                                      e.target.value,
-                                      mainIndex,
-                                      collectionIndex,
-                                      collection.measurement.quantity,
-                                      item[4],
-                                      item[5],
-                                      itemIndex
-                                    )
-                                  }
-                                  className="border w-full sm:w-2/5 px-2 py-1 rounded text-xs sm:text-sm"
-                                />
-                                <p className="text-[10px] sm:text-xs text-gray-600">{item[3]}</p>
-                              </div>
-                            </td>
-                            <td className="w-full sm:w-[20%] text-xs sm:text-sm">
-                              {(item[4] * parseFloat(collection.measurement.quantity) * qty).toFixed(2)}
-                            </td>
-                            <td className="w-full sm:w-[20%] text-xs sm:text-sm">{item[5]}</td>
-                            <td className="w-full sm:w-[20%] text-xs sm:text-sm">
-                              {collection.totalTax[itemIndex] ? collection.totalTax[itemIndex].toFixed(2) : "0.00"}
-                            </td>
-                            <td className="w-full sm:w-[20%] text-xs sm:text-sm">
-                              {collection.totalAmount[itemIndex] ? collection.totalAmount[itemIndex].toFixed(2) : "0.00"}
-                            </td>
-                          </tr>
-                        );
-                      });
-                    })
-                  ) : (
-                    <tr>
-                      <td colSpan={9} className="text-center py-2 text-gray-500 text-sm sm:text-base">
-                        No product data available.
-                      </td>
-                    </tr>
-                  )}
+{selection.areacollection && selection.areacollection.length > 0 ? (
+  selection.areacollection.map((collection, collectionIndex) => {
+    if (!Array.isArray(collection.items)) {
+      return (
+        <tr key={`error-${collectionIndex}`}>
+          <td colSpan={9} className="text-center text-red-500 text-sm py-2">
+            No items found for collection {collectionIndex + 1}
+          </td>
+        </tr>
+      );
+    }
+
+    return collection.items.map((item: any, itemIndex: number) => {
+      const key = `${mainIndex}-${collectionIndex}-${itemIndex}`;
+      const qty = collection.quantities?.[itemIndex] || 0;
+
+      return (
+        <tr
+          key={key}
+          className="flex flex-col sm:flex-row justify-between w-full border-b p-2 sm:p-4"
+        >
+          <td className="w-full sm:w-[10%] text-xs sm:text-sm">{itemIndex + 1}</td>
+          <td className="w-full sm:w-[45%] text-xs sm:text-sm">
+            {item[0] + " * " + collection.measurement.quantity}
+          </td>
+          <td className="w-full sm:w-[45%] text-xs sm:text-sm">
+            {collection.measurement.width +
+              " x " +
+              collection.measurement.height +
+              " " +
+              collection.measurement.unit}
+          </td>
+          <td className="w-full sm:w-[20%] text-xs sm:text-sm">
+            {(item[4] * parseFloat(collection.measurement.quantity)).toFixed(2)}
+          </td>
+          <td className="w-full sm:w-[20%]">
+            <div className="flex flex-col">
+              <input
+                type="text"
+                value={collection.quantities?.[itemIndex] || ""}
+                onChange={(e) =>
+                  handleQuantityChange(
+                    key,
+                    e.target.value,
+                    mainIndex,
+                    collectionIndex,
+                    collection.measurement.quantity,
+                    item[4],
+                    item[5],
+                    itemIndex
+                  )
+                }
+                className="border w-full sm:w-2/5 px-2 py-1 rounded text-xs sm:text-sm"
+              />
+              <p className="text-[10px] sm:text-xs text-gray-600">{item[3]}</p>
+            </div>
+          </td>
+          <td className="w-full sm:w-[20%] text-xs sm:text-sm">
+            {(item[4] * parseFloat(collection.measurement.quantity) * qty).toFixed(2)}
+          </td>
+          <td className="w-full sm:w-[20%] text-xs sm:text-sm">{item[5]}</td>
+          <td className="w-full sm:w-[20%] text-xs sm:text-sm">
+            {collection.totalTax[itemIndex] ? collection.totalTax[itemIndex].toFixed(2) : "0.00"}
+          </td>
+          <td className="w-full sm:w-[20%] text-xs sm:text-sm">
+            {collection.totalAmount[itemIndex] ? collection.totalAmount[itemIndex].toFixed(2) : "0.00"}
+          </td>
+        </tr>
+      );
+    });
+  })
+) : (
+  <tr>
+    <td colSpan={9} className="text-center py-2 text-gray-500 text-sm sm:text-base">
+      No product data available.
+    </td>
+  </tr>
+)}
+
+
                 </tbody>
               </table>
             </div>

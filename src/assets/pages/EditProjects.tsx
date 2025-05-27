@@ -385,33 +385,49 @@ const EditProjects = ({ projectData, index, goBack, projects, Tax, setTax, Amoun
         designNo: null,
         reference: null,
         measurement: { unit: "Centimeter (cm)", width: undefined, height: undefined, quantity: undefined },
-        additionalItems: [],
         totalAmount: [],
-        totalTax: []
+        totalTax: [],
+        quantities: [],
       };
     }
   
     const newproduct = product.split(",");
     updatedSelections[mainindex].areacollection[i].productGroup = newproduct;
   
+
     const pg = newproduct;
     if (!Array.isArray(pg) || pg.length < 2) return;
   
-    const relevantPG = pg.length > 2 ? pg.slice(1, -2) : [];
+    console.log(pg);
+
+    let relevantPG = pg.length > 2 ? pg.slice(1, -1) : null;
   
-    const newMatchedItems = relevantPG.map(pgItem =>
-      items.find(item => item[0] === pgItem)
-    ).filter(item => Array.isArray(item));
+    let newMatchedItems = null;
+
+    console.log(relevantPG);
+
+    if(relevantPG != null){
+      newMatchedItems = relevantPG.map(pgItem =>
+        items.find(item => item[0] === pgItem)
+      ).filter(item => Array.isArray(item));
+    }else{
+      newMatchedItems = [product];
+    }
+    console.log(newMatchedItems);
+
+    if(newMatchedItems.length == 0){
+      newMatchedItems = [product.split(",")];
+    }
+    console.log(newMatchedItems);
   
     updatedSelections[mainindex].areacollection[i].items = newMatchedItems;
     setSelections(updatedSelections);
   
-    // Remove old entries for this area and group index
     const filteredGoods = goodsArray.filter(
       g => !(g.mainindex === mainindex && g.groupIndex === i)
     );
   
-    const newGoods = newMatchedItems.map((item, itemindex) => ({
+    const newGoods = newMatchedItems.map((item) => ({
       mainindex,
       groupIndex: i,
       pg: newproduct,
@@ -419,7 +435,7 @@ const EditProjects = ({ projectData, index, goBack, projects, Tax, setTax, Amoun
       status: "Pending",
       orderID: "",
       remark: "NA",
-      item : item,
+      item: item,
     }));
   
     setGoodsArray([...filteredGoods, ...newGoods]);
@@ -429,7 +445,7 @@ const EditProjects = ({ projectData, index, goBack, projects, Tax, setTax, Amoun
     );
   
     const newTailors = newMatchedItems
-      .filter(item => item[2] === "Tailoring")
+      .filter(item => item[7] == true)
       .map((item, itemIndex) => ({
         mainindex,
         groupIndex: i,
@@ -438,13 +454,10 @@ const EditProjects = ({ projectData, index, goBack, projects, Tax, setTax, Amoun
         tailorData: [""],
         status: "Pending",
         remark: "NA",
-        item : item,
+        item: item,
       }));
   
     setTailorsArray([...filteredTailors, ...newTailors]);
-
-    console.log(tailorsArray);
-    console.log(goodsArray);
   };
   
   
@@ -1367,6 +1380,7 @@ useEffect(() => {
                   handleGroupDelete = {handleGroupDelete}
                   projectData={projectData}
                   setAvailableAreas={setAvailableAreas}
+                  singleItems={singleitems}
                 />
               <div className="flex flex-row justify-between">
                     <button onClick={() => setNavState("Customer & Project Details")} style={{ borderRadius : "8px" }} className="rounded-lg border px-2 h-8 bg-white">Back</button>
@@ -1415,76 +1429,84 @@ useEffect(() => {
                 </tr>
               </thead>
               <tbody>
-  {selection.areacollection && selection.areacollection.length > 0 ? (
-    selection.areacollection.map((collection, collectionIndex) => {
-      const pg = collection.productGroup;
+{selection.areacollection && selection.areacollection.length > 0 ? (
+  selection.areacollection.map((collection, collectionIndex) => {
+    if (!Array.isArray(collection.items)) {
+      return (
+        <tr key={`error-${collectionIndex}`}>
+          <td colSpan={9} className="text-center text-red-500 text-sm py-2">
+            No items found for collection {collectionIndex + 1}
+          </td>
+        </tr>
+      );
+    }
 
-      if (!Array.isArray(pg) || pg.length < 2) return null;
+    return collection.items.map((item: any, itemIndex: number) => {
+      const key = `${mainindex}-${collectionIndex}-${itemIndex}`;
+      const qty = collection.quantities?.[itemIndex] || 0;
 
-      const relevantPG = pg.length > 2 ? pg.slice(1, -2) : [];
-
-      // Replace strings in productGroup with matched item arrays
-      const matchedItems = relevantPG.map((pgItem) => {
-        const matched = items.find((item) => item[0] === pgItem);
-        return matched || pgItem; // if match not found, keep original
-      });
-
-      // Update productGroup with replaced arrays
-      collection.items = [                 // keep the first element (title/groupName maybe)
-        ...matchedItems,          // updated product items       // last (e.g., addon maybe)
-      ];
-      // Filter only matched full item arrays (to avoid rendering original strings)
-      const validMatchedItems = matchedItems.filter((el) => Array.isArray(el));
-
-      
-      return validMatchedItems.map((item, itemIndex) => {
-        const key = `${mainindex}-${collectionIndex}-${itemIndex}`;
-        const qty = selection.areacollection[collectionIndex]?.quantities?.[itemIndex] || 0;   
-        return (
-          <tr key={key} className="flex justify-between w-full border-b p-2">
-            <td className="w-[10%]">{itemIndex}</td>
-            <td className="w-[45%]">{item[0] + " * " + collection.measurement.quantity}</td>
-            <td className="w-[45%]">
-              {collection.measurement.width + "*" + collection.measurement.height + " " + collection.measurement.unit}
-            </td>
-            <td className="w-[20%]">{item[4] * collection.measurement.quantity}</td>
-            <td className="w-[20%]">
-              <div className="flex flex-col">
-                <input
-                  type="text"
-                  value={selection.areacollection[collectionIndex]?.quantities?.[itemIndex] || ""} 
-                  onChange={(e) =>
-                    handleQuantityChange(
-                      key,
-                      e.target.value,
-                      mainindex,
-                      collectionIndex,
-                      collection.measurement.quantity,
-                      item[4],
-                      item[5],
-                      itemIndex
-                    )
-                  }
-                  className="border w-[40%] px-2 py-1 rounded"
-                />
-                <p className=" text-[0.8vw] text-gray-600">{item[3]}</p>
-              </div>
-            </td>
-            <td className="w-[20%]">{item[4] * collection.measurement.quantity * qty}</td>
-            <td className="w-[20%]">{item[5]}</td>
-            <td className="w-[20%]">{collection.totalTax[itemIndex]}</td>
-            <td className="w-[20%]">{collection.totalAmount[itemIndex]}</td>
-          </tr>
-        );
-      });
-    })
-  ) : (
-    <tr>
-      <td colSpan="7" className="text-center py-2 text-gray-500">
-        No product data available.
-      </td>
-    </tr>
-  )}
+      return (
+        <tr
+          key={key}
+          className="flex flex-col sm:flex-row justify-between w-full border-b p-2 sm:p-4"
+        >
+          <td className="w-full sm:w-[10%] text-xs sm:text-sm">{itemIndex + 1}</td>
+          <td className="w-full sm:w-[45%] text-xs sm:text-sm">
+            {item[0] + " * " + collection.measurement.quantity}
+          </td>
+          <td className="w-full sm:w-[45%] text-xs sm:text-sm">
+            {collection.measurement.width +
+              " x " +
+              collection.measurement.height +
+              " " +
+              collection.measurement.unit}
+          </td>
+          <td className="w-full sm:w-[20%] text-xs sm:text-sm">
+            {(item[4] * parseFloat(collection.measurement.quantity)).toFixed(2)}
+          </td>
+          <td className="w-full sm:w-[20%]">
+            <div className="flex flex-col">
+              <input
+                type="text"
+                value={collection.quantities?.[itemIndex] || ""}
+                onChange={(e) =>
+                  handleQuantityChange(
+                    key,
+                    e.target.value,
+                    mainindex,
+                    collectionIndex,
+                    collection.measurement.quantity,
+                    item[4],
+                    item[5],
+                    itemIndex
+                  )
+                }
+                className="border w-full sm:w-2/5 px-2 py-1 rounded text-xs sm:text-sm"
+              />
+              <p className="text-[10px] sm:text-xs text-gray-600">{item[3]}</p>
+            </div>
+          </td>
+          <td className="w-full sm:w-[20%] text-xs sm:text-sm">
+            {(item[4] * parseFloat(collection.measurement.quantity) * qty).toFixed(2)}
+          </td>
+          <td className="w-full sm:w-[20%] text-xs sm:text-sm">{item[5]}</td>
+          <td className="w-full sm:w-[20%] text-xs sm:text-sm">
+            {collection.totalTax[itemIndex] ? collection.totalTax[itemIndex].toFixed(2) : "0.00"}
+          </td>
+          <td className="w-full sm:w-[20%] text-xs sm:text-sm">
+            {collection.totalAmount[itemIndex] ? collection.totalAmount[itemIndex].toFixed(2) : "0.00"}
+          </td>
+        </tr>
+      );
+    });
+  })
+) : (
+  <tr>
+    <td colSpan={9} className="text-center py-2 text-gray-500 text-sm sm:text-base">
+      No product data available.
+    </td>
+  </tr>
+)}
 </tbody>
 
             </table>

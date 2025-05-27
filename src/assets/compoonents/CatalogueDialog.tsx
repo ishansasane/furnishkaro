@@ -54,7 +54,7 @@ const CatalogueDialog: React.FC<CatalogueDialogProps> = ({ setDialogOpen, setRef
           onChange={(e) => setDescription(e.target.value)}
         />
          <div className="flex justify-end gap-2 mt-4">
-          <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={() => setDialogOpen(false)}>
+          <button className="bg-gray-500 text-white px-4 py-2 rounded" onClick={() => {navigate("/masters/catalogues"); setDialogOpen(false)}}>
             Cancel
     </button>
           <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleSubmit}>

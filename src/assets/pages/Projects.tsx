@@ -128,6 +128,7 @@ export default function Projects() {
       goodsArray: deepClone(parseSafely(row[15], [])),
       tailorsArray: deepClone(parseSafely(row[16], [])),
       projectAddress : row[17],
+      date : row[18],
     }));
 
     return projects;
@@ -492,12 +493,12 @@ const deleteProject = async (name) => {
             <tr>
               <th className="px-4 py-2">Project Name</th>
               <th className="px-4 py-2">Customer Name</th>
-              <th className="px-4 py-2">Status</th>
               <th className="px-4 py-2">Amount</th>
               <th className="px-4 py-2">Received</th>
               <th className="px-4 py-2">Due</th>
               <th className="px-4 py-2">Created By</th>
-              <th className="px-4 py-2">Date</th>
+              <th className="px-4 py-2">Deadline Date</th>
+              <th className="px-4 py-2">Created On</th>
               <th className="px-4 py-2">Quote</th>
               <th className="px-4 py-2">Actions</th>
             </tr>
@@ -507,12 +508,12 @@ const deleteProject = async (name) => {
               <tr key={index} className="hover:bg-sky-50">
                 <td className="px-4 py-2">{project.projectName}</td>
                 <td className="px-4 py-2">{project.customerLink ? project.customerLink[0] : ""}</td>
-                <td className="px-4 py-2">{project.status}</td>
                 <td className="px-4 py-2">{(project.totalAmount + project.totalTax - project.discount).toFixed(2)}</td>
                 <td className="px-4 py-2">{projectPayments[index]}</td>
                 <td className="px-4 py-2">{(project.totalAmount + project.totalTax - project.discount - (projectPayments[index] || 0)).toFixed(2)}</td>
                 <td className="px-4 py-2">{project.createdBy}</td>
                 <td className="px-4 py-2">{project.projectDate}</td>
+                <td className="px-4 py-2">{project.date}</td>
                 <td className="px-4 py-2">
                   <button
                     onClick={() => generatePDF(project)}

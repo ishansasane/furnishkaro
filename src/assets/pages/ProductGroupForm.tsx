@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store";
 import { setProducts } from "../Redux/dataSlice";
+import { Link } from "react-router-dom";
 
 async function fetchProductGroups() {
   try {
@@ -84,7 +85,7 @@ const ProductGroupForm: React.FC = () => {
       {/* Header */}
       <h2 className="text-2xl font-semibold text-gray-800">New Product Group</h2>
       <p className="text-gray-500 text-sm mb-6">
-        Dashboard &gt; Product Groups &gt; New Product Group
+        <Link className="text-black !no-underline" to="/">Dashboard</Link> &gt; <Link className="text-black !no-underline" to="/masters/product-groups">Product Groups</Link> &gt; New Product Group
       </p>
 
       {/* Form */}

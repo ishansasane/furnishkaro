@@ -25,10 +25,20 @@ const MaterialSelectionComponent = ({
   handleReferenceChange,
   handleGroupDelete,
   projectData,
-  setAvailableAreas
+  setAvailableAreas,
+  singleItems
 }) => {
 
   const dispatch = useDispatch();
+
+  const [combinedData, setCombinedData] = useState([]);
+
+useEffect(() => {
+  const combined = [...availableProductGroups, ...singleItems];
+  setCombinedData(combined);
+}, [availableProductGroups, singleItems]);
+
+
 
   const fetchCompanyData = async () => {
     try {
@@ -298,14 +308,14 @@ const MaterialSelectionComponent = ({
                     <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                       {/* Product Group */}
                       <div className="flex flex-col w-full sm:w-1/5">
-                        <p className="text-sm sm:text-base">Product Group</p>
+                        <p className="text-sm sm:text-base">Product Group / Items</p>
                         <select
                           className="border p-2 sm:p-3 rounded w-full text-sm sm:text-base"
                           value={element.productGroup}
                           onChange={(e) => handleProductGroupChange(mainindex, i, e.target.value)}
                         >
                           <option value="">Select Product Group</option>
-                          {availableProductGroups.map((product, index) => (
+                          {combinedData.map((product, index) => (
                             <option key={index} value={product}>
                               {product[0]}
                             </option>

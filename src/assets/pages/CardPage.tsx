@@ -15,9 +15,9 @@ const Card: React.FC<CardProps> = ({ title, value, color, isCurrency = false }) 
       <div className={`w-1 h-full ${color} rounded-full`}></div>
 
       {/* Content */}
-      <div className="ml-4">
-        <h4 className="text-gray-600 text-sm font-semibold">{title}</h4>
-        <p className="text-xl font-bold text-gray-900">
+      <div className="ml-4 flex flex-col">
+        <p className="text-[1.3vw] font-semibold">{title}</p>
+        <p className="text-[1.1vw] mb-1 font-semibold text-gray-900">
           {isCurrency ? `₹${value.toLocaleString('en-IN')}` : value.toLocaleString('en-IN')}
 
         </p>

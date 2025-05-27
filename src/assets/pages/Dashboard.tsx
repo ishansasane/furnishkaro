@@ -210,6 +210,7 @@ useEffect(() => {
       goodsArray: deepClone(parseSafely(row[15], [])),
       tailorsArray: deepClone(parseSafely(row[16], [])),
       projectAddress : row[17],
+      date : row[18],
     }));
 
     return projects;
