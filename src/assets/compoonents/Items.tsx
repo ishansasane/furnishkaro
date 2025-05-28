@@ -571,7 +571,7 @@ const handleSubmit = async () => {
           </div>
         )}
 
-        <div className="bg-white shadow rounded-lg p-4 mt-4 overflow-x-auto" ref={tableRef}>
+        <div className={ `bg-white shadow rounded-lg p-4 mt-4 overflow-x-auto ${isFormOpen ? "hidden" : ""}`}ref={tableRef}>
           <input
             type="text"
             placeholder="Search items..."
@@ -592,8 +592,8 @@ const handleSubmit = async () => {
             </thead>
             <tbody>
               {items != undefined && items.map((item, index) => (
-                <tr key={index} className="border-t relative hover:bg-sky-50" onClick={() => editMenu(item)}>
-                  <td className="py-2 px-4">{item[0]}</td>
+                <tr key={index} className="border-t relative hover:bg-sky-50">
+                  <td onClick={() => editMenu(item)} className="py-2 px-4">{item[0]}</td>
                   <td className="py-2 px-4">{item[1]}</td>
                   <td className="py-2 px-4">{item[3]}</td>
                   <td className="py-2 px-4">{item[2]}</td>

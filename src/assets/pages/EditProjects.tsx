@@ -1289,15 +1289,15 @@ useEffect(() => {
             <button onClick={goBack} className="mb-4 px-3 py-1 text-white bg-red-500 rounded">← Back</button>
           </div>
           <div className='flex flex-row w-[65vw] justify-between mb-3 bg-sky-50 px-2 py-2 rounded-lg'>
-            <button className={`text-[1vw] ${navState == "Overview" ? "text-sky-700" : ""}`} onClick={() => setNavState("Overview")}>Overview</button>
-            <button className={`text-[1vw] ${navState == "Customer & Project Details" ? "text-sky-700" : ""}`} onClick={() => setNavState("Customer & Project Details")}>Customer & Project Details</button>
-            <button className={`text-[1vw] ${navState == "Material Selection" ? "text-sky-700" : ""}`} onClick={() => setNavState("Material Selection")}>Material Selection</button>
-            <button className={`text-[1vw] ${navState == "Measurement" ? "text-sky-700" : ""}`} onClick={() => setNavState("Measurement")}>Measurement</button>
-            <button className={`text-[1vw] ${navState == "Quotation" ? "text-sky-700" : ""}`} onClick={() => setNavState("Quotation")}>Quotation</button>
-            <button className={`text-[1vw] ${navState == "Goods" ? "text-sky-700" : ""}`} onClick={() => setNavState("Goods")}>Goods</button>
-            <button className={`text-[1vw] ${navState == "Tailors" ? "text-sky-700" : ""}`} onClick={() => setNavState("Tailors")}>Tailors</button>
-            <button className={`text-[1vw] ${navState == "Payments" ? "text-sky-700" : ""}`} onClick={() => setNavState("Payments")}>Payments</button>
-            <button className={`text-[1vw] ${navState == "Tasks" ? "text-sky-700" : ""}`} onClick={() => setNavState("Tasks")}>Tasks</button>
+            <button className={`text-[1vw] ${navState == "Overview" ? "text-sky-700 font-semibold" : ""}`} onClick={() => setNavState("Overview")}>Overview</button>
+            <button className={`text-[1vw] ${navState == "Customer & Project Details" ? "text-sky-700  font-semibold" : ""}`} onClick={() => setNavState("Customer & Project Details")}>Customer & Project Details</button>
+            <button className={`text-[1vw] ${navState == "Material Selection" ? "text-sky-700  font-semibold" : ""}`} onClick={() => setNavState("Material Selection")}>Material Selection</button>
+            <button className={`text-[1vw] ${navState == "Measurement" ? "text-sky-700  font-semibold" : ""}`} onClick={() => setNavState("Measurement")}>Measurement</button>
+            <button className={`text-[1vw] ${navState == "Quotation" ? "text-sky-700  font-semibold" : ""}`} onClick={() => setNavState("Quotation")}>Quotation</button>
+            <button className={`text-[1vw] ${navState == "Goods" ? "text-sky-700  font-semibold" : ""}`} onClick={() => setNavState("Goods")}>Goods</button>
+            <button className={`text-[1vw] ${navState == "Tailors" ? "text-sky-700  font-semibold" : ""}`} onClick={() => setNavState("Tailors")}>Tailors</button>
+            <button className={`text-[1vw] ${navState == "Payments" ? "text-sky-700  font-semibold" : ""}`} onClick={() => setNavState("Payments")}>Payments</button>
+            <button className={`text-[1vw] ${navState == "Tasks" ? "text-sky-700  font-semibold" : ""}`} onClick={() => setNavState("Tasks")}>Tasks</button>
           </div>
           {navState == "Overview" &&  
           <div className="flex flex-col justify-between">

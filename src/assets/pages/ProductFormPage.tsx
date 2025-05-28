@@ -27,7 +27,7 @@ const ProductFormPage: React.FC = () => {
     publish: false,
     accessory: false,
   };
-  const groupTypes = [["Fabric", ["Meter"]], ["Area Based", ["Sq.Feet"]], ["Running Length based", ["Meter", "Feet"]], ["Piece Based", ["Piece", "Items", "Sets"]], ["Fixed Length Items", ["Piece"]], ["Fixed Area Items", ["Piece", "Roll"]], ["Tailoring", ["Parts", "Sq.Feet"]]]
+  const groupTypes = [["Fabric", ["Meter"], ["e.g. Curtains"]], ["Area Based", ["Sq.Feet"], ["e.g. Area Based"]], ["Running Length based", ["Meter", "Feet"], ["e.g. Track, Border cloth"]], ["Piece Based", ["Piece", "Items", "Sets"], ["e.g. Hooks, Tape"]], ["Fixed Length Items", ["Piece"], ["e.g. 12 feet rod"]], ["Fixed Area Items", ["Piece", "Roll"], ["e.g. 57 sq.ft. wallpaper"]], ["Tailoring", ["Parts", "Sq.Feet"], ["e.g. Stitching"]]]
   const [groupType, setGroupType] = useState([]);
   const [showForm, setShowForm] = useState(true);
 
@@ -50,6 +50,19 @@ const ProductFormPage: React.FC = () => {
   const handleToggle = (field: "publish" | "accessory") => {
     setFormData((prev) => ({ ...prev, [field]: !prev[field] }));
   };
+
+
+const handleGroupTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const selected = e.target.value;
+  const matchedGroup = groupTypes.find(([label]) => label == selected);
+  if (matchedGroup) {
+    setSelectedGroupType(matchedGroup[0]);
+    console.log(matchedGroup[0]) // just the label
+  } else {
+    setSelectedGroupType(""); // fallback
+  }
+};
+
 
 const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
@@ -167,20 +180,22 @@ const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         <label className="block font-medium">
           Group Type <span className="text-red-500">*</span>
         </label>
-        <select
-          name="groupType"
-          value={selectedGroupType}
-          onChange={(e) => setSelectedGroupType(e.target.value)}
-          className="w-full p-2 border rounded-md"
-          required
-        >
-          <option value="">Select Group Type</option>
-          {groupTypes.map(([label]) => (
-            <option key={label} value={label}>
-              {label}
-            </option>
-          ))}
-        </select>
+<select
+  name="groupType"
+  value={selectedGroupType}
+  onChange={handleGroupTypeChange}
+  className="w-full p-2 border rounded-md"
+  required
+>
+  <option value="">Select Group Type</option>
+  {groupTypes.map(([label, , examples]) => (
+    <option key={label} value={label}>
+      {label} {examples?.[0] ? `(${examples[0]})` : ""}
+    </option>
+  ))}
+</select>
+
+
       </div>
 
       <div>
