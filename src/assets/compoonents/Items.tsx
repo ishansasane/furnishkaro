@@ -586,16 +586,18 @@ const handleSubmit = async () => {
                 <th className="py-3 px-4">Description</th>
                 <th className="py-3 px-4">Costing Type</th>
                 <th className="py-3 px-4">Group Type</th>
+                <th className="py-3 px-4">Added Date</th>
                 <th className="py-3 px-4">Actions</th>
               </tr>
             </thead>
             <tbody>
               {items != undefined && items.map((item, index) => (
-                <tr key={index} className="border-t relative hover:bg-sky-50">
+                <tr key={index} className="border-t relative hover:bg-sky-50" onClick={() => editMenu(item)}>
                   <td className="py-2 px-4">{item[0]}</td>
                   <td className="py-2 px-4">{item[1]}</td>
                   <td className="py-2 px-4">{item[3]}</td>
                   <td className="py-2 px-4">{item[2]}</td>
+                  <td className="py-2 px-4">{item[6]}</td>
                   <td className="py-2 px-4 relative">
                     <button
                       onClick={() => toggleMenu(index)}

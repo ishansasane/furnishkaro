@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setItemData } from "../Redux/dataSlice";
+import { RootState } from "../Redux/store";
+import { useSelector } from "react-redux";
 
 
 const getItemsData = async () => {
@@ -31,6 +33,8 @@ const ProductFormPage: React.FC = () => {
 
   const [needsTailoring, setNeedsTailoring] = useState(false);
 
+  const items = useSelector(( state : RootState ) => state.data.items);
+
   const [selectedGroupType, setSelectedGroupType] = useState("");
   const [sellingUnit, setSellingUnit] = useState("");
 
@@ -47,54 +51,65 @@ const ProductFormPage: React.FC = () => {
     setFormData((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  e.preventDefault();
 
-    const date = new Date();
+  const date = new Date();
 
-    try {
-      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body : JSON.stringify({
-          productName,
-          description,
-          groupTypes: selectedGroupType,
-          sellingUnit,
-          mrp,
-          taxRate,
-          date,
-          needsTailoring
-          })
-      });
+  // ✅ Step 1: Get current items (either from Redux or localStorage or by fetching)
+  let currentItems = items; // from Redux
+  if (!currentItems || currentItems.length === 0) {
+    currentItems = await getItemsData(); // fallback to fetch
+  }
 
-      if (!response.ok) {
-        throw new Error("Failed to save product");
-      }
-      
-      const result = await response.json();
-      console.log("Saved to backend:", result);
-      
-      // Fetch updated data
-      const data = await getItemsData();
-      
-      // 1. Update Redux store
-      dispatch(setItemData(data));
-      
-      // 3. Update localStorage
-      localStorage.setItem("itemData", JSON.stringify({ data, time: Date.now() }));
-      
-      // 4. Notify and redirect
-      alert("Product saved successfully!");
-      navigate("/masters/items");
-      
-    } catch (error) {
-      console.error("Error saving product:", error);
-      alert("Failed to save product. Please try again.");
+  // ✅ Step 2: Check for duplicate product name (case-insensitive)
+  const productExists = currentItems.some(
+    (item: any) => item[0]?.trim().toLowerCase() === productName.trim().toLowerCase()
+  );
+
+  if (productExists) {
+    alert("Product with this name already exists.");
+    return;
+  }
+
+  try {
+    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        productName,
+        description,
+        groupTypes: selectedGroupType,
+        sellingUnit,
+        mrp,
+        taxRate,
+        date,
+        needsTailoring
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to save product");
     }
-  };
+
+    const result = await response.json();
+    console.log("Saved to backend:", result);
+
+    const data = await getItemsData();
+    dispatch(setItemData(data));
+    localStorage.setItem("itemData", JSON.stringify({ data, time: Date.now() }));
+    
+    alert("Product saved successfully!");
+    navigate("/masters/items");
+
+  } catch (error) {
+    console.error("Error saving product:", error);
+    alert("Failed to save product. Please try again.");
+  }
+};
+
 
   const handleCancel = () => {
     navigate(-1); // cancel and go back

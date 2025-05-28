@@ -2,18 +2,30 @@ import React, { useEffect, useState } from 'react';
 import { setTaskDialogOpen } from '../Redux/dataSlice';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import TaskDialog from '../compoonents/TaskDialog';
+import { setProjectFlag } from '../Redux/dataSlice';
 
-const OverviewPage = ({ interiorArray, salesAssociateArray, setNavState, projectData, status, setStatus, tasks, tailorsArray, setTailorsArray, goodsArray, setGoodsArray, projectDate, setPRojectDate }) => {
+const OverviewPage = ({ addPayment, setAddPayment, interiorArray, salesAssociateArray, setNavState, projectData, status, setStatus, tasks, tailorsArray, setTailorsArray, goodsArray, setGoodsArray, projectDate, setPRojectDate, projects }) => {
   const dueAmount = projectData.totalAmount + projectData.totalTax - projectData.paid;
   const dispatch = useDispatch();
   const taskDialogOpen = useSelector(( state : RootState) => state.data.taskDialogOpen);
+
   const navigate = useNavigate();
+
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [refresh, setRefresh] = useState(false);
+
+  const [editing, setediting] = useState(null);
 
   const addNewTask = () => {
     dispatch(setTaskDialogOpen(true));
     console.log(taskDialogOpen);
     navigate("/tasks");
   }
+
+
+
   const [pending, setPending] = useState(0);
   const [ordered, setOrdered] = useState(0);
   const [received, setReceived] = useState(0);
@@ -85,13 +97,13 @@ const OverviewPage = ({ interiorArray, salesAssociateArray, setNavState, project
   
 
   return (
-    <div className='flex flex-col'>
+    <div className={`flex flex-col`}>
       <div className='flex flex-row justify-between items-center'>
         <p className='text-[1.4vw] font-semibold'>Project Name : {projectData.projectName}</p>
         <p className='text-[1.1vw]'>Delivery Date : <input className='rounded-lg border px-2 py-2' type="date" value={projectDate} onChange={(e) => setPRojectDate(e.target.value)}/></p>
       </div>
 
-      <div className='flex flex-row justify-between gap-3 h-[25vw]'>
+      <div className={`flex flex-row justify-between gap-3 h-[25vw]`}>
         {/* Client Info */}
         <div className='flex flex-col border rounded-lg p-3 w-[25vw] justify-between'>
           <p className='text-[1.2vw]'>Client Information</p>
@@ -165,19 +177,22 @@ const OverviewPage = ({ interiorArray, salesAssociateArray, setNavState, project
           <div className='flex flex-row justify-between'>
             <p className='text-[1.2vw]'>Payments</p>
             <div className='flex flex-row gap-2'>
-              <button className='text-white text-[1vw] bg-sky-600 rounded-lg px-3 h-8'>Add</button>
-              <button className='text-white text-[1vw] bg-sky-600 rounded-lg px-3 h-8'>View</button>
+              <button onClick={() => setAddPayment(true)} style={{ borderRadius : "6px" }} className='text-white text-[1vw] hover:bg-sky-700 bg-sky-600 rounded-lg px-3 h-8'>Add</button>
+              <button onClick={() => navigate("/paymentsPage")} style={{ borderRadius : "6px" }} className='text-white text-[1vw] hover:bg-sky-700 bg-sky-600 rounded-lg px-3 h-8'>View</button>
             </div>
           </div>
-          <div className='flex flex-row justify-between'>
+          <div className='flex flex-row justify-between border rounded-lg p-2'>
+            <div className='w-1 bg-gray-500  border border-gray-800'></div>
             <p className='text-[1.1vw]'>Total Payment</p>
             <p className='text-[1.1vw]'>{(projectData.totalAmount + projectData.totalTax).toFixed(2)}</p>
           </div>
-          <div className='flex flex-row justify-between'>
+          <div className='flex flex-row justify-between border rounded-lg p-2'>
+            <div className='w-1 bg-green-500  border border-green-500'></div>
             <p className='text-[1.1vw]'>Payment Received</p>
             <p className='text-[1.1vw]'>{projectData.paid}</p>
           </div>
-          <div className='flex flex-row justify-between'>
+          <div className='flex flex-row justify-between border rounded-lg p-2'>
+            <div className='w-1 bg-yellow-500  border border-yellow-500'></div>
             <p className='text-[1.1vw]'>Due</p>
             <p className='text-[1.1vw]'>{(dueAmount).toFixed(2)}</p>
           </div>
@@ -254,11 +269,44 @@ const OverviewPage = ({ interiorArray, salesAssociateArray, setNavState, project
                 <p className='text-[1.2vw] font-semibold'>{task[0]}</p>
                 <p className='text-[1.1vw]'>Created At : {task[3]}</p>
                 <p className='text-[1.1vw]'>Description : {task[1]}</p>
+                <button onClick={() => { setediting(task); setDialogOpen(true); }} style={{ borderRadius : "6px" }} className='border px-2 py-1 w-20 text-white bg-sky-600 hover:bg-sky-700'>Edit Task</button>
               </div>
             ))}
           </div>
         </div>
       </div>
+      <AnimatePresence>
+        {dialogOpen && (
+          <>
+            <motion.div
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => dispatch(setTaskDialogOpen(false))}
+            />
+            <motion.div
+              className="fixed inset-0 z-50 flex items-center justify-center"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3 }}
+            >
+              <TaskDialog
+                onClose={() => setDialogOpen(false)}
+                isEditing={editing}
+                setediting={setediting}
+                name={"NA"}
+                setrefresh={setRefresh}
+                projectData={projects}
+                setTaskDialogOpen={setTaskDialogOpen}
+                taskDialogOpen={dialogOpen}
+                setProjectFlag={setProjectFlag}
+              />
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

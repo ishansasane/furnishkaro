@@ -123,6 +123,9 @@ const CustomerDashboard = ({ customerDashboardData, setCustomerDashboardData, se
     const paymentData = useSelector((state : RootState) => state.data.paymentData);
     const projects = useSelector((state : RootState) => state.data.projects);
 
+    const [companyName, setCompanyName] = useState("");
+    const [GST, setGST] = useState("");
+
     const [payments, setPaymentsArray] = useState([]);
 
     useEffect(() => {
@@ -257,7 +260,9 @@ useEffect(() => {
             email : email,
             address : address,
             alternatenumber: alternateNumber,
-            addedDate: date
+            addedDate: date,
+            companyName,
+            GST
           })
         });
     
@@ -294,11 +299,11 @@ useEffect(() => {
             </div>
             <div className='flex flex-col border rounded-xl p-3 w-1/3'>
                 <p className='text-[1.2vw] text-green-600'>Payment Received</p>
-                <p className='text-[1.1vw]'>{receivedPayment}</p>
+                <p className='text-[1.1vw]'>₹{Math.round(receivedPayment).toLocaleString("en-IN")}</p>
             </div>
             <div className='flex flex-col border rounded-xl p-3 w-1/3'>
                 <p className='text-[1.2vw] text-red-500'>Payment Due</p>
-                <p className='text-[1.1vw]'>{duePayment - receivedPayment}</p>
+                <p className='text-[1.1vw]'>₹{Math.round(duePayment - receivedPayment).toLocaleString("en-IN")}</p>
             </div>
         </div>
         <div className='flex flex-col w-full border rounded-xl p-3'>
@@ -316,12 +321,12 @@ useEffect(() => {
             </thead>
             <tbody>
                 {projectData && projectData.map((project, index) => (
-                <tr key={index}>
+                <tr key={index} className=''>
                     <td>{project.projectName}</td>
                     <td>{project.status}</td>
-                    <td>{duePayment}</td>
-                    <td>{receivedPayment}</td>
-                    <td>{duePayment - receivedPayment}</td>
+                    <td>₹{Math.round(duePayment).toLocaleString("en-IN")}</td>
+                    <td>₹{Math.round(receivedPayment).toLocaleString("en-IN")}</td>
+                    <td>₹{Math.round(duePayment - receivedPayment).toLocaleString("en-IN")}</td>
                     <td className='py-2'>{project.projectDate}</td>
                     <td className='py-2'>{project.quote}</td>
                 </tr>
@@ -363,6 +368,16 @@ useEffect(() => {
             <div className='flex flex-col w-full'>
                 <p className='text-[0.9vw] text-gray-600'>Address</p>
                 <input type="text" onChange={(e) => setAddress(e.target.value)} className='border rounded-lg px-2 py-2' value={address}/>
+            </div>
+            <div className='flex flex-row w-full justify-between gap-2'>
+              <div className='flex flex-col w-full'>
+                  <p className='text-[0.9vw] text-gray-600'>Company Name</p>
+                  <input type="text" placeholder='Company Name' onChange={(e) => setCompanyName(e.target.value)} className='border rounded-lg px-2 py-2' value={companyName}/>
+              </div>
+              <div className='flex flex-col w-full'>
+                  <p className='text-[0.9vw] text-gray-600'>GST IN</p>
+                  <input type="text" placeholder='GST Number' onChange={(e) => setGST(e.target.value)} className='border rounded-lg px-2 py-2' value={GST}/>
+              </div>
             </div>
             <div className='w-full flex flex-row justify-end'>
                 <button onClick={sendcustomerData} style={{ borderRadius : "6px" }} className='text-white bg-sky-600 hover:bg-sky-700 px-2 py-1 w-[6vw]'>Update</button>

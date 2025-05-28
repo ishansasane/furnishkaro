@@ -1315,6 +1315,9 @@ useEffect(() => {
             setPRojectDate={setPRojectDate}
             interiorArray={interiorArray}
             salesAssociateArray={salesAssociateArray}
+            projects={projects}
+            setAddPayment={setAddPayment}
+            addPayment={addPayment}
             />
             <div className="flex flex-row justify-between mt-3">
                 <button onClick={() => setNavState("Tasks")} style={{ borderRadius : "8px" }} className="rounded-lg border px-2 h-8 bg-white">Back</button>
