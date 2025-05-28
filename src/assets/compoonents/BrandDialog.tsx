@@ -46,7 +46,7 @@ const BrandDialog: React.FC<BrandDialogProps> = ({ setDialogOpen, setRefresh, re
       <div className="bg-white p-6 rounded shadow-md w-full border">
         <h2 className="text-xl font-bold mb-4">{editingBrand ? "Edit Brand" : "Add Brand"}</h2>
         <input
-          className={` p-2 rounded w-full mb-2`}
+          className={`border p-2 rounded w-full mb-2`}
           placeholder="Brand Name"
           value={brandName}
           onChange={(e) => {editingBrand ? null : setBrandName(e.target.value)}}
