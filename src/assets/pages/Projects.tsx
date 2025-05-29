@@ -8,6 +8,7 @@ import { setProjects, setTasks, setProjectFlag, setPaymentData } from "../Redux/
 import EditProjects from "./EditProjects";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import ConfirmBox from "./ConfirmBox";
 
 // Define the type for a project
 interface Project {
@@ -332,6 +333,9 @@ const deleteProject = async (name) => {
   }
 };
 
+  const [confirmBox, setConfirmBox] = useState(false);
+  const [chosenProject, setChosenProject] = useState(false);
+
   const [Amount, setAmount] = useState(0);
   const [Tax, setTax] = useState(0);
   const [Discount, setDiscount] = useState(0);
@@ -536,7 +540,7 @@ const deleteProject = async (name) => {
                       <Edit size={16} />
                     </button>
                     <button
-                      onClick={() => deleteProject(project.projectName)}
+                      onClick={() => { setChosenProject(project); setConfirmBox(true); }}
                       className="border px-2 py-1 rounded-md bg-red-500 text-white"
                     >
                       <Trash2 size={16} />
@@ -565,6 +569,9 @@ const deleteProject = async (name) => {
             setDiscount={setDiscount}
           />
         )}
+        {
+          confirmBox && <ConfirmBox setConfirmBox={setConfirmBox} deleteProject={deleteProject} project={chosenProject}/>
+        }
       </div>
     </div>
   );
