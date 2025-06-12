@@ -86,7 +86,7 @@ export default function Reports() {
             Product Group Wise
           </button>
         </div>
-
+ 
         {/* Form Components */}
         <div className="w-full md:p-6 p-2 bg-white shadow-lg rounded-lg">
           {activeForm === "form1" && (
