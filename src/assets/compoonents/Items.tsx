@@ -163,6 +163,9 @@ const deleteItem = async (name: string) => {
 };
 
 const duplicateItem = async (item: Array<string>) => {
+
+  const date = new Date();
+
   try {
     const response = await fetch(
       "https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct",
@@ -179,7 +182,8 @@ const duplicateItem = async (item: Array<string>) => {
           sellingUnit: item[3],
           mrp: item[4],
           taxRate: item[5],
-          needsTailoring : item[6]
+          needsTailoring : item[7],
+          date : date
         }),
       }
     );
