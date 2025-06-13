@@ -26,8 +26,8 @@ async function fetchProductGroups() {
 const ProductGroupForm: React.FC = () => {
   const navigate = useNavigate();
   const [groupName, setGroupName] = useState("");
-  const [mainProduct, setMainProduct] = useState([]);
-  const [addonProduct, setAddonProduct] = useState([]);
+  const [mainProduct, setMainProduct] = useState("");
+  const [addonProduct, setAddonProduct] = useState<string[]>([]);
   const [color, setColor] = useState("#ffffff");
   const [status, setStatus] = useState(false);
   const [needsTailoring, setNeedsTailoring] = useState(false);
@@ -43,7 +43,7 @@ const ProductGroupForm: React.FC = () => {
       status,
     };
 
-    console.log("Group Data to Submit:", groupData); // for debugging
+    console.log("Group Data to Submit:", groupData);
 
     try {
       const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/addproductgroup", {
@@ -51,7 +51,8 @@ const ProductGroupForm: React.FC = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ groupName, mainProducts: mainProduct, addonProducts : addonProduct, status })
+        credentials: "include",
+        body: JSON.stringify({ groupName, mainProducts: mainProduct, addonProducts: addonProduct, status })
       });
 
       if (!response.ok) {
@@ -61,16 +62,10 @@ const ProductGroupForm: React.FC = () => {
       const result = await response.json();
       console.log("Saved Group:", result);
       
-      // 1. Re-fetch the updated product groups
       const data = await fetchProductGroups();
-      
-      // 2. Update Redux store
       dispatch(setProducts(data));
-      
-      // 3. Update localStorage
       localStorage.setItem("productGroupData", JSON.stringify({ data, time: Date.now() }));
       
-      // 4. Alert and navigate
       alert("Product Group saved successfully!");
       navigate("/masters/product-groups");
       
@@ -80,17 +75,19 @@ const ProductGroupForm: React.FC = () => {
     }
   };
 
+  const handleAddonProductChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedOptions = Array.from(e.target.selectedOptions).map(option => option.value);
+    setAddonProduct(selectedOptions);
+  };
+
   return (
     <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
-      {/* Header */}
       <h2 className="text-2xl font-semibold text-gray-800">New Product Group</h2>
       <p className="text-gray-500 text-sm mb-6">
         <Link className="text-black !no-underline" to="/">Dashboard</Link> &gt; <Link className="text-black !no-underline" to="/masters/product-groups">Product Groups</Link> &gt; New Product Group
       </p>
 
-      {/* Form */}
       <div className="space-y-4">
-        {/* Group Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
             Group Name <span className="text-red-500">*</span>
@@ -105,7 +102,6 @@ const ProductGroupForm: React.FC = () => {
           />
         </div>
 
-        {/* Main Products */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
             Main Products <span className="text-red-500">*</span>
@@ -130,7 +126,6 @@ const ProductGroupForm: React.FC = () => {
           </div>
         </div>
 
-        {/* Addon Products */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
             Addon Products
@@ -140,11 +135,12 @@ const ProductGroupForm: React.FC = () => {
               + Product
             </button>
             <select
+              multiple
               value={addonProduct}
-              onChange={(e) => setAddonProduct(e.target.value)}
-              className="w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+              onChange={handleAddonProductChange}
+              className="w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 h-32"
             >
-              <option value="">Select Addon Product</option>
+              <option value="">Select Addon Products</option>
               {items.map((item, index) => (
                 <option key={index} value={item[0]}>
                   {item[0]}
@@ -152,9 +148,13 @@ const ProductGroupForm: React.FC = () => {
               ))}
             </select>
           </div>
+          {addonProduct.length > 0 && (
+            <p className="text-sm text-gray-500 mt-1">
+              Selected: {addonProduct.join(", ")}
+            </p>
+          )}
         </div>
 
-        {/* Color Picker & Toggles */}
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">
@@ -175,9 +175,8 @@ const ProductGroupForm: React.FC = () => {
           </div>
         </div>
 
-        {/* Buttons */}
         <div className="flex justify-end gap-3 mt-4">
-          <button onClick={() => {navigate("/masters/product-groups")}} className="border px-4 py-2 rounded text-gray-700 hover:bg-gray-100">
+          <button onClick={() => navigate("/masters/product-groups")} className="border px-4 py-2 rounded text-gray-700 hover:bg-gray-100">
             Cancel
           </button>
           <button

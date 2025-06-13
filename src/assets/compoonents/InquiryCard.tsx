@@ -1,17 +1,22 @@
-import React, { useState } from "react";
+
+import React from "react";
 
 interface InquiryCardProps {
   project: string;
   comments: string;
   inquiryDate: string;
   followUpDate: string;
+  status: string;
+  onStatusChange: (status: string) => void;
+  onCardClick: () => void;
 }
 
-const InquiryCard: React.FC<InquiryCardProps> = ({ project, comments, inquiryDate, followUpDate }) => {
-  const [status, setStatus] = useState("New Inquiry");
-
+const InquiryCard: React.FC<InquiryCardProps> = ({ project, comments, inquiryDate, followUpDate, status, onStatusChange, onCardClick }) => {
   return (
-    <div className="w-full max-w-sm mx-auto bg-white shadow-md rounded-lg p-4 flex flex-col space-y-4">
+    <div
+      className="w-full max-w-sm mx-auto bg-white shadow-md rounded-lg p-4 flex flex-col space-y-4"
+      onClick={onCardClick}
+    >
       <div className="flex flex-col space-y-2">
         <h3 className="text-lg font-semibold text-gray-800">{project}</h3>
         <p className="text-md text-gray-600">{comments}</p>
@@ -24,7 +29,11 @@ const InquiryCard: React.FC<InquiryCardProps> = ({ project, comments, inquiryDat
 
       <select
         value={status}
-        onChange={(e) => setStatus(e.target.value)}
+        onClick={(e) => e.stopPropagation()}
+        onChange={(e) => {
+          e.stopPropagation();
+          onStatusChange(e.target.value);
+        }}
         className="w-full mt-2 border p-2 rounded-md text-gray-700 focus:ring-indigo-500 focus:border-indigo-500"
       >
         <option>New Inquiry</option>

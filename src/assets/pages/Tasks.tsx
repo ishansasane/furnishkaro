@@ -198,7 +198,7 @@ useEffect(() => {
   return (
     <div className="p-6 bg-gray-50 md:mt-0 mt-20 h-screen">
       <div className="flex flex-wrap justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold">✅ Tasks</h1>
+        <h1 className="text-2xl font-bold"> Tasks</h1>
         <button
           onClick={() => setDialogOpen(true)}
           style={{ borderRadius: "8px" }}

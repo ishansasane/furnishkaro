@@ -1,15 +1,13 @@
 import { useState, useEffect } from "react";
-import { Plus, Edit, Trash2 } from "lucide-react";
+import { Plus, Pencil, XCircle } from "lucide-react";
 import CatalogueDialog from "../compoonents/CatalogueDialog";
 import { useDispatch, useSelector } from "react-redux";
 import { setCatalogs } from "../Redux/dataSlice";
 import { RootState } from "../Redux/Store";
 import { useNavigate } from "react-router-dom";
 
-
 interface Catalogue {
-  catalogueName: string;
-  description: string;
+  data: string[];
 }
 
 // Fetch catalogues from the server
@@ -32,25 +30,30 @@ async function fetchCatalogues(): Promise<Catalogue[]> {
 }
 
 // Delete a catalogue
-async function deleteCatalogue(catalogueName: string, setRefresh: (state: boolean) => void, refresh: boolean) {
-  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletecatalogue", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-    body: JSON.stringify({ catalogueName }),
-  });
+async function deleteCatalogue(catalogueName: string, setRefresh: (state: boolean) => void) {
+  try {
+    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletecatalogue", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ catalogueName }),
+    });
 
-  if (response.status === 200) {
-    alert("Catalogue deleted");
-    setRefresh(!refresh);
-  } else {
-    alert("Error deleting catalogue");
+    if (response.ok) {
+      alert("Catalogue deleted");
+      setRefresh(true); // Trigger refresh to fetch updated data
+    } else {
+      const errorText = await response.text();
+      alert(`Error deleting catalogue: ${errorText || response.statusText}`);
+    }
+  } catch (error) {
+    console.error("Error deleting catalogue:", error);
+    alert("Network or server error while deleting catalogue");
   }
 }
 
 export default function Catalogues() {
   const navigate = useNavigate();
-
   const [catalogues, setCatalogues] = useState<Catalogue[]>([]);
   const [search, setSearch] = useState("");
   const [isDialogOpen, setDialogOpen] = useState(false);
@@ -58,43 +61,56 @@ export default function Catalogues() {
   const [refresh, setRefresh] = useState(false);
 
   const dispatch = useDispatch();
-  const catalogueData = useSelector((state : RootState) => state.data.catalogs);
+  const catalogueData = useSelector((state: RootState) => state.data.catalogues);
 
   useEffect(() => {
-    async function getCatalogues() {
-      const data = await fetchCatalogues();
-      dispatch(setCatalogs(data));
-      setCatalogues(catalogueData);
-    }
-    if(catalogueData.length === 0){
-      getCatalogues();
-    }else{
-      setCatalogues(catalogueData);
-    }
-  }, [catalogueData, dispatch]);
+    const fetchAndSetData = async () => {
+      try {
+        const cached = localStorage.getItem("catalogueData");
+        const now = Date.now();
+        const cacheExpiry = 5 * 60 * 1000; // 5 minutes
 
-  useEffect(() => {
-    async function getCatalogues() {
-      const data = await fetchCatalogues();
-      dispatch(setCatalogs(data));
-      setCatalogues(catalogueData);
-    }
-    if(refresh){
-      getCatalogues();
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed.data?.length > 0 && now - parsed.time < cacheExpiry) {
+            dispatch(setCatalogues(parsed.data));
+            setCatalogues(parsed.data);
+            return;
+          }
+        }
+
+        const data = await fetchCatalogues();
+        if (Array.isArray(data)) {
+          dispatch(setCatalogues(data));
+          setCatalogues(data);
+          localStorage.setItem("catalogueData", JSON.stringify({ data, time: now }));
+        } else {
+          console.error("Fetched catalogue data is invalid:", data);
+        }
+      } catch (error) {
+        console.error("Error fetching catalogues:", error);
+      }
+    };
+
+    if (refresh || !catalogueData || catalogueData.length === 0) {
+      fetchAndSetData();
       setRefresh(false);
+    } else {
+      catalogueData !== catalogues && setCatalogues(catalogueData);
     }
-  }, [refresh])
+  }, [catalogueData, dispatch, refresh]);
 
   return (
-    <div className="md:p-6  pt-20 h-full bg-gray-50">
-      <div className="flex flex-wrap justify-between  items-center mb-4">
+    <div className="md:p-6 pt-20 h-full bg-gray-50">
+      <div className="flex flex-wrap justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Catalogues</h1>
-        <button className="flex !rounded-lg items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md" onClick={() => navigate("/catalogue-dialog")}>
+        <button className="flex !rounded-md items-center gap-2 bg-blue-600 text-white px-6 py-2 rounded-md" onClick={() => navigate("/catalogue-dialog")}>
           <Plus size={18} /> Add Catalogue
         </button>
       </div>
+      
       <div className="bg-white overflow-x-auto shadow rounded-lg p-5">
-      <div className="mb-4 overflow-x-auto">
+      <div className="mb-4">
         <input
           type="text"
           placeholder="Search catalogues..."
@@ -103,11 +119,11 @@ export default function Catalogues() {
           className="border px-3 py-2 rounded-md w-full"
         />
       </div>
-      
+
       <table className="w-full">
-        <thead className="bg-sky-50">
+        <thead className="bg-blue-50">
           <tr>
-            <th className="px-4 py-3">Catalogue Name</th>
+            <th className="px-4 py Zinc">Items</th>
             <th className="px-4 py-3">Description</th>
             <th className="px-4 py-3">Actions</th>
           </tr>
@@ -115,15 +131,24 @@ export default function Catalogues() {
         <tbody>
           {catalogues.length > 0 ? (
             catalogues.map((catalogue, index) => (
-              <tr key={index} className="hover:bg-sky-50">
+              <tr key={index} className="hover:bg-blue-50">
                 <td className="px-4 py-2">{catalogue[0]}</td>
                 <td className="px-4 py-2">{catalogue[1]}</td>
                 <td className="px-4 py-2 flex gap-2">
-                  <button className="border px-2 py-1 rounded-md bg-gray-300" onClick={() => { setEditingCatalogue(catalogue); setDialogOpen(true); }}>
-                    <Edit size={16} />
+                  <button
+                    className="border px-2 py-1 rounded-md"
+                    onClick={() => {
+                      setEditingCatalogue(catalogue);
+                      setDialogOpen(true);
+                    }}
+                  >
+                    <Pencil size={16} />
                   </button>
-                  <button className="border px-2 py-1 rounded-md bg-red-500 text-white" onClick={() => deleteCatalogue(catalogue[0], setRefresh, refresh)}>
-                    <Trash2 size={16} />
+                  <button
+                    className="border px-2 py-1 rounded-md"
+                    onClick={() => deleteCatalogue(catalogue[0], setRefresh)}
+                  >
+                    <XCircle size={16} />
                   </button>
                 </td>
               </tr>

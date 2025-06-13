@@ -5,6 +5,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/Store.ts";
 import { setItemData } from "../Redux/dataSlice.ts";
 import { useNavigate } from "react-router-dom";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import * as XLSX from "xlsx";
 
 const getItemsData = async () => {
   const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts");
@@ -13,7 +16,15 @@ const getItemsData = async () => {
 }
 
 const Items = () => {
-  const groupTypes = [["Fabric", ["Meter"]], ["Area Based", ["Sq.Feet"]], ["Running Length based", ["Meter", "Feet"]], ["Piece Based", ["Piece", "Items", "Sets"]], ["Fixed Length Items", ["Piece"]], ["Fixed Area Items", ["Piece", "Roll"]], ["Tailoring", ["Parts", "Sq.Feet"]]]
+  const groupTypes = [
+    ["Fabric", ["Meter"]],
+    ["Area Based", ["Sq.Feet"]],
+    ["Running Length based", ["Meter", "Feet"]],
+    ["Piece Based", ["Piece", "Items", "Sets"]],
+    ["Fixed Length Items", ["Piece"]],
+    ["Fixed Area Items", ["Piece", "Roll"]],
+    ["Tailoring", ["Parts", "Sq.Feet"]]
+  ];
   const [search, setSearch] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [items, setItems] = useState([]);
@@ -47,7 +58,7 @@ const Items = () => {
     setOpenMenu(openMenu === index ? -1 : index); // Toggle menu for the clicked row
   };
 
-  const editMenu = (item) => {
+  const editMenu = (item: any) => {
     console.log(item);
     setIsFormOpen(true);
     setEditing(true);
@@ -58,7 +69,7 @@ const Items = () => {
     setMrp(item[4]);
     setTaxRate(item[5]);
     setNeedsTailoring(item[6]);
-  }
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -97,6 +108,7 @@ const Items = () => {
       }
     }
   }, [openMenu]);
+
   useEffect(() => {
     const fetchData = async () => {
       const cached = localStorage.getItem("itemData");
@@ -120,95 +132,104 @@ const Items = () => {
   
     fetchData();
   }, [isFormOpen, deleted, dispatch]);
-  
 
-const deleteItem = async (name: string) => {
-  try {
-    // Delete request
-    const response = await fetch(
-      "https://sheeladecor.netlify.app/.netlify/functions/server/deletesingleproduct",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ productName: name }),
+  const deleteItem = async (name: string) => {
+    try {
+      // Delete request
+      const response = await fetch(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/deletesingleproduct",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ productName: name }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to delete the item");
       }
-    );
 
-    if (!response.ok) {
-      throw new Error("Failed to delete the item");
+      // Refetch updated items
+      const updatedData = await getItemsData();
+
+      // Update Redux and local state
+      dispatch(setItemData(updatedData));
+      setItems(updatedData);
+
+      // Update cache
+      localStorage.setItem(
+        "itemData",
+        JSON.stringify({ data: updatedData, time: Date.now() })
+      );
+
+      // UI updates
+      setDeleted((prev) => !prev);
+      setOpenMenu(-1);
+    } catch (err) {
+      console.error("Error deleting item:", err);
+      alert("Failed to delete item");
     }
+  };
 
-    // Refetch updated items
-    const updatedData = await getItemsData();
+  const duplicateItem = async (item: Array<string>, index: number) => {
+    const date = new Date();
 
-    // Update Redux and local state
-    dispatch(setItemData(updatedData));
-    setItems(updatedData);
+    try {
+      const response = await fetch(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            productName: item[0], // Use the same product name
+            description: item[1],
+            groupTypes: item[2],
+            sellingUnit: item[3],
+            mrp: item[4],
+            taxRate: item[5],
+            needsTailoring: item[7],
+            date: date.toISOString()
+          }),
+        }
+      );
 
-    // Update cache
-    localStorage.setItem(
-      "itemData",
-      JSON.stringify({ data: updatedData, time: Date.now() })
-    );
-
-    // UI updates
-    setDeleted((prev) => !prev);
-    setOpenMenu(-1);
-  } catch (err) {
-    console.error("Error deleting item:", err);
-  }
-};
-
-const duplicateItem = async (item: Array<string>) => {
-
-  const date = new Date();
-
-  try {
-    const response = await fetch(
-      "https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          productName: item[0],
-          description: item[1],
-          groupTypes: item[2],
-          sellingUnit: item[3],
-          mrp: item[4],
-          taxRate: item[5],
-          needsTailoring : item[7],
-          date : date
-        }),
+      if (!response.ok) {
+        throw new Error("Failed to duplicate the item");
       }
-    );
 
-    if (!response.ok) {
-      throw new Error("Failed to duplicate the item");
+      const updatedData = await getItemsData();
+
+      // Assume the last item in updatedData is the newly added item
+      const duplicatedItem = updatedData[updatedData.length - 1];
+
+      // Reorder items to place the duplicated item just below the original
+      const reorderedData = [
+        ...items.slice(0, index + 1), // Items up to and including the original
+        duplicatedItem, // Insert the duplicated item
+        ...items.slice(index + 1) // Rest of the items
+      ];
+
+      // Update state and cache
+      dispatch(setItemData(reorderedData));
+      setItems(reorderedData);
+      localStorage.setItem(
+        "itemData",
+        JSON.stringify({ data: reorderedData, time: Date.now() })
+      );
+
+      setDeleted((prev) => !prev);
+      setOpenMenu(-1);
+    } catch (err) {
+      console.error("Error duplicating item:", err);
+      alert("Failed to duplicate item");
     }
-
-    const updatedData = await getItemsData();
-
-    // Update state and cache
-    dispatch(setItemData(updatedData));
-    setItems(updatedData);
-    localStorage.setItem(
-      "itemData",
-      JSON.stringify({ data: updatedData, time: Date.now() })
-    );
-
-    setDeleted((prev) => !prev);
-    setOpenMenu(-1);
-  } catch (err) {
-    console.error("Error duplicating item:", err);
-  }
-};
-
+  };
 
   const groupOptions: string[] = [
     "Fabric",
@@ -221,33 +242,33 @@ const duplicateItem = async (item: Array<string>) => {
   ];
 
   const sellingUnits = {
-    "Fabric": ["Meter"],
+    Fabric: ["Meter"],
     "Area Based": ["Sq. feet", "Sq. meter"],
     "Running length based": ["Meter", "Feet"],
     "Piece based": ["Piece", "Items", "Sets"],
     "Fixed length items": ["Piece"],
     "Fixed area items": ["Piece", "Roll"],
-    "Tailoring": ["Parts", "Sq. feet"]
+    Tailoring: ["Parts", "Sq. feet"]
   };
 
-  const additionalFields: object = {
-    "Fabric": ["Coverage in Width", "Wastage in Height", "Threshold For Parts Calculation"],
+  const additionalFields: Record<string, string[]> = {
+    Fabric: ["Coverage in Width", "Wastage in Height", "Threshold For Parts Calculation"],
     "Area Based": ["Coverage in Area"],
     "Running length based": [],
     "Piece based": [],
     "Fixed length items": ["Length of Item"],
     "Fixed area items": ["Area Covered"],
-    "Tailoring": []
+    Tailoring: []
   };
 
-  const sideDropdownOptions: object = {
-    "Fabric": ["Inch", "Centimeter", "Meter"],
+  const sideDropdownOptions: Record<string, string[]> = {
+    Fabric: ["Inch", "Centimeter", "Meter"],
     "Area Based": ["Sq. Feet", "Sq. Meter"],
     "Running length based": [],
     "Piece based": [],
     "Fixed length items": ["Meter", "Inch", "Centimeter", "Feet"],
     "Fixed area items": ["Sq. Feet", "Sq. Meter"],
-    "Tailoring": []
+    Tailoring: []
   };
 
   const [formData, setFormData] = useState({
@@ -281,135 +302,233 @@ const duplicateItem = async (item: Array<string>) => {
     });
   };
 
-const editItemData = async () => {
-  try {
-    const response = await fetch(
-      "https://sheeladecor.netlify.app/.netlify/functions/server/updatesingleproduct",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          productName,
-          description,
-          groupTypes: selectedGroupType,
-          sellingUnit,
-          mrp,
-          taxRate,
-          needsTailoring
-        }),
+  const editItemData = async () => {
+    try {
+      const response = await fetch(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/updatesingleproduct",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            productName,
+            description,
+            groupTypes: selectedGroupType,
+            sellingUnit,
+            mrp,
+            taxRate,
+            needsTailoring
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to update item");
       }
-    );
 
-    if (!response.ok) {
-      throw new Error("Failed to update item");
+      alert("Item Updated");
+
+      const updatedData = await getItemsData();
+
+      // Update global state
+      dispatch(setItemData(updatedData));
+
+      // Update local state
+      setItems(updatedData);
+
+      // Refresh cache
+      localStorage.setItem(
+        "itemData",
+        JSON.stringify({ data: updatedData, time: Date.now() })
+      );
+
+      // Reset UI/form state
+      setIsFormOpen(false);
+      setEditing(false);
+      setOpenMenu(-1);
+      setFormData({
+        productName: "",
+        productDetails: "",
+        groupType: "",
+        sellingUnit: "",
+        mrp: "",
+        taxRate: "",
+        additionalInputs: {},
+        sideDropdown: ""
+      });
+    } catch (error) {
+      console.error("Edit error:", error);
+      alert("Something went wrong while updating the item.");
     }
-
-    alert("Item Updated");
-
-    const updatedData = await getItemsData();
-
-    // 1. Update global state
-    dispatch(setItemData(updatedData));
-
-    // 2. Update local state
-    setItems(updatedData);
-
-    // 3. Refresh cache
-    localStorage.setItem(
-      "itemData",
-      JSON.stringify({ data: updatedData, time: Date.now() })
-    );
-
-    // 4. Reset UI/form state
-    setIsFormOpen(false);
-    setEditing(false);
-    setOpenMenu(-1);
-    setFormData({
-      productName: "",
-      productDetails: "",
-      groupType: "",
-      sellingUnit: "",
-      mrp: "",
-      taxRate: "",
-      additionalInputs: {},
-      sideDropdown: "",
-    });
-
-  } catch (error) {
-    console.error("Edit error:", error);
-    alert("Something went wrong while updating the item.");
-  }
-};
-
-
-const handleSubmit = async () => {
-  const newItem = {
-    id: items.length + 1,
-    name: formData.productName,
-    description: formData.productDetails,
-    costingType: formData.sellingUnit,
-    groupType: formData.groupType,
-    entryDate: new Date().toLocaleDateString(),
-    additionalInputs: formData.additionalInputs,
-    sideDropdown: formData.sideDropdown,
-    mrp: formData.mrp,
-    taxrate: formData.taxRate,
-    needsTailoring : needsTailoring
   };
 
-  try {
-    const response = await fetch(
-      "https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          productName: newItem.name,
-          description: newItem.description,
-          groupTypes: newItem.groupType,
-          sellingUnit: newItem.costingType,
-          mrp: newItem.mrp,
-          taxRate: newItem.taxrate,
-          needsTailoring
-        }),
-      }
-    );
+  const handleSubmit = async () => {
+    const newItem = {
+      id: items.length + 1,
+      name: formData.productName,
+      description: formData.productDetails,
+      costingType: formData.sellingUnit,
+      groupType: formData.groupType,
+      entryDate: new Date().toLocaleDateString(),
+      additionalInputs: formData.additionalInputs,
+      sideDropdown: formData.sideDropdown,
+      mrp: formData.mrp,
+      taxrate: formData.taxRate,
+      needsTailoring: needsTailoring
+    };
 
-    if (!response.ok) {
-      throw new Error("Failed to add new item");
+    try {
+      const response = await fetch(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            productName: newItem.name,
+            description: newItem.description,
+            groupTypes: newItem.groupType,
+            sellingUnit: newItem.costingType,
+            mrp: newItem.mrp,
+            taxRate: newItem.taxrate,
+            needsTailoring
+          })
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to add new item");
+      }
+
+      const updatedData = await getItemsData();
+
+      dispatch(setItemData(updatedData));
+      setItems(updatedData);
+      localStorage.setItem("itemData", JSON.stringify({ data: updatedData, time: Date.now() }));
+
+      alert("Item Added");
+      setIsFormOpen(false);
+      setFormData({
+        productName: "",
+        productDetails: "",
+        groupType: "",
+        sellingUnit: "",
+        mrp: "",
+        taxRate: "",
+        additionalInputs: {},
+        sideDropdown: ""
+      });
+      setNeedsTailoring(false);
+    } catch (error) {
+      console.error("Error adding item:", error);
+      alert("Error adding item");
+    }
+  };
+
+  // Export table data as PDF
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    
+    // Add title
+    doc.text("Products List", 14, 20);
+    
+    // Define table columns
+    const columns = [
+      "Product Name",
+      "Description",
+      "Costing Type",
+      "Group Type",
+      "Added Date"
+    ];
+    
+    // Map items to table rows
+    const rows = items.map((item: any) => [
+      item[0] || "", // Product Name
+      item[1] || "", // Description
+      item[3] || "", // Costing Type
+      item[2] || "", // Group Type
+      item[6] || ""  // Added Date
+    ]);
+    
+    // Generate table
+    autoTable(doc, {
+      head: [columns],
+      body: rows,
+      startY: 30,
+      theme: "striped",
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [50, 150, 150] }
+    });
+    
+    // Download the PDF
+    doc.save("products-table.pdf");
+  };
+
+  // Export table data as Excel
+  const handleExportExcel = () => {
+    console.log("Export as Excel clicked");
+    console.log("Items data:", items);
+
+    if (!items || items.length === 0) {
+      alert("No data available to export.");
+      return;
     }
 
-    const updatedData = await getItemsData();
-
-    dispatch(setItemData(updatedData));
-    setItems(updatedData);
-    localStorage.setItem("itemData", JSON.stringify({ data: updatedData, time: Date.now() }));
-
-    alert("Item Added");
-    setIsFormOpen(false);
-    setFormData({
-      productName: "",
-      productDetails: "",
-      groupType: "",
-      sellingUnit: "",
-      mrp: "",
-      taxRate: "",
-      additionalInputs: {},
-      sideDropdown: "",
-    });
-    setNeedsTailoring(false);
-
-  } catch (error) {
-    console.error("Error adding item:", error);
-    alert("Error adding item");
-  }
-};
+    try {
+      // Define table columns
+      const columns = [
+        "Product Name",
+        "Description",
+        "Costing Type",
+        "Group Type",
+        "Added Date"
+      ];
+      
+      // Map items to table rows
+      const rows = items.map((item: any) => ({
+        "Product Name": item[0] || "",
+        "Description": item[1] || "",
+        "Costing Type": item[3] || "",
+        "Group Type": item[2] || "",
+        "Added Date": item[6] || ""
+      }));
+      
+      // Create worksheet
+      const worksheet = XLSX.utils.json_to_sheet(rows);
+      
+      // Set column widths (optional, for better readability)
+      worksheet["!cols"] = [
+        { wch: 20 }, // Product Name
+        { wch: 30 }, // Description
+        { wch: 15 }, // Costing Type
+        { wch: 15 }, // Group Type
+        { wch: 15 }  // Added Date
+      ];
+      
+      // Create workbook and add worksheet
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Products");
+      
+      // Download the Excel file using Blob for better compatibility
+      const buffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+      const blob = new Blob([buffer], { type: "application/octet-stream" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "products-table.xlsx";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error exporting Excel:", error);
+      alert("Failed to export Excel file.");
+    }
+  };
 
   return (
     <div className="bg-gray-50 min-h-screen pt-20 md:p-4">
@@ -430,7 +549,16 @@ const handleSubmit = async () => {
               </button>
               <ul className="dropdown-menu">
                 <li><a className="dropdown-item" href="#">Import Product</a></li>
-                <li><a className="dropdown-item" href="#">Export Product</a></li>
+                <li>
+                  <button className="dropdown-item" onClick={handleExportPDF}>
+                    Export as PDF
+                  </button>
+                </li>
+                <li>
+                  <button className="dropdown-item" onClick={handleExportExcel}>
+                    Export as Excel
+                  </button>
+                </li>
               </ul>
             </div>
             <button
@@ -443,7 +571,7 @@ const handleSubmit = async () => {
         </div>
 
         {isFormOpen && (
-            <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
+          <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
             <h2 className="text-2xl font-semibold mb-4">Product Details</h2>
             <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); }}>
               <div>
@@ -455,6 +583,7 @@ const handleSubmit = async () => {
                   name="productName"
                   value={productName}
                   placeholder="Enter Product Name"
+                  onChange={(e) => setProductName(e.target.value)}
                   className="w-full p-2 border rounded-md"
                   required
                 />
@@ -472,45 +601,45 @@ const handleSubmit = async () => {
               </div>
       
               <div className="grid grid-cols-2 gap-4">
-              <div>
-              <label className="block font-medium">
-                Group Type <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="groupType"
-                value={selectedGroupType}
-                onChange={(e) => setSelectedGroupType(e.target.value)}
-                className="w-full p-2 border rounded-md"
-                required
-              >
-                <option value="">Select Group Type</option>
-                {groupTypes.map(([label]) => (
-                  <option key={label} value={label}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
+                <div>
+                  <label className="block font-medium">
+                    Group Type <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="groupType"
+                    value={selectedGroupType}
+                    onChange={(e) => setSelectedGroupType(e.target.value)}
+                    className="w-full p-2 border rounded-md"
+                    required
+                  >
+                    <option value="">Select Group Type</option>
+                    {groupTypes.map(([label]) => (
+                      <option key={label} value={label}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
       
-            <div>
-              <label className="block font-medium">
-                Selling Unit <span className="text-red-500">*</span>
-              </label>
-              <select
-                name="sellingUnit"
-                value={sellingUnit}
-                onChange={(e) => setSellingUnit(e.target.value)}
-                className="w-full p-2 border rounded-md"
-                required
-              >
-                <option value="">Select Selling Unit</option>
-                {selectedUnits.map((unit) => (
-                  <option key={unit} value={unit}>
-                    {unit}
-                  </option>
-                ))}
-              </select>
-            </div>
+                <div>
+                  <label className="block font-medium">
+                    Selling Unit <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    name="sellingUnit"
+                    value={sellingUnit}
+                    onChange={(e) => setSellingUnit(e.target.value)}
+                    className="w-full p-2 border rounded-md"
+                    required
+                  >
+                    <option value="">Select Selling Unit</option>
+                    {selectedUnits.map((unit) => (
+                      <option key={unit} value={unit}>
+                        {unit}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
       
               <div className="grid grid-cols-2 gap-4">
@@ -575,7 +704,7 @@ const handleSubmit = async () => {
           </div>
         )}
 
-        <div className={ `bg-white shadow rounded-lg p-4 mt-4 overflow-x-auto ${isFormOpen ? "hidden" : ""}`}ref={tableRef}>
+        <div className={`bg-white shadow rounded-lg p-4 mt-4 overflow-x-auto ${isFormOpen ? "hidden" : ""}`} ref={tableRef}>
           <input
             type="text"
             placeholder="Search items..."
@@ -595,7 +724,7 @@ const handleSubmit = async () => {
               </tr>
             </thead>
             <tbody>
-              {items != undefined && items.map((item, index) => (
+              {items != undefined && items.map((item: any, index: number) => (
                 <tr key={index} className="border-t relative hover:bg-sky-50">
                   <td onClick={() => editMenu(item)} className="py-2 px-4">{item[0]}</td>
                   <td className="py-2 px-4">{item[1]}</td>
@@ -628,7 +757,7 @@ const handleSubmit = async () => {
                       </button>
                       <button
                         className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                        onClick={() => duplicateItem(item)}
+                        onClick={() => duplicateItem(item, index)}
                       >
                         Duplicate
                       </button>

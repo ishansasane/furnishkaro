@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
-import { Edit, Trash2, Plus, Download } from "lucide-react";
+import { Pencil, XCircle, Plus, Download } from "lucide-react";
 import { Link } from "react-router-dom";
 import { RootState } from "../Redux/store";
 import { useDispatch, useSelector } from "react-redux";
@@ -128,8 +128,8 @@ export default function Projects() {
       additionalItems: deepClone(parseSafely(row[14], [])),
       goodsArray: deepClone(parseSafely(row[15], [])),
       tailorsArray: deepClone(parseSafely(row[16], [])),
-      projectAddress : row[17],
-      date : row[18],
+      projectAddress: row[17],
+      date: row[18],
     }));
 
     return projects;
@@ -145,59 +145,55 @@ export default function Projects() {
 
   const [deleted, setDeleted] = useState(false);
   
-  // Fetch Payments when 'projectData' is ready
-  
   // --- Fetch Projects ---
-useEffect(() => {
-  const fetchProjects = async () => {
-    try {
-      const cached = localStorage.getItem("projectData");
-      const now = Date.now();
-      const cacheExpiry = 5 * 60 * 1000; // 5 minutes
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const cached = localStorage.getItem("projectData");
+        const now = Date.now();
+        const cacheExpiry = 5 * 60 * 1000; // 5 minutes
 
-      if (cached) {
-        const parsed = JSON.parse(cached);
+        if (cached) {
+          const parsed = JSON.parse(cached);
 
-        const isCacheValid = parsed?.data?.length > 0 && (now - parsed.time) < cacheExpiry;
+          const isCacheValid = parsed?.data?.length > 0 && (now - parsed.time) < cacheExpiry;
 
-        if (isCacheValid) {
-          dispatch(setProjects(parsed.data));
-          setprojects(parsed.data);
-          return;
+          if (isCacheValid) {
+            dispatch(setProjects(parsed.data));
+            setprojects(parsed.data);
+            return;
+          }
+        }
+
+        // If no valid cache, fetch fresh data
+        const freshData = await fetchProjectData();
+
+        if (Array.isArray(freshData)) {
+          dispatch(setProjects(freshData));
+          setprojects(freshData);
+          localStorage.setItem("projectData", JSON.stringify({ data: freshData, time: now }));
+        } else {
+          console.warn("Fetched project data is not an array:", freshData);
+        }
+
+      } catch (error) {
+        console.error("Failed to fetch projects:", error);
+
+        // Optional fallback to stale cache if fetch fails
+        const fallbackCache = localStorage.getItem("projectData");
+        if (fallbackCache) {
+          const parsed = JSON.parse(fallbackCache);
+          if (parsed?.data?.length > 0) {
+            dispatch(setProjects(parsed.data));
+            setprojects(parsed.data);
+          }
         }
       }
+    };
 
-      // If no valid cache, fetch fresh data
-      const freshData = await fetchProjectData();
+    fetchProjects();
+  }, [dispatch]);
 
-      if (Array.isArray(freshData)) {
-        dispatch(setProjects(freshData));
-        setprojects(freshData);
-        localStorage.setItem("projectData", JSON.stringify({ data: freshData, time: now }));
-      } else {
-        console.warn("Fetched project data is not an array:", freshData);
-      }
-
-    } catch (error) {
-      console.error("Failed to fetch projects:", error);
-
-      // Optional fallback to stale cache if fetch fails
-      const fallbackCache = localStorage.getItem("projectData");
-      if (fallbackCache) {
-        const parsed = JSON.parse(fallbackCache);
-        if (parsed?.data?.length > 0) {
-          dispatch(setProjects(parsed.data));
-          setprojects(parsed.data);
-        }
-      }
-    }
-  };
-
-  fetchProjects();
-}, [dispatch]);
-
-
-  
   // --- Fetch Tasks ---
   useEffect(() => {
     const fetchTasks = async () => {
@@ -255,8 +251,6 @@ useEffect(() => {
     return data.body || [];
   };
   
-  
-
   const [filteredTasks, setTaskNames] = useState([]);
 
   const deleteTask = async (name: string) => {
@@ -274,64 +268,64 @@ useEffect(() => {
   const filteredProjects =
     filter === "all" ? projects : projects.filter((proj) => proj.status === filter);
 
-const deleteProject = async (name) => {
-  try {
-    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deleteprojectdata", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({ projectName: name }),
-    });
+  const deleteProject = async (name) => {
+    try {
+      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deleteprojectdata", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ projectName: name }),
+      });
 
-    // Fetch tasks and delete related ones
-    const taskData = await fetchTaskData();
-    const filteredTaskNames = taskData
-      .filter((task) => task[5] === name)
-      .map((task) => task[0]);
+      // Fetch tasks and delete related ones
+      const taskData = await fetchTaskData();
+      const filteredTaskNames = taskData
+        .filter((task) => task[5] === name)
+        .map((task) => task[0]);
 
-    setTaskNames(filteredTaskNames);
+      setTaskNames(filteredTaskNames);
 
-    for (const taskName of filteredTaskNames) {
-      await deleteTask(taskName);
-    }
-
-    if (response.status === 200) {
-      alert("Project Deleted");
-
-      // 1. Get current cache
-      const cached = localStorage.getItem("projectData");
-      let currentProjects = [];
-
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed.data)) {
-          currentProjects = parsed.data;
-        }
+      for (const taskName of filteredTaskNames) {
+        await deleteTask(taskName);
       }
 
-      // 2. Remove deleted project from cache
-      const updatedProjects = currentProjects.filter(p => p.projectName !== name);
+      if (response.status === 200) {
+        alert("Project Deleted");
 
-      // 3. Update Redux and state
-      dispatch(setProjects(updatedProjects));
-      setprojects(updatedProjects);
+        // 1. Get current cache
+        const cached = localStorage.getItem("projectData");
+        let currentProjects = [];
 
-      // 4. Update localStorage
-      localStorage.setItem("projectData", JSON.stringify({
-        data: updatedProjects,
-        time: Date.now()
-      }));
-    } else {
-      alert("Error");
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed.data)) {
+            currentProjects = parsed.data;
+          }
+        }
+
+        // 2. Remove deleted project from cache
+        const updatedProjects = currentProjects.filter(p => p.projectName !== name);
+
+        // 3. Update Redux and state
+        dispatch(setProjects(updatedProjects));
+        setprojects(updatedProjects);
+
+        // 4. Update localStorage
+        localStorage.setItem("projectData", JSON.stringify({
+          data: updatedProjects,
+          time: Date.now()
+        }));
+      } else {
+        alert("Error");
+      }
+
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      alert("Error: Network issue or server not responding");
     }
-
-  } catch (error) {
-    console.error("Error deleting project:", error);
-    alert("Error: Network issue or server not responding");
-  }
-};
+  };
 
   const [confirmBox, setConfirmBox] = useState(false);
   const [chosenProject, setChosenProject] = useState(false);
@@ -471,7 +465,7 @@ const deleteProject = async (name) => {
   return (
     <div className={`md:!p-6 p-2 md:mt-0 mt-20 h-screen bg-gray-50`}>
       <div className={`flex justify-between flex-wrap items-center mb-4`}>
-        <h1 className="text-2xl font-bold">🚀 Projects</h1>
+        <h1 className="text-2xl font-bold">Projects</h1>
         <Link to="/add-project">
           <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 !rounded-md">
             <Plus size={18} /> Add Project
@@ -535,15 +529,15 @@ const deleteProject = async (name) => {
                         setSendProject(project);
                         setFlag(true);
                       }}
-                      className="border px-2 py-1 rounded-md bg-gray-300"
+                      className="border px-2 py-1 rounded-md"
                     >
-                      <Edit size={16} />
+                      <Pencil size={16} />
                     </button>
                     <button
                       onClick={() => { setChosenProject(project); setConfirmBox(true); }}
-                      className="border px-2 py-1 rounded-md bg-red-500 text-white"
+                      className="border px-2 py-1 rounded-md"
                     >
-                      <Trash2 size={16} />
+                      <XCircle size={16} />
                     </button>
                   </div>
                 </td>

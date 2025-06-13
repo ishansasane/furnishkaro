@@ -59,7 +59,7 @@ export default function Reports() {
 
   return (
     <div className="p-2 md:p-6  bg-gray-50 md:mt-0 mt-20 h-screen">
-      <h1 className="text-2xl font-bold">📑 Reports</h1>
+      <h1 className="text-2xl font-bold"> Reports</h1>
       <div className="flex flex-col items-center p-6">
         {/* Button Group */}
         <div className="flex w-full flex flex-wrap  gap-4 mb-6">
