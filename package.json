@@ -12,7 +12,9 @@
   "dependencies": {
     "@reduxjs/toolkit": "^2.6.1",
     "@tailwindcss/vite": "^4.0.9",
+    "axios": "^1.9.0",
     "bootstrap": "^5.3.3",
+    "dayjs": "^1.11.13",
     "framer-motion": "^12.7.4",
     "furnishkaro": "file:",
     "jspdf": "^3.0.1",
