@@ -7,7 +7,7 @@ import InquiryCard from "../compoonents/InquiryCard.tsx"; // Corrected import pa
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store.ts";
-import { setTasks, setProjects, setPaymentData, setProjectFlag } from "../Redux/dataSlice.ts";
+import { setTasks, setProjects, setPaymentData, setProjectFlag, setInquiryData } from "../Redux/dataSlice.ts";
 import TaskDialog from "../compoonents/TaskDialog.tsx";
 import { AnimatePresence, motion } from "framer-motion";
 import EditProjects from "./EditProjects.tsx";
@@ -15,6 +15,16 @@ import { useNavigate } from "react-router-dom";
 
 const fetchTaskData = async () => {
   const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks");
+  const data = await response.json();
+  if (data.body) {
+    return data.body;
+  } else {
+    return [];
+  }
+};
+
+const fetchInquiryData = async () => {
+  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getInquiry");
   const data = await response.json();
   if (data.body) {
     return data.body;
@@ -34,35 +44,38 @@ const Dashboard: React.FC = () => {
     inquiryDate: "",
     followUpDate: ""
   });
-  const [inquiries, setInquiries] = useState([
-    {
-      project: "E-commerce Website",
-      comments: "Client wants a Shopify integration.",
-      inquiryDate: "Feb 15, 2025",
-      followUpDate: "Feb 28, 2025",
-      status: "New Inquiry"
-    },
-    {
-      project: "Mobile App for Gym",
-      comments: "Needs a booking system & payment gateway.",
-      inquiryDate: "Feb 20, 2025",
-      followUpDate: "March 5, 2025",
-      status: "New Inquiry"
-    },
-    {
-      project: "Real Estate CRM",
-      comments: "Looking for a cloud-based solution.",
-      inquiryDate: "Feb 25, 2025",
-      followUpDate: "March 10, 2025",
-      status: "New Inquiry"
+
+  const sendInquiry = async () => {
+    const projectName = inquiryForm.project;
+    const comment  = inquiryForm.comments;
+    const inquiryDate = inquiryForm.inquiryDate;
+    const followUpDate = inquiryForm.followUpDate;
+
+    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/sendInquiry", {
+      method : "POST",
+      headers : {
+        "content-type" : "application/json"
+      },
+      body : JSON.stringify({ projectName, comment, inquiryDate, projectDate : followUpDate, status : "New Inquiry" })
+    });
+
+    if(response.status === 200){
+      alert("Inquiry Added");
+      const data = await fetchInquiryData();
+      dispatch(setInquiryData(data));
+      setInquiryFormOpen(false);
+    }else{
+      alert("Error in adding inquiry");
     }
-  ]);
+  }
+
   const dispatch = useDispatch();
   const tasks = useSelector((state: RootState) => state.data.tasks);
   const [filteredTasks, setFilteredTasks] = useState([]);
   const projects = useSelector((state: RootState) => state.data.projects);
   const paymentData = useSelector((state: RootState) => state.data.paymentData);
   const projectsData = useSelector((state: RootState) => state.data.projects);
+  const inquiries = useSelector((state : RootState) => state.data.inquiry);
   const [Amount, setAmount] = useState(0);
   const [Tax, setTax] = useState(0);
   const [projectDiscount, setProjectDiscount] = useState(0);
@@ -115,6 +128,19 @@ const Dashboard: React.FC = () => {
       alert("Something went wrong while deleting the task.");
     }
   };
+
+  useEffect(() => {
+    async function fetchInquiries(){
+      const data = await fetchInquiryData();
+      dispatch(setInquiryData(data));
+    }
+    fetchInquiries();
+  }, [dispatch, inquiries])
+
+
+  useEffect(() => {
+
+  })
 
   useEffect(() => {
     let isMounted = true;
@@ -596,7 +622,7 @@ const Dashboard: React.FC = () => {
                   ✕
                 </button>
                 <h2 className="text-xl font-bold mb-4 text-gray-800">Add Inquiry</h2>
-                <form onSubmit={handleInquirySubmit} className="space-y-4">
+                <form className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Project</label>
                     <input
@@ -649,6 +675,7 @@ const Dashboard: React.FC = () => {
                     <button
                       type="submit"
                       className="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-700 transition-colors"
+                      onClick={sendInquiry}
                     >
                       Submit
                     </button>
@@ -717,11 +744,11 @@ const Dashboard: React.FC = () => {
           {inquiries.map((inquiry, index) => (
             <div key={index}>
               <InquiryCard
-                project={inquiry.project}
-                comments={inquiry.comments}
-                inquiryDate={inquiry.inquiryDate}
-                followUpDate={inquiry.followUpDate}
-                status={inquiry.status}
+                project={inquiry[0]}
+                comments={inquiry[1]}
+                inquiryDate={inquiry[2]}
+                followUpDate={inquiry[3]}
+                status={inquiry[4]}
                 onStatusChange={(newStatus) => handleStatusChange(inquiry, newStatus)}
                 onCardClick={() => { setSelectedInquiry(inquiry); setInquiryDialogOpen(true); }}
               />
