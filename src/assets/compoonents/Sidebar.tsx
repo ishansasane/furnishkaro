@@ -260,7 +260,7 @@ function SidebarContent({
             <button
               onClick={() => {
                 localStorage.clear();
-                window.location.href = "http://localhost/auth/";
+                window.location.href = "https://sheeladecor.free.nf/";
               }}
               className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
             >
