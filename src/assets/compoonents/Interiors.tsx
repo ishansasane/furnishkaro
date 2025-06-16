@@ -5,10 +5,12 @@ import { RootState } from "../Redux/Store";
 import { useDispatch, useSelector } from "react-redux";
 import { setInteriorData } from "../Redux/dataSlice";
 import { useNavigate } from "react-router-dom";
+import InteriorPage from "./InteriorPage";
 
 interface Interior {
   data: string[];
 }
+
 
 // Fetch interiors from the server
 async function fetchInteriors(): Promise<Interior[]> {
@@ -63,6 +65,7 @@ export default function Interiors() {
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [editingInterior, setEditingInterior] = useState<Interior | null>(null);
   const [refresh, setRefresh] = useState(false);
+  const [interiorOpen, setInteriorOpen] = useState(false);
 
   const dispatch = useDispatch();
   const interiorsFromRedux = useSelector((state: RootState) => state.data.interiors);
@@ -104,9 +107,11 @@ export default function Interiors() {
     }
   }, [interiorsFromRedux, dispatch, refresh]);
 
+  const [interiorData, setInteriorData] = useState(null);
+
   return (
     <div className="md:p-6 pt-20 h-full bg-gray-50">
-      <div className="flex flex-wrap justify-between items-center mb-4">
+      <div className={`flex flex-wrap justify-between items-center mb-4 ${interiorOpen ? "hidden" : ""}`}>
         <h1 className="text-2xl font-bold">Interiors</h1>
         <button
           className="flex !rounded-md items-center gap-2 bg-blue-600 text-white px-4 py-2"
@@ -115,7 +120,7 @@ export default function Interiors() {
           <Plus size={18} /> Add Interior
         </button>
       </div>
-      <div className="bg-white shadow rounded-lg overflow-x-auto p-5">
+      <div className={`bg-white shadow rounded-lg overflow-x-auto p-5 ${interiorOpen ? "hidden" : ""}`}>
         <div className="mb-4">
           <input
             type="text"
@@ -138,7 +143,7 @@ export default function Interiors() {
           <tbody>
             {interiors.length > 0 ? (
               interiors.map((interior, index) => (
-                <tr key={index} className="hover:bg-sky-50">
+                <tr key={index} className="hover:bg-sky-50" onClick={() => {setInteriorData(interior); setInteriorOpen(true);}}> 
                   <td className="px-4 py-2">{interior[0]}</td>
                   <td className="px-4 py-2">{interior[1]}</td>
                   <td className="px-4 py-2">{interior[2]}</td>
@@ -170,6 +175,7 @@ export default function Interiors() {
           </tbody>
         </table>
       </div>
+      {interiorOpen &&  <InteriorPage interiorData={interiorData} setInteriorOpen={setInteriorOpen} />}
       {isDialogOpen && <InteriorDialog setDialogOpen={setDialogOpen} setRefresh={setRefresh} refresh={refresh} editingInterior={editingInterior} setEditingInterior={setEditingInterior} />}
     </div>
   );
