@@ -1,17 +1,7 @@
 
 import React from "react";
 
-interface InquiryCardProps {
-  project: string;
-  comments: string;
-  inquiryDate: string;
-  followUpDate: string;
-  status: string;
-  onStatusChange: (status: string) => void;
-  onCardClick: () => void;
-}
-
-const InquiryCard: React.FC<InquiryCardProps> = ({ project, comments, inquiryDate, followUpDate, status, onStatusChange, onCardClick }) => {
+const InquiryCard = ({ project, comments, inquiryDate, followUpDate, status, handlestatuschange, onCardClick, customer }) => {
   return (
     <div
       className="w-full max-w-sm mx-auto bg-white shadow-md rounded-lg p-4 flex flex-col space-y-4"
@@ -19,6 +9,7 @@ const InquiryCard: React.FC<InquiryCardProps> = ({ project, comments, inquiryDat
     >
       <div className="flex flex-col space-y-2">
         <h3 className="text-lg font-semibold text-gray-800">{project}</h3>
+        <p className="text-md text-gray-600">{customer}</p>
         <p className="text-md text-gray-600">{comments}</p>
       </div>
 
@@ -31,8 +22,7 @@ const InquiryCard: React.FC<InquiryCardProps> = ({ project, comments, inquiryDat
         value={status}
         onClick={(e) => e.stopPropagation()}
         onChange={(e) => {
-          e.stopPropagation();
-          onStatusChange(e.target.value);
+          handlestatuschange(project, e.target.value)
         }}
         className="w-full mt-2 border p-2 rounded-md text-gray-700 focus:ring-indigo-500 focus:border-indigo-500"
       >
