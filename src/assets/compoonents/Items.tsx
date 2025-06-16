@@ -45,21 +45,23 @@ const Items = () => {
   const itemData = useSelector((state: RootState) => state.data.items);
 
   const [needsTailoring, setNeedsTailoring] = useState(false);
-
   const [selectedGroupType, setSelectedGroupType] = useState("");
-  
   const selectedUnits = groupTypes.find((type) => type[0] === selectedGroupType)?.[1] || [];
 
-  const [openMenu, setOpenMenu] = useState(-1); // Track which dropdown is open
-  const menuRefs = useRef<(HTMLDivElement | null)[]>([]); // Refs for dropdown menus
-  const tableRef = useRef<HTMLDivElement>(null); // Ref for table container
+  const [openMenu, setOpenMenu] = useState(-1);
+  const menuRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const tableRef = useRef<HTMLDivElement>(null);
+
+  // State for import modal and drag-and-drop
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [fileError, setFileError] = useState<string | null>(null);
 
   const toggleMenu = (index: number) => {
-    setOpenMenu(openMenu === index ? -1 : index); // Toggle menu for the clicked row
+    setOpenMenu(openMenu === index ? -1 : index);
   };
 
   const editMenu = (item: any) => {
-    console.log(item);
     setIsFormOpen(true);
     setEditing(true);
     setProductName(item[0]);
@@ -97,12 +99,9 @@ const Items = () => {
         const rect = dropdown.getBoundingClientRect();
         const viewportHeight = window.innerHeight;
 
-        // Check if dropdown is partially or fully outside the viewport
         if (rect.bottom > viewportHeight) {
-          // Scroll to bring the dropdown into view
           dropdown.scrollIntoView({ behavior: "smooth", block: "end" });
         } else if (rect.top < 0) {
-          // Scroll up if dropdown is above the viewport
           dropdown.scrollIntoView({ behavior: "smooth", block: "start" });
         }
       }
@@ -123,7 +122,6 @@ const Items = () => {
         }
       }
   
-      // Fetch fresh data from backend
       const freshData = await getItemsData();
       dispatch(setItemData(freshData));
       setItems(freshData);
@@ -135,7 +133,6 @@ const Items = () => {
 
   const deleteItem = async (name: string) => {
     try {
-      // Delete request
       const response = await fetch(
         "https://sheeladecor.netlify.app/.netlify/functions/server/deletesingleproduct",
         {
@@ -152,20 +149,13 @@ const Items = () => {
         throw new Error("Failed to delete the item");
       }
 
-      // Refetch updated items
       const updatedData = await getItemsData();
-
-      // Update Redux and local state
       dispatch(setItemData(updatedData));
       setItems(updatedData);
-
-      // Update cache
       localStorage.setItem(
         "itemData",
         JSON.stringify({ data: updatedData, time: Date.now() })
       );
-
-      // UI updates
       setDeleted((prev) => !prev);
       setOpenMenu(-1);
     } catch (err) {
@@ -187,7 +177,7 @@ const Items = () => {
           },
           credentials: "include",
           body: JSON.stringify({
-            productName: item[0], // Use the same product name
+            productName: item[0],
             description: item[1],
             groupTypes: item[2],
             sellingUnit: item[3],
@@ -204,25 +194,19 @@ const Items = () => {
       }
 
       const updatedData = await getItemsData();
-
-      // Assume the last item in updatedData is the newly added item
       const duplicatedItem = updatedData[updatedData.length - 1];
-
-      // Reorder items to place the duplicated item just below the original
       const reorderedData = [
-        ...items.slice(0, index + 1), // Items up to and including the original
-        duplicatedItem, // Insert the duplicated item
-        ...items.slice(index + 1) // Rest of the items
+        ...items.slice(0, index + 1),
+        duplicatedItem,
+        ...items.slice(index + 1)
       ];
 
-      // Update state and cache
       dispatch(setItemData(reorderedData));
       setItems(reorderedData);
       localStorage.setItem(
         "itemData",
         JSON.stringify({ data: reorderedData, time: Date.now() })
       );
-
       setDeleted((prev) => !prev);
       setOpenMenu(-1);
     } catch (err) {
@@ -329,22 +313,13 @@ const Items = () => {
       }
 
       alert("Item Updated");
-
       const updatedData = await getItemsData();
-
-      // Update global state
       dispatch(setItemData(updatedData));
-
-      // Update local state
       setItems(updatedData);
-
-      // Refresh cache
       localStorage.setItem(
         "itemData",
         JSON.stringify({ data: updatedData, time: Date.now() })
       );
-
-      // Reset UI/form state
       setIsFormOpen(false);
       setEditing(false);
       setOpenMenu(-1);
@@ -405,11 +380,9 @@ const Items = () => {
       }
 
       const updatedData = await getItemsData();
-
       dispatch(setItemData(updatedData));
       setItems(updatedData);
       localStorage.setItem("itemData", JSON.stringify({ data: updatedData, time: Date.now() }));
-
       alert("Item Added");
       setIsFormOpen(false);
       setFormData({
@@ -429,14 +402,113 @@ const Items = () => {
     }
   };
 
+  // Handle file import
+  const handleFileImport = async (file: File) => {
+    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+      setFileError('Please upload a valid Excel file (.xlsx or .xls)');
+      return;
+    }
+
+    try {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      // Map Excel data to the expected item format
+      const importedItems = jsonData.map((row: any) => [
+        row["Product Name"] || "",
+        row["Description"] || "",
+        row["Group Type"] || "",
+        row["Costing Type"] || "",
+        row["MRP"] || "",
+        row["Tax Rate"] || "",
+        row["Added Date"] || new Date().toLocaleDateString(),
+        row["Needs Tailoring"] || false
+      ]);
+
+      // Validate imported data
+      const validItems = importedItems.filter(item => item[0] && groupOptions.includes(item[2]) && sellingUnits[item[2]]?.includes(item[3]));
+
+      if (validItems.length === 0) {
+        setFileError('No valid items found in the Excel file');
+        return;
+      }
+
+      // Send each valid item to the backend
+      for (const item of validItems) {
+        const response = await fetch(
+          "https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            credentials: "include",
+            body: JSON.stringify({
+              productName: item[0],
+              description: item[1],
+              groupTypes: item[2],
+              sellingUnit: item[3],
+              mrp: item[4],
+              taxRate: item[5],
+              needsTailoring: item[7],
+              date: item[6]
+            })
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Failed to import item: ${item[0]}`);
+        }
+      }
+
+      // Refresh data
+      const updatedData = await getItemsData();
+      dispatch(setItemData(updatedData));
+      setItems(updatedData);
+      localStorage.setItem("itemData", JSON.stringify({ data: updatedData, time: Date.now() }));
+      setIsImportModalOpen(false);
+      setFileError(null);
+      alert("Items imported successfully");
+    } catch (error) {
+      console.error("Error importing file:", error);
+      setFileError('Failed to import Excel file');
+    }
+  };
+
+  // Handle drag and drop events
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      handleFileImport(file);
+    }
+  };
+
+  // Handle file input change
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleFileImport(file);
+    }
+  };
+
   // Export table data as PDF
   const handleExportPDF = () => {
     const doc = new jsPDF();
-    
-    // Add title
     doc.text("Products List", 14, 20);
-    
-    // Define table columns
     const columns = [
       "Product Name",
       "Description",
@@ -444,17 +516,13 @@ const Items = () => {
       "Group Type",
       "Added Date"
     ];
-    
-    // Map items to table rows
     const rows = items.map((item: any) => [
-      item[0] || "", // Product Name
-      item[1] || "", // Description
-      item[3] || "", // Costing Type
-      item[2] || "", // Group Type
-      item[6] || ""  // Added Date
+      item[0] || "",
+      item[1] || "",
+      item[3] || "",
+      item[2] || "",
+      item[6] || ""
     ]);
-    
-    // Generate table
     autoTable(doc, {
       head: [columns],
       body: rows,
@@ -463,23 +531,17 @@ const Items = () => {
       styles: { fontSize: 10 },
       headStyles: { fillColor: [50, 150, 150] }
     });
-    
-    // Download the PDF
     doc.save("products-table.pdf");
   };
 
   // Export table data as Excel
   const handleExportExcel = () => {
-    console.log("Export as Excel clicked");
-    console.log("Items data:", items);
-
     if (!items || items.length === 0) {
       alert("No data available to export.");
       return;
     }
 
     try {
-      // Define table columns
       const columns = [
         "Product Name",
         "Description",
@@ -487,8 +549,6 @@ const Items = () => {
         "Group Type",
         "Added Date"
       ];
-      
-      // Map items to table rows
       const rows = items.map((item: any) => ({
         "Product Name": item[0] || "",
         "Description": item[1] || "",
@@ -496,24 +556,16 @@ const Items = () => {
         "Group Type": item[2] || "",
         "Added Date": item[6] || ""
       }));
-      
-      // Create worksheet
       const worksheet = XLSX.utils.json_to_sheet(rows);
-      
-      // Set column widths (optional, for better readability)
       worksheet["!cols"] = [
-        { wch: 20 }, // Product Name
-        { wch: 30 }, // Description
-        { wch: 15 }, // Costing Type
-        { wch: 15 }, // Group Type
-        { wch: 15 }  // Added Date
+        { wch: 20 },
+        { wch: 30 },
+        { wch: 15 },
+        { wch: 15 },
+        { wch: 15 }
       ];
-      
-      // Create workbook and add worksheet
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Products");
-      
-      // Download the Excel file using Blob for better compatibility
       const buffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
       const blob = new Blob([buffer], { type: "application/octet-stream" });
       const url = window.URL.createObjectURL(blob);
@@ -548,7 +600,11 @@ const Items = () => {
                 More Options
               </button>
               <ul className="dropdown-menu">
-                <li><a className="dropdown-item" href="#">Import Product</a></li>
+                <li>
+                  <button className="dropdown-item" onClick={() => setIsImportModalOpen(true)}>
+                    Import Product
+                  </button>
+                </li>
                 <li>
                   <button className="dropdown-item" onClick={handleExportPDF}>
                     Export as PDF
@@ -569,6 +625,70 @@ const Items = () => {
             </button>
           </div>
         </div>
+
+        {/* Import Modal */}
+        {isImportModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Import Excel File</h2>
+                <button
+                  onClick={() => {
+                    setIsImportModalOpen(false);
+                    setFileError(null);
+                    setIsDragging(false);
+                  }}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ✕
+                </button>
+              </div>
+              <div
+                className={`border-2 border-dashed rounded-lg p-6 text-center ${
+                  isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+                }`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                <p className="text-gray-600 mb-2">
+                  Drag and drop your Excel file here or
+                </p>
+                <label
+                  htmlFor="fileInput"
+                  className="cursor-pointer text-blue-500 hover:text-blue-600"
+                >
+                  click to select a file
+                </label>
+                <input
+                  id="fileInput"
+                  type="file"
+                  accept=".xlsx,.xls"
+                  className="hidden"
+                  onChange={handleFileInputChange}
+                />
+                {fileError && (
+                  <p className="text-red-500 mt-2">{fileError}</p>
+                )}
+              </div>
+              <div className="mt-4 text-sm text-gray-500">
+                <p>Expected columns: Product Name, Description, Group Type, Costing Type, MRP, Tax Rate, Added Date, Needs Tailoring</p>
+              </div>
+              <div className="flex justify-end mt-6">
+                <button
+                  onClick={() => {
+                    setIsImportModalOpen(false);
+                    setFileError(null);
+                    setIsDragging(false);
+                  }}
+                  className="px-4 py-2 border rounded-lg"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {isFormOpen && (
           <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
