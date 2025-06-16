@@ -32,7 +32,22 @@ async function fetchInteriors(): Promise<Interior[]> {
 }
 
 // Delete an interior record
-async function deleteInterior(name: string, setRefresh: (state: boolean) => void) {
+
+
+export default function Interiors() {
+  const navigate = useNavigate();
+  const [interiors, setInteriors] = useState<Interior[]>([]);
+  const [search, setSearch] = useState("");
+  const [isDialogOpen, setDialogOpen] = useState(false);
+  const [editingInterior, setEditingInterior] = useState<Interior | null>(null);
+  const [refresh, setRefresh] = useState(false);
+  const [interiorOpen, setInteriorOpen] = useState(false);
+
+  const dispatch = useDispatch();
+  const interiorsFromRedux = useSelector((state: RootState) => state.data.interiors);
+
+
+  async function deleteInterior(name: string, setRefresh: (state: boolean) => void) {
   try {
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deleteinteriordata", {
       method: "POST",
@@ -58,56 +73,53 @@ async function deleteInterior(name: string, setRefresh: (state: boolean) => void
   }
 }
 
-export default function Interiors() {
-  const navigate = useNavigate();
-  const [interiors, setInteriors] = useState<Interior[]>([]);
-  const [search, setSearch] = useState("");
-  const [isDialogOpen, setDialogOpen] = useState(false);
-  const [editingInterior, setEditingInterior] = useState<Interior | null>(null);
-  const [refresh, setRefresh] = useState(false);
-  const [interiorOpen, setInteriorOpen] = useState(false);
+useEffect(() => {
+  const fetchInteriorsData = async () => {
+    try {
+      const cached = localStorage.getItem("interiorData");
+      const now = Date.now();
+      const cacheExpiry = 5 * 60 * 1000; // 5 minutes
 
-  const dispatch = useDispatch();
-  const interiorsFromRedux = useSelector((state: RootState) => state.data.interiors);
+      let finalData = [];
 
-  useEffect(() => {
-    const fetchAndSetData = async () => {
-      try {
-        const cached = localStorage.getItem("interiorData");
-        const now = Date.now();
-        const cacheExpiry = 5 * 60 * 1000; // 5 minutes
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        const isCacheValid = parsed?.data?.length > 0 && (now - parsed.time < cacheExpiry);
 
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (parsed.data?.length > 0 && now - parsed.time < cacheExpiry) {
-            dispatch(setInteriorData(parsed.data));
-            setInteriors(parsed.data);
-            return;
-          }
+        if (isCacheValid) {
+          finalData = parsed.data;
+          dispatch(setInteriorData(finalData));
+          setInteriors(finalData);
+          return;
         }
-
-        const data = await fetchInteriors();
-        if (Array.isArray(data)) {
-          dispatch(setInteriorData(data));
-          setInteriors(data);
-          localStorage.setItem("interiorData", JSON.stringify({ data, time: now }));
-        } else {
-          console.error("Fetched interior data is invalid:", data);
-        }
-      } catch (error) {
-        console.error("Error fetching interiors:", error);
       }
-    };
 
-    if (refresh || !interiorsFromRedux || interiorsFromRedux.length === 0) {
-      fetchAndSetData();
-      setRefresh(false);
-    } else {
-      interiorsFromRedux !== interiors && setInteriors(interiorsFromRedux);
+      const freshData = await fetchInteriors();
+
+      if (Array.isArray(freshData)) {
+        finalData = freshData;
+        dispatch(setInteriorData(finalData));
+        setInteriors(finalData);
+        localStorage.setItem("interiorData", JSON.stringify({ data: finalData, time: now }));
+      } else {
+        console.warn("Fetched interior data is not an array:", freshData);
+      }
+
+    } catch (error) {
+      console.error("Error fetching interiors:", error);
     }
-  }, [interiorsFromRedux, dispatch, refresh]);
+  };
 
-  const [interiorData, setInteriorData] = useState(null);
+  if (refresh || !interiorsFromRedux || interiorsFromRedux.length === 0) {
+    fetchInteriorsData();
+    setRefresh(false);
+  } else {
+    setInteriors(interiorsFromRedux);
+  }
+}, [interiorsFromRedux, dispatch, refresh]);
+
+
+  const [interiorPageData, setInteriorPageData] = useState(null);
 
   return (
     <div className="md:p-6 pt-20 h-full bg-gray-50">
@@ -143,7 +155,7 @@ export default function Interiors() {
           <tbody>
             {interiors.length > 0 ? (
               interiors.map((interior, index) => (
-                <tr key={index} className="hover:bg-sky-50" onClick={() => {setInteriorData(interior); setInteriorOpen(true);}}> 
+                <tr key={index} className="hover:bg-sky-50" onClick={() => {setInteriorPageData(interior); setInteriorOpen(true);}}> 
                   <td className="px-4 py-2">{interior[0]}</td>
                   <td className="px-4 py-2">{interior[1]}</td>
                   <td className="px-4 py-2">{interior[2]}</td>
@@ -175,7 +187,7 @@ export default function Interiors() {
           </tbody>
         </table>
       </div>
-      {interiorOpen &&  <InteriorPage interiorData={interiorData} setInteriorOpen={setInteriorOpen} />}
+      {interiorOpen &&  <InteriorPage interiorData={interiorPageData} setInteriorOpen={setInteriorOpen} />}
       {isDialogOpen && <InteriorDialog setDialogOpen={setDialogOpen} setRefresh={setRefresh} refresh={refresh} editingInterior={editingInterior} setEditingInterior={setEditingInterior} />}
     </div>
   );
