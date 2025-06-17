@@ -1,11 +1,75 @@
 import { Divide } from 'lucide-react';
-import React, { useEffect } from 'react';
-import { useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCatalogs } from '../Redux/dataSlice';
 import { RootState } from '../Redux/store';
 import { setCompanyData, setDesignData } from '../Redux/dataSlice';
+
+const SearchableSelect = ({ options, value, onChange, placeholder, name }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredOptions, setFilteredOptions] = useState(options);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    setFilteredOptions(
+      options.filter(option => 
+        option[0].toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+  }, [searchTerm, options]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+        setSearchTerm('');
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleSelect = (option) => {
+    onChange({ target: { value: option[0] } });
+    setIsOpen(false);
+    setSearchTerm('');
+  };
+
+  return (
+    <div className="relative w-full" ref={dropdownRef}>
+      <input
+        type="text"
+        value={searchTerm || value}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        onFocus={() => setIsOpen(true)}
+        placeholder={placeholder}
+        className="border p-2 sm:p-3 rounded w-full text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
+      />
+      {isOpen && (
+        <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+          {filteredOptions.length > 0 ? (
+            filteredOptions.map((option, index) => (
+              <div
+                key={index}
+                className="p-2 hover:bg-gray-100 cursor-pointer"
+                onClick={() => handleSelect(option)}
+              >
+                {option[0]}
+              </div>
+            ))
+          ) : (
+            <div className="p-2 text-gray-500">No results found</div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const MaterialSelectionComponent = ({
   selections,
@@ -28,17 +92,13 @@ const MaterialSelectionComponent = ({
   setAvailableAreas,
   singleItems
 }) => {
-
   const dispatch = useDispatch();
-
   const [combinedData, setCombinedData] = useState([]);
 
-useEffect(() => {
-  const combined = [...availableProductGroups, ...singleItems];
-  setCombinedData(combined);
-}, [availableProductGroups, singleItems]);
-
-
+  useEffect(() => {
+    const combined = [...availableProductGroups, ...singleItems];
+    setCombinedData(combined);
+  }, [availableProductGroups, singleItems]);
 
   const fetchCompanyData = async () => {
     try {
@@ -106,13 +166,10 @@ useEffect(() => {
     }, [dispatch]);
   };
   
-
   useInitialFetch(dispatch, setCompanyData, setDesignData);
 
   const [isCompanyOpen, setIsCompantyOpen] = useState(false);
-
   const [isCatalogueOpen, setIsCatalogueOpen] = useState(false); 
-
   const [isDesignNoOpen, setIsDesignNoOpen] = useState(false);
 
   async function fetchCatalogues() {
@@ -140,7 +197,6 @@ useEffect(() => {
       },
       body: JSON.stringify({ name: name }),
     });
-    console.log(name);
 
     if (response.status === 200) {
       const newareas = [...availableAreas];
@@ -154,91 +210,68 @@ useEffect(() => {
 
   const [catalogueName, setCatalogueName] = useState("");
   const [catalogueDescription, setCatalogueDescription] = useState("");
-
   const [companyName, setCompanyName] = useState("");
   const [designName, setDesignName] = useState("");
 
   const addCatalogue = async () => {
-
-    
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/addcatalogue", {
-      method : "POST",
-      credentials : "include",
-      headers : {
-        "content-type" : "application/json"
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "content-type": "application/json"
       },
-      body : JSON.stringify({ catalogueName : catalogueName, description : catalogueDescription }),
+      body: JSON.stringify({ catalogueName: catalogueName, description: catalogueDescription }),
     });
 
     if (response.status === 200) {
       const data = await fetchCatalogues();
-    
-      // 1. Update Redux store
       dispatch(setCatalogs(data));
-    
-      // 2. Update local state
-      setCatalogs(data);
-    
-      // 3. Update localStorage
       localStorage.setItem("catalogueData", JSON.stringify({ data, time: Date.now() }));
-      
       setCatalogueName("");
       setCatalogueDescription("");
-
       setIsCatalogueOpen(false);
-      // 4. Notify user
       alert("Catalogue Added");
     } else {
       alert("Error");
     }
-    
   }
 
   const addCompany = async () => {
-
     const date = new Date();
-
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/sendCompany", {
-      method : "POST",
-      credentials : "include",
-      headers : {
-        "content-type" : "application/json"
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "content-type": "application/json"
       },
-      body : JSON.stringify({ companyName, date }),
+      body: JSON.stringify({ companyName, date }),
     });
 
     if (response.status === 200) {
-      const data = await fetchCompanyData();  // ✅ FIXED
-    
-      dispatch(setCompanyData(data));         // Redux
-      setCompanyData(data);                   // Local State
-      localStorage.setItem("companyData", JSON.stringify({ data, time: Date.now() })); // Storage
-    
+      const data = await fetchCompanyData();
+      dispatch(setCompanyData(data));
+      localStorage.setItem("companyData", JSON.stringify({ data, time: Date.now() }));
       setIsCompantyOpen(false);
       alert("Company Added");
-    }
-     else {
+    } else {
       alert("Error");
     }
-    
   }
+
   const [design, setDesign] = useState("");
 
   return (
     <div className="flex flex-col bg-white p-4 sm:p-6 rounded-lg shadow-lg">
       <p className="text-lg sm:text-xl font-semibold">Material Selection</p>
-
       <div className="flex flex-col sm:flex-row gap-4 sm:gap-5">
         {/* Left Column: Area Selection */}
         <div className="w-full sm:w-1/4">
           <p className="text-sm sm:text-base">Area</p>
           {selections.map((selection, index) => {
             const currentArea = selection.area || "";
-
             return (
               <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mb-4">
                 <div className="flex flex-col gap-2 w-full">
-                  {/* Select Dropdown */}
                   <select
                     className="border border-black opacity-50 p-2 sm:p-3 rounded-lg w-full text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
                     value={currentArea}
@@ -263,7 +296,6 @@ useEffect(() => {
                     ))}
                   </select>
                 </div>
-                {/* Remove Area Button */}
                 <button
                   className="text-red-500 hover:text-red-700 mt-2 sm:mt-0"
                   onClick={() => handleRemoveArea(index)}
@@ -273,16 +305,13 @@ useEffect(() => {
               </div>
             );
           })}
-          
-          
-       
           <button
-        className="flex flex-row gap-2 !rounded-md bg-sky-50 hover:bg-sky-100 items-center px-2 py-1 text-sm sm:text-base"
-        onClick={handleAddArea}
-      >
-        <FaPlus className="text-sky-500" />
-        Add Area
-      </button>
+            className="flex flex-row gap-2 !rounded-md bg-sky-50 hover:bg-sky-100 items-center px-2 py-1 text-sm sm:text-base"
+            onClick={handleAddArea}
+          >
+            <FaPlus className="text-sky-500" />
+            Add Area
+          </button>
         </div>
 
         {/* Right Column: Product Group Selection */}
@@ -290,7 +319,6 @@ useEffect(() => {
           <div className="flex flex-row items-center justify-between">
             <p className="text-sm sm:text-base">Select Product Groups</p>
           </div>
-
           {selections.map((selection, mainindex) => (
             <div key={mainindex} className="mb-4 border p-3 rounded-lg shadow-sm bg-gray-50">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
@@ -309,66 +337,64 @@ useEffect(() => {
                       {/* Product Group */}
                       <div className="flex flex-col w-full sm:w-1/5">
                         <p className="text-sm sm:text-base">Product Group / Items</p>
-                        <select
-                          className="border p-2 sm:p-3 rounded w-full text-sm sm:text-base"
+                        <SearchableSelect
+                          options={combinedData}
                           value={element.productGroup}
                           onChange={(e) => handleProductGroupChange(mainindex, i, e.target.value)}
-                        >
-                          <option value="">Select Product Group</option>
-                          {combinedData.map((product, index) => (
-                            <option key={index} value={product}>
-                              {product[0]}
-                            </option>
-                          ))}
-                        </select>
+                          placeholder="Select Product Group"
+                          name="productGroup"
+                        />
                       </div>
 
                       {/* Company */}
                       <div>
                         <div className='flex flex-row gap-3'>
                           <p className=''>Company</p>
-                          <button className='mb-3' onClick={() => setIsCompantyOpen(true)}><span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">+</span></button>
+                          <button className='mb-3' onClick={() => setIsCompantyOpen(true)}>
+                            <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">+</span>
+                          </button>
                         </div>
-                        <select
-                          className="border p-2 sm:p-3 rounded w-full text-sm sm:text-base"
+                        <SearchableSelect
+                          options={companyData}
                           value={element.company}
                           onChange={(e) => handleCompanyChange(mainindex, i, e.target.value)}
-                        >
-                          <option value="">Select Company</option>
-                          {companyData.map((company, index) => (
-                            <option key={index} value={company[0]}>
-                              {company[0]}
-                            </option>
-                          ))}
-                        </select>
+                          placeholder="Select Company"
+                          name="company"
+                        />
                       </div>
 
                       {/* Catalogue */}
                       <div>
-                      <div className='flex flex-row gap-3'>
+                        <div className='flex flex-row gap-3'>
                           <p className=''>Catalogue</p>
-                          <button className='mb-3' onClick={() => setIsCatalogueOpen(true)}><span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">+</span></button>
+                          <button className='mb-3' onClick={() => setIsCatalogueOpen(true)}>
+                            <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">+</span>
+                          </button>
                         </div>
-                        <select
-                          className="border p-2 sm:p-3 rounded w-full text-sm sm:text-base"
+                        <SearchableSelect
+                          options={catalogueData}
                           value={element.catalogue}
                           onChange={(e) => handleCatalogueChange(mainindex, i, e.target.value)}
-                        >
-                          <option value="">Select Catalogue</option>
-                          {catalogueData.map((catalogue, index) => (
-                            <option key={index} value={catalogue}>
-                              {catalogue[0]}
-                            </option>
-                          ))}
-                        </select>
+                          placeholder="Select Catalogue"
+                          name="catalogue"
+                        />
                       </div>
 
                       {/* Design No */}
                       <div>
-                      <div className='flex flex-row gap-3'>
+                        <div className='flex flex-row gap-3'>
                           <p className=''>Design No.</p>
                         </div>
-                        <input type="text" placeholder='Design No' value={design} onChange={(e) => {handleDesignNoChange(mainindex, i, e.target.value); setDesign(e.target.value);}} className='border rounded-lg pl-2 py-2 w-24'/>
+                        <input 
+                          type="text" 
+                          placeholder='Design No' 
+                          value={design} 
+                          onChange={(e) => {
+                            handleDesignNoChange(mainindex, i, e.target.value);
+                            setDesign(e.target.value);
+                          }} 
+                          className='border rounded-lg pl-2 py-2 w-24'
+                        />
                       </div>
 
                       {/* Reference */}
@@ -403,11 +429,22 @@ useEffect(() => {
       </div>
       {isCompanyOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/50">
-        <div className="w-[300px] p-6 rounded-xl shadow-xl text-center bg-white">
-          <p className="text-[1.3vw]">Add Company</p>
-          <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} className='w-full rounded-lg border p-2 pl-2 mb-3'/>
+          <div className="w-[300px] p-6 rounded-xl shadow-xl text-center bg-white">
+            <p className="text-[1.3vw]">Add Company</p>
+            <input 
+              type="text" 
+              value={companyName} 
+              onChange={(e) => setCompanyName(e.target.value)} 
+              className='w-full rounded-lg border p-2 pl-2 mb-3'
+            />
             <div className="w-full flex flex-row justify-between">
-              <button style={{ borderRadius : "6px" }} onClick={addCompany} className="px-2 py-1 text-white bg-sky-600 hover:bg-sky-700">Add</button>
+              <button 
+                style={{ borderRadius: "6px" }} 
+                onClick={addCompany} 
+                className="px-2 py-1 text-white bg-sky-600 hover:bg-sky-700"
+              >
+                Add
+              </button>
               <button 
                 onClick={() => setIsCompantyOpen(false)} 
                 className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
@@ -420,12 +457,30 @@ useEffect(() => {
       )}
       {isCatalogueOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/50">
-        <div className="w-[300px] p-6 rounded-xl shadow-xl text-center bg-white ">
-        <p className="text-[1.3vw]">Add Catalogue</p>
-        <input type="text" value={catalogueName} onChange={(e) => setCatalogueName(e.target.value)} className='w-full rounded-lg border p-2 pl-2 mb-3' placeholder='Name'/>
-        <input type="text" value={catalogueDescription} onChange={(e) => setCatalogueDescription(e.target.value)} className='w-full rounded-lg border p-2 pl-2 mb-3' placeholder='Description'/>
+          <div className="w-[300px] p-6 rounded-xl shadow-xl text-center bg-white">
+            <p className="text-[1.3vw]">Add Catalogue</p>
+            <input 
+              type="text" 
+              value={catalogueName} 
+              onChange={(e) => setCatalogueName(e.target.value)} 
+              className='w-full rounded-lg border p-2 pl-2 mb-3' 
+              placeholder='Name'
+            />
+            <input 
+              type="text" 
+              value={catalogueDescription} 
+              onChange={(e) => setCatalogueDescription(e.target.value)} 
+              className='w-full rounded-lg border p-2 pl-2 mb-3' 
+              placeholder='Description'
+            />
             <div className="w-full flex flex-row justify-between">
-              <button onClick={addCatalogue} style={{ borderRadius : "6px" }} className="px-2 py-1 text-white bg-sky-600 hover:bg-sky-700">Add</button>
+              <button 
+                onClick={addCatalogue} 
+                style={{ borderRadius: "6px" }} 
+                className="px-2 py-1 text-white bg-sky-600 hover:bg-sky-700"
+              >
+                Add
+              </button>
               <button 
                 onClick={() => setIsCatalogueOpen(false)} 
                 className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
@@ -438,11 +493,22 @@ useEffect(() => {
       )}
       {isDesignNoOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/50">
-        <div className="w-[300px] p-6 rounded-xl shadow-xl text-center bg-white">
-        <p className="text-[1.3vw]">Add Design No</p>
-        <input type="text" value={designName} onChange={(e) => setDesignName(e.target.value)} className='w-full rounded-lg border p-2 pl-2 mb-3'/>
+          <div className="w-[300px] p-6 rounded-xl shadow-xl text-center bg-white">
+            <p className="text-[1.3vw]">Add Design No</p>
+            <input 
+              type="text" 
+              value={designName} 
+              onChange={(e) => setDesignName(e.target.value)} 
+              className='w-full rounded-lg border p-2 pl-2 mb-3'
+            />
             <div className="w-full flex flex-row justify-between">
-              <button style={{ borderRadius : "6px" }} onClick={addDesign} className="px-2 py-1 text-white bg-sky-600 hover:bg-sky-700">Add</button>
+              <button 
+                style={{ borderRadius: "6px" }} 
+                onClick={addDesign} 
+                className="px-2 py-1 text-white bg-sky-600 hover:bg-sky-700"
+              >
+                Add
+              </button>
               <button 
                 onClick={() => setIsDesignNoOpen(false)} 
                 className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"

@@ -1111,10 +1111,10 @@ function AddProjectForm() {
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Add New Project</h1>
         <div className="flex gap-4 text-sm md:text-base">
-          <Link to="/" className="text-blue-600 hover:text-blue-800 transition-colors no-underline">
+          <Link to="/" className="text-blue-600 hover:text-blue-800 transition-colors !no-underline">
             Dashboard
           </Link>
-          <Link to="/projects" className="text-blue-600 hover:text-blue-800 transition-colors no-underline">
+          <Link to="/projects" className="text-blue-600 hover:text-blue-800 transition-colors !no-underline">
             All Projects
           </Link>
         </div>

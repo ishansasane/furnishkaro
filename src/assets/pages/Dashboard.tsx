@@ -747,7 +747,7 @@ const Dashboard: React.FC = () => {
               >
                 ✕
               </button>
-              <h2 className="text-xl font-bold mb-2 text-gray-800">📩 {selectedInquiry[0]}</h2>
+              <h2 className="text-xl font-bold mb-2 text-gray-800"> {selectedInquiry[0]}</h2>
               <div className="space-y-3 p-3 text-gray-700 text-sm">
                 <p className="flex justify-between">
                   <strong>Status:</strong>
@@ -786,7 +786,7 @@ const Dashboard: React.FC = () => {
 
       <div className={`bg-white shadow-md rounded-xl p-6 mt-2 ${flag ? "hidden" : ""}`}>
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">📩 Inquiries</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4"> Inquiries</h2>
           <button
             style={{ borderRadius: "6px" }}
             className="mb-2 bg-sky-600 text-white hover:bg-sky-700 px-2 md:text-[1.7vw] py-1"
