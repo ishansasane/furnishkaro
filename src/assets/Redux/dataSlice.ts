@@ -4,7 +4,7 @@ interface DataState {
   products: any[];  // Change 'any' to the appropriate type
   brands: [];
   catalogs: any[];
-  interiors: [];
+  interiors: any[];
   tailors: [];
   salesAssociates: [];
   tasks : any[];
@@ -53,7 +53,7 @@ const dataSlice = createSlice({
     setCatalogs: (state, action: PayloadAction<any[]>) => {
       state.catalogs = action.payload;
     },
-    setInteriorData: (state, action: PayloadAction<[]>) => {
+    setInteriorData: (state, action: PayloadAction<any[]>) => {
       state.interiors = action.payload;
     },
     setTailorData: (state, action: PayloadAction<[]>) => {
