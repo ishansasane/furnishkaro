@@ -253,7 +253,6 @@ function AddProjectForm() {
     const newproduct = product.split(",");
     updatedSelections[mainindex].areacollection[i].productGroup = newproduct;
   
-
     const pg = newproduct;
     if (!Array.isArray(pg) || pg.length < 2) return;
   
@@ -664,6 +663,7 @@ function AddProjectForm() {
   const [user, setUser] = useState("");
   const [projectDate, setProjectDate] = useState("");
   const [additionalRequests, setAdditionalRequests] = useState("");
+  const [termsAndConditions, setTermsAndConditions] = useState("");
 
   const handleItemRemarkChange = (i: number, remark: string) => {
     const updated = [...additionalItems];
@@ -766,11 +766,12 @@ function AddProjectForm() {
           projectDate,
           additionalRequests,
           interiorArray: JSON.stringify(interiorArray),
-          salesAssociateArray: JSON.stringify(salesAssociateArray),
+          salesAssociateArray: JSON.stringify(salesAssociateArray || []),
           additionalItems: JSON.stringify(additionalItems),
           goodsArray: JSON.stringify(goodsArray),
           tailorsArray: JSON.stringify(tailorsArray),
           projectAddress: JSON.stringify(projectAddress),
+          termsAndConditions,
           date
         }),
       });
@@ -879,62 +880,61 @@ function AddProjectForm() {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    let yOffset = 30; // Increased top gap
+    let yOffset = 20;
 
     // Setting up fonts and colors
     doc.setFont("helvetica", "normal");
-    const primaryColor = [0, 51, 102]; // Dark blue
-    const secondaryColor = [33, 33, 33]; // Dark gray
-    const accentColor = [0, 102, 204]; // Bright blue
+    const primaryColor = [0, 51, 102];
+    const secondaryColor = [33, 33, 33];
+    const accentColor = [0, 102, 204];
     const lightGray = [245, 245, 245];
 
-    // Header Section with Logo Placeholder and Gradient Background
+    // Header Section
     doc.setFillColor(...primaryColor);
-    doc.rect(0, 0, pageWidth, 40, 'F');
+    doc.rect(0, 0, pageWidth, 30, 'F');
     doc.setFillColor(...accentColor);
-    doc.rect(0, 40, pageWidth, 2, 'F'); // Accent line
-    doc.setFontSize(24);
+    doc.rect(0, 30, pageWidth, 1, 'F');
+    doc.setFontSize(20);
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
-    doc.text("Quotation", pageWidth / 2, 25, { align: "center" });
+    doc.text("Quotation", pageWidth / 2, 18, { align: "center" });
 
     // Company Details
-    yOffset += 25;
-    doc.setFontSize(12);
+    yOffset += 15;
+    doc.setFontSize(10);
     doc.setTextColor(...secondaryColor);
     doc.setFont("helvetica", "normal");
-    doc.text("Sheela Decor", 20, yOffset);
-    yOffset += 7;
-    doc.text("123 Business Street, City, Country", 20, yOffset);
-    yOffset += 7;
-    doc.text("Email: contact@sheeladecor.com | Phone: +123 456 7890", 20, yOffset);
-    yOffset += 10;
+    doc.text("Sheela Decor", 15, yOffset);
+    yOffset += 5;
+    doc.text("123 Business Street, City, Country", 15, yOffset);
+    yOffset += 5;
+    doc.text("Email: contact@sheeladecor.com | Phone: +123 456 7890", 15, yOffset);
+    yOffset += 8;
 
-    // Divider Line with Gradient
+    // Divider Line
     doc.setDrawColor(...accentColor);
-    doc.setLineWidth(0.5);
-    doc.line(20, yOffset, pageWidth - 20, yOffset);
-    yOffset += 10;
+    doc.setLineWidth(0.4);
+    doc.line(15, yOffset, pageWidth - 15, yOffset);
+    yOffset += 8;
 
-    // Project and Customer Details in a Card-like Layout
+    // Project and Customer Details
     doc.setFillColor(...lightGray);
-    doc.roundedRect(20, yOffset, pageWidth - 40, 30, 3, 3, 'F');
-    doc.setFontSize(11);
+    doc.roundedRect(15, yOffset, pageWidth - 30, 25, 2, 2, 'F');
+    doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(...primaryColor);
-    doc.text("Project Details", 30, yOffset + 8); // Equal padding
-    doc.text("Customer Details", pageWidth / 2 + 20, yOffset + 8); // Equal padding
-    yOffset += 15;
+    doc.text("Project Details", 20, yOffset + 6);
+    doc.text("Customer Details", pageWidth / 2 + 5, yOffset + 6);
+    yOffset += 12;
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...secondaryColor);
-    doc.text(`Project: ${projectName || "N/A"}`, 30, yOffset);
-    doc.text(`Customer: ${selectedCustomer?.name || "N/A"}`, pageWidth / 2 + 20, yOffset);
-    yOffset += 7;
-    doc.text(`Reference: ${projectReference || "N/A"}`, 30, yOffset);
-    doc.text(`Address: ${projectAddress || "N/A"}`, pageWidth / 2 + 20, yOffset);
-    yOffset += 7;
-    doc.text(`Date: ${projectDate || new Date().toLocaleDateString()}`, 30, yOffset);
-    yOffset += 15;
+    doc.text(`Project Name: ${projectName || "N/A"}`, 20, yOffset);
+    doc.text(`Customer: ${selectedCustomer?.name || "N/A"}`, pageWidth / 2 + 5, yOffset);
+    yOffset += 5;
+    doc.text(`Address: ${projectAddress || "N/A"}`, pageWidth / 2 + 5, yOffset);
+    yOffset += 5;
+    doc.text(`Date: ${projectDate || new Date().toLocaleDateString()}`, 20, yOffset);
+    yOffset += 10;
 
     // Table Data Preparation
     const tableData = [];
@@ -942,164 +942,213 @@ function AddProjectForm() {
 
     selections.forEach((selection, mainIndex) => {
       if (selection.areacollection && selection.areacollection.length > 0) {
-        // Area Header with Background
         tableData.push([
-          { content: selection.area, colSpan: 9, styles: { fontStyle: "bold", fillColor: accentColor, textColor: [255, 255, 255], fontSize: 10 } },
+          { content: selection.area, colSpan: 9, styles: { fontStyle: "bold", fontSize: 9, fillColor: accentColor, textColor: [255, 255, 255] } },
         ]);
 
         selection.areacollection.forEach((collection, collectionIndex) => {
           const pg = collection.productGroup;
+          const productGroupName = Array.isArray(pg) ? pg.join(", ") : pg || "N/A";
+          tableData.push([
+            { content: `Product Group: ${productGroupName}`, colSpan: 9, styles: { fontStyle: "bold", fontSize: 9, fillColor: lightGray, textColor: secondaryColor } },
+          ]);
+
           if (!Array.isArray(pg) || pg.length < 2) return;
-          const relevantPG = pg.length > 2 ? pg.slice(1, -2) : [];
+          const relevantPG = pg.length > 2 ? pg.slice(1, -2) : null;
           const matchedItems = relevantPG.map((pgItem) => {
             const matched = items.find((item) => item[0] === pgItem);
-            return matched || pgItem;
+            return matched || null;
           });
-          const validMatchedItems = matchedItems.filter((el) => Array.isArray(el));
+          const validMatchedItems = matchedItems.filter((item) => Array.isArray(item));
           validMatchedItems.forEach((item, itemIndex) => {
-            const qty = collection.quantities?.[itemIndex] || 0;
+            const qty = parseFloat(collection.quantities?.[itemIndex]) || 0;
+            const productName = item[0] ? `${item[0]} * ${collection.measurement.quantity || 0}` : "N/A";
+            const size = collection.measurement?.width && collection.measurement?.height
+              ? `${collection.measurement.width} x ${collection.measurement.height} ${collection.measurement.unit || ""}`
+              : "N/A";
+            const mrp = parseFloat(item[4]) * parseFloat(collection.measurement.quantity || "0") || 0;
+            const subtotal = mrp * qty || 0;
+            const taxRate = parseFloat(item[5]) || 0;
+            const taxAmount = parseFloat(collection.totalTax[itemIndex]?.toString()) || 0;
+            const total = parseFloat(collection.totalAmount[itemIndex]?.toString()) || 0;
             tableData.push([
               srNo++,
-              `${item[0]} * ${collection.measurement.quantity}`,
-              `${collection.measurement.width} x ${collection.measurement.height} ${collection.measurement.unit}`,
-              `₹${(item[4] * parseFloat(collection.measurement.quantity)).toFixed(2)}`,
-              qty,
-              `₹${(item[4] * parseFloat(collection.measurement.quantity) * qty).toFixed(2)}`,
-              `${item[5].toFixed(2)}%`,
-              `₹${collection.totalTax[itemIndex]?.toFixed(2) || "0.00"}`,
-              `₹${collection.totalAmount[itemIndex]?.toFixed(2) || "0.00"}`,
+              productName,
+              size,
+              `INR ${mrp.toFixed(2)}`,
+              qty.toString(),
+              `INR ${subtotal.toFixed(2)}`,
+              `${taxRate.toFixed(2)}%`,
+              `INR ${taxAmount.toFixed(2)}`,
+              `INR ${total.toFixed(2)}`,
             ]);
           });
         });
       }
     });
 
-    // Miscellaneous Items Header
     if (additionalItems.length > 0) {
       tableData.push([
-        { content: "Miscellaneous Items", colSpan: 9, styles: { fontStyle: "bold", fillColor: accentColor, textColor: [255, 255, 255], fontSize: 10 } },
+        { content: "Miscellaneous Items", colSpan: 9, styles: { fontStyle: "bold", fillColor: accentColor, textColor: [255, 255, 255], fontSize: 9 } },
       ]);
 
-      additionalItems.forEach((item, i) => {
+      additionalItems.forEach((item) => {
+        const qty = parseFloat(item.quantity?.toString()) || 0;
+        const rate = parseFloat(item.rate?.toString()) || 0;
+        const netRate = parseFloat(item.netRate?.toString()) || 0;
+        const tax = parseFloat(item.tax?.toString()) || 0;
+        const taxAmount = parseFloat(item.taxAmount?.toString()) || 0;
+        const totalAmount = parseFloat(item.totalAmount?.toString()) || 0;
         tableData.push([
           srNo++,
           item.name || "N/A",
           "N/A",
-          `₹${item.rate.toFixed(2)}`,
-          item.quantity,
-          `₹${item.netRate.toFixed(2)}`,
-          `${item.tax.toFixed(2)}%`,
-          `₹${item.taxAmount.toFixed(2)}`,
-          `₹${item.totalAmount.toFixed(2)}`,
+          `INR ${rate.toFixed(2)}`,
+          qty.toString(),
+          `INR ${netRate.toFixed(2)}`,
+          `${tax.toFixed(2)}%`,
+          `INR ${taxAmount.toFixed(2)}`,
+          `INR ${totalAmount.toFixed(2)}`,
         ]);
       });
     }
 
-    // Table Rendering with Enhanced Styling
+    // Table Rendering
     autoTable(doc, {
       startY: yOffset,
       head: [
-        ["Sr. No.", "Product Name", "Size", "MRP", "Quantity", "Subtotal", "Tax Rate (%)", "Tax Amount", "Total"],
+        ["Sr. No.", "Product Name", "Size", "MRP", "Qty", "Subtotal", "Tax Rate", "Tax Amount", "Total"],
       ],
       body: tableData,
       theme: "grid",
       styles: {
         font: "helvetica",
-        fontSize: 8,
-        cellPadding: 4,
+        fontSize: 6.5,
+        cellPadding: 1.5,
         textColor: secondaryColor,
         lineColor: [200, 200, 200],
-        lineWidth: 0.2,
+        lineWidth: 0.1,
         overflow: 'linebreak',
+        minCellHeight: 0,
       },
       headStyles: {
         fillColor: primaryColor,
         textColor: [255, 255, 255],
         fontStyle: "bold",
-        fontSize: 9,
+        fontSize: 7,
         halign: "center",
+        cellPadding: 1.5,
       },
       alternateRowStyles: {
         fillColor: lightGray,
       },
       columnStyles: {
-        0: { cellWidth: 10, halign: "center" }, // Sr. No.
-        1: { cellWidth: 40 }, // Product Name
-        2: { cellWidth: 30 }, // Size
-        3: { cellWidth: 20, halign: "right" }, // MRP
-        4: { cellWidth: 15, halign: "center" }, // Quantity
-        5: { cellWidth: 20, halign: "right" }, // Subtotal
-        6: { cellWidth: 15, halign: "center" }, // Tax Rate
-        7: { cellWidth: 20, halign: "right" }, // Tax Amount
-        8: { cellWidth: 20, halign: "right" }, // Total
+        "0": { cellWidth: 7, halign: "center" },
+        "1": { cellWidth: 35, overflow: "linebreak" },
+        "2": { cellWidth: 20, overflow: "linebreak" },
+        "3": { cellWidth: 15, halign: "right" },
+        "4": { cellWidth: 8, halign: "center" },
+        "5": { cellWidth: 15, halign: "right" },
+        "6": { cellWidth: 10, halign: "center" },
+        "7": { cellWidth: 15, halign: "right" },
+        "8": { cellWidth: 15, halign: "right" },
       },
-      margin: { left: 20, right: 20 },
+      margin: { top: yOffset, left: 15, right: 15, bottom: 50 },
+      pageBreak: 'auto',
+      rowPageBreak: 'avoid',
       didDrawPage: (data) => {
-        // Add Page Number
+        yOffset = data.cursor.y + 10;
         doc.setFontSize(8);
         doc.setTextColor(100, 100, 100);
-        doc.text(`Page ${data.pageNumber}`, pageWidth - 20, pageHeight - 10, { align: "right" });
+        doc.text(`Page ${data.pageNumber}`, pageWidth - 15, pageHeight - 10, { align: "right" });
+      },
+      willDrawCell: (data) => {
+        if (data.section === 'body' && (data.column.index === 1 || data.column.index === 2)) {
+          const text = data.cell.text.join(' ');
+          if (text.length > 25) {
+            data.cell.text = doc.splitTextToSize(text, data.cell.width - 3);
+          }
+        }
+      },
+      didParseCell: (data) => {
+        if (data.section === 'body' && [3, 5, 7, 8].includes(data.column.index)) {
+          data.cell.text = data.cell.text.map(text => text.replace(/^1\s*/, '')); // Remove leading "1"
+        }
       },
     });
 
-    yOffset = doc.lastAutoTable.finalY + 15;
+    yOffset = doc.lastAutoTable.finalY + 10;
 
-    // Summary Section with Card-like Layout
+    // Summary Section
+    if (yOffset + 60 > pageHeight - 50) {
+      doc.addPage();
+      yOffset = 15;
+    }
     doc.setFillColor(...lightGray);
-    doc.roundedRect(pageWidth - 110, yOffset - 5, 90, 65, 3, 3, 'F'); // Adjusted width and height
-    doc.setFontSize(12);
+    doc.roundedRect(pageWidth - 90, yOffset - 5, 75, 50, 2, 2, 'F');
+    doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(...primaryColor);
-    doc.text("Summary", pageWidth - 105, yOffset);
-    yOffset += 10;
+    doc.text("Summary", pageWidth - 85, yOffset);
+    yOffset += 8;
 
-    doc.setFontSize(10);
+    doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...secondaryColor);
     const summaryItems = [
-      { label: "Sub Total", value: `₹${amount.toFixed(2)}` },
-      { label: "Total Tax Amount", value: `₹${tax.toFixed(2)}` },
-      { label: "Total Amount", value: `₹${(amount + tax).toFixed(2)}` },
-      { label: "Discount", value: `₹${discount.toFixed(2)}` },
-      { label: "Grand Total", value: `₹${(amount + tax - discount).toFixed(2)}` },
+      { label: "Sub Total", value: `INR ${(amount || 0).toFixed(2)}` },
+      { label: "Total Tax", value: `INR ${(tax || 0).toFixed(2)}` },
+      { label: "Total Amount", value: `INR ${((amount + tax) || 0).toFixed(2)}` },
+      { label: "Discount", value: `INR ${(discount || 0).toFixed(2)}` },
+      { label: "Grand Total", value: `INR ${((amount + tax - discount) || 0).toFixed(2)}` },
     ];
 
     summaryItems.forEach((item) => {
       doc.setFont("helvetica", "bold");
-      doc.text(item.label, pageWidth - 105, yOffset);
+      doc.text(item.label, pageWidth - 85, yOffset);
       doc.setFont("helvetica", "normal");
-      doc.text(item.value, pageWidth - 25, yOffset, { align: "right" }); // Adjusted right padding
-      yOffset += 10; // Increased spacing
+      doc.text(item.value.replace(/^1\s*/, ''), pageWidth - 20, yOffset, { align: "right" });
+      yOffset += 8;
     });
 
     // Terms and Conditions
-    yOffset += 10;
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(...primaryColor);
-    doc.text("Terms & Conditions", 20, yOffset);
-    yOffset += 6;
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(...secondaryColor);
-    const terms = [
-      "Prices are inclusive of taxes unless otherwise stated.",
-      "Quotation is valid for 30 days from the date of issue.",
-      "All payments must be made in INR.",
-    ];
-    terms.forEach((term) => {
-      doc.text(`• ${term}`, 20, yOffset);
-      yOffset += 6;
-    });
+    if (termsAndConditions.trim()) {
+      if (yOffset + 30 > pageHeight - 50) {
+        doc.addPage();
+        yOffset = 15;
+      }
+      yOffset += 5;
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(...primaryColor);
+      doc.text("Terms & Conditions", 15, yOffset);
+      yOffset += 5;
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(...secondaryColor);
+      const terms = doc.splitTextToSize(termsAndConditions, pageWidth - 30);
+      terms.forEach((term: string) => {
+        if (yOffset + 5 > pageHeight - 50) {
+          doc.addPage();
+          yOffset = 15;
+        }
+        doc.text(`• ${term}`, 15, yOffset);
+        yOffset += 5;
+      });
+    }
 
-    // Footer with Accent Line
+    // Footer
+    if (yOffset + 20 > pageHeight - 50) {
+      doc.addPage();
+      yOffset = 15;
+    }
     doc.setFillColor(...accentColor);
-    doc.rect(0, pageHeight - 30, pageWidth, 2, 'F');
-    doc.setFontSize(9);
+    doc.rect(0, pageHeight - 25, pageWidth, 1, 'F');
+    doc.setFontSize(8);
     doc.setTextColor(100, 100, 100);
     doc.setFont("helvetica", "italic");
-    doc.text("Thank you for choosing Sheela Decor!", pageWidth / 2, pageHeight - 20, { align: "center" });
+    doc.text("Thank you for choosing Sheela Decor!", pageWidth / 2, pageHeight - 15, { align: "center" });
     doc.setFont("helvetica", "normal");
-    doc.text("Sheela Decor - All Rights Reserved", pageWidth / 2, pageHeight - 12, { align: "center" });
+    doc.text("Sheela Decor - All Rights Reserved", pageWidth / 2, pageHeight - 8, { align: "center" });
 
     // Save PDF
     doc.save(`Quotation_${projectName || "Project"}_${projectDate || new Date().toLocaleDateString()}.pdf`);
@@ -1142,8 +1191,8 @@ function AddProjectForm() {
             salesdata={salesData}
             interiorArray={interiorArray}
             setInteriorArray={setInteriorArray}
-            salesAssociateArray={salesAssociateArray}
-            setSalesAssociateArray={setSalesData}
+            salesAssociateArray={salesAssociateArray || []}
+            setSalesAssociateArray={(newArray) => setSalesAssociateArray(Array.isArray(newArray) ? newArray : [])}
             projectName={projectName}
             setProjectName={setProjectName}
             projectReference={projectReference}
@@ -1241,7 +1290,7 @@ function AddProjectForm() {
                                     collection.measurement.unit}
                                 </td>
                                 <td className="py-3 px-4 text-sm">
-                                  ₹{(item[4] * parseFloat(collection.measurement.quantity)).toFixed(2)}
+                                  INR {(item[4] * parseFloat(collection.measurement.quantity)).toFixed(2)}
                                 </td>
                                 <td className="py-3 px-4">
                                   <div className="flex flex-col gap-1">
@@ -1267,14 +1316,14 @@ function AddProjectForm() {
                                   </div>
                                 </td>
                                 <td className="py-3 px-4 text-sm">
-                                  ₹{(item[4] * parseFloat(collection.measurement.quantity) * qty).toFixed(2)}
+                                  INR {(item[4] * parseFloat(collection.measurement.quantity) * qty).toFixed(2)}
                                 </td>
                                 <td className="py-3 px-4 text-sm">{item[5]}%</td>
                                 <td className="py-3 px-4 text-sm">
-                                  ₹{collection.totalTax[itemIndex]?.toFixed(2) || "0.00"}
+                                  INR {collection.totalTax[itemIndex]?.toFixed(2) || "0.00"}
                                 </td>
                                 <td className="py-3 px-4 text-sm">
-                                  ₹{collection.totalAmount[itemIndex]?.toFixed(2) || "0.00"}
+                                  INR {collection.totalAmount[itemIndex]?.toFixed(2) || "0.00"}
                                 </td>
                               </tr>
                             );
@@ -1352,7 +1401,7 @@ function AddProjectForm() {
                           min="0"
                         />
                       </td>
-                      <td className="py-3 px-4 text-sm text-center">₹{item.netRate.toFixed(2)}</td>
+                      <td className="py-3 px-4 text-sm text-center">INR {item.netRate.toFixed(2)}</td>
                       <td className="py-3 px-4">
                         <input
                           onChange={(e) => handleItemTaxChange(i, e.target.value)}
@@ -1362,8 +1411,8 @@ function AddProjectForm() {
                           min="0"
                         />
                       </td>
-                      <td className="py-3 px-4 text-sm text-center">₹{item.taxAmount.toFixed(2)}</td>
-                      <td className="py-3 px-4 text-sm text-center">₹{item.totalAmount.toFixed(2)}</td>
+                      <td className="py-3 px-4 text-sm text-center">INR {item.taxAmount.toFixed(2)}</td>
+                      <td className="py-3 px-4 text-sm text-center">INR {item.totalAmount.toFixed(2)}</td>
                       <td className="py-3 px-4">
                         <input
                           onChange={(e) => handleItemRemarkChange(i, e.target.value)}
@@ -1423,7 +1472,7 @@ function AddProjectForm() {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Net Rate</label>
-                        <span className="text-sm">₹{item.netRate.toFixed(2)}</span>
+                        <span className="text-sm">INR {item.netRate.toFixed(2)}</span>
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Tax (%)</label>
@@ -1437,11 +1486,11 @@ function AddProjectForm() {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Tax Amount</label>
-                        <span className="text-sm">₹{item.taxAmount.toFixed(2)}</span>
+                        <span className="text-sm">INR {item.taxAmount.toFixed(2)}</span>
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Total Amount</label>
-                        <span className="text-sm">₹{item.totalAmount.toFixed(2)}</span>
+                        <span className="text-sm">INR {item.totalAmount.toFixed(2)}</span>
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700">Remark</label>
@@ -1491,6 +1540,8 @@ function AddProjectForm() {
                 placeholder="Terms & Conditions Description"
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 rows={3}
+                value={termsAndConditions}
+                onChange={(e) => setTermsAndConditions(e.target.value)}
               ></textarea>
             </div>
           </div>
@@ -1501,15 +1552,15 @@ function AddProjectForm() {
             <div className="space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Sub Total</span>
-                <span className="font-medium">₹{amount.toFixed(2)}</span>
+                <span className="font-medium">INR {amount.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Total Tax Amount</span>
-                <span className="font-medium">₹{tax.toFixed(2)}</span>
+                <span className="font-medium">INR {tax.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Total Amount</span>
-                <span className="font-medium">₹{(amount + tax).toFixed(2)}</span>
+                <span className="font-medium">INR {(amount + tax).toFixed(2)}</span>
               </div>
               <hr className="border-gray-200" />
               <div className="flex justify-between items-center">
@@ -1517,7 +1568,7 @@ function AddProjectForm() {
                 <div className="flex items-center gap-2">
                   <select className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                     <option value="percentage">%</option>
-                    <option value="rupee">₹</option>
+                    <option value="rupee">INR</option>
                   </select>
                   <input
                     className="w-24 border border-gray-300 rounded-md px-3 py-1 text-sm text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -1531,9 +1582,9 @@ function AddProjectForm() {
               <hr className="border-gray-200" />
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600 font-semibold">Grand Total</span>
-                <span className="font-semibold text-blue-600">₹{(amount + tax - discount).toFixed(2)}</span>
+                <span className="font-semibold text-blue-600">INR {(amount + tax - discount).toFixed(2)}</span>
               </div>
-              <div className=" flex gap-2 flex-col">
+              <div className="flex gap-2 flex-col">
                 <button
                   onClick={sendProjectData}
                   className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium mt-4"

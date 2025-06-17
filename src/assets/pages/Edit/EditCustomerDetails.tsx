@@ -6,9 +6,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../Redux/store";
 
 const EditCustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer, projectData, setCustomers }) => {
-
-
-
   const handleCustomerChange = (e) => {
     if (e.target.value === "") {
       setSelectedCustomer(null);
@@ -19,8 +16,8 @@ const EditCustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer,
   };
 
   useEffect(() => {
-    console.log(selectedCustomer)
-  }, [selectedCustomer])
+    console.log(selectedCustomer);
+  }, [selectedCustomer]);
 
   async function fetchCustomers() {
     try {
@@ -28,11 +25,9 @@ const EditCustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer,
         "https://sheeladecor.netlify.app/.netlify/functions/server/getcustomerdata",
         { credentials: "include" }
       );
-  
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
-  
       const data = await response.json();
       return Array.isArray(data.body) ? data.body : [];
     } catch (error) {
@@ -42,7 +37,6 @@ const EditCustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer,
   }
 
   const [isOpen, setIsOpen] = useState(false);
-
   const [name, setName] = useState("");
   const [mobile, setMobile] = useState("");
   const [address, setAddress] = useState("");
@@ -55,7 +49,6 @@ const EditCustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer,
   async function sendcustomerData() {
     const phonenumber = mobile;
     let date = undefined;
-
     const now = new Date();
     date = now.toISOString().slice(0, 16);
 
@@ -79,49 +72,47 @@ const EditCustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer,
 
     if (response.status === 200) {
       const data = await fetchCustomers();
-    
-      // 1. Update Redux store
       dispatch(setCustomerData(data));
-    
-      // 2. Update local component state
       setCustomers(data);
-    
-      // 3. Update localStorage cache
       localStorage.setItem("customerData", JSON.stringify({ data, time: Date.now() }));
-    
-      // 4. Clear form
       setName("");
       setAddress("");
       setMobile("");
       setEmail("");
       setAlternateNumber("");
-    
-      // 5. Show success
       alert("Customer added successfully");
     } else {
       alert("Error in adding customer");
     }
-    
-
     setIsOpen(false);
   }
-  
-  return (
-    <div className="flex flex-col gap-3 px-3 py-3 rounded-xl shadow-xl w-full border-gray-200 border-2 mt-3">
-      <p className="text-[1.4vw] font-semibold">Customer Details</p>
 
-      <div className="flex flex-row justify-between gap-2">
+  return (
+    <div className="flex flex-col gap-4 p-4 sm:p-6 rounded-xl shadow-xl w-full border-gray-200 border-2 mt-4">
+      <p className="text-lg sm:text-xl font-semibold">Customer Details</p>
+
+      <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
         {/* Select Customer */}
-        <div className="flex flex-col w-1/2">
-          <div className="flex flex-row gap-3 px-2">
-            <p className="text-[1vw]">Select Customer</p>
-            <button className="mb-3 flex items-center px-2 py-1 border-1 border-blue-400 text-blue-500 font-semibold !rounded-xl hover:bg-blue-50 transition" onClick={() => setIsOpen(true)}>
-            <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">+</span> Customer
-          </button></div>
+        <div className="flex flex-col w-full sm:w-1/2">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
+            <p className="text-sm sm:text-base">Select Customer</p>
+            <button 
+              className="flex items-center px-3 py-1 border border-blue-400 text-blue-500 font-semibold rounded-lg hover:bg-blue-50 transition-colors"
+              onClick={() => setIsOpen(true)}
+            >
+              <FaPlus className="mr-2 text-blue-600" /> Add Customer
+            </button>
+          </div>
           <select
-            className="border border-black p-2 rounded w-full opacity-50"
-            value={JSON.stringify(selectedCustomer)}
-            onChange={(e) => setSelectedCustomer(JSON.parse(e.target.value))}
+            className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base opacity-80 focus:opacity-100 focus:ring-2 focus:ring-blue-400"
+            value={selectedCustomer ? JSON.stringify(selectedCustomer) : ""}
+            onChange={(e) => {
+              if (e.target.value === "") {
+                setSelectedCustomer(null);
+              } else {
+                setSelectedCustomer(JSON.parse(e.target.value));
+              }
+            }}
           >
             <option value="">Select Customer</option>
             {Array.isArray(customers) &&
@@ -131,17 +122,16 @@ const EditCustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer,
                 </option>
               ))}
           </select>
-
         </div>
 
         {/* Email Field */}
-        {projectData.customerLink && (
-          <div className="flex flex-col w-1/2">
-            <p className="text-[1vw]">Email (optional)</p>
+        {projectData.customerLink && selectedCustomer && (
+          <div className="flex flex-col w-full sm:w-1/2">
+            <p className="text-sm sm:text-base">Email (optional)</p>
             <input
               type="text"
-              className="border p-2 rounded w-full"
-              value={selectedCustomer[2]}
+              className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base bg-gray-100"
+              value={selectedCustomer[2] || ""}
               readOnly
             />
           </div>
@@ -149,91 +139,75 @@ const EditCustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer,
       </div>
 
       {/* Phone and Alternate Phone */}
-      {projectData.customerLink && (
-        <div className="flex flex-row justify-between gap-2">
-          <div className="flex flex-col w-1/2">
-            <p className="text-[1vw]">Phone Number</p>
+      {projectData.customerLink && selectedCustomer && (
+        <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
+          <div className="flex flex-col w-full sm:w-1/2">
+            <p className="text-sm sm:text-base">Phone Number</p>
             <input
               type="text"
-              className="border p-2 rounded w-full"
-              value={selectedCustomer[1]}
+              className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base bg-gray-100"
+              value={selectedCustomer[1] || ""}
               readOnly
             />
           </div>
-          <div className="flex flex-col w-1/2">
-            <p className="text-[1vw]">Alternate Phone Number (optional)</p>
+          <div className="flex flex-col w-full sm:w-1/2">
+            <p className="text-sm sm:text-base">Alternate Phone Number (optional)</p>
             <input
               type="text"
-              className="border p-2 rounded w-full"
-              value={selectedCustomer[4]}
+              className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base bg-gray-100"
+              value={selectedCustomer[4] || ""}
               readOnly
             />
           </div>
         </div>
       )}
+
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/50">
-          <div className="bg-transparent w-[300px] p-6 rounded-xl shadow-xl text-center">
-          <div className="fixed inset-0 flex items-center justify-center bg-transparent bg-opacity-30 z-50">
-            <div className="bg-white p-6 rounded shadow-md w-full max-w-md border">
-              <h2 className="text-xl font-bold mb-4">
-                {"Add Customer"}
-              </h2>
-              <input
-                className={` border p-2 rounded w-full mb-2`}
-                placeholder="Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-              <input
-                className="border p-2 rounded w-full mb-2"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <input
-                className="border p-2 rounded w-full mb-2"
-                placeholder="Mobile Number"
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
-              />
-              <input
-                className="border p-2 rounded w-full mb-2"
-                placeholder="Address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-              />
-              <input
-                className="border p-2 rounded w-full mb-2"
-                placeholder="Alternate Number"
-                value={alternateNumber}
-                onChange={(e) => setAlternateNumber(e.target.value)}
-              />
-              <div className="flex justify-end gap-2">
-                <button
-                  className="bg-gray-500 text-white px-4 py-2 rounded"
-                  onClick={() => {
-                    setIsOpen(false);
-                  }}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="bg-blue-500 text-white px-4 py-2 rounded"
-                  onClick={sendcustomerData}
-                >
-                  Save
-                </button>
-              </div>
-            </div>
-          </div>
-            <div className="w-full flex flex-row justify-between">
-              <button style={{ borderRadius : "6px" }} className="px-2 py-1 text-white bg-sky-600 hover:bg-sky-700">Add</button>
-              <button 
-                onClick={() => setIsOpen(false)} 
-                className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white p-4 sm:p-6 rounded-xl shadow-xl w-full max-w-xs sm:max-w-md">
+            <h2 className="text-lg sm:text-xl font-bold mb-4">Add Customer</h2>
+            <input
+              className="border border-gray-300 p-2 rounded w-full mb-3 text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
+              placeholder="Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+            <input
+              className="border border-gray-300 p-2 rounded w-full mb-3 text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            <input
+              className="border border-gray-300 p-2 rounded w-full mb-3 text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
+              placeholder="Mobile Number"
+              value={mobile}
+              onChange={(e) => setMobile(e.target.value)}
+            />
+            <input
+              className="border border-gray-300 p-2 rounded w-full mb-3 text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
+              placeholder="Address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+            />
+            <input
+              className="border border-gray-300 p-2 rounded w-full mb-3 text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
+              placeholder="Alternate Number"
+              value={alternateNumber}
+              onChange={(e) => setAlternateNumber(e.target.value)}
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm sm:text-base"
+                onClick={() => setIsOpen(false)}
               >
-                Close
+                Cancel
+              </button>
+              <button
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm sm:text-base"
+                onClick={sendcustomerData}
+              >
+                Save
               </button>
             </div>
           </div>
