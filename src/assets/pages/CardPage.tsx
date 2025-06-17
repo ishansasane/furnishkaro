@@ -16,8 +16,8 @@ const Card: React.FC<CardProps> = ({ title, value, color, isCurrency = false }) 
 
       {/* Content */}
       <div className="ml-4 flex flex-col">
-        <p className="text-[1.3vw] font-semibold">{title}</p>
-        <p className="text-[1.1vw] mb-1 font-semibold text-gray-900">
+        <p className="md:text-[1.3vw] font-semibold">{title}</p>
+        <p className="md:text-[1.1vw] mb-1 font-semibold text-gray-900">
           {isCurrency ? `₹${value.toLocaleString('en-IN')}` : value.toLocaleString('en-IN')}
 
         </p>

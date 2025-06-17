@@ -1514,33 +1514,38 @@ function AddProjectForm() {
               <hr className="border-gray-200" />
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Discount</span>
-                <input
-                  className="w-24 border border-gray-300 rounded-md px-3 py-1 text-sm text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  value={discount}
-                  onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
-                  type="number"
-                  min="0"
-                />
+                <div className="flex items-center gap-2">
+                  <select className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="percentage">%</option>
+                    <option value="rupee">₹</option>
+                  </select>
+                  <input
+                    className="w-24 border border-gray-300 rounded-md px-3 py-1 text-sm text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    value={discount}
+                    onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+                    type="number"
+                    min="0"
+                  />
+                </div>
               </div>
               <hr className="border-gray-200" />
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600 font-semibold">Grand Total</span>
                 <span className="font-semibold text-blue-600">₹{(amount + tax - discount).toFixed(2)}</span>
               </div>
-              <div className="flex gap-2 flex-col">
-              <button
-                onClick={sendProjectData}
-                className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium mt-4"
-              >
-                Add Project & Generate Quote
-              </button>
-              
-              <button
-                onClick={generatePDF}
-                className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition-colors text-sm font-medium"
-              >
-                Download Quotation PDF
-              </button>
+              <div className=" flex gap-2 flex-col">
+                <button
+                  onClick={sendProjectData}
+                  className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium mt-4"
+                >
+                  Add Project & Generate Quote
+                </button>
+                <button
+                  onClick={generatePDF}
+                  className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition-colors text-sm font-medium"
+                >
+                  Download Quotation PDF
+                </button>
               </div>
             </div>
           </div>
