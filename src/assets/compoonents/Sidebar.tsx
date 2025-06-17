@@ -1,4 +1,4 @@
-// Imports
+// Sidebar.tsx
 import {
   MoreVertical,
   ChevronLast,
@@ -28,7 +28,9 @@ interface SidebarContextType {
   toggleSidebar: () => void;
 }
 
-export const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
+export const SidebarContext = createContext<SidebarContextType | undefined>(
+  undefined
+);
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -51,13 +53,17 @@ export default function Sidebar() {
   return (
     <SidebarContext.Provider value={{ expanded, toggleSidebar }}>
       {/* Desktop Sidebar */}
-      <nav   className={`h-full flex-col hidden md:flex transition-all duration-300 ease-in-out ${
-    expanded ? "w-64" : "w-24"
-  }`}>
+      <nav
+        className={`h-full flex-col hidden md:flex transition-all duration-300 ease-in-out ${
+          expanded ? "w-64" : "w-24"
+        }`}
+      >
         <div className="p-4 pb-2 flex justify-between items-center">
           <img
             src="https://img.logoipsum.com/243.svg"
-            className={`overflow-hidden transition-all duration-300 ${expanded ? "w-32" : "w-0"}`}
+            className={`overflow-hidden transition-all duration-300 ${
+              expanded ? "w-32" : "w-0"
+            }`}
             alt="Logo"
             onClick={() => navigate("/")}
           />
@@ -83,16 +89,25 @@ export default function Sidebar() {
         >
           {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
-        <img src="https://img.logoipsum.com/243.svg" onClick={() => navigate("/")} className="w-28" alt="Logo" />
+        <img
+          src="https://img.logoipsum.com/243.svg"
+          onClick={() => navigate("/")}
+          className="w-28"
+          alt="Logo"
+        />
       </div>
 
-      {/* Mobile Sidebar (with animation) */}
+      {/* Mobile Sidebar */}
       <div
         className={`md:hidden fixed top-16 left-0 w-full z-40 bg-white shadow-lg overflow-hidden transform transition-all duration-300 ease-in-out ${
-          mobileMenuOpen ? "translate-y-0 opacity-100" : "-translate-y-10 opacity-0 pointer-events-none"
+          mobileMenuOpen
+            ? "translate-y-0 opacity-100"
+            : "-translate-y-10 opacity-0 pointer-events-none"
         }`}
       >
-        <SidebarContext.Provider value={{ expanded: true, toggleSidebar: () => {} }}>
+        <SidebarContext.Provider
+          value={{ expanded: true, toggleSidebar: () => {} }}
+        >
           <SidebarContent
             mastersOpen={mastersOpen}
             setMastersOpen={setMastersOpen}
@@ -111,26 +126,57 @@ interface SidebarContentProps {
   setMobileMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-function SidebarContent({ mastersOpen, setMastersOpen, setMobileMenuOpen }: SidebarContentProps) {
+function SidebarContent({
+  mastersOpen,
+  setMastersOpen,
+  setMobileMenuOpen,
+}: SidebarContentProps) {
   const context = useContext(SidebarContext);
-  if (!context) return null;
-  const { expanded } = context;
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const { expanded } = context!;
+
+  // ✅ Use direct values from localStorage
+  const user = {
+    name: localStorage.getItem("auth_name") || "User",
+    email: localStorage.getItem("auth_email") || "user@example.com",
+  };
 
   return (
     <>
       <ul className="flex-1 px-3 pt-4 pb-2">
-        <SidebarItem icon={<LayoutDashboard size={20} />} text="Dashboard" path="/" setMobileMenuOpen={setMobileMenuOpen} />
-        <SidebarItem icon={<Briefcase size={20} />} text="Projects" path="/projects" setMobileMenuOpen={setMobileMenuOpen} />
-        <SidebarItem icon={<Users size={20} />} text="Customers" path="/customers" setMobileMenuOpen={setMobileMenuOpen} />
+        <SidebarItem
+          icon={<LayoutDashboard size={20} />}
+          text="Dashboard"
+          path="/"
+          setMobileMenuOpen={setMobileMenuOpen}
+        />
+        <SidebarItem
+          icon={<Briefcase size={20} />}
+          text="Projects"
+          path="/projects"
+          setMobileMenuOpen={setMobileMenuOpen}
+        />
+        <SidebarItem
+          icon={<Users size={20} />}
+          text="Customers"
+          path="/customers"
+          setMobileMenuOpen={setMobileMenuOpen}
+        />
 
-        {/* Dropdown */}
+        {/* Dropdown Section */}
         <li className="relative">
           <button
             onClick={() => setMastersOpen(!mastersOpen)}
             className="flex items-center w-full py-2 px-3 my-1 font-medium rounded-md transition-all text-gray-600 hover:bg-gray-200"
           >
             <ClipboardList size={20} />
-            <span className={`transition-all ${expanded ? "ml-3 w-10" : "w-0 overflow-hidden"}`}>Masters</span>
+            <span
+              className={`transition-all ${
+                expanded ? "ml-3 w-10" : "w-0 overflow-hidden"
+              }`}
+            >
+              Masters
+            </span>
             <ChevronDown
               className={`ml-auto transform transition-transform duration-300 ${
                 mastersOpen ? "rotate-180" : "rotate-0"
@@ -154,30 +200,74 @@ function SidebarContent({ mastersOpen, setMastersOpen, setMobileMenuOpen }: Side
                 ["Sales Associate", "/masters/sales-associate"],
                 ["Stores", "/masters/stores"],
               ].map(([text, path]) => (
-                <SidebarItem key={path} icon={null} text={text} path={path} setMobileMenuOpen={setMobileMenuOpen} />
+                <SidebarItem
+                  key={path}
+                  icon={null}
+                  text={text}
+                  path={path}
+                  setMobileMenuOpen={setMobileMenuOpen}
+                />
               ))}
             </ul>
           </div>
         </li>
 
-        <SidebarItem icon={<ListChecks size={20} />} text="Tasks" path="/tasks" setMobileMenuOpen={setMobileMenuOpen} />
-        <SidebarItem icon={<FileText size={20} />} text="Reports" path="/reports" setMobileMenuOpen={setMobileMenuOpen} />
-        <SidebarItem icon={<Settings size={20} />} text="Settings" path="/settings" setMobileMenuOpen={setMobileMenuOpen} />
+        <SidebarItem
+          icon={<ListChecks size={20} />}
+          text="Tasks"
+          path="/tasks"
+          setMobileMenuOpen={setMobileMenuOpen}
+        />
+        <SidebarItem
+          icon={<FileText size={20} />}
+          text="Reports"
+          path="/reports"
+          setMobileMenuOpen={setMobileMenuOpen}
+        />
+        <SidebarItem
+          icon={<Settings size={20} />}
+          text="Settings"
+          path="/settings"
+          setMobileMenuOpen={setMobileMenuOpen}
+        />
       </ul>
 
-      <div className="border-t flex items-center p-3">
+      {/* User Profile Section */}
+      <div className="relative border-t flex items-center p-3 cursor-pointer group">
         <img
-          src="https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true"
+          src={`https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=${encodeURIComponent(
+            user.name
+          )}`}
           alt="User Avatar"
           className="w-10 h-10 rounded-md"
         />
-        <div className={`flex justify-between items-center overflow-hidden transition-all ${expanded ? "w-52 ml-3" : "w-0"}`}>
+        <div
+          className={`flex justify-between items-center overflow-hidden transition-all ${
+            expanded ? "w-52 ml-3" : "w-0"
+          }`}
+          onClick={() => setDropdownOpen(!dropdownOpen)}
+        >
           <div className="leading-4">
-            <h4 className="font-semibold">John Doe</h4>
-            <span className="text-xs text-gray-600">johndoe@gmail.com</span>
+            <h4 className="font-semibold">{user.name}</h4>
+            <span className="text-xs text-gray-600">{user.email}</span>
           </div>
-          <MoreVertical size={20} />
+          <MoreVertical size={20} className="ml-2" />
         </div>
+
+        {/* Dropdown Logout */}
+        {dropdownOpen && expanded && (
+          <div className="absolute bottom-14 right-4 bg-white shadow-lg rounded-md border w-40 z-50">
+            <button
+              onClick={() => {
+                localStorage.clear();
+                window.location.href = "https://sheeladecor.free.nf/logout.php";
+              }}
+              className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+            >
+              Logout
+            </button>
+          </div>
+        )}
       </div>
     </>
   );
@@ -191,7 +281,12 @@ interface SidebarItemProps {
   setMobileMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-function SidebarItem({ icon, text, path, setMobileMenuOpen }: SidebarItemProps) {
+function SidebarItem({
+  icon,
+  text,
+  path,
+  setMobileMenuOpen,
+}: SidebarItemProps) {
   const context = useContext(SidebarContext);
   if (!context) return null;
   const { expanded } = context;
@@ -209,10 +304,18 @@ function SidebarItem({ icon, text, path, setMobileMenuOpen }: SidebarItemProps) 
     >
       <li
         className={`relative flex items-center py-2 px-3 my-1 font-medium rounded-md cursor-pointer transition-all group
-        ${location.pathname === path ? "bg-indigo-100 text-indigo-800" : "hover:bg-gray-200 text-gray-600"}`}
+        ${
+          location.pathname === path
+            ? "bg-indigo-100 text-indigo-800"
+            : "hover:bg-gray-200 text-gray-600"
+        }`}
       >
         {icon && icon}
-        <span className={`overflow-hidden transition-all ${expanded ? "ml-3 w-40" : "w-0"}`}>
+        <span
+          className={`overflow-hidden transition-all ${
+            expanded ? "ml-3 w-40" : "w-0"
+          }`}
+        >
           {expanded && text}
         </span>
       </li>
