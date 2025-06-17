@@ -16,7 +16,7 @@ import { useEffect } from "react";
         <div className="w-full flex flex-row justify-between gap-2">
           <p className="text-gray-600">Items:</p>
           <div className="flex flex-row w-full flex-wrap gap-2">
-            {project.goodsArray.map((arr, index) => (
+            {project.goodsArray &&  project.goodsArray.map((arr, index) => (
               <p key={index}>{arr.item?.[0]},</p>
             ))}
           </div>

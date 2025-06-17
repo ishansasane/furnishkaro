@@ -1122,8 +1122,21 @@ useEffect(() => {
           {selections.map((selection, mainIndex) => (
             <div key={mainIndex} className="w-full">
               <p className="font-semibold mb-2">{selection.area}</p>
-              <table className="w-full border-collapse mb-6 text-xs sm:text-sm">
-                <tbody>
+            <table className="w-full border-collapse mb-6 text-[0.95vw]">
+              <thead>
+                <tr className="flex justify-between w-full bg-gray-100 p-2 border-b font-semibold">
+                  <td className="w-[10%]">Sr. No.</td>
+                  <td className="w-[45%]">Product Name</td>
+                  <td className="w-[45%]">Size</td>
+                  <td className="w-[20%]">MRP</td>
+                  <td className="w-[20%]">Quantity</td>
+                  <td className="w-[20%]">Subtotal</td>
+                  <td className="w-[20%]">Tax Rate (%)</td>
+                  <td className="w-[20%]">Tax Amount</td>
+                  <td className="w-[20%]">Total</td>
+                </tr>
+              </thead>
+              <tbody>
 {selection.areacollection && selection.areacollection.length > 0 ? (
   selection.areacollection.map((collection, collectionIndex) => {
     if (!Array.isArray(collection.items)) {
