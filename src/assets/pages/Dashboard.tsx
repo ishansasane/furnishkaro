@@ -570,26 +570,37 @@ const Dashboard: React.FC = () => {
       </div>
 
       <div className={`${flag ? "hidden" : ""} grid grid-cols-1 lg:grid-cols-3 gap-2 mt-2`}>
-        <div className="bg-white shadow-md rounded-xl p-6">
+        <div className="bg-white flex flex-wrap flex-col shadow-md rounded-xl p-6">
           <p className="md:text-[1.7vw] font-semibold mb-4 text-gray-800"> Project Deadlines</p>
-          <div className="space-y-4">
-            {projects && projects.map((project, index) => (
-              <div key={index} onClick={() => {setSendProject(project); setIndex(index); setTax(project.totalTax); setAmount(project.totalAmount); setProjectDiscount(project.discount); setFlag(true);}}>
-                <DeadlineCard
-                  setFlag={setFlag}
-                  setTax={setTax}
-                  setProjectDiscount={setProjectDiscount}
-                  setAmount={setAmount}
-                  setSendProject={setSendProject}
-                  index={index}
-                  setIndex={setIndex}
-                  project={project}
-                  projectName={project.projectName}
-                  date={project.projectDate}
-                />
-              </div>
-            ))}
-          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-4">
+  {projects && projects.map((project, index) => (
+    <div
+      key={index}
+      onClick={() => {
+        setSendProject(project);
+        setIndex(index);
+        setTax(project.totalTax);
+        setAmount(project.totalAmount);
+        setProjectDiscount(project.discount);
+        setFlag(true);
+      }}
+    >
+      <DeadlineCard
+        setFlag={setFlag}
+        setTax={setTax}
+        setProjectDiscount={setProjectDiscount}
+        setAmount={setAmount}
+        setSendProject={setSendProject}
+        index={index}
+        setIndex={setIndex}
+        project={project}
+        projectName={project.projectName}
+        date={project.projectDate}
+      />
+    </div>
+  ))}
+</div>
+
         </div>
 
         <div className="bg-white shadow-md rounded-xl p-3 col-span-2">
