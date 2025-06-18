@@ -253,6 +253,7 @@ function AddProjectForm() {
     const newproduct = product.split(",");
     updatedSelections[mainindex].areacollection[i].productGroup = newproduct;
   
+
     const pg = newproduct;
     if (!Array.isArray(pg) || pg.length < 2) return;
   
@@ -766,7 +767,7 @@ function AddProjectForm() {
           projectDate,
           additionalRequests,
           interiorArray: JSON.stringify(interiorArray),
-          salesAssociateArray: JSON.stringify(salesAssociateArray || []),
+          salesAssociateArray: JSON.stringify(salesAssociateArray),
           additionalItems: JSON.stringify(additionalItems),
           goodsArray: JSON.stringify(goodsArray),
           tailorsArray: JSON.stringify(tailorsArray),
@@ -948,11 +949,6 @@ function AddProjectForm() {
 
         selection.areacollection.forEach((collection, collectionIndex) => {
           const pg = collection.productGroup;
-          const productGroupName = Array.isArray(pg) ? pg.join(", ") : pg || "N/A";
-          tableData.push([
-            { content: `Product Group: ${productGroupName}`, colSpan: 9, styles: { fontStyle: "bold", fontSize: 9, fillColor: lightGray, textColor: secondaryColor } },
-          ]);
-
           if (!Array.isArray(pg) || pg.length < 2) return;
           const relevantPG = pg.length > 2 ? pg.slice(1, -2) : null;
           const matchedItems = relevantPG.map((pgItem) => {
@@ -1191,8 +1187,8 @@ function AddProjectForm() {
             salesdata={salesData}
             interiorArray={interiorArray}
             setInteriorArray={setInteriorArray}
-            salesAssociateArray={salesAssociateArray || []}
-            setSalesAssociateArray={(newArray) => setSalesAssociateArray(Array.isArray(newArray) ? newArray : [])}
+            salesAssociateArray={salesAssociateArray}
+            setSalesAssociateArray={setSalesData}
             projectName={projectName}
             setProjectName={setProjectName}
             projectReference={projectReference}
@@ -1584,7 +1580,7 @@ function AddProjectForm() {
                 <span className="text-gray-600 font-semibold">Grand Total</span>
                 <span className="font-semibold text-blue-600">INR {(amount + tax - discount).toFixed(2)}</span>
               </div>
-              <div className="flex gap-2 flex-col">
+              <div className=" flex gap-2 flex-col">
                 <button
                   onClick={sendProjectData}
                   className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium mt-4"
