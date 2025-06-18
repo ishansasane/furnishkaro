@@ -32,6 +32,7 @@ interface Project {
   additionalItems: any[];
   interiorArray: string[];
   salesAssociateArray: string[];
+  grandTotal : number;
 }
 
 // Status filter options
@@ -59,6 +60,8 @@ export default function Projects() {
   const projectFlag = useSelector((state: RootState) => state.data.projectFlag);
   const paymentData = useSelector((state: RootState) => state.data.paymentData);
   const [projectPayments, setProjectPayments] = useState([]);
+
+  const [grandTotal , setGrandTotal] = useState(0);
 
   const fetchProjectData = async () => {
     const response = await fetch(
@@ -130,6 +133,7 @@ export default function Projects() {
       tailorsArray: deepClone(parseSafely(row[16], [])),
       projectAddress: row[17],
       date: row[18],
+      grandTotal : row[19]
     }));
 
     return projects;
@@ -338,6 +342,7 @@ export default function Projects() {
     setTax(projectData[i].totalTax);
     setAmount(projectData[i].totalAmount);
     setDiscount(projectData[i].discount !== undefined ? projectData[i].discount : 0);
+    setGrandTotal(projectData[i].grandTotal);
   };
 
   // PDF Generation Function
@@ -451,7 +456,7 @@ export default function Projects() {
     yOffset += 7;
     doc.text(`Discount: ${project.discount.toFixed(2)}`, pageWidth - 80, yOffset);
     yOffset += 7;
-    doc.text(`Grand Total: ${(project.totalAmount + project.totalTax - project.discount).toFixed(2)}`, pageWidth - 80, yOffset);
+    doc.text(`Grand Total: ${(grandTotal).toFixed(2)}`, pageWidth - 80, yOffset);
 
     // Footer
     yOffset = pageHeight - 20;
@@ -503,10 +508,15 @@ export default function Projects() {
           </thead>
           <tbody>
             {filteredProjects.map((project, index) => (
-              <tr key={index} className="hover:bg-sky-50">
+              <tr onClick={() => {
+                        setValues(index);
+                        setIndex(index);
+                        setSendProject(project);
+                        setFlag(true);
+                      }} key={index} className="hover:bg-sky-50">
                 <td className="px-4 py-2">{project.projectName}</td>
                 <td className="px-4 py-2">{project.customerLink ? project.customerLink[0] : ""}</td>
-                <td className="px-4 py-2">{(project.totalAmount + project.totalTax - project.discount).toFixed(2)}</td>
+                <td className="px-4 py-2">{project.grandTotal}</td>
                 <td className="px-4 py-2">{projectPayments[index]}</td>
                 <td className="px-4 py-2">{(project.totalAmount + project.totalTax - project.discount - (projectPayments[index] || 0)).toFixed(2)}</td>
                 <td className="px-4 py-2">{project.createdBy}</td>
@@ -561,6 +571,8 @@ export default function Projects() {
             setAmount={setAmount}
             Discount={Discount}
             setDiscount={setDiscount}
+            grandTotal={grandTotal}
+            setGrandTotal={setGrandTotal}
           />
         )}
         {

@@ -60,9 +60,6 @@ const ProductGroupForm: React.FC = () => {
       // category: "default", // Uncomment and adjust if needed
     };
 
-    console.log("Group Data to Submit:", groupData); // Debug
-    console.log("Raw addonProducts state:", addonProducts); // Debug
-
     try {
       const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/addproductgroup", {
         method: "POST",
@@ -70,7 +67,7 @@ const ProductGroupForm: React.FC = () => {
           "Content-Type": "application/json",
         },
         credentials: "include",
-        body: JSON.stringify(groupData)
+        body: JSON.stringify({ groupName : groupData.group_name,  mainProducts : groupData.main_product, addonProducts : JSON.stringify(groupData.addon_products), status : groupData.status })
       });
 
       if (!response.ok) {
