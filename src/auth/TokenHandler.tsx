@@ -1,4 +1,3 @@
-// auth/TokenHandler.tsx
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
@@ -11,14 +10,21 @@ const TokenHandler = () => {
     const token = searchParams.get("token");
     const name = searchParams.get("name");
     const email = searchParams.get("email");
+    const rawRoutes = searchParams.get("routes");
 
-    if (token && name && email) {
-      localStorage.setItem("auth_token", token);
-      localStorage.setItem("auth_name", name);
-      localStorage.setItem("auth_email", email);
+    try {
+      const routes = rawRoutes ? JSON.parse(rawRoutes) : [];
 
-      // Clean URL
-      navigate(location.pathname, { replace: true });
+      if (token && name && email && Array.isArray(routes)) {
+        localStorage.setItem("auth_token", token);
+        localStorage.setItem("auth_name", name);
+        localStorage.setItem("auth_email", email);
+        localStorage.setItem("allowed_routes", JSON.stringify(routes)); // Clean JSON
+
+        navigate(location.pathname, { replace: true });
+      }
+    } catch (err) {
+      console.error("Failed to parse routes:", err);
     }
   }, [location, navigate]);
 
