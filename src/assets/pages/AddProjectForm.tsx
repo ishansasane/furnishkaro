@@ -676,19 +676,79 @@ function AddProjectForm() {
   const [selectedCollectionIndex, setSelectedCollectionIndex] = useState<number | null>(null);
 
   const fetchProjectData = async () => {
-    try {
-      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata", {
+    const response = await fetch(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
+      {
         credentials: "include",
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
       }
-      const data = await response.json();
-      return data.body;
-    } catch (error) {
-      console.error("Error fetching project data:", error);
-      return [];
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
     }
+
+    const data = await response.json();
+
+    if (!data.body || !Array.isArray(data.body)) {
+      throw new Error("Invalid data format: Expected an array in data.body");
+    }
+
+    const parseSafely = (value: any, fallback: any) => {
+      try {
+        return typeof value === "string" ? JSON.parse(value) : value || fallback;
+      } catch (error) {
+        console.warn("Invalid JSON:", value, error);
+        return fallback;
+      }
+    };
+
+    const deepClone = (obj: any) => JSON.parse(JSON.stringify(obj));
+
+    const fixBrokenArray = (input: any): string[] => {
+      if (Array.isArray(input)) return input;
+      if (typeof input !== "string") return [];
+
+      try {
+        const fixed = JSON.parse(input);
+        if (Array.isArray(fixed)) return fixed;
+        return [];
+      } catch {
+        try {
+          const cleaned = input
+            .replace(/^\[|\]$/g, "")
+            .split(",")
+            .map((item: string) => item.trim().replace(/^"+|"+$/g, ""));
+          return cleaned;
+        } catch {
+          return [];
+        }
+      }
+    };
+
+    const projects = data.body.map((row: any[]) => ({
+      projectName: row[0],
+      customerLink: parseSafely(row[1], []),
+      projectReference: row[2] || "",
+      status: row[3] || "",
+      totalAmount: parseFloat(row[4]) || 0,
+      totalTax: parseFloat(row[5]) || 0,
+      paid: parseFloat(row[6]) || 0,
+      discount: parseFloat(row[7]) || 0,
+      createdBy: row[8] || "",
+      allData: deepClone(parseSafely(row[9], [])),
+      projectDate: row[10] || "",
+      additionalRequests: parseSafely(row[11], []),
+      interiorArray: fixBrokenArray(row[12]),
+      salesAssociateArray: fixBrokenArray(row[13]),
+      additionalItems: deepClone(parseSafely(row[14], [])),
+      goodsArray: deepClone(parseSafely(row[15], [])),
+      tailorsArray: deepClone(parseSafely(row[16], [])),
+      projectAddress: row[17],
+      date: row[18],
+      grandTotal : row[19]
+    }));
+
+    return projects;
   };
 
   const parseSafely = (input: any, fallback: any) => {
@@ -772,8 +832,8 @@ function AddProjectForm() {
           goodsArray: JSON.stringify(goodsArray),
           tailorsArray: JSON.stringify(tailorsArray),
           projectAddress: JSON.stringify(projectAddress),
-          termsAndConditions,
-          date
+          date,
+          grandTotal
         }),
       });
 
@@ -1188,7 +1248,7 @@ function AddProjectForm() {
             interiorArray={interiorArray}
             setInteriorArray={setInteriorArray}
             salesAssociateArray={salesAssociateArray}
-            setSalesAssociateArray={setSalesData}
+            setSalesAssociateArray={setSalesAssociateArray}
             projectName={projectName}
             setProjectName={setProjectName}
             projectReference={projectReference}
@@ -1562,9 +1622,9 @@ function AddProjectForm() {
               <div className="flex justify-between items-center">
                 <span className="text-sm text-gray-600">Discount</span>
                 <div className="flex items-center gap-2">
-                  <select className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="percentage">%</option>
-                    <option value="rupee">INR</option>
+                  <select onChange={(e) => setDiscountType(e.target.value)} className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <option value="cash">₹</option>
+                    <option value="percent">%</option>
                   </select>
                   <input
                     className="w-24 border border-gray-300 rounded-md px-3 py-1 text-sm text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

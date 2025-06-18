@@ -165,7 +165,13 @@ const Items = () => {
   };
 
   const duplicateItem = async (item: Array<string>, index: number) => {
-    const date = new Date();
+    let date = new Date();
+
+    const day = date.getDate();               // 1-31
+    const month = date.getMonth() + 1;        // 0-11, so add 1
+    const year = date.getFullYear();  
+    
+    date = day+month+year; 
 
     try {
       const response = await fetch(
@@ -184,7 +190,7 @@ const Items = () => {
             mrp: item[4],
             taxRate: item[5],
             needsTailoring: item[7],
-            date: date.toISOString()
+            date: date
           }),
         }
       );
@@ -340,13 +346,22 @@ const Items = () => {
   };
 
   const handleSubmit = async () => {
+
+    let date = new Date();
+
+    const day = date.getDate();               // 1-31
+    const month = date.getMonth() + 1;        // 0-11, so add 1
+    const year = date.getFullYear();  
+    
+    date = day+month+year;
+
     const newItem = {
       id: items.length + 1,
       name: formData.productName,
       description: formData.productDetails,
       costingType: formData.sellingUnit,
       groupType: formData.groupType,
-      entryDate: new Date().toLocaleDateString(),
+      entryDate: date,
       additionalInputs: formData.additionalInputs,
       sideDropdown: formData.sideDropdown,
       mrp: formData.mrp,

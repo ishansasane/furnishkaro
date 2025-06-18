@@ -111,7 +111,7 @@ export default function ProductGroups() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ groupName, mainProducts: mainProduct, addonProducts: addonProduct, status })
+        body: JSON.stringify({ groupName, mainProducts: mainProduct, addonProducts: JSON.stringify(addonProduct), status })
       });
       const data = await fetchProductGroups();
       dispatch(setProducts(data));
