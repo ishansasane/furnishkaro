@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import Card from "./CardPage";
 import DeadlineCard from "../compoonents/DeadlineCard.tsx";
@@ -7,14 +6,21 @@ import InquiryCard from "../compoonents/InquiryCard.tsx"; // Corrected import pa
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store.ts";
-import { setTasks, setProjects, setPaymentData, setProjectFlag } from "../Redux/dataSlice.ts";
+import {
+  setTasks,
+  setProjects,
+  setPaymentData,
+  setProjectFlag,
+} from "../Redux/dataSlice.ts";
 import TaskDialog from "../compoonents/TaskDialog.tsx";
 import { AnimatePresence, motion } from "framer-motion";
 import EditProjects from "./EditProjects.tsx";
 import { useNavigate } from "react-router-dom";
 
 const fetchTaskData = async () => {
-  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks");
+  const response = await fetch(
+    "https://sheeladecor.netlify.app/.netlify/functions/server/gettasks"
+  );
   const data = await response.json();
   if (data.body) {
     return data.body;
@@ -32,7 +38,7 @@ const Dashboard: React.FC = () => {
     project: "",
     comments: "",
     inquiryDate: "",
-    followUpDate: ""
+    followUpDate: "",
   });
   const [inquiries, setInquiries] = useState([
     {
@@ -40,22 +46,22 @@ const Dashboard: React.FC = () => {
       comments: "Client wants a Shopify integration.",
       inquiryDate: "Feb 15, 2025",
       followUpDate: "Feb 28, 2025",
-      status: "New Inquiry"
+      status: "New Inquiry",
     },
     {
       project: "Mobile App for Gym",
       comments: "Needs a booking system & payment gateway.",
       inquiryDate: "Feb 20, 2025",
       followUpDate: "March 5, 2025",
-      status: "New Inquiry"
+      status: "New Inquiry",
     },
     {
       project: "Real Estate CRM",
       comments: "Looking for a cloud-based solution.",
       inquiryDate: "Feb 25, 2025",
       followUpDate: "March 10, 2025",
-      status: "New Inquiry"
-    }
+      status: "New Inquiry",
+    },
   ]);
   const dispatch = useDispatch();
   const tasks = useSelector((state: RootState) => state.data.tasks);
@@ -82,14 +88,17 @@ const Dashboard: React.FC = () => {
 
   const deleteTask = async (name: string) => {
     try {
-      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletetask", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ title: name }),
-      });
+      const response = await fetch(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/deletetask",
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ title: name }),
+        }
+      );
 
       if (response.status === 200) {
         alert("Task deleted");
@@ -101,11 +110,14 @@ const Dashboard: React.FC = () => {
 
         dispatch(setTasks(sortedTasks));
 
-        localStorage.setItem("taskData", JSON.stringify({ data: sortedTasks, time: Date.now() }));
+        localStorage.setItem(
+          "taskData",
+          JSON.stringify({ data: sortedTasks, time: Date.now() })
+        );
 
         setSelectedTask(null);
 
-        setRefresh(prev => !prev);
+        setRefresh((prev) => !prev);
       } else {
         alert("Error deleting task");
       }
@@ -130,7 +142,9 @@ const Dashboard: React.FC = () => {
 
           if (timeDiff < 5 * 60 * 1000 && parsed.data?.length > 0) {
             if (isMounted) {
-              const filtered = parsed.data.filter(task => task[7] !== "Completed");
+              const filtered = parsed.data.filter(
+                (task) => task[7] !== "Completed"
+              );
               dispatch(setTasks(parsed.data));
               setFilteredTasks(filtered);
             }
@@ -138,9 +152,12 @@ const Dashboard: React.FC = () => {
           }
         }
 
-        const taskRes = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks", {
-          credentials: "include"
-        });
+        const taskRes = await fetch(
+          "https://sheeladecor.netlify.app/.netlify/functions/server/gettasks",
+          {
+            credentials: "include",
+          }
+        );
 
         if (!taskRes.ok) {
           throw new Error(`HTTP error! Status: ${taskRes.status}`);
@@ -150,10 +167,13 @@ const Dashboard: React.FC = () => {
         const tasksList = Array.isArray(taskData.body) ? taskData.body : [];
 
         if (isMounted) {
-          const filtered = tasksList.filter(task => task[7] !== "Completed");
+          const filtered = tasksList.filter((task) => task[7] !== "Completed");
           dispatch(setTasks(tasksList));
           setFilteredTasks(filtered);
-          localStorage.setItem("taskData", JSON.stringify({ data: tasksList, time: now }));
+          localStorage.setItem(
+            "taskData",
+            JSON.stringify({ data: tasksList, time: now })
+          );
         }
       } catch (error) {
         console.error("Error fetching tasks:", error);
@@ -219,41 +239,47 @@ const Dashboard: React.FC = () => {
               .replace(/^\[|\]$/g, "")
               .split(",")
               .map((item: string) => item.trim().replace(/^"+|"+$/g, ""));
-            return cleaned.filter(item => item);
+            return cleaned.filter((item) => item);
           } catch {
             return [];
           }
         }
       };
 
-      const projects = data.body.map((row: any[], rowIndex: number) => {
-        try {
-          return {
-            projectName: row[0] || "",
-            customerLink: parseSafely(row[1], []),
-            projectReference: row[2] || "",
-            status: row[3] || "",
-            totalAmount: parseFloat(row[4]) || 0,
-            totalTax: parseFloat(row[5]) || 0,
-            paid: parseFloat(row[6]) || 0,
-            discount: parseFloat(row[7]) || 0,
-            createdBy: row[8] || "",
-            allData: deepClone(parseSafely(row[9], [])),
-            projectDate: row[10] || "",
-            additionalRequests: parseSafely(row[11], []),
-            interiorArray: fixBrokenArray(row[12]),
-            salesAssociateArray: fixBrokenArray(row[13]),
-            additionalItems: deepClone(parseSafely(row[14], [])),
-            goodsArray: deepClone(parseSafely(row[15], [])),
-            tailorsArray: deepClone(parseSafely(row[16], [])),
-            projectAddress: row[17] || "",
-            date: row[18] || "",
-          };
-        } catch (error) {
-          console.error(`Error processing project row ${rowIndex}:`, row, error);
-          return null;
-        }
-      }).filter(project => project !== null);
+      const projects = data.body
+        .map((row: any[], rowIndex: number) => {
+          try {
+            return {
+              projectName: row[0] || "",
+              customerLink: parseSafely(row[1], []),
+              projectReference: row[2] || "",
+              status: row[3] || "",
+              totalAmount: parseFloat(row[4]) || 0,
+              totalTax: parseFloat(row[5]) || 0,
+              paid: parseFloat(row[6]) || 0,
+              discount: parseFloat(row[7]) || 0,
+              createdBy: row[8] || "",
+              allData: deepClone(parseSafely(row[9], [])),
+              projectDate: row[10] || "",
+              additionalRequests: parseSafely(row[11], []),
+              interiorArray: fixBrokenArray(row[12]),
+              salesAssociateArray: fixBrokenArray(row[13]),
+              additionalItems: deepClone(parseSafely(row[14], [])),
+              goodsArray: deepClone(parseSafely(row[15], [])),
+              tailorsArray: deepClone(parseSafely(row[16], [])),
+              projectAddress: row[17] || "",
+              date: row[18] || "",
+            };
+          } catch (error) {
+            console.error(
+              `Error processing project row ${rowIndex}:`,
+              row,
+              error
+            );
+            return null;
+          }
+        })
+        .filter((project) => project !== null);
 
       return projects;
     } catch (error) {
@@ -264,7 +290,9 @@ const Dashboard: React.FC = () => {
 
   const fetchPaymentData = async () => {
     try {
-      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getPayments");
+      const response = await fetch(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/getPayments"
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -290,7 +318,7 @@ const Dashboard: React.FC = () => {
         let totalAmount = 0;
         let discount = 0;
 
-        projects.forEach(project => {
+        projects.forEach((project) => {
           totalTax += parseFloat(project.totalTax) || 0;
           totalAmount += parseFloat(project.totalAmount) || 0;
           discount += parseFloat(project.discount) || 0;
@@ -299,7 +327,9 @@ const Dashboard: React.FC = () => {
         setTotalPayment(totalAmount + totalTax);
         setDiscount(discount);
 
-        const validProjectNames = new Set(projects.map(project => project.projectName));
+        const validProjectNames = new Set(
+          projects.map((project) => project.projectName)
+        );
 
         const cached = localStorage.getItem("paymentData");
         const now = Date.now();
@@ -328,7 +358,10 @@ const Dashboard: React.FC = () => {
 
         if (paymentData) {
           dispatch(setPaymentData(paymentData));
-          localStorage.setItem("paymentData", JSON.stringify({ data: paymentData, time: now }));
+          localStorage.setItem(
+            "paymentData",
+            JSON.stringify({ data: paymentData, time: now })
+          );
 
           const totalReceived = paymentData.reduce((acc, payment) => {
             const projectName = payment[1];
@@ -352,17 +385,20 @@ const Dashboard: React.FC = () => {
 
   const handleMarkAsCompleted = async (status, name) => {
     try {
-      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/updatetask", {
-        method: "POST",
-        headers: {
-          "content-type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          title: name,
-          status,
-        }),
-      });
+      const response = await fetch(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/updatetask",
+        {
+          method: "POST",
+          headers: {
+            "content-type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            title: name,
+            status,
+          }),
+        }
+      );
 
       if (response.status === 200) {
         alert("Task marked as completed");
@@ -374,13 +410,16 @@ const Dashboard: React.FC = () => {
 
         dispatch(setTasks(sortedTasks));
 
-        localStorage.setItem("taskData", JSON.stringify({ data: sortedTasks, time: Date.now() }));
+        localStorage.setItem(
+          "taskData",
+          JSON.stringify({ data: sortedTasks, time: Date.now() })
+        );
       } else {
         alert("Error updating task");
       }
 
       setTaskDialogOpen(false);
-      setRefresh(prev => !prev);
+      setRefresh((prev) => !prev);
     } catch (error) {
       console.error("Error marking task as completed:", error);
       alert("Something went wrong while updating the task.");
@@ -400,7 +439,8 @@ const Dashboard: React.FC = () => {
         if (cached) {
           const parsed = JSON.parse(cached);
 
-          const isCacheValid = parsed?.data?.length > 0 && (now - parsed.time) < cacheExpiry;
+          const isCacheValid =
+            parsed?.data?.length > 0 && now - parsed.time < cacheExpiry;
 
           if (isCacheValid) {
             dispatch(setProjects(parsed.data));
@@ -412,7 +452,10 @@ const Dashboard: React.FC = () => {
 
         if (Array.isArray(freshData)) {
           dispatch(setProjects(freshData));
-          localStorage.setItem("projectData", JSON.stringify({ data: freshData, time: now }));
+          localStorage.setItem(
+            "projectData",
+            JSON.stringify({ data: freshData, time: now })
+          );
         } else {
           console.warn("Fetched project data is not an array:", freshData);
         }
@@ -435,7 +478,7 @@ const Dashboard: React.FC = () => {
   const openProject = (selectedTask) => {
     const name = selectedTask[5];
 
-    const index = projects.findIndex(project => project.projectName === name);
+    const index = projects.findIndex((project) => project.projectName === name);
 
     setIndex(index);
 
@@ -461,82 +504,183 @@ const Dashboard: React.FC = () => {
       project: "",
       comments: "",
       inquiryDate: "",
-      followUpDate: ""
+      followUpDate: "",
     });
   };
 
   const handleDeleteInquiry = (inquiry) => {
-    const confirmDelete = window.confirm("Are you sure you want to delete this inquiry?");
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this inquiry?"
+    );
     if (!confirmDelete) return;
 
-    setInquiries(inquiries.filter(i => i.project !== inquiry.project || i.inquiryDate !== inquiry.inquiryDate));
+    setInquiries(
+      inquiries.filter(
+        (i) =>
+          i.project !== inquiry.project || i.inquiryDate !== inquiry.inquiryDate
+      )
+    );
     setInquiryDialogOpen(false);
     alert("Inquiry deleted");
   };
 
   const handleMarkAsApproved = (inquiry) => {
-    setInquiries(inquiries.map(i => 
-      i.project === inquiry.project && i.inquiryDate === inquiry.inquiryDate 
-        ? { ...i, status: "Approved" } 
-        : i
-    ));
+    setInquiries(
+      inquiries.map((i) =>
+        i.project === inquiry.project && i.inquiryDate === inquiry.inquiryDate
+          ? { ...i, status: "Approved" }
+          : i
+      )
+    );
     setInquiryDialogOpen(false);
     alert("Inquiry marked as approved");
   };
 
   const handleStatusChange = (inquiry, newStatus: string) => {
-    setInquiries(inquiries.map(i => 
-      i.project === inquiry.project && i.inquiryDate === inquiry.inquiryDate 
-        ? { ...i, status: newStatus } 
-        : i
-    ));
+    setInquiries(
+      inquiries.map((i) =>
+        i.project === inquiry.project && i.inquiryDate === inquiry.inquiryDate
+          ? { ...i, status: newStatus }
+          : i
+      )
+    );
   };
 
   return (
     <div className="p-6 md:mt-0 mt-20 bg-gray-100 min-h-screen">
-      <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 ${flag ? "hidden" : ""}`}>
-        <div className="flex" onClick={() => navigate("/projects")}><Card title="Orders" value={projects.length} color="bg-blue-500" className="w-full max-w-sm"/></div>
-        <Card title="Total Value" value={Math.round((totalPayment - Discount))} color="bg-purple-500" isCurrency />
-        <div className="flex" onClick={() => navigate("/paymentsPage")}><Card title="Payment Received" value={Math.round(received)} color="bg-green-500" isCurrency /></div>
-        <div className="flex" onClick={() => navigate("/duePage")}><Card title="Payment Due" value={Math.round(totalPayment - received - Discount)} color="bg-red-500" isCurrency /></div>
+      <div
+        className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 ${
+          flag ? "hidden" : ""
+        }`}
+      >
+        <div className="flex" onClick={() => navigate("/projects")}>
+          <Card
+            title="Orders"
+            value={projects.length}
+            color="bg-blue-500"
+            className="w-full max-w-sm"
+          />
+        </div>
+        <Card
+          title="Total Value"
+          value={Math.round(totalPayment - Discount)}
+          color="bg-purple-500"
+          isCurrency
+        />
+        <div className="flex" onClick={() => navigate("/paymentsPage")}>
+          <Card
+            title="Payment Received"
+            value={Math.round(received)}
+            color="bg-green-500"
+            isCurrency
+          />
+        </div>
+        <div className="flex" onClick={() => navigate("/duePage")}>
+          <Card
+            title="Payment Due"
+            value={Math.round(totalPayment - received - Discount)}
+            color="bg-red-500"
+            isCurrency
+          />
+        </div>
       </div>
 
-      <div className={`${flag ? "hidden" : ""} grid grid-cols-1 lg:grid-cols-3 gap-2 mt-2`}>
+      <div
+        className={`${
+          flag ? "hidden" : ""
+        } grid grid-cols-1 lg:grid-cols-3 gap-2 mt-2`}
+      >
         <div className="bg-white shadow-md rounded-xl p-6">
-          <p className="md:text-[1.7vw] font-semibold mb-4 text-gray-800"> Project Deadlines</p>
+          <p
+            style={{ fontFamily: "Poppins, sans-serif" }}
+            className="md:text-[1.7vw] font-semibold mb-4 text-gray-800"
+          >
+            Project Deadlines
+          </p>
+
           <div className="space-y-4">
-            {projects && projects.map((project, index) => (
-              <div key={index} onClick={() => {setSendProject(project); setIndex(index); setTax(project.totalTax); setAmount(project.totalAmount); setProjectDiscount(project.discount); setFlag(true);}}>
-                <DeadlineCard
-                  setFlag={setFlag}
-                  setTax={setTax}
-                  setProjectDiscount={setProjectDiscount}
-                  setAmount={setAmount}
-                  setSendProject={setSendProject}
-                  index={index}
-                  setIndex={setIndex}
-                  project={project}
-                  projectName={project.projectName}
-                  date={project.projectDate}
-                />
-              </div>
-            ))}
+            {projects &&
+              projects.map((project, index) => (
+                <div
+                  key={index}
+                  onClick={() => {
+                    setSendProject(project);
+                    setIndex(index);
+                    setTax(project.totalTax);
+                    setAmount(project.totalAmount);
+                    setProjectDiscount(project.discount);
+                    setFlag(true);
+                  }}
+                >
+                  <DeadlineCard
+                    setFlag={setFlag}
+                    setTax={setTax}
+                    setProjectDiscount={setProjectDiscount}
+                    setAmount={setAmount}
+                    setSendProject={setSendProject}
+                    index={index}
+                    setIndex={setIndex}
+                    project={project}
+                    projectName={project.projectName}
+                    date={project.projectDate}
+                  />
+                </div>
+              ))}
           </div>
         </div>
 
         <div className="bg-white shadow-md rounded-xl p-3 col-span-2">
           <div className="flex flex-row w-full justify-between items-center mb-4">
             <Link to="/tasks" className="!no-underline">
-              <p className="md:text-[1.7vw] font-semibold text-gray-800">Tasks</p>
+              <p
+                style={{ fontFamily: "Poppins, sans-serif" }}
+                className="md:text-[1.7vw] font-semibold mb-4 text-gray-800"
+              >
+                Tasks
+              </p>
             </Link>
-            <button onClick={() => setTaskDialog(true)} style={{ borderRadius: "6px" }} className="mb-2 bg-sky-600 text-white hover:bg-sky-700 px-2 md:text-[1.7vw] py-1">Add Task</button>
+            <button
+              onClick={() => setTaskDialog(true)}
+              className="relative overflow-hidden group mb-2 px-4 py-2 text-sm font-medium text-white transition-all duration-300 ease-out rounded-lg shadow-sm bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 hover:shadow-md"
+            >
+              {/* Animated background elements */}
+              <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></span>
+
+              {/* Button content with icon */}
+              <div className="relative flex items-center justify-center space-x-2">
+                <svg
+                  className="w-5 h-5 text-white transition-transform group-hover:scale-110"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                  />
+                </svg>
+                <span className="font-semibold tracking-wide">Add Task</span>
+              </div>
+
+              {/* Ripple effect (optional) */}
+              <span className="absolute inset-0 scale-0 rounded-full bg-white opacity-20 group-hover:scale-100 transition-transform duration-500"></span>
+            </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto max-h-[90vh] pr-2">
-            {filteredTasks && filteredTasks.map((task, index) => (
-              <div key={index} onClick={() => { setSelectedTask(task); setTaskDialogOpen(true); }}>
-                <TaskCard taskData={task} />
-              </div>
-            ))}
+            {filteredTasks &&
+              filteredTasks.map((task, index) => (
+                <div
+                  key={index}
+                  onClick={() => {
+                    setSelectedTask(task);
+                    setTaskDialogOpen(true);
+                  }}
+                >
+                  <TaskCard taskData={task} />
+                </div>
+              ))}
           </div>
         </div>
       </div>
@@ -595,45 +739,75 @@ const Dashboard: React.FC = () => {
                 >
                   ✕
                 </button>
-                <h2 className="text-xl font-bold mb-4 text-gray-800">Add Inquiry</h2>
+                <h2 className="relative text-2xl font-bold mb-6 text-gray-800 after:absolute after:bottom-[-8px] after:left-0 after:w-12 after:h-1 after:bg-blue-500 after:rounded-full">
+                  Add Inquiry
+                </h2>
                 <form onSubmit={handleInquirySubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Project</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Project
+                    </label>
                     <input
                       type="text"
                       value={inquiryForm.project}
-                      onChange={(e) => setInquiryForm({ ...inquiryForm, project: e.target.value })}
+                      onChange={(e) =>
+                        setInquiryForm({
+                          ...inquiryForm,
+                          project: e.target.value,
+                        })
+                      }
                       className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                       placeholder="Enter project name"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Comments</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Comments
+                    </label>
                     <textarea
                       value={inquiryForm.comments}
-                      onChange={(e) => setInquiryForm({ ...inquiryForm, comments: e.target.value })}
+                      onChange={(e) =>
+                        setInquiryForm({
+                          ...inquiryForm,
+                          comments: e.target.value,
+                        })
+                      }
                       className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                       placeholder="Enter comments"
                       rows={4}
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Inquiry Date</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Inquiry Date
+                    </label>
                     <input
                       type="date"
                       value={inquiryForm.inquiryDate}
-                      onChange={(e) => setInquiryForm({ ...inquiryForm, inquiryDate: e.target.value })}
+                      onChange={(e) =>
+                        setInquiryForm({
+                          ...inquiryForm,
+                          inquiryDate: e.target.value,
+                        })
+                      }
                       className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Follow-Up Date</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Follow-Up Date
+                    </label>
                     <input
                       type="date"
                       value={inquiryForm.followUpDate}
-                      onChange={(e) => setInquiryForm({ ...inquiryForm, followUpDate: e.target.value })}
+                      onChange={(e) =>
+                        setInquiryForm({
+                          ...inquiryForm,
+                          followUpDate: e.target.value,
+                        })
+                      }
                       className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                       required
                     />
@@ -667,20 +841,42 @@ const Dashboard: React.FC = () => {
               >
                 ✕
               </button>
-              <h2 className="text-xl font-bold mb-2 text-gray-800">📩 {selectedInquiry.project}</h2>
+              <h2 className="text-xl font-bold mb-2 text-gray-800">
+                📩 {selectedInquiry.project}
+              </h2>
               <div className="space-y-3 p-3 text-gray-700 text-sm">
                 <p className="flex justify-between">
                   <strong>Status:</strong>
-                  <span className={`inline-block px-2 py-1 rounded text-white ${selectedInquiry.status.toLowerCase() === 'approved' ? 'bg-green-500' : selectedInquiry.status.toLowerCase() === 'new inquiry' ? 'bg-blue-500' : selectedInquiry.status.toLowerCase() === 'in progress' ? 'bg-yellow-500' : selectedInquiry.status.toLowerCase() === 'convert to project' ? 'bg-purple-500' : 'bg-red-500'}`}>
+                  <span
+                    className={`inline-block px-2 py-1 rounded text-white ${
+                      selectedInquiry.status.toLowerCase() === "approved"
+                        ? "bg-green-500"
+                        : selectedInquiry.status.toLowerCase() === "new inquiry"
+                        ? "bg-blue-500"
+                        : selectedInquiry.status.toLowerCase() === "in progress"
+                        ? "bg-yellow-500"
+                        : selectedInquiry.status.toLowerCase() ===
+                          "convert to project"
+                        ? "bg-purple-500"
+                        : "bg-red-500"
+                    }`}
+                  >
                     {selectedInquiry.status}
                   </span>
                 </p>
                 <hr />
-                <p className="flex justify-between"><strong>Comments:</strong> {selectedInquiry.comments}</p>
+                <p className="flex justify-between">
+                  <strong>Comments:</strong> {selectedInquiry.comments}
+                </p>
                 <hr />
-                <p className="flex justify-between"><strong>Inquiry Date:</strong> {selectedInquiry.inquiryDate}</p>
+                <p className="flex justify-between">
+                  <strong>Inquiry Date:</strong> {selectedInquiry.inquiryDate}
+                </p>
                 <hr />
-                <p className="flex justify-between"><strong>Follow-Up Date:</strong> {selectedInquiry.followUpDate}</p>
+                <p className="flex justify-between">
+                  <strong>Follow-Up Date:</strong>{" "}
+                  {selectedInquiry.followUpDate}
+                </p>
                 <hr />
               </div>
               <div className="flex justify-between mt-6">
@@ -702,9 +898,18 @@ const Dashboard: React.FC = () => {
         )}
       </AnimatePresence>
 
-      <div className={`bg-white shadow-md rounded-xl p-6 mt-2 ${flag ? "hidden" : ""}`}>
+      <div
+        className={`bg-white shadow-md rounded-xl p-6 mt-2 ${
+          flag ? "hidden" : ""
+        }`}
+      >
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">📩 Inquiries</h2>
+          <h2
+            className="text-xl font-bold text-gray-800 mb-4"
+            style={{ fontFamily: "Poppins, sans-serif" }}
+          >
+            Inquiries
+          </h2>
           <button
             style={{ borderRadius: "6px" }}
             className="mb-2 bg-sky-600 text-white hover:bg-sky-700 px-2 md:text-[1.7vw] py-1"
@@ -722,8 +927,13 @@ const Dashboard: React.FC = () => {
                 inquiryDate={inquiry.inquiryDate}
                 followUpDate={inquiry.followUpDate}
                 status={inquiry.status}
-                onStatusChange={(newStatus) => handleStatusChange(inquiry, newStatus)}
-                onCardClick={() => { setSelectedInquiry(inquiry); setInquiryDialogOpen(true); }}
+                onStatusChange={(newStatus) =>
+                  handleStatusChange(inquiry, newStatus)
+                }
+                onCardClick={() => {
+                  setSelectedInquiry(inquiry);
+                  setInquiryDialogOpen(true);
+                }}
               />
             </div>
           ))}
@@ -739,20 +949,59 @@ const Dashboard: React.FC = () => {
             >
               ✕
             </button>
-            <h2 className="text-xl font-bold mb-2 text-gray-800">📝 {selectedTask[0]}</h2>
+            <h2 className="text-xl font-bold mb-2 text-gray-800">
+              📝 {selectedTask[0]}
+            </h2>
             <p className="text-sm text-gray-600 mb-4">By {selectedTask[4]}</p>
             <div className="space-y-3 p-3 text-gray-700 text-sm">
-              <p className="flex justify-between"><strong>Priority :</strong> <span className={`inline-block px-2 py-1 rounded text-white ${selectedTask[6].toLowerCase() === 'high' ? 'bg-red-500' : selectedTask[6].toLowerCase() === 'moderate' ? 'bg-yellow-500' : 'bg-green-500'}`}>{selectedTask[6]}</span></p>
+              <p className="flex justify-between">
+                <strong>Priority :</strong>{" "}
+                <span
+                  className={`inline-block px-2 py-1 rounded text-white ${
+                    selectedTask[6].toLowerCase() === "high"
+                      ? "bg-red-500"
+                      : selectedTask[6].toLowerCase() === "moderate"
+                      ? "bg-yellow-500"
+                      : "bg-green-500"
+                  }`}
+                >
+                  {selectedTask[6]}
+                </span>
+              </p>
               <hr />
-              <p className="flex justify-between"><strong>Status :</strong> <span className={`inline-block px-2 py-1 rounded text-white ${selectedTask[7].toLowerCase() === 'completed' ? 'bg-green-500' : 'bg-gray-500'}`}>{selectedTask[7]}</span></p>
+              <p className="flex justify-between">
+                <strong>Status :</strong>{" "}
+                <span
+                  className={`inline-block px-2 py-1 rounded text-white ${
+                    selectedTask[7].toLowerCase() === "completed"
+                      ? "bg-green-500"
+                      : "bg-gray-500"
+                  }`}
+                >
+                  {selectedTask[7]}
+                </span>
+              </p>
               <hr />
-              <p onClick={() => openProject(selectedTask)} className="flex justify-between"><strong>Project :</strong> <span className="text-blue-600">{selectedTask[5]}</span></p>
+              <p
+                onClick={() => openProject(selectedTask)}
+                className="flex justify-between"
+              >
+                <strong>Project :</strong>{" "}
+                <span className="text-blue-600">{selectedTask[5]}</span>
+              </p>
               <hr />
-              <p className="flex justify-between"><strong>Assignee :</strong> {selectedTask[4]}</p>
+              <p className="flex justify-between">
+                <strong>Assignee :</strong> {selectedTask[4]}
+              </p>
               <hr />
-              <p className="flex justify-between"><strong>Assigned by :</strong> {selectedTask[4]}</p>
+              <p className="flex justify-between">
+                <strong>Assigned by :</strong> {selectedTask[4]}
+              </p>
               <hr />
-              <p className="flex justify-between"><strong>Due date & time :</strong> {selectedTask[2]}, {selectedTask[3]}</p>
+              <p className="flex justify-between">
+                <strong>Due date & time :</strong> {selectedTask[2]},{" "}
+                {selectedTask[3]}
+              </p>
               <hr />
             </div>
             <div className="flex justify-between mt-6">
@@ -763,7 +1012,9 @@ const Dashboard: React.FC = () => {
                 Delete
               </button>
               <button
-                onClick={() => handleMarkAsCompleted("Completed", selectedTask[0])}
+                onClick={() =>
+                  handleMarkAsCompleted("Completed", selectedTask[0])
+                }
                 className="flex items-center bg-gray-200 text-gray-700 px-4 py-2 !rounded-lg hover:bg-gray-300 transition-colors"
               >
                 <span className="mr-2">✔</span> Mark As Completed
