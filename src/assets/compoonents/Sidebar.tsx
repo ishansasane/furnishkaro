@@ -224,12 +224,27 @@ function SidebarContent({
           path="/reports"
           setMobileMenuOpen={setMobileMenuOpen}
         />
-        <SidebarItem
+        {/* <SidebarItem
           icon={<Settings size={20} />}
           text="Settings"
           path="/settings"
           setMobileMenuOpen={setMobileMenuOpen}
-        />
+        /> */}
+        <a
+          href="http://sheeladecor.free.nf/user-management.php"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            padding: "10px",
+            textDecoration: "none",
+            color: "inherit",
+          }}
+        >
+          <Settings size={20} style={{ marginRight: "8px" }} />
+          <span>Settings</span>
+        </a>
       </ul>
 
       {/* User Profile Section */}
