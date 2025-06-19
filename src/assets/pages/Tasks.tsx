@@ -1,7 +1,13 @@
 import { useState, useEffect } from "react";
 import { Edit, Trash2, Plus, MoreVertical } from "lucide-react";
 import TaskDialog from "../compoonents/TaskDialog";
-import { setTasks, setProjects, setProducts, setTaskDialogOpen, setProjectFlag } from "../Redux/dataSlice";
+import {
+  setTasks,
+  setProjects,
+  setProducts,
+  setTaskDialogOpen,
+  setProjectFlag,
+} from "../Redux/dataSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,11 +23,13 @@ interface Task {
 }
 
 const fetchTaskData = async () => {
-  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks");
+  const response = await fetch(
+    "https://sheeladecor.netlify.app/.netlify/functions/server/gettasks"
+  );
   const data = await response.json();
-  if(data.body){
+  if (data.body) {
     return data.body;
-  }else{
+  } else {
     return [];
   }
 };
@@ -41,17 +49,22 @@ export default function Tasks() {
   const dispatch = useDispatch();
   const taskData = useSelector((state: RootState) => state.data.tasks);
   const projects = useSelector((state: RootState) => state.data.projects);
-  const taskDialogOpen = useSelector((state: RootState) => state.data.taskDialogOpen);
+  const taskDialogOpen = useSelector(
+    (state: RootState) => state.data.taskDialogOpen
+  );
 
   const deleteTask = async (name: string) => {
-    await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletetask", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({ title: name }),
-    });
+    await fetch(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/deletetask",
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ title: name }),
+      }
+    );
 
     setdeleted(!deleted);
     setrefresh(true);
@@ -59,9 +72,12 @@ export default function Tasks() {
 
   const fetchProjectData = async () => {
     try {
-      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata", {
-        credentials: "include",
-      });
+      const response = await fetch(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
+        {
+          credentials: "include",
+        }
+      );
 
       const data = await response.json();
       const projects = data.body.map((row, index) => {
@@ -86,8 +102,20 @@ export default function Tasks() {
           allData: parseSafely(row[9], []),
           projectDate: row[10] || "",
           additionalRequests: row[11],
-          interiorArray: typeof row[12] === "string" ? row[12].replace(/^"(.*)"$/, "$1").split(",").map(str => str.trim()) : [],
-          salesAssociateArray: typeof row[13] === "string" ? row[13].replace(/^"(.*)"$/, "$1").split(",").map(str => str.trim()) : []
+          interiorArray:
+            typeof row[12] === "string"
+              ? row[12]
+                  .replace(/^"(.*)"$/, "$1")
+                  .split(",")
+                  .map((str) => str.trim())
+              : [],
+          salesAssociateArray:
+            typeof row[13] === "string"
+              ? row[13]
+                  .replace(/^"(.*)"$/, "$1")
+                  .split(",")
+                  .map((str) => str.trim())
+              : [],
         };
       });
 
@@ -98,95 +126,112 @@ export default function Tasks() {
     }
   };
 
-useEffect(() => {
-  const fetchAndSetTasks = async () => {
-    try {
-      const cached = localStorage.getItem("taskData");
-      const now = Date.now();
+  useEffect(() => {
+    const fetchAndSetTasks = async () => {
+      try {
+        const cached = localStorage.getItem("taskData");
+        const now = Date.now();
 
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        const timeDiff = now - parsed.time;
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          const timeDiff = now - parsed.time;
 
-        if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
-          const sortedTasks = parsed.data.sort((a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime());
-          dispatch(setTasks(sortedTasks));
-          settasks(sortedTasks);
-          return;
+          if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
+            const sortedTasks = parsed.data.sort(
+              (a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime()
+            );
+            dispatch(setTasks(sortedTasks));
+            settasks(sortedTasks);
+            return;
+          }
         }
-      }
 
-      const data = await fetchTaskData();
-      const sorted = data.sort((a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime());
-      dispatch(setTasks(sorted));
-      settasks(sorted);
-      localStorage.setItem("taskData", JSON.stringify({ data: sorted, time: now }));
-    } catch (error) {
-      console.error("Failed to fetch tasks:", error);
-    }
-  };
+        const data = await fetchTaskData();
+        const sorted = data.sort(
+          (a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime()
+        );
+        dispatch(setTasks(sorted));
+        settasks(sorted);
+        localStorage.setItem(
+          "taskData",
+          JSON.stringify({ data: sorted, time: now })
+        );
+      } catch (error) {
+        console.error("Failed to fetch tasks:", error);
+      }
+    };
 
     fetchAndSetTasks();
-}, [dispatch, refresh]);
+  }, [dispatch, refresh]);
 
-useEffect(() => {
-  const fetchAndSetProjects = async () => {
-    try {
-      const cached = localStorage.getItem("projectData");
-      const now = Date.now();
+  useEffect(() => {
+    const fetchAndSetProjects = async () => {
+      try {
+        const cached = localStorage.getItem("projectData");
+        const now = Date.now();
 
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        const timeDiff = now - parsed.time;
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          const timeDiff = now - parsed.time;
 
-        if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
-          dispatch(setProjects(parsed.data));
-          setProjectData(parsed.data);
-          return;
+          if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
+            dispatch(setProjects(parsed.data));
+            setProjectData(parsed.data);
+            return;
+          }
         }
+
+        const data = await fetchProjectData();
+        dispatch(setProjects(data));
+        setProjectData(data);
+        localStorage.setItem(
+          "projectData",
+          JSON.stringify({ data, time: now })
+        );
+      } catch (error) {
+        console.error("Failed to fetch projects:", error);
       }
+    };
 
-      const data = await fetchProjectData();
-      dispatch(setProjects(data));
-      setProjectData(data);
-      localStorage.setItem("projectData", JSON.stringify({ data, time: now }));
-    } catch (error) {
-      console.error("Failed to fetch projects:", error);
+    if (projectData.length === 0) {
+      if (projects.length === 0) fetchAndSetProjects();
+      else setProjectData(projects);
     }
-  };
+  }, [dispatch, projects]);
 
-  if (projectData.length === 0) {
-    if (projects.length === 0) fetchAndSetProjects();
-    else setProjectData(projects);
-  }
-}, [dispatch, projects]);
+  // Refresh hook
+  useEffect(() => {
+    const refreshData = async () => {
+      try {
+        const taskData = await fetchTaskData();
+        const sortedTasks = taskData.sort(
+          (a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime()
+        );
+        dispatch(setTasks(sortedTasks));
+        settasks(sortedTasks);
+        localStorage.setItem(
+          "taskData",
+          JSON.stringify({ data: sortedTasks, time: Date.now() })
+        );
 
-// Refresh hook
-useEffect(() => {
-  const refreshData = async () => {
-    try {
-      const taskData = await fetchTaskData();
-      const sortedTasks = taskData.sort((a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime());
-      dispatch(setTasks(sortedTasks));
-      settasks(sortedTasks);
-      localStorage.setItem("taskData", JSON.stringify({ data: sortedTasks, time: Date.now() }));
+        const projectData = await fetchProjectData();
+        dispatch(setProjects(projectData));
+        setProjectData(projectData);
+        localStorage.setItem(
+          "projectData",
+          JSON.stringify({ data: projectData, time: Date.now() })
+        );
 
-      const projectData = await fetchProjectData();
-      dispatch(setProjects(projectData));
-      setProjectData(projectData);
-      localStorage.setItem("projectData", JSON.stringify({ data: projectData, time: Date.now() }));
+        setrefresh(false);
+      } catch (error) {
+        console.error("Error refreshing data:", error);
+      }
+    };
 
-      setrefresh(false);
-    } catch (error) {
-      console.error("Error refreshing data:", error);
+    if (refresh) {
+      refreshData();
     }
-  };
-
-  if (refresh) {
-    refreshData();
-  }
-}, [refresh]);
-
+  }, [refresh]);
 
   const filterOptions = [
     { label: "All Tasks", value: "All Tasks" },
@@ -213,7 +258,9 @@ useEffect(() => {
           <button
             key={option.value}
             className={`px-4 py-2 rounded transition ${
-              filter === option.value ? "bg-blue-600 text-white" : "bg-gray-200 hover:bg-gray-300"
+              filter === option.value
+                ? "bg-blue-600 text-white"
+                : "bg-gray-200 hover:bg-gray-300"
             }`}
             onClick={() => setFilter(option.value)}
           >
@@ -242,56 +289,63 @@ useEffect(() => {
             </tr>
           </thead>
           <tbody>
-            {tasks != null && tasks.map((task, index) =>
-              task[7] === `${filter}` || filter === "All Tasks" ? (
-                <tr key={index} className="hover:bg-sky-50">
-                  <td className="px-4 py-2">{task[0]}</td>
-                  <td className={`font-bold px-4 ${
-                    task[6] === "High" ? "text-red-600" :
-                    task[6] === "Moderate" ? "text-yellow-400" :
-                    "text-green-600"
-                  }`}>
-                    {task[6]}
-                  </td>
-                  <td className="px-4 py-2">{task[5]}</td>
-                  <td className="px-4 py-2">{task[2]}</td>
-                  <td className="px-4 py-2">{task[3]}</td>
-                  <td className="px-4 py-2">{task[4]}</td>
-                  <td className="px-4 py-2">{task[7]}</td>
-                  <td className="px-4 py-2 relative">
-                    <button
-                      className="p-2 hover:bg-gray-200 rounded-full"
-                      onClick={() => setOpenDropdown(openDropdown === index ? null : index)}
+            {tasks != null &&
+              tasks.map((task, index) =>
+                task[7] === `${filter}` || filter === "All Tasks" ? (
+                  <tr key={index} className="hover:bg-sky-50">
+                    <td className="px-4 py-2">{task[0]}</td>
+                    <td
+                      className={`font-bold px-4 ${
+                        task[6] === "High"
+                          ? "text-red-600"
+                          : task[6] === "Moderate"
+                          ? "text-yellow-400"
+                          : "text-green-600"
+                      }`}
                     >
-                      <MoreVertical size={18} />
-                    </button>
-                    {openDropdown === index && (
-                      <div className="absolute w-32 bg-white shadow-md rounded-md z-[50] border">
-                        <button
-                          className="w-full text-left px-3 py-2 hover:bg-gray-100 flex items-center gap-2"
-                          onClick={() => {
-                            setOpenDropdown(null);
-                            setDialogOpen(true);
-                            setediting(task);
-                          }}
-                        >
-                          <Edit size={16} /> Edit
-                        </button>
-                        <button
-                          className="w-full text-left px-3 py-2 hover:bg-red-100 text-red-600 flex items-center gap-2"
-                          onClick={() => {
-                            deleteTask(task[0]);
-                            setOpenDropdown(null);
-                          }}
-                        >
-                          <Trash2 size={16} /> Delete
-                        </button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ) : null
-            )}
+                      {task[6]}
+                    </td>
+                    <td className="px-4 py-2">{task[5]}</td>
+                    <td className="px-4 py-2">{task[2]}</td>
+                    <td className="px-4 py-2">{task[3]}</td>
+                    <td className="px-4 py-2">{task[4]}</td>
+                    <td className="px-4 py-2">{task[7]}</td>
+                    <td className="px-4 py-2 relative">
+                      <button
+                        className="p-2 hover:bg-gray-200 rounded-full"
+                        onClick={() =>
+                          setOpenDropdown(openDropdown === index ? null : index)
+                        }
+                      >
+                        <MoreVertical size={18} />
+                      </button>
+                      {openDropdown === index && (
+                        <div className="absolute w-32 bg-white shadow-md rounded-md z-[50] border">
+                          <button
+                            className="w-full text-left px-3 py-2 hover:bg-gray-100 flex items-center gap-2"
+                            onClick={() => {
+                              setOpenDropdown(null);
+                              setDialogOpen(true);
+                              setediting(task);
+                            }}
+                          >
+                            <Edit size={16} /> Edit
+                          </button>
+                          <button
+                            className="w-full text-left px-3 py-2 hover:bg-red-100 text-red-600 flex items-center gap-2"
+                            onClick={() => {
+                              deleteTask(task[0]);
+                              setOpenDropdown(null);
+                            }}
+                          >
+                            <Trash2 size={16} /> Delete
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ) : null
+              )}
           </tbody>
         </table>
       </div>
