@@ -13,6 +13,14 @@ import {
   ChevronDown,
   Menu,
   X,
+  Box,
+  Layers,
+  Tag,
+  BookOpen,
+  Home,
+  Scissors,
+  UserCircle,
+  Store,
 } from "lucide-react";
 import {
   createContext,
@@ -38,7 +46,15 @@ export default function Sidebar() {
   const [mastersOpen, setMastersOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const toggleSidebar = () => setExpanded((prev) => !prev);
+  const toggleSidebar = () => {
+    setExpanded((prev) => {
+      // Close masters when collapsing if they were open
+      if (prev && !expanded && mastersOpen) {
+        setMastersOpen(false);
+      }
+      return !prev;
+    });
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -55,7 +71,7 @@ export default function Sidebar() {
       {/* Desktop Sidebar */}
       <nav
         className={`h-full flex-col hidden md:flex transition-all duration-300 ease-in-out ${
-          expanded ? "w-64" : "w-24"
+          expanded ? "w-64" : "w-20"
         }`}
       >
         <div className="p-4 pb-2 flex justify-between items-center">
@@ -135,11 +151,34 @@ function SidebarContent({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const { expanded } = context!;
 
-  // ✅ Use direct values from localStorage
   const user = {
     name: localStorage.getItem("auth_name") || "User",
     email: localStorage.getItem("auth_email") || "user@example.com",
   };
+
+  // Master items with icons
+  const masterItems = [
+    { text: "Products", path: "/masters/items", icon: <Box size={18} /> },
+    {
+      text: "Product Groups",
+      path: "/masters/product-groups",
+      icon: <Layers size={18} />,
+    },
+    { text: "Brands", path: "/masters/brands", icon: <Tag size={18} /> },
+    {
+      text: "Catalogues",
+      path: "/masters/catalogues",
+      icon: <BookOpen size={18} />,
+    },
+    { text: "Interiors", path: "/masters/interiors", icon: <Home size={18} /> },
+    { text: "Tailors", path: "/masters/tailors", icon: <Scissors size={18} /> },
+    {
+      text: "Sales Associate",
+      path: "/masters/sales-associate",
+      icon: <UserCircle size={18} />,
+    },
+    { text: "Stores", path: "/masters/stores", icon: <Store size={18} /> },
+  ];
 
   return (
     <>
@@ -177,11 +216,13 @@ function SidebarContent({
             >
               Masters
             </span>
-            <ChevronDown
-              className={`ml-auto transform transition-transform duration-300 ${
-                mastersOpen ? "rotate-180" : "rotate-0"
-              }`}
-            />
+            {expanded && (
+              <ChevronDown
+                className={`ml-auto transform transition-transform duration-300 ${
+                  mastersOpen ? "rotate-180" : "rotate-0"
+                }`}
+              />
+            )}
           </button>
 
           <div
@@ -189,23 +230,16 @@ function SidebarContent({
               mastersOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
             }`}
           >
-            <ul className="ml-8 mt-1 space-y-1">
-              {[
-                ["Products", "/masters/items"],
-                ["Product Groups", "/masters/product-groups"],
-                ["Brands", "/masters/brands"],
-                ["Catalogues", "/masters/catalogues"],
-                ["Interiors", "/masters/interiors"],
-                ["Tailors", "/masters/tailors"],
-                ["Sales Associate", "/masters/sales-associate"],
-                ["Stores", "/masters/stores"],
-              ].map(([text, path]) => (
+            <ul className={`${expanded ? "ml-8" : "ml-0"} mt-1 space-y-1`}>
+              {masterItems.map(({ text, path, icon }) => (
                 <SidebarItem
                   key={path}
-                  icon={null}
+                  icon={icon}
                   text={text}
                   path={path}
                   setMobileMenuOpen={setMobileMenuOpen}
+                  isChildItem
+                  showIconOnly={!expanded}
                 />
               ))}
             </ul>
@@ -224,27 +258,13 @@ function SidebarContent({
           path="/reports"
           setMobileMenuOpen={setMobileMenuOpen}
         />
-        {/* <SidebarItem
+        <SidebarItem
           icon={<Settings size={20} />}
           text="Settings"
-          path="/settings"
+          path="http://sheeladecor.free.nf/user-management.php"
+          isExternal
           setMobileMenuOpen={setMobileMenuOpen}
-        /> */}
-        <a
-          href="http://sheeladecor.free.nf/user-management.php"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            padding: "10px",
-            textDecoration: "none",
-            color: "inherit",
-          }}
-        >
-          <Settings size={20} style={{ marginRight: "8px" }} />
-          <span>Settings</span>
-        </a>
+        />
       </ul>
 
       {/* User Profile Section */}
@@ -294,6 +314,9 @@ interface SidebarItemProps {
   text: string;
   path: string;
   setMobileMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isChildItem?: boolean;
+  isExternal?: boolean;
+  showIconOnly?: boolean;
 }
 
 function SidebarItem({
@@ -301,31 +324,28 @@ function SidebarItem({
   text,
   path,
   setMobileMenuOpen,
+  isChildItem = false,
+  isExternal = false,
+  showIconOnly = false,
 }: SidebarItemProps) {
   const context = useContext(SidebarContext);
   if (!context) return null;
   const { expanded } = context;
   const location = useLocation();
 
-  return (
-    <Link
-      to={path}
-      onClick={() => {
-        if (window.innerWidth < 768) {
-          setMobileMenuOpen(false);
-        }
-      }}
-      className="block !no-underline hover:!no-underline"
+  const content = (
+    <li
+      className={`relative flex items-center py-2 px-3 my-1 font-medium rounded-md cursor-pointer transition-all group
+      ${
+        location.pathname === path
+          ? "bg-indigo-100 text-indigo-800"
+          : "hover:bg-gray-200 text-gray-600"
+      } ${isChildItem ? (expanded ? "pl-8" : "pl-3") : ""}`}
     >
-      <li
-        className={`relative flex items-center py-2 px-3 my-1 font-medium rounded-md cursor-pointer transition-all group
-        ${
-          location.pathname === path
-            ? "bg-indigo-100 text-indigo-800"
-            : "hover:bg-gray-200 text-gray-600"
-        }`}
-      >
-        {icon && icon}
+      {icon && (
+        <span className={isChildItem && expanded ? "mr-2" : ""}>{icon}</span>
+      )}
+      {(!showIconOnly || !isChildItem) && (
         <span
           className={`overflow-hidden transition-all ${
             expanded ? "ml-3 w-40" : "w-0"
@@ -333,7 +353,35 @@ function SidebarItem({
         >
           {expanded && text}
         </span>
-      </li>
+      )}
+    </li>
+  );
+
+  return isExternal ? (
+    <a
+      href={path}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block !no-underline hover:!no-underline"
+      onClick={() => {
+        if (window.innerWidth < 768) {
+          setMobileMenuOpen(false);
+        }
+      }}
+    >
+      {content}
+    </a>
+  ) : (
+    <Link
+      to={path}
+      className="block !no-underline hover:!no-underline"
+      onClick={() => {
+        if (window.innerWidth < 768) {
+          setMobileMenuOpen(false);
+        }
+      }}
+    >
+      {content}
     </Link>
   );
 }
