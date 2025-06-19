@@ -6,16 +6,8 @@ import InquiryCard from "../compoonents/InquiryCard.tsx"; // Corrected import pa
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store.ts";
-<<<<<<< HEAD
 import { setTasks, setProjects, setPaymentData, setProjectFlag, setInquiryData } from "../Redux/dataSlice.ts";
-=======
-import {
-  setTasks,
-  setProjects,
-  setPaymentData,
-  setProjectFlag,
-} from "../Redux/dataSlice.ts";
->>>>>>> 23dabf25e970b15d323d36efeb8241718d848a27
+
 import TaskDialog from "../compoonents/TaskDialog.tsx";
 import { AnimatePresence, motion } from "framer-motion";
 import EditProjects from "./EditProjects.tsx";
@@ -53,7 +45,6 @@ const Dashboard: React.FC = () => {
     comments: "",
     inquiryDate: "",
     followUpDate: "",
-<<<<<<< HEAD
     customer : ""
   });
 
@@ -82,32 +73,6 @@ const Dashboard: React.FC = () => {
     }
   }
 
-=======
-  });
-  const [inquiries, setInquiries] = useState([
-    {
-      project: "E-commerce Website",
-      comments: "Client wants a Shopify integration.",
-      inquiryDate: "Feb 15, 2025",
-      followUpDate: "Feb 28, 2025",
-      status: "New Inquiry",
-    },
-    {
-      project: "Mobile App for Gym",
-      comments: "Needs a booking system & payment gateway.",
-      inquiryDate: "Feb 20, 2025",
-      followUpDate: "March 5, 2025",
-      status: "New Inquiry",
-    },
-    {
-      project: "Real Estate CRM",
-      comments: "Looking for a cloud-based solution.",
-      inquiryDate: "Feb 25, 2025",
-      followUpDate: "March 10, 2025",
-      status: "New Inquiry",
-    },
-  ]);
->>>>>>> 23dabf25e970b15d323d36efeb8241718d848a27
   const dispatch = useDispatch();
   const tasks = useSelector((state: RootState) => state.data.tasks);
   const [filteredTasks, setFilteredTasks] = useState([]);
@@ -572,8 +537,6 @@ const Dashboard: React.FC = () => {
       followUpDate: "",
     });
   };
-
-<<<<<<< HEAD
   const handleDeleteInquiry = async (projectName) => {
       const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deleteInquiry", {
         method : "POST",
@@ -633,44 +596,6 @@ const Dashboard: React.FC = () => {
       }else{
         alert("Error");
       }
-=======
-  const handleDeleteInquiry = (inquiry) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this inquiry?"
-    );
-    if (!confirmDelete) return;
-
-    setInquiries(
-      inquiries.filter(
-        (i) =>
-          i.project !== inquiry.project || i.inquiryDate !== inquiry.inquiryDate
-      )
-    );
-    setInquiryDialogOpen(false);
-    alert("Inquiry deleted");
-  };
-
-  const handleMarkAsApproved = (inquiry) => {
-    setInquiries(
-      inquiries.map((i) =>
-        i.project === inquiry.project && i.inquiryDate === inquiry.inquiryDate
-          ? { ...i, status: "Approved" }
-          : i
-      )
-    );
-    setInquiryDialogOpen(false);
-    alert("Inquiry marked as approved");
-  };
-
-  const handleStatusChange = (inquiry, newStatus: string) => {
-    setInquiries(
-      inquiries.map((i) =>
-        i.project === inquiry.project && i.inquiryDate === inquiry.inquiryDate
-          ? { ...i, status: newStatus }
-          : i
-      )
-    );
->>>>>>> 23dabf25e970b15d323d36efeb8241718d848a27
   };
 
   return (
@@ -711,41 +636,6 @@ const Dashboard: React.FC = () => {
           />
         </div>
       </div>
-
-<<<<<<< HEAD
-      <div className={`${flag ? "hidden" : ""} grid grid-cols-1 lg:grid-cols-3 gap-2 mt-2`}>
-        <div className="bg-white flex flex-wrap flex-col shadow-md rounded-xl p-6">
-          <p className="md:text-[1.7vw] font-semibold mb-4 text-gray-800"> Project Deadlines</p>
-          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 gap-4">
-  {projects && projects.map((project, index) => (
-    <div
-      key={index}
-      onClick={() => {
-        setSendProject(project);
-        setIndex(index);
-        setTax(project.totalTax);
-        setAmount(project.totalAmount);
-        setProjectDiscount(project.discount);
-        setFlag(true);
-      }}
-    >
-      <DeadlineCard
-        setFlag={setFlag}
-        setTax={setTax}
-        setProjectDiscount={setProjectDiscount}
-        setAmount={setAmount}
-        setSendProject={setSendProject}
-        index={index}
-        setIndex={setIndex}
-        project={project}
-        projectName={project.projectName}
-        date={project.projectDate}
-      />
-    </div>
-  ))}
-</div>
-
-=======
       <div
         className={`${
           flag ? "hidden" : ""
@@ -788,7 +678,6 @@ const Dashboard: React.FC = () => {
                 </div>
               ))}
           </div>
->>>>>>> 23dabf25e970b15d323d36efeb8241718d848a27
         </div>
 
         <div className="bg-white shadow-md rounded-xl p-3 col-span-2">
@@ -830,14 +719,6 @@ const Dashboard: React.FC = () => {
               <span className="absolute inset-0 scale-0 rounded-full bg-white opacity-20 group-hover:scale-100 transition-transform duration-500"></span>
             </button>
           </div>
-<<<<<<< HEAD
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-1 overflow-y-auto max-h-[90vh] pr-2">
-            {filteredTasks && filteredTasks.map((task, index) => (
-              <div key={index} onClick={() => { setSelectedTask(task); setTaskDialogOpen(true); }}>
-                <TaskCard taskData={task} />
-              </div>
-            ))}
-=======
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto max-h-[90vh] pr-2">
             {filteredTasks &&
               filteredTasks.map((task, index) => (
@@ -851,7 +732,6 @@ const Dashboard: React.FC = () => {
                   <TaskCard taskData={task} />
                 </div>
               ))}
->>>>>>> 23dabf25e970b15d323d36efeb8241718d848a27
           </div>
         </div>
       </div>
@@ -910,15 +790,10 @@ const Dashboard: React.FC = () => {
                 >
                   ✕
                 </button>
-<<<<<<< HEAD
-                <h2 className="text-xl font-bold mb-4 text-gray-800">Add Inquiry</h2>
-                <form className="space-y-4">
-=======
                 <h2 className="relative text-2xl font-bold mb-6 text-gray-800 after:absolute after:bottom-[-8px] after:left-0 after:w-12 after:h-1 after:bg-blue-500 after:rounded-full">
                   Add Inquiry
                 </h2>
                 <form onSubmit={handleInquirySubmit} className="space-y-4">
->>>>>>> 23dabf25e970b15d323d36efeb8241718d848a27
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
                       Project
@@ -938,7 +813,6 @@ const Dashboard: React.FC = () => {
                     />
                   </div>
                   <div>
-<<<<<<< HEAD
                     <label className="block text-sm font-medium text-gray-700">Customer Name</label>
                     <input
                       type="text"
@@ -951,11 +825,6 @@ const Dashboard: React.FC = () => {
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Comments</label>
-=======
-                    <label className="block text-sm font-medium text-gray-700">
-                      Comments
-                    </label>
->>>>>>> 23dabf25e970b15d323d36efeb8241718d848a27
                     <textarea
                       value={inquiryForm.comments}
                       onChange={(e) =>
@@ -1033,7 +902,6 @@ const Dashboard: React.FC = () => {
               >
                 ✕
               </button>
-<<<<<<< HEAD
               <h2 className="text-xl font-bold mb-2 text-gray-800"> {selectedInquiry[0]}</h2>
               <div className="space-y-3 p-3 text-gray-700 text-sm">
                 <p className="flex justify-between">
@@ -1050,44 +918,6 @@ const Dashboard: React.FC = () => {
                 <p className="flex justify-between"><strong>Inquiry Date:</strong> {selectedInquiry[2]}</p>
                 <hr />
                 <p className="flex justify-between"><strong>Follow-Up Date:</strong> {selectedInquiry[3]}</p>
-=======
-              <h2 className="text-xl font-bold mb-2 text-gray-800">
-                📩 {selectedInquiry.project}
-              </h2>
-              <div className="space-y-3 p-3 text-gray-700 text-sm">
-                <p className="flex justify-between">
-                  <strong>Status:</strong>
-                  <span
-                    className={`inline-block px-2 py-1 rounded text-white ${
-                      selectedInquiry.status.toLowerCase() === "approved"
-                        ? "bg-green-500"
-                        : selectedInquiry.status.toLowerCase() === "new inquiry"
-                        ? "bg-blue-500"
-                        : selectedInquiry.status.toLowerCase() === "in progress"
-                        ? "bg-yellow-500"
-                        : selectedInquiry.status.toLowerCase() ===
-                          "convert to project"
-                        ? "bg-purple-500"
-                        : "bg-red-500"
-                    }`}
-                  >
-                    {selectedInquiry.status}
-                  </span>
-                </p>
-                <hr />
-                <p className="flex justify-between">
-                  <strong>Comments:</strong> {selectedInquiry.comments}
-                </p>
-                <hr />
-                <p className="flex justify-between">
-                  <strong>Inquiry Date:</strong> {selectedInquiry.inquiryDate}
-                </p>
-                <hr />
-                <p className="flex justify-between">
-                  <strong>Follow-Up Date:</strong>{" "}
-                  {selectedInquiry.followUpDate}
-                </p>
->>>>>>> 23dabf25e970b15d323d36efeb8241718d848a27
                 <hr />
               </div>
               <div className="flex justify-between mt-6">
@@ -1115,16 +945,13 @@ const Dashboard: React.FC = () => {
         }`}
       >
         <div className="flex justify-between items-center">
-<<<<<<< HEAD
-          <h2 className="text-xl font-semibold text-gray-800 mb-4"> Inquiries</h2>
-=======
+
           <h2
             className="text-xl font-bold text-gray-800 mb-4"
             style={{ fontFamily: "Poppins, sans-serif" }}
           >
             Inquiries
           </h2>
->>>>>>> 23dabf25e970b15d323d36efeb8241718d848a27
           <button
             style={{ borderRadius: "6px" }}
             className="mb-2 bg-sky-600 text-white hover:bg-sky-700 px-2 md:text-[1.7vw] py-1"
@@ -1137,7 +964,6 @@ const Dashboard: React.FC = () => {
           {inquiries.map((inquiry, index) => (
             <div key={index}>
               <InquiryCard
-<<<<<<< HEAD
                 project={inquiry[0]}
                 comments={inquiry[1]}
                 inquiryDate={inquiry[2]}
@@ -1146,20 +972,6 @@ const Dashboard: React.FC = () => {
                 customer={inquiry[5]}
                 handlestatuschange={handleStatusChange}
                 onCardClick={() => { setSelectedInquiry(inquiry); setInquiryDialogOpen(true); }}
-=======
-                project={inquiry.project}
-                comments={inquiry.comments}
-                inquiryDate={inquiry.inquiryDate}
-                followUpDate={inquiry.followUpDate}
-                status={inquiry.status}
-                onStatusChange={(newStatus) =>
-                  handleStatusChange(inquiry, newStatus)
-                }
-                onCardClick={() => {
-                  setSelectedInquiry(inquiry);
-                  setInquiryDialogOpen(true);
-                }}
->>>>>>> 23dabf25e970b15d323d36efeb8241718d848a27
               />
             </div>
           ))}
