@@ -76,7 +76,7 @@ export default function Sidebar() {
       >
         <div className="p-4 pb-2 flex justify-between items-center">
           <img
-            src="https://img.logoipsum.com/243.svg"
+            src="https://sheeladecor.free.nf/logo/sheelaDecore.png"
             className={`overflow-hidden transition-all duration-300 ${
               expanded ? "w-32" : "w-0"
             }`}
