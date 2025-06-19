@@ -73,11 +73,11 @@ const TaskCard = ({ taskData }) => {
         </button>
       )}
 
-      {/* Main card content */}
-      <div className="p-5 pl-6">
+      {/* Main card content - adjusted padding for reduced height */}
+      <div className="p-4 pl-5">
         {/* Task title with subtle hover effect */}
         <h3
-          className={`text-lg font-semibold text-gray-900 mb-2 transition-all duration-300 ${
+          className={`text-md font-semibold text-gray-900 mb-1 transition-all duration-300 ${
             isHovered ? "translate-x-1" : ""
           }`}
         >
@@ -85,9 +85,9 @@ const TaskCard = ({ taskData }) => {
         </h3>
 
         {/* Priority tag with animated underline */}
-        <div className="relative inline-block mb-4">
+        <div className="relative inline-block mb-3">
           <span
-            className={`text-xs px-3 py-1 rounded-full ${
+            className={`text-xs px-2 py-1 rounded-full ${
               priorityStyles[taskData[6]]
                 ? `bg-gradient-to-r ${priorityStyles[taskData[6]]} text-white`
                 : "bg-gray-100 text-gray-800"
@@ -104,29 +104,29 @@ const TaskCard = ({ taskData }) => {
           ></div>
         </div>
 
-        {/* Task description with elegant fade */}
-        <div className="relative mb-5">
-          <p className="text-gray-600 text-sm leading-relaxed line-clamp-3 transition-all duration-300">
+        {/* Task description with shorter height */}
+        <div className="relative mb-3 max-h-12 overflow-hidden">
+          <p className="text-gray-600 text-sm leading-tight line-clamp-2">
             {taskData[5]}
           </p>
-          <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-white to-transparent"></div>
+          <div className="absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-white to-transparent"></div>
         </div>
 
-        {/* Metadata with elegant layout */}
-        <div className="grid grid-cols-2 gap-4 mb-5">
+        {/* Compact metadata grid */}
+        <div className="grid grid-cols-2 gap-3 mb-3">
           <div>
-            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">
+            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-0.5">
               Due Date
             </p>
             <p
-              className={`flex items-center text-sm font-medium ${
+              className={`flex items-center text-xs font-medium ${
                 isOverdue ? "text-red-500" : "text-gray-700"
               }`}
             >
               {isOverdue && (
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 mr-1"
+                  className="h-3 w-3 mr-1"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -143,26 +143,26 @@ const TaskCard = ({ taskData }) => {
             </p>
           </div>
           <div>
-            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">
+            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-0.5">
               Assigned To
             </p>
             <div className="flex items-center">
-              <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-xs font-bold mr-2">
+              <div className="w-5 h-5 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-xs font-bold mr-1">
                 {taskData[4].charAt(0)}
               </div>
-              <p className="text-sm text-gray-700">{taskData[4]}</p>
+              <p className="text-xs text-gray-700 truncate">{taskData[4]}</p>
             </div>
           </div>
         </div>
 
-        {/* Status with progress indicator */}
+        {/* Compact status with progress indicator */}
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-1">
+            <p className="text-xs text-gray-500 font-medium uppercase tracking-wider mb-0.5">
               Status
             </p>
             <div
-              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+              className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                 statusStyles[taskData[7]]
               }`}
             >
@@ -170,8 +170,8 @@ const TaskCard = ({ taskData }) => {
             </div>
           </div>
 
-          {/* Animated progress circle */}
-          <div className="relative w-10 h-10">
+          {/* Smaller progress circle */}
+          <div className="relative w-8 h-8">
             <svg className="w-full h-full" viewBox="0 0 36 36">
               <path
                 d="M18 2.0845
@@ -204,7 +204,7 @@ const TaskCard = ({ taskData }) => {
                 className="transition-all duration-1000 ease-out"
               />
             </svg>
-            <div className="absolute inset-0 flex items-center justify-center text-xs font-medium">
+            <div className="absolute inset-0 flex items-center justify-center text-[10px] font-medium">
               {taskData[7] === "Completed"
                 ? "✓"
                 : taskData[7] === "In Progress"
