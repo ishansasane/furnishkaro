@@ -53,6 +53,7 @@ export default function Projects() {
   const [sendProject, setSendProject] = useState([]);
   const [taskData, setTaskData] = useState([]);
   const [Received, setReceived] = useState(0);
+  const [discountType, setDiscountType] = useState("cash");
 
   const dispatch = useDispatch();
   const projectData = useSelector((state: RootState) => state.data.projects);
@@ -133,7 +134,8 @@ export default function Projects() {
       tailorsArray: deepClone(parseSafely(row[16], [])),
       projectAddress: row[17],
       date: row[18],
-      grandTotal : row[19]
+      grandTotal : row[19],
+      discountType : row[20]
     }));
 
     return projects;
@@ -512,6 +514,7 @@ export default function Projects() {
                         setValues(index);
                         setIndex(index);
                         setSendProject(project);
+                        setDiscountType(project.discountType);
                         setFlag(true);
                       }} key={index} className="hover:bg-sky-50">
                 <td className="px-4 py-2">{project.projectName}</td>
@@ -537,6 +540,7 @@ export default function Projects() {
                         setValues(index);
                         setIndex(index);
                         setSendProject(project);
+                        setDiscountType(project.discountType);
                         setFlag(true);
                       }}
                       className="border px-2 py-1 rounded-md"
@@ -573,6 +577,8 @@ export default function Projects() {
             setDiscount={setDiscount}
             grandTotal={grandTotal}
             setGrandTotal={setGrandTotal}
+            discountType={discountType}
+            setDiscountType={setDiscountType}
           />
         )}
         {

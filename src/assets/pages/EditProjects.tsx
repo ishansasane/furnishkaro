@@ -19,7 +19,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import TaskDialog from "../compoonents/TaskDialog";
 import { useCallback } from "react";
 
-const EditProjects = ({ grandTotal, setGrandTotal, projectData, index, goBack, projects, Tax, setTax, Amount, setAmount, Discount, setDiscount }) => {
+const EditProjects = ({ discountType, setDiscountType, grandTotal, setGrandTotal, projectData, index, goBack, projects, Tax, setTax, Amount, setAmount, Discount, setDiscount }) => {
 
     const [currentStatus, setCurrentStatus] = useState("Unsent");
     const [navState, setNavState] = useState("Overview");
@@ -679,8 +679,6 @@ const handleheightchange = (mainindex : number, index : number, height) => {
   setSelections(updatedSelection);
 }
 
-const [discountType, setDiscountType] = useState("cash");
-
 const recalculateTotals = (updatedSelections: AreaSelection[], additionalItems: Additional[]) => {
   const selectionTaxArray = updatedSelections.flatMap((selection) =>
     selection.areacollection.flatMap((col) => col.totalTax || [])
@@ -691,18 +689,18 @@ const recalculateTotals = (updatedSelections: AreaSelection[], additionalItems: 
   );
 
   const additionalTaxArray = additionalItems.map((item) =>
-    parseFloat(item.taxAmount.toString()) || 0
+    parseInt(item.taxAmount) || 0
   );
 
   const additionalAmountArray = additionalItems.map((item) =>
-    parseFloat(item.totalAmount.toString()) || 0
+    parseInt(item.totalAmount) || 0
   );
 
-  const totalTax = parseFloat(
+  const totalTax = parseInt(
     [...selectionTaxArray, ...additionalTaxArray].reduce((acc, curr) => acc + curr, 0).toFixed(2)
   );
 
-  const totalAmount = parseFloat(
+  const totalAmount = parseInt(
     [...selectionAmountArray, ...additionalAmountArray].reduce((acc, curr) => acc + curr, 0).toFixed(2)
   );
 
@@ -715,10 +713,10 @@ const handlequantitychange = (mainIndex: number, index: number, quantity: number
   const areaCol = updatedSelections[mainIndex].areacollection[index];
   areaCol.measurement.quantity = quantity;
 
-  const discountRaw = discountType === "cash" ? `${discount}` : `${discount}%`;
+  const discountRaw = discountType === "cash" ? `${Discount}` : `${Discount}%`;
 
   const isPercent = typeof discountRaw === "string" && discountRaw.toString().includes("%");
-  const discountValue = parseFloat(discountRaw.toString().replace("%", "")) || 0;
+  const discountValue = parseInt(discountRaw.toString().replace("%", "")) || 0;
 
   if (areaCol.items !== undefined) {
     if (!areaCol.totalTax) areaCol.totalTax = [];
@@ -727,8 +725,8 @@ const handlequantitychange = (mainIndex: number, index: number, quantity: number
     // Step 1: Calculate total pre-tax amount for flat discount
     let preTaxTotal = 0;
     areaCol.items.forEach((item, i) => {
-      const itemQuantity = parseFloat(areaCol.quantities?.[i]) || 0;
-      const itemRate = parseFloat(item[4]) || 0;
+      const itemQuantity = parseInt(areaCol.quantities?.[i]) || 0;
+      const itemRate = parseInt(item[4]) || 0;
       preTaxTotal += quantity * itemQuantity * itemRate;
     });
 
@@ -740,16 +738,16 @@ const handlequantitychange = (mainIndex: number, index: number, quantity: number
 
     // Step 2: Calculate per item with discount + tax
     const corrected = areaCol.items.map((item, i) => {
-      const itemQuantity = parseFloat(areaCol.quantities?.[i]) || 0;
-      const itemRate = parseFloat(item[4]) || 0;
-      const itemTaxPercent = parseFloat(item[5]) || 0;
+      const itemQuantity = parseInt(areaCol.quantities?.[i]) || 0;
+      const itemRate = parseInt(item[4]) || 0;
+      const itemTaxPercent = parseInt(item[5]) || 0;
 
       const baseAmount = quantity * itemQuantity * itemRate;
       const discountAmount = (baseAmount * effectiveDiscountPercent) / 100;
       const discountedAmount = baseAmount - discountAmount;
 
-      const taxAmount = parseFloat(((discountedAmount * itemTaxPercent) / 100).toFixed(2));
-      const totalAmount = parseFloat((discountedAmount + taxAmount).toFixed(2));
+      const taxAmount = parseInt(((discountedAmount * itemTaxPercent) / 100).toFixed(2));
+      const totalAmount = parseInt((discountedAmount + taxAmount).toFixed(2));
 
       areaCol.totalTax[i] = taxAmount;
       areaCol.totalAmount[i] = totalAmount;
@@ -765,7 +763,7 @@ const handlequantitychange = (mainIndex: number, index: number, quantity: number
   const { totalTax, totalAmount } = recalculateTotals(updatedSelections, additionalItems);
   setTax(totalTax);
   setAmount(totalAmount);
-  setGrandTotal(parseFloat((totalAmount + totalTax).toFixed(2))); // ✅ Grand Total = Amount + Tax
+  setGrandTotal(parseInt((totalAmount).toFixed(2))); // ✅ Grand Total = Amount + Tax
 
 };
 const handleunitchange = (mainindex : number, index : number, unit) => {
@@ -839,10 +837,10 @@ const handleQuantityChange = async (
   if (discountType === "percent") {
     discountAmt = (totalAmount * Discount) / 100;
   } else if (discountType === "cash") {
-    discountAmt = Discount;
+    discountAmt = Discount; 
   }
 
-  const grandTotal = parseFloat((totalAmount + totalTax - discountAmt).toFixed(2)); // if you're tracking this
+  const grandTotal = parseFloat((totalAmount).toFixed(2)); // if you're tracking this
   setGrandTotal(grandTotal)
 };
 
@@ -890,7 +888,7 @@ const handleItemQuantityChange = (i: number, quantity: string) => {
     discountAmt = discount;
   }
 
-  const grandTotal = parseFloat((grandSubtotal + totalTax - discountAmt).toFixed(2));
+  const grandTotal = parseFloat((grandSubtotal).toFixed(2));
   setGrandTotal(grandTotal)
 };
 
@@ -932,7 +930,7 @@ const handleDeleteMiscItem = (itemIndex: number) => {
   }
 
   // Recalculate grand total with updated discount
-  const grandTotal = parseFloat((totalAmount + totalTax - discountAmt).toFixed(2));
+  const grandTotal = parseFloat((totalAmount).toFixed(2));
   setGrandTotal(grandTotal)
 };
 const [itemTax, setItemTax] = useState(0);
@@ -1024,7 +1022,7 @@ const handleItemRateChange = (i: number, rate: string) => {
   const { totalTax, totalAmount } = recalculateTotals(selections, updated);
   setTax(totalTax);
   setAmount(totalAmount);
-  setGrandTotal(parseFloat((totalTax + totalAmount).toFixed(2))); // ✅ Grand total logic added
+  setGrandTotal(parseFloat((totalAmount).toFixed(2))); // ✅ Grand total logic added
 };
 
 
@@ -1065,7 +1063,7 @@ const handleItemTaxChange = (i: number, tax: string) => {
   const { totalTax, totalAmount } = recalculateTotals(selections, updated);
   setTax(totalTax);
   setAmount(totalAmount);
-  setGrandTotal(parseFloat((totalTax + totalAmount).toFixed(2))); // ✅ Grand total logic added
+  setGrandTotal(parseFloat((totalAmount).toFixed(2))); // ✅ Grand total logic added
 };
 const handleItemRemarkChange = (i, remark) => {
   const updated = [...additionalItems];
@@ -1389,21 +1387,22 @@ useEffect(() => {
   }
 
 
-  const handleDiscountChange = (newDiscount , newDiscountType) => {
-  // --- Update discount state (if required) ---
+const handleDiscountChange = (newDiscount, newDiscountType) => {
+  // --- Update discount state ---
   setDiscount(newDiscount);
   setDiscountType(newDiscountType);
 
   // --- Deep clone selections and additionalItems ---
-  const updatedSelections = [...selections];
-  const updatedAdditionalItems = [...additionalItems];
+  const updatedSelections = JSON.parse(JSON.stringify(selections));
+  const updatedAdditionalItems = JSON.parse(JSON.stringify(additionalItems));
 
   // === Recalculate Area-Based Items ===
   updatedSelections.forEach((selection) => {
     selection.areacollection.forEach((areaCol) => {
-      const quantity = areaCol.measurement.quantity || 0;
-      if (!areaCol.totalTax) areaCol.totalTax = [];
-      if (!areaCol.totalAmount) areaCol.totalAmount = [];
+      const quantity = parseFloat(areaCol.measurement.quantity) || 0;
+
+      if (!Array.isArray(areaCol.totalTax)) areaCol.totalTax = [];
+      if (!Array.isArray(areaCol.totalAmount)) areaCol.totalAmount = [];
 
       // Calculate pre-tax total
       let preTaxTotal = 0;
@@ -1415,12 +1414,12 @@ useEffect(() => {
 
       const isPercent = newDiscountType === "percent";
       const effectiveDiscountPercent = isPercent
-        ? newDiscount
+        ? parseFloat(newDiscount)
         : preTaxTotal > 0
-        ? (newDiscount / preTaxTotal) * 100
+        ? (parseFloat(newDiscount) / preTaxTotal) * 100
         : 0;
 
-      // Apply discount to each item
+      // Apply discount and calculate tax
       areaCol.items = areaCol.items?.map((item, i) => {
         const itemQty = parseFloat(areaCol.quantities?.[i]) || 0;
         const itemRate = parseFloat(item[4]) || 0;
@@ -1443,14 +1442,14 @@ useEffect(() => {
 
   // === Recalculate Additional Items ===
   const totalBeforeDiscount = updatedAdditionalItems.reduce(
-    (acc, item) => acc + (item.quantity * item.rate),
+    (acc, item) => acc + item.quantity * item.rate,
     0
   );
 
   const additionalDiscountPercent = newDiscountType === "percent"
-    ? newDiscount
+    ? parseFloat(newDiscount)
     : totalBeforeDiscount > 0
-    ? (newDiscount / totalBeforeDiscount) * 100
+    ? (parseFloat(newDiscount) / totalBeforeDiscount) * 100
     : 0;
 
   updatedAdditionalItems.forEach((item) => {
@@ -1470,7 +1469,7 @@ useEffect(() => {
   const { totalTax, totalAmount } = recalculateTotals(updatedSelections, updatedAdditionalItems);
   setTax(totalTax);
   setAmount(totalAmount);
-  setGrandTotal(parseFloat((totalTax + totalAmount).toFixed(2)));
+  setGrandTotal(parseFloat((totalAmount).toFixed(2)));
 };
 
   const fetchProjectData = async () => {
@@ -1543,7 +1542,8 @@ useEffect(() => {
       tailorsArray: deepClone(parseSafely(row[16], [])),
       projectAddress: row[17],
       date: row[18],
-      grandTotal : row[19]
+      grandTotal : row[19],
+      discountType : row[20]
     }));
 
     return projects;
@@ -1578,7 +1578,8 @@ const sendProjectData = async () => {
           goodsArray: JSON.stringify(goodsArray),
           tailorsArray: JSON.stringify(tailorsArray),
           projectAddress: JSON.stringify(projectAddress),
-          grandTotal
+          grandTotal,
+          discountType
         }),
       }
     );
@@ -1968,16 +1969,21 @@ const sendProjectData = async () => {
             </div>
             <div className="flex flex-row justify-between w-full">
               <p className="text-[1.1vw]">Total Amount</p>
-              <p className="text-[1.1vw]">{parseFloat((Amount + Tax).toFixed(2))}</p>
+              <p className="text-[1.1vw]">{parseFloat((Amount).toFixed(2))}</p>
             </div>
             <div className="border border-gray-400"></div>
             <div className="flex justify-between mt-1 w-full">
               <p className="text-[1.1vw]">Discount</p>
               <div className="flex items-center gap-2">
-                  <select onChange={(e) => setDiscountType(e.target.value)} className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="cash">₹</option>
-                    <option value="percent">%</option>
-                  </select>
+              <select
+                value={discountType} // <- This ensures the selected value is reflected
+                onChange={(e) => {handleDiscountChange(Discount, e.target.value)}}
+                className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="cash">₹</option>
+                <option value="percent">%</option>
+              </select>
+
                   <input
                     className="w-24 border border-gray-300 rounded-md px-3 py-1 text-sm text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     value={Discount}
