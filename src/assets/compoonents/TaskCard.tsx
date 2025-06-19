@@ -8,7 +8,7 @@ const TaskCard = ({ taskData }) => {
   };
 
   return (
-    <div className="bg-white shadow-lg rounded-xl m-2 p-3 border-l-4 border-gray-100 transition-transform transform hover:scale-102 hover:shadow-xl">
+    <div className="bg-white shadow-md rounded-xl m-2 p-3 border-l-4 border-gray-100 transition-transform transform hover:scale-102 hover:shadow-xl">
       <div className="flex justify-between !gap-0 items-start">
         <div className="flex-col">
           <h3 className="!text-lg font-semibold text-gray-900 truncate">{taskData[0]}</h3>

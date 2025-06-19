@@ -610,7 +610,7 @@ const Dashboard: React.FC = () => {
             </Link>
             <button onClick={() => setTaskDialog(true)} style={{ borderRadius: "6px" }} className="mb-2 bg-sky-600 text-white hover:bg-sky-700 px-2 md:text-[1.7vw] py-1">Add Task</button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto max-h-[90vh] pr-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-1 overflow-y-auto max-h-[90vh] pr-2">
             {filteredTasks && filteredTasks.map((task, index) => (
               <div key={index} onClick={() => { setSelectedTask(task); setTaskDialogOpen(true); }}>
                 <TaskCard taskData={task} />
