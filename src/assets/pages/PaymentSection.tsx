@@ -1,6 +1,21 @@
-import React from 'react';
-import { FaTrash } from 'react-icons/fa';
-import { Edit } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { FaTrash } from "react-icons/fa";
+import { Edit } from "lucide-react";
+
+// 🔧 SAME CLEANING LOGIC as your ProtectedRoute
+const normalizePath = (path: string) => {
+  if (path.length > 1 && path.endsWith("/")) return path.slice(0, -1);
+  return path;
+};
+
+const cleanRoute = (route: string) => {
+  try {
+    const decoded = route.replace(/\\/g, "");
+    return normalizePath(decoded);
+  } catch {
+    return route;
+  }
+};
 
 interface PaymentsSectionProps {
   addPayment: boolean;
@@ -10,8 +25,20 @@ interface PaymentsSectionProps {
   Received: number;
   Discount: number;
   paymentData: any[];
-  deletePayment: (amount: string, date: string, mode: string, remarks: string) => void;
+  deletePayment: (
+    amount: string,
+    date: string,
+    mode: string,
+    remarks: string
+  ) => void;
   setNavState: (nav: string) => void;
+  setEditPayments: (val: any) => void;
+  setPaymentDate: (val: string) => void;
+  setPaymentMode: (val: string) => void;
+  setPayment: (val: string) => void;
+  setPaymentRemarks: (val: string) => void;
+  projectData: any;
+  discountType: string;
 }
 
 const PaymentsSection: React.FC<PaymentsSectionProps> = ({
@@ -30,25 +57,47 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
   setPayment,
   setPaymentRemarks,
   projectData,
-  discountType
+  discountType,
 }) => {
+  const [canDeleteOrEdit, setCanDeleteOrEdit] = useState(false);
 
-  const editPaymentData = (data) => {
+  // ✅ Check if "/delete-payments" permission exists
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("allowed_routes");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+          const cleaned = parsed.map(cleanRoute);
+          setCanDeleteOrEdit(cleaned.includes("/delete-payments"));
+        }
+      }
+    } catch (err) {
+      console.error("❌ Failed to check /delete-payments permission:", err);
+    }
+  }, []);
+
+  const editPaymentData = (data: any[]) => {
     setPayment(data[2]);
     setPaymentDate(data[3]);
     setPaymentMode(data[4]);
     setPaymentRemarks(data[5]);
-    setEditPayments(data); 
+    setEditPayments(data);
     setAddPayment(true);
-  }
+  };
 
   return (
-    <div className={`${addPayment ? "hidden" : ""} flex flex-col gap-3 mt-3 w-full`}>
+    <div
+      className={`${
+        addPayment ? "hidden" : ""
+      } flex flex-col gap-3 mt-3 w-full`}
+    >
       <p className="text-[1.3vw] font-semibold">Payments</p>
+
       <div className="flex flex-row w-full justify-between gap-3">
         <div className="border rounded-lg w-1/4 p-3">
           <p className="text-[1.3vw] text-gray-500">Total Amount</p>
-          <p className="text-[1.3vw]">{(Amount).toFixed(2)}</p> 
+          <p className="text-[1.3vw]">{Amount.toFixed(2)}</p>
         </div>
         <div className="border rounded-lg w-1/4 p-3">
           <p className="text-[1.3vw] text-gray-500">Payment Received</p>
@@ -60,12 +109,12 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
         </div>
         <div className="border rounded-lg w-1/4 p-3">
           <p className="text-[1.3vw] text-gray-500">Discount</p>
-          <p className="text-[1.3vw]">{Discount + `in ${discountType}`}</p>
+          <p className="text-[1.3vw]">{Discount + ` in ${discountType}`}</p>
         </div>
       </div>
 
       <div className="flex flex-col w-full">
-        <div className="flex flex-row justify-between">
+        <div className="flex flex-row justify-between mt-2">
           <p className="text-[1.2vw] font-semibold">Received Payments</p>
           <button
             onClick={() => setAddPayment(true)}
@@ -76,7 +125,7 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
           </button>
         </div>
 
-        <table className="w-full border border-gray-300">
+        <table className="w-full border border-gray-300 mt-2">
           <thead>
             <tr className="bg-gray-100">
               <th className="text-left p-2">Amount Received</th>
@@ -87,38 +136,47 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
             </tr>
           </thead>
           <tbody>
-          {paymentData
-            ?.filter(data => data[1] === projectData.projectName)
-            .map((data, index) => (
-              <tr key={index} className="border-t">
-                <td className="p-2">{data[1]}</td>
-                <td className="p-2">{data[2]}</td>
-                <td className="p-2">{data[3]}</td>
-                <td className="p-2">{data[4]}</td>
-                <td className="flex flex-row gap-2 items-center mt-2">
-                  <button><Edit size={18} onClick={() => editPaymentData(data)}/></button>
-                  <button onClick={() => deletePayment(data[1], data[2], data[3], data[4])}>
-                    <FaTrash className="text-red-500" />
-                  </button>
-                </td>
-              </tr>
-          ))}
-
+            {paymentData
+              ?.filter((data) => data[1] === projectData.projectName)
+              .map((data, index) => (
+                <tr key={index} className="border-t">
+                  <td className="p-2">{data[2]}</td>
+                  <td className="p-2">{data[3]}</td>
+                  <td className="p-2">{data[4]}</td>
+                  <td className="p-2">{data[5]}</td>
+                  <td className="p-2">
+                    <div className="flex flex-row gap-2 items-center">
+                      {canDeleteOrEdit && (
+                        <>
+                          <button onClick={() => editPaymentData(data)}>
+                            <Edit size={18} />
+                          </button>
+                          <button
+                            onClick={() =>
+                              deletePayment(data[1], data[2], data[3], data[4])
+                            }
+                          >
+                            <FaTrash className="text-red-500" />
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>
 
-      <div className="flex flex-row justify-between">
+      <div className="flex flex-row justify-between mt-4">
         <button
           onClick={() => setNavState("Tailors")}
-          style={{ borderRadius: "8px" }}
           className="rounded-lg border px-2 h-8 bg-white"
         >
           Back
         </button>
         <button
           onClick={() => setNavState("Tasks")}
-          style={{ borderRadius: "8px" }}
           className="rounded-lg text-white border px-2 h-8 bg-sky-600"
         >
           Next
