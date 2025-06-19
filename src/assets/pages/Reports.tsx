@@ -243,23 +243,26 @@ const filteredPayments = (payments ?? []).filter(([customer, , , date]) => {
   return matchCustomer && matchDate;
 });
 
-
   const totalPaymentAmount = filteredPayments.reduce(
     (acc, curr) => acc + parseFloat(curr[2] || 0),
     0
   );
+// 1. Correct total project value
+const totalProjectValue = projects.reduce((acc, proj) => {
+  const projectValue = parseFloat(proj.grandTotal) || 0;
+  return acc + projectValue;
+}, 0);
 
-  const totalProjectValue = projects.reduce(
-    (acc, proj) => acc + parseFloat(proj[4] || 0),
-    0
-  );
+// 2. Correct total advance from payments matching project names
+const totalAdvance = payments.reduce((acc, payment) => {
+  const [ , projectName, amount ] = payment;
+  const isInProjectList = projects.some(proj => proj.projectName === projectName);
+  return isInProjectList ? acc + (parseFloat(amount) || 0) : acc;
+}, 0);
 
-  const totalAdvance = projects.reduce(
-    (acc, proj) => acc + parseFloat(proj[7] || 0),
-    0
-  );
   
   const [discountType, setDiscountType] = useState("cash");
+  const [paidAmount, setPaidAmount] = useState(0);
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -375,7 +378,7 @@ const filteredPayments = (payments ?? []).filter(([customer, , , date]) => {
                   <tbody>
                     {projects.map((proj, idx) => (
                       <tr key={idx} className="border-t">
-                        <td onClick={() => { setDiscountType(proj.discountType); setTax(proj.totalTax); setAmount(proj.totalAmount); setDiscount(proj.discount); setGrandTotal(proj.grandTotal); setSendProject(proj); setIndex(idx); setFlag(true); }} className="px-4 py-2">{proj.projectName}</td>
+                        <td onClick={() => { setPaidAmount(projectPayments[idx]); setDiscountType(proj.discountType); setTax(proj.totalTax); setAmount(proj.totalAmount); setDiscount(proj.discount); setGrandTotal(proj.grandTotal); setSendProject(proj); setIndex(idx); setFlag(true); }} className="px-4 py-2">{proj.projectName}</td>
                         <td className="px-4 py-2">{proj.customerLink[0]}</td>
                         <td className="px-4 py-2">₹{proj.grandTotal}</td>
                         <td className="px-4 py-2">₹{projectPayments[idx]}</td>
@@ -409,6 +412,8 @@ const filteredPayments = (payments ?? []).filter(([customer, , , date]) => {
             setGrandTotal={setGrandTotal}
             discountType={discountType}
             setDiscountType={setDiscountType}
+            Paid={paidAmount}
+            setPaid={setPaidAmount}
           />
         )}
     </div>

@@ -29,7 +29,8 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
   setPaymentMode,
   setPayment,
   setPaymentRemarks,
-  projectData
+  projectData,
+  discountType
 }) => {
 
   const editPaymentData = (data) => {
@@ -47,7 +48,7 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
       <div className="flex flex-row w-full justify-between gap-3">
         <div className="border rounded-lg w-1/4 p-3">
           <p className="text-[1.3vw] text-gray-500">Total Amount</p>
-          <p className="text-[1.3vw]">{(Amount + Tax).toFixed(2)}</p> 
+          <p className="text-[1.3vw]">{(Amount).toFixed(2)}</p> 
         </div>
         <div className="border rounded-lg w-1/4 p-3">
           <p className="text-[1.3vw] text-gray-500">Payment Received</p>
@@ -55,11 +56,11 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
         </div>
         <div className="border rounded-lg w-1/4 p-3">
           <p className="text-[1.3vw] text-gray-500">Payment Due</p>
-          <p className="text-[1.3vw]">{(Amount + Tax - Received - Discount).toFixed(2)}</p>
+          <p className="text-[1.3vw]">{(Amount - Received).toFixed(2)}</p>
         </div>
         <div className="border rounded-lg w-1/4 p-3">
           <p className="text-[1.3vw] text-gray-500">Discount</p>
-          <p className="text-[1.3vw]">{Discount}</p>
+          <p className="text-[1.3vw]">{Discount + `in ${discountType}`}</p>
         </div>
       </div>
 

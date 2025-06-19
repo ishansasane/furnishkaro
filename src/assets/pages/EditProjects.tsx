@@ -19,7 +19,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import TaskDialog from "../compoonents/TaskDialog";
 import { useCallback } from "react";
 
-const EditProjects = ({ discountType, setDiscountType, grandTotal, setGrandTotal, projectData, index, goBack, projects, Tax, setTax, Amount, setAmount, Discount, setDiscount }) => {
+const EditProjects = ({ Paid, setPaid, discountType, setDiscountType, grandTotal, setGrandTotal, projectData, index, goBack, projects, Tax, setTax, Amount, setAmount, Discount, setDiscount }) => {
 
     const [currentStatus, setCurrentStatus] = useState("Unsent");
     const [navState, setNavState] = useState("Overview");
@@ -420,9 +420,9 @@ const EditProjects = ({ discountType, setDiscountType, grandTotal, setGrandTotal
     console.log(newMatchedItems);
 
     if(newMatchedItems.length == 0){
-      newMatchedItems = [product.split(",")];
+      newMatchedItems = [product];
     }
-  
+    
     updatedSelections[mainindex].areacollection[i].items = newMatchedItems;
     setSelections(updatedSelections);
   
@@ -772,7 +772,6 @@ const handleunitchange = (mainindex : number, index : number, unit) => {
   setSelections(updatedSelection);
 }
 const [quantities, setQuantities] = useState({});
-const [Paid, setPaid] = useState(0);
 const [Received, setReceived] = useState(0);
 
 const handleQuantityChange = async (
@@ -1148,9 +1147,9 @@ useEffect(() => {
 
         // Compute total payment for this project
         const totalReceived = paymentData.reduce((sum, record) => {
-          const [_, projectName, amountStr] = record;
-          if (projectName === projectData.projectName) {
-            const amount = parseFloat(amountStr);
+          
+          if (record[1] === projectData.projectName) {
+            const amount = parseFloat(record[2]);
             return sum + (isNaN(amount) ? 0 : amount);
           }
           return sum;
@@ -1224,31 +1223,21 @@ useEffect(() => {
   }
 }, [availableAreas.length]);// Only re-run when availableAreas length changes
 
-
 const addPaymentFunction = async () => {
   const isEdit = typeof editProjects !== "undefined";
 
   const url = isEdit
-    ? "https://sheeladecor.netlify.app/.netlify/functions/server/updateProjects"
+    ? "https://sheeladecor.netlify.app/.netlify/functions/server/updatePayments"
     : "https://sheeladecor.netlify.app/.netlify/functions/server/addPayment";
 
-  const payload = isEdit
-    ? {
-        customerName: projectData.customerLink[0],
-        Name: projectData.projectName,
-        Received: payment,
-        ReceivedDate: paymentDate,
-        PaymentMode: paymentMode,
-        Remarks: paymentRemarks,// send this if backend needs it
-      }
-    : {
-        customerName: projectData.customerLink[0],
-        Name: projectData.projectName,
-        Received: payment,
-        ReceivedDate: paymentDate,
-        PaymentMode: paymentMode,
-        Remarks: paymentRemarks,
-      };
+  const payload = {
+    customerName: projectData.customerLink[0],
+    Name: projectData.projectName,
+    Received: payment,
+    ReceivedDate: paymentDate,
+    PaymentMode: paymentMode,
+    Remarks: paymentRemarks,
+  };
 
   try {
     const response = await fetch(url, {
@@ -1260,16 +1249,23 @@ const addPaymentFunction = async () => {
       body: JSON.stringify(payload),
     });
 
-    if (response.status === 200) {
+    if (response.ok) {
       alert(isEdit ? "Payment updated" : "Payment added");
+
+      // ✅ Reset form states
       setAddPayment(false);
       setPayment(0);
       setPaymentDate("");
       setPaymentMode("");
       setPaymentRemarks("");
-      setAdded(prev => !prev);
+      setAdded((prev) => !prev); // trigger useEffect if needed
+
+      // ✅ Refresh payment data
+      const latestPayments = await fetchPaymentData();
+      dispatch(setPaymentData(latestPayments));
+      localStorage.setItem("paymentData", JSON.stringify({ data: latestPayments, time: Date.now() }));
     } else {
-      alert("Error");
+      alert("Error submitting payment");
     }
   } catch (error) {
     console.error("Fetch error:", error);
@@ -1585,7 +1581,7 @@ const sendProjectData = async () => {
     );
 
       if (response.status === 200) {
-        alert("Project Added");
+        alert("Project Edited");
         const updatedData = await fetchProjectData();
         dispatch(setProjects(updatedData));
         localStorage.setItem("projectData", JSON.stringify({ data: updatedData, time: Date.now() }));
@@ -2031,14 +2027,13 @@ const sendProjectData = async () => {
   {goodsArray != undefined && goodsArray.map((goods, index) => {
     const selection = selections[goods.mainindex];
     const collection = selection?.areacollection?.[goods.groupIndex];
-
     return (
       <tr key={index} className="text-center rounded-md">
         <td>{index + 1}</td>
         <td>{selection?.area || ""}</td>
         <td>{goods?.item?.[0] || ""}</td>
-        <td>{collection?.company || ""}</td>
-        <td>{collection?.catalogue?.[0] || ""}</td>
+        <td>{collection.company[0] || ""}</td>
+        <td>{collection?.catalogue || ""}</td>
         <td>{collection?.designNo || ""}</td>
         <td>
           <input
@@ -2112,7 +2107,7 @@ const sendProjectData = async () => {
             setAddPayment={setAddPayment}
             Amount={Amount}
             Tax={Tax}
-            Received={Received}
+            Received={Paid}
             Discount={Discount}
             paymentData={paymentData}
             deletePayment={deletePayment}
@@ -2123,6 +2118,7 @@ const sendProjectData = async () => {
             setPaymentRemarks={setPaymentRemarks}
             setPaymentMode={setPaymentMode}
             projectData={projectData}
+            discountType={discountType}
           />
           }
           { 

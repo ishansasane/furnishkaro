@@ -33,6 +33,7 @@ interface Project {
   interiorArray: string[];
   salesAssociateArray: string[];
   grandTotal : number;
+  discountType : string;
 }
 
 // Status filter options
@@ -47,7 +48,7 @@ const statusFilters = [
 
 export default function Projects() {
   const [projects, setprojects] = useState<Project[]>([]);
-  const [filter, setFilter] = useState<(typeof statusFilters)[number]>("all");
+  const [filter, setFilter] = useState<(typeof statusFilters)[number]>("approved");
   const [index, setIndex] = useState(null);
   const [flag, setFlag] = useState(false);
   const [sendProject, setSendProject] = useState([]);
@@ -198,7 +199,7 @@ export default function Projects() {
     };
 
     fetchProjects();
-  }, [dispatch]);
+  }, [dispatch, flag]);
 
   // --- Fetch Tasks ---
   useEffect(() => {
@@ -272,7 +273,7 @@ export default function Projects() {
   };
 
   const filteredProjects =
-    filter === "all" ? projects : projects.filter((proj) => proj.status === filter);
+    filter === "approved" ? projects : projects.filter((proj) => proj.status === filter);
 
   const deleteProject = async (name) => {
     try {
@@ -469,6 +470,8 @@ export default function Projects() {
     doc.save(`Quotation_${project.projectName || "Project"}_${project.projectDate || "Date"}.pdf`);
   };
 
+  const [paidAmount, setPaidAmount] = useState(0);
+
   return (
     <div className={`md:!p-6 p-2 md:mt-0 mt-20 h-screen bg-gray-50`}>
       <div className={`flex justify-between flex-wrap items-center mb-4`}>
@@ -515,13 +518,15 @@ export default function Projects() {
                         setIndex(index);
                         setSendProject(project);
                         setDiscountType(project.discountType);
+                        setPaidAmount(projectPayments[index]);
                         setFlag(true);
+                        console.log(project);
                       }} key={index} className="hover:bg-sky-50">
                 <td className="px-4 py-2">{project.projectName}</td>
                 <td className="px-4 py-2">{project.customerLink ? project.customerLink[0] : ""}</td>
                 <td className="px-4 py-2">{project.grandTotal}</td>
                 <td className="px-4 py-2">{projectPayments[index]}</td>
-                <td className="px-4 py-2">{(project.totalAmount + project.totalTax - project.discount - (projectPayments[index] || 0)).toFixed(2)}</td>
+                <td className="px-4 py-2">{(project.grandTotal - (projectPayments[index] || 0)).toFixed(2)}</td>
                 <td className="px-4 py-2">{project.createdBy}</td>
                 <td className="px-4 py-2">{project.projectDate}</td>
                 <td className="px-4 py-2">{project.date}</td>
@@ -542,6 +547,7 @@ export default function Projects() {
                         setSendProject(project);
                         setDiscountType(project.discountType);
                         setFlag(true);
+                        console.log(project);
                       }}
                       className="border px-2 py-1 rounded-md"
                     >
@@ -579,6 +585,8 @@ export default function Projects() {
             setGrandTotal={setGrandTotal}
             discountType={discountType}
             setDiscountType={setDiscountType}
+            Paid={paidAmount}
+            setPaid={setPaidAmount}
           />
         )}
         {
