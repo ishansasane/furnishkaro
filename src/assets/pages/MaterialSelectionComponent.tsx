@@ -6,7 +6,7 @@ import { setCatalogs } from '../Redux/dataSlice';
 import { RootState } from '../Redux/store';
 import { setCompanyData, setDesignData } from '../Redux/dataSlice';
 
-const SearchableSelect = ({ options, value, onChange, placeholder, name }) => {
+const SearchableSelect = ({ options, value, placeholder, name, mainindex, i, handleProductGroupChange }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filteredOptions, setFilteredOptions] = useState(options);
@@ -34,12 +34,6 @@ const SearchableSelect = ({ options, value, onChange, placeholder, name }) => {
     };
   }, []);
 
-  const handleSelect = (option) => {
-    onChange({ target: { value: option[0] } });
-    setIsOpen(false);
-    setSearchTerm('');
-  };
-
   return (
     <div className="relative w-full" ref={dropdownRef}>
       <input
@@ -57,7 +51,11 @@ const SearchableSelect = ({ options, value, onChange, placeholder, name }) => {
               <div
                 key={index}
                 className="p-2 hover:bg-gray-100 cursor-pointer"
-                onClick={() => handleSelect(option)}
+                onClick={() => {
+                  handleProductGroupChange(mainindex, i, option);
+                  setIsOpen(false);
+                  setSearchTerm('');
+                }}
               >
                 {option[0]}
               </div>
@@ -70,6 +68,7 @@ const SearchableSelect = ({ options, value, onChange, placeholder, name }) => {
     </div>
   );
 };
+
 
 const MaterialSelectionComponent = ({
   selections,
@@ -339,8 +338,10 @@ const MaterialSelectionComponent = ({
                         <p className="text-sm sm:text-base">Product Group / Items</p>
                         <SearchableSelect
                           options={combinedData}
-                          value={element.productGroup}
-                          onChange={(e) => handleProductGroupChange(mainindex, i, e.target.value)}
+                          value={element.productGroup[0]}
+                          i = { i }
+                          mainindex={mainindex}
+                          handleProductGroupChange={handleProductGroupChange}
                           placeholder="Select Product Group"
                           name="productGroup"
                         />
@@ -355,9 +356,11 @@ const MaterialSelectionComponent = ({
                           </button>
                         </div>
                         <SearchableSelect
-                          options={companyData}
+                          options={combinedData}
                           value={element.company}
-                          onChange={(e) => handleCompanyChange(mainindex, i, e.target.value)}
+                          i = { i }
+                          mainindex={mainindex}
+                          handleProductGroupChange={handleCompanyChange}
                           placeholder="Select Company"
                           name="company"
                         />
@@ -372,9 +375,11 @@ const MaterialSelectionComponent = ({
                           </button>
                         </div>
                         <SearchableSelect
-                          options={catalogueData}
+                          options={combinedData}
                           value={element.catalogue}
-                          onChange={(e) => handleCatalogueChange(mainindex, i, e.target.value)}
+                          i = { i }
+                          mainindex={mainindex}
+                          handleProductGroupChange={handleCatalogueChange}
                           placeholder="Select Catalogue"
                           name="catalogue"
                         />

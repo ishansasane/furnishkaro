@@ -372,6 +372,10 @@ const EditProjects = ({ grandTotal, setGrandTotal, projectData, index, goBack, p
   const handleProductGroupChange = (mainindex: number, i: number, product: string) => {
     const updatedSelections = [...selections];
   
+    console.log(product);
+    console.log(mainindex);
+    console.log(i);
+
     if (!updatedSelections[mainindex].areacollection) {
       updatedSelections[mainindex].areacollection = [];
     }
@@ -391,7 +395,7 @@ const EditProjects = ({ grandTotal, setGrandTotal, projectData, index, goBack, p
       };
     }
   
-    const newproduct = product.split(",");
+    const newproduct = product
     updatedSelections[mainindex].areacollection[i].productGroup = newproduct;
   
 
@@ -418,7 +422,6 @@ const EditProjects = ({ grandTotal, setGrandTotal, projectData, index, goBack, p
     if(newMatchedItems.length == 0){
       newMatchedItems = [product.split(",")];
     }
-    console.log(newMatchedItems);
   
     updatedSelections[mainindex].areacollection[i].items = newMatchedItems;
     setSelections(updatedSelections);
