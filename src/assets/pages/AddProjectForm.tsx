@@ -1620,265 +1620,274 @@ const handleItemTaxChange = (i: number, tax: string) => {
           />
         </div>
 
-        {/* Quotation Section */}
-        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-          <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-4">Quotation</h2>
-          <div className="space-y-6">
-            {selections.map((selection, mainIndex) => (
-              <div key={mainIndex} className="w-full">
-                <h3 className="font-semibold text-lg text-gray-700 mb-3">{selection.area}</h3>
-                <div className="overflow-x-auto rounded-lg border border-gray-200">
-                  <table className="w-full bg-white">
-                    <tbody>
-                      {selection.areacollection && selection.areacollection.length > 0 ? (
-                        selection.areacollection.map((collection, collectionIndex) => {
-                          if (!Array.isArray(collection.items)) {
-                            return (
-                              <tr key={`error-${collectionIndex}`}>
-                                <td colSpan={9} className="text-center text-red-500 py-4 text-sm">
-                                  No items found for collection {collectionIndex + 1}
-                                </td>
-                              </tr>
-                            );
-                          }
+<div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+  <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-4">Quotation</h2>
+  <div className="space-y-6">
+    {selections.map((selection, mainIndex) => (
+      <div key={mainIndex} className="w-full">
+        <h3 className="font-semibold text-lg text-gray-700 mb-3">{selection.area}</h3>
+        <div className="overflow-x-auto rounded-lg border border-gray-200">
+          <table className="w-full bg-white">
+            <thead>
+              <tr className="bg-gray-100 text-gray-700 text-sm font-semibold">
+                <th className="py-3 px-4 text-center">SR</th>
+                <th className="py-3 px-4">Product Name</th>
+                <th className="py-3 px-4">Size</th>
+                <th className="py-3 px-4">MRP</th>
+                <th className="py-3 px-4">Quantity</th>
+                <th className="py-3 px-4">Subtotal</th>
+                <th className="py-3 px-4">Tax Rate(%)</th>
+                <th className="py-3 px-4">Tax Amount</th>
+                <th className="py-3 px-4">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {selection.areacollection && selection.areacollection.length > 0 ? (
+                selection.areacollection.map((collection, collectionIndex) => {
+                  if (!Array.isArray(collection.items) || !collection.items.length) {
+                    return (
+                      <tr key={`error-${collectionIndex}`}>
+                        <td colSpan={9} className="text-center text-red-500 py-4 text-sm">
+                          No items found for collection {collectionIndex + 1}
+                        </td>
+                      </tr>
+                    );
+                  }
 
-                          return collection.items.map((item: any, itemIndex: number) => {
-                            const key = `${mainIndex}-${collectionIndex}-${itemIndex}`;
-                            const qty = collection.quantities?.[itemIndex] || 0;
+                  // Use the first item from items array
+                  const item = collection.items[0];
+                  const qty = collection.quantities?.[0] || 0;
 
-                            return (
-                              <tr
-                                key={key}
-                                className="flex flex-col sm:table-row border-b border-gray-200 hover:bg-gray-50"
-                              >
-                                <td className="py-3 px-4 text-sm text-center">{itemIndex + 1}</td>
-                                <td className="py-3 px-4 text-sm">{item[0] + " * " + collection.measurement.quantity}</td>
-                                <td className="py-3 px-4 text-sm">
-                                  {collection.measurement.width +
-                                    " x " +
-                                    collection.measurement.height +
-                                    " " +
-                                    collection.measurement.unit}
-                                </td>
-                                <td className="py-3 px-4 text-sm">
-                                  INR {(item[4] * parseFloat(collection.measurement.quantity)).toFixed(2)}
-                                </td>
-                                <td className="py-3 px-4">
-                                  <div className="flex flex-col gap-1">
-                                    <input
-                                      type="number"
-                                      value={collection.quantities?.[itemIndex] || ""}
-                                      onChange={(e) =>
-                                        handleQuantityChange(
-                                          key,
-                                          e.target.value,
-                                          mainIndex,
-                                          collectionIndex,
-                                          collection.measurement.quantity,
-                                          item[4],
-                                          item[5],
-                                          itemIndex
-                                        )
-                                      }
-                                      className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-20"
-                                      min="0"
-                                    />
-                                    <p className="text-xs text-gray-500">{item[3]}</p>
-                                  </div>
-                                </td>
-                                <td className="py-3 px-4 text-sm">
-                                  INR {(item[4] * parseFloat(collection.measurement.quantity) * qty).toFixed(2)}
-                                </td>
-                                <td className="py-3 px-4 text-sm">{item[5]}%</td>
-                                <td className="py-3 px-4 text-sm">
-                                  INR {collection.totalTax[itemIndex]?.toFixed(2) || "0.00"}
-                                </td>
-                                <td className="py-3 px-4 text-sm">
-                                  INR {collection.totalAmount[itemIndex]?.toFixed(2) || "0.00"}
-                                </td>
-                              </tr>
-                            );
-                          });
-                        })
-                      ) : (
-                        <tr>
-                          <td colSpan={9} className="text-center py-4 text-gray-500 text-sm">
-                            No product data available.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Miscellaneous Section */}
-          <div className="mt-6 p-6 bg-gray-50 rounded-lg border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Miscellaneous</h3>
-            <div className="flex justify-end mb-4">
-              <button
-                className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
-                onClick={handleAddMiscItem}
-              >
-                <FaPlus className="w-4 h-4" />
-                Add Item
-              </button>
-            </div>
-            <div className="overflow-x-auto rounded-lg border border-gray-200">
-              <table className="w-full bg-white hidden sm:table">
-                <thead>
-                  <tr className="bg-gray-100 text-gray-700 text-sm font-semibold">
-                    <th className="py-3 px-4 text-center">SR</th>
-                    <th className="py-3 px-4">Item Name</th>
-                    <th className="py-3 px-4">Quantity</th>
-                    <th className="py-3 px-4">Rate</th>
-                    <th className="py-3 px-4">Net Rate</th>
-                    <th className="py-3 px-4">Tax (%)</th>
-                    <th className="py-3 px-4">Tax Amount</th>
-                    <th className="py-3 px-4">Total Amount</th>
-                    <th className="py-3 px-4">Remark</th>
-                    <th className="py-3 px-4 text-center">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {additionalItems.map((item, i) => (
-                    <tr key={i} className="border-b hover:bg-gray-50">
-                      <td className="py-3 px-4 text-center text-sm">{i + 1}</td>
-                      <td className="py-3 px-4">
-                        <input
-                          onChange={(e) => handleItemNameChange(i, e.target.value)}
-                          className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          value={item.name || ""}
-                          type="text"
-                        />
+                  return (
+                    <tr
+                      key={`${mainIndex}-${collectionIndex}`}
+                      className="flex flex-col sm:table-row border-b border-gray-200 hover:bg-gray-50"
+                    >
+                      <td className="py-3 px-4 text-sm text-center">1</td>
+                      <td className="py-3 px-4 text-sm">{collection.productGroup[0] || "N/A"}</td>
+                      <td className="py-3 px-4 text-sm">
+                        {collection.measurement.width && collection.measurement.height
+                          ? `${collection.measurement.width} x ${collection.measurement.height} ${collection.measurement.unit || ""}`
+                          : "N/A"}
+                      </td>
+                      <td className="py-3 px-4 text-sm">
+                        INR {(item[4] * parseFloat(collection.measurement.quantity || "0")).toFixed(2)}
                       </td>
                       <td className="py-3 px-4">
-                        <input
-                          onChange={(e) => handleItemQuantityChange(i, e.target.value)}
-                          className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          value={item.quantity || ""}
-                          type="number"
-                          min="0"
-                        />
+                        <div className="flex flex-col gap-1">
+                          <input
+                            type="number"
+                            value={collection.quantities?.[0] || ""}
+                            onChange={(e) =>
+                              handleQuantityChange(
+                                `${mainIndex}-${collectionIndex}-0`,
+                                e.target.value,
+                                mainIndex,
+                                collectionIndex,
+                                collection.measurement.quantity,
+                                item[4],
+                                item[5],
+                                0
+                              )
+                            }
+                            className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-20"
+                            min="0"
+                          />
+                          <p className="text-xs text-gray-500">{item[3] || "N/A"}</p>
+                        </div>
                       </td>
-                      <td className="py-3 px-4">
-                        <input
-                          onChange={(e) => handleItemRateChange(i, e.target.value)}
-                          className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          value={item.rate || ""}
-                          type="number"
-                          min="0"
-                        />
+                      <td className="py-3 px-4 text-sm">
+                        INR {(item[4] * parseFloat(collection.measurement.quantity || "0") * qty).toFixed(2)}
                       </td>
-                      <td className="py-3 px-4 text-sm text-center">INR {item.netRate.toFixed(2)}</td>
-                      <td className="py-3 px-4">
-                        <input
-                          onChange={(e) => handleItemTaxChange(i, e.target.value)}
-                          className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          value={item.tax || ""}
-                          type="number"
-                          min="0"
-                        />
+                      <td className="py-3 px-4 text-sm">{item[5] || "0"}%</td>
+                      <td className="py-3 px-4 text-sm">
+                        INR {collection.totalTax[0]?.toFixed(2) || "0.00"}
                       </td>
-                      <td className="py-3 px-4 text-sm text-center">INR {item.taxAmount.toFixed(2)}</td>
-                      <td className="py-3 px-4 text-sm text-center">INR {item.totalAmount.toFixed(2)}</td>
-                      <td className="py-3 px-4">
-                        <input
-                          onChange={(e) => handleItemRemarkChange(i, e.target.value)}
-                          className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          value={item.remark || ""}
-                          type="text"
-                        />
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <button onClick={() => handleDeleteMiscItem(i)}>
-                          <FaTrash className="text-red-500 hover:text-red-600 w-4 h-4" />
-                        </button>
+                      <td className="py-3 px-4 text-sm">
+                        INR {collection.totalAmount[0]?.toFixed(2) || "0.00"}
                       </td>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-              {/* Mobile View for Miscellaneous */}
-              <div className="sm:hidden flex flex-col gap-4 mt-4">
-                {additionalItems.map((item, i) => (
-                  <div key={i} className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
-                    <div className="flex justify-between items-center mb-3">
-                      <span className="font-semibold text-sm">SR: {i + 1}</span>
-                      <button onClick={() => handleDeleteMiscItem(i)}>
-                        <FaTrash className="text-red-500 hover:text-red-600 w-4 h-4" />
-                      </button>
-                    </div>
-                    <div className="grid grid-cols-1 gap-3">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Item Name</label>
-                        <input
-                          onChange={(e) => handleItemNameChange(i, e.target.value)}
-                          className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          value={item.name || ""}
-                          type="text"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Quantity</label>
-                        <input
-                          onChange={(e) => handleItemQuantityChange(i, e.target.value)}
-                          className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          value={item.quantity || ""}
-                          type="number"
-                          min="0"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Rate</label>
-                        <input
-                          onChange={(e) => handleItemRateChange(i, e.target.value)}
-                          className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          value={item.rate || ""}
-                          type="number"
-                          min="0"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Net Rate</label>
-                        <span className="text-sm">INR {item.netRate.toFixed(2)}</span>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Tax (%)</label>
-                        <input
-                          onChange={(e) => handleItemTaxChange(i, e.target.value)}
-                          className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          value={item.tax || ""}
-                          type="number"
-                          min="0"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Tax Amount</label>
-                        <span className="text-sm">INR {item.taxAmount.toFixed(2)}</span>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Total Amount</label>
-                        <span className="text-sm">INR {item.totalAmount.toFixed(2)}</span>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700">Remark</label>
-                        <input
-                          onChange={(e) => handleItemRemarkChange(i, e.target.value)}
-                          className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          value={item.remark || ""}
-                          type="text"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={9} className="text-center py-4 text-gray-500 text-sm">
+                    No product data available.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    ))}
+
+    {/* Miscellaneous Section */}
+    <div className="mt-6 p-6 bg-gray-50 rounded-lg border border-gray-200">
+      <h3 className="text-lg font-semibold text-gray-800 mb-4">Miscellaneous</h3>
+      <div className="flex justify-end mb-4">
+        <button
+          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+          onClick={handleAddMiscItem}
+        >
+          <FaPlus className="w-4 h-4" />
+          Add Item
+        </button>
+      </div>
+      <div className="overflow-x-auto rounded-lg border border-gray-200">
+        <table className="w-full bg-white hidden sm:table">
+          <thead>
+            <tr className="bg-gray-100 text-gray-700 text-sm font-semibold">
+              <th className="py-3 px-4 text-center">SR</th>
+              <th className="py-3 px-4">Item Name</th>
+              <th className="py-3 px-4">Quantity</th>
+              <th className="py-3 px-4">Rate</th>
+              <th className="py-3 px-4">Net Rate</th>
+              <th className="py-3 px-4">Tax (%)</th>
+              <th className="py-3 px-4">Tax Amount</th>
+              <th className="py-3 px-4">Total Amount</th>
+              <th className="py-3 px-4">Remark</th>
+              <th className="py-3 px-4 text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {additionalItems.map((item, i) => (
+              <tr key={i} className="border-b hover:bg-gray-50">
+                <td className="py-3 px-4 text-center text-sm">{i + 1}</td>
+                <td className="py-3 px-4">
+                  <input
+                    onChange={(e) => handleItemNameChange(i, e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    value={item.name || ""}
+                    type="text"
+                  />
+                </td>
+                <td className="py-3 px-4">
+                  <input
+                    onChange={(e) => handleItemQuantityChange(i, e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    value={item.quantity || ""}
+                    type="number"
+                    min="0"
+                  />
+                </td>
+                <td className="py-3 px-4">
+                  <input
+                    onChange={(e) => handleItemRateChange(i, e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    value={item.rate || ""}
+                    type="number"
+                    min="0"
+                  />
+                </td>
+                <td className="py-3 px-4 text-sm text-center">INR {item.netRate.toFixed(2)}</td>
+                <td className="py-3 px-4">
+                  <input
+                    onChange={(e) => handleItemTaxChange(i, e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    value={item.tax || ""}
+                    type="number"
+                    min="0"
+                  />
+                </td>
+                <td className="py-3 px-4 text-sm text-center">INR {item.taxAmount.toFixed(2)}</td>
+                <td className="py-3 px-4 text-sm text-center">INR {item.totalAmount.toFixed(2)}</td>
+                <td className="py-3 px-4">
+                  <input
+                    onChange={(e) => handleItemRemarkChange(i, e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    value={item.remark || ""}
+                    type="text"
+                  />
+                </td>
+                <td className="py-3 px-4 text-center">
+                  <button onClick={() => handleDeleteMiscItem(i)}>
+                    <FaTrash className="text-red-500 hover:text-red-600 w-4 h-4" />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {/* Mobile View for Miscellaneous */}
+        <div className="sm:hidden flex flex-col gap-4 mt-4">
+          {additionalItems.map((item, i) => (
+            <div key={i} className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+              <div className="flex justify-between items-center mb-3">
+                <span className="font-semibold text-sm">SR: {i + 1}</span>
+                <button onClick={() => handleDeleteMiscItem(i)}>
+                  <FaTrash className="text-red-500 hover:text-red-600 w-4 h-4" />
+                </button>
+              </div>
+              <div className="grid grid-cols-1 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Item Name</label>
+                  <input
+                    onChange={(e) => handleItemNameChange(i, e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    value={item.name || ""}
+                    type="text"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Quantity</label>
+                  <input
+                    onChange={(e) => handleItemQuantityChange(i, e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    value={item.quantity || ""}
+                    type="number"
+                    min="0"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Rate</label>
+                  <input
+                    onChange={(e) => handleItemRateChange(i, e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    value={item.rate || ""}
+                    type="number"
+                    min="0"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Net Rate</label>
+                  <span className="text-sm">INR {item.netRate.toFixed(2)}</span>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Tax (%)</label>
+                  <input
+                    onChange={(e) => handleItemTaxChange(i, e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    value={item.tax || ""}
+                    type="number"
+                    min="0"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Tax Amount</label>
+                  <span className="text-sm">INR {item.taxAmount.toFixed(2)}</span>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Total Amount</label>
+                  <span className="text-sm">INR {item.totalAmount.toFixed(2)}</span>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Remark</label>
+                  <input
+                    onChange={(e) => handleItemRemarkChange(i, e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    value={item.remark || ""}
+                    type="text"
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          ))}
         </div>
+      </div>
+    </div>
+  </div>
+</div>
 
         {/* Summary and Bank Details */}
         <div className="flex flex-col md:flex-row gap-6">
