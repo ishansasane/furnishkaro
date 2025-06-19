@@ -250,7 +250,7 @@ function AddProjectForm() {
       };
     }
   
-    const newproduct = product.split(",");
+    const newproduct = product
     updatedSelections[mainindex].areacollection[i].productGroup = newproduct;
   
 
@@ -1286,6 +1286,8 @@ function AddProjectForm() {
             handleGroupDelete={handleGroupDelete}
             setAvailableAreas={setAvailableAreas}
             singleItems={singleItems}
+            projectData={projectData}
+
           />
         </div>
 

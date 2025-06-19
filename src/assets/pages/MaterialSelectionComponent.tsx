@@ -356,8 +356,8 @@ const MaterialSelectionComponent = ({
                           </button>
                         </div>
                         <SearchableSelect
-                          options={combinedData}
-                          value={element.company}
+                          options={companyData}
+                          value={element.company[0]}
                           i = { i }
                           mainindex={mainindex}
                           handleProductGroupChange={handleCompanyChange}
@@ -375,7 +375,7 @@ const MaterialSelectionComponent = ({
                           </button>
                         </div>
                         <SearchableSelect
-                          options={combinedData}
+                          options={catalogueData}
                           value={element.catalogue}
                           i = { i }
                           mainindex={mainindex}
