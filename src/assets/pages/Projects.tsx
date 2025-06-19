@@ -533,7 +533,7 @@ export default function Projects() {
                 <td className="px-4 py-2">
                   <button
                     onClick={() => generatePDF(project)}
-                    className="border px-2 py-1 rounded-md bg-green-500 text-white"
+                    className="border px-2 py-1 rounded-md"
                   >
                     <Download size={16} />
                   </button>

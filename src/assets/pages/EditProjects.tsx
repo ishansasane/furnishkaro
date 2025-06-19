@@ -1601,20 +1601,83 @@ const sendProjectData = async () => {
       <div className='p-6'>
         <div className='flex flex-col'>
           <div className='flex flex-row justify-between items-center'>
-            <p className='text-[1.4vw] font-semibold'>Order Overview</p>
+            <p className=' font-semibold'>Order Overview</p>
             <button onClick={goBack} className="mb-4 px-3 py-1 text-white bg-red-500 rounded">← Back</button>
           </div>
-          <div className='flex flex-row w-[65vw] justify-between mb-3 bg-sky-50 px-2 py-2 rounded-lg'>
-            <button className={`text-[1vw] ${navState == "Overview" ? "text-sky-700 font-semibold" : ""}`} onClick={() => setNavState("Overview")}>Overview</button>
-            <button className={`text-[1vw] ${navState == "Customer & Project Details" ? "text-sky-700  font-semibold" : ""}`} onClick={() => setNavState("Customer & Project Details")}>Customer & Project Details</button>
-            <button className={`text-[1vw] ${navState == "Material Selection" ? "text-sky-700  font-semibold" : ""}`} onClick={() => setNavState("Material Selection")}>Material Selection</button>
-            <button className={`text-[1vw] ${navState == "Measurement" ? "text-sky-700  font-semibold" : ""}`} onClick={() => setNavState("Measurement")}>Measurement</button>
-            <button className={`text-[1vw] ${navState == "Quotation" ? "text-sky-700  font-semibold" : ""}`} onClick={() => setNavState("Quotation")}>Quotation</button>
-            <button className={`text-[1vw] ${navState == "Goods" ? "text-sky-700  font-semibold" : ""}`} onClick={() => setNavState("Goods")}>Goods</button>
-            <button className={`text-[1vw] ${navState == "Tailors" ? "text-sky-700  font-semibold" : ""}`} onClick={() => setNavState("Tailors")}>Tailors</button>
-            <button className={`text-[1vw] ${navState == "Payments" ? "text-sky-700  font-semibold" : ""}`} onClick={() => setNavState("Payments")}>Payments</button>
-            <button className={`text-[1vw] ${navState == "Tasks" ? "text-sky-700  font-semibold" : ""}`} onClick={() => setNavState("Tasks")}>Tasks</button>
-          </div>
+          <div className="flex flex-col sm:flex-row w-full max-w-full justify-between mb-2 sm:mb-3 bg-sky-50 px-1 sm:px-2 py-1 sm:py-2 rounded-lg">
+  <button
+    className={`w-full sm:w-auto text-sm sm:text-base ${
+      navState === "Overview" ? "text-sky-700 font-semibold" : ""
+    }`}
+    onClick={() => setNavState("Overview")}
+  >
+    Overview
+  </button>
+  <button
+    className={`w-full sm:w-auto text-sm sm:text-base ${
+      navState === "Customer & Project Details" ? "text-sky-700 font-semibold" : ""
+    }`}
+    onClick={() => setNavState("Customer & Project Details")}
+  >
+    Customer & Project Details
+  </button>
+  <button
+    className={`w-full sm:w-auto text-sm sm:text-base ${
+      navState === "Material Selection" ? "text-sky-700 font-semibold" : ""
+    }`}
+    onClick={() => setNavState("Material Selection")}
+  >
+    Material Selection
+  </button>
+  <button
+    className={`w-full sm:w-auto text-sm sm:text-base ${
+      navState === "Measurement" ? "text-sky-700 font-semibold" : ""
+    }`}
+    onClick={() => setNavState("Measurement")}
+  >
+    Measurement
+  </button>
+  <button
+    className={`w-full sm:w-auto text-sm sm:text-base ${
+      navState === "Quotation" ? "text-sky-700 font-semibold" : ""
+    }`}
+    onClick={() => setNavState("Quotation")}
+  >
+    Quotation
+  </button>
+  <button
+    className={`w-full sm:w-auto text-sm sm:text-base ${
+      navState === "Goods" ? "text-sky-700 font-semibold" : ""
+    }`}
+    onClick={() => setNavState("Goods")}
+  >
+    Goods
+  </button>
+  <button
+    className={`w-full sm:w-auto text-sm sm:text-base ${
+      navState === "Tailors" ? "text-sky-700 font-semibold" : ""
+    }`}
+    onClick={() => setNavState("Tailors")}
+  >
+    Tailors
+  </button>
+  <button
+    className={`w-full sm:w-auto text-sm sm:text-base ${
+      navState === "Payments" ? "text-sky-700 font-semibold" : ""
+    }`}
+    onClick={() => setNavState("Payments")}
+  >
+    Payments
+  </button>
+  <button
+    className={`w-full sm:w-auto text-sm sm:text-base ${
+      navState === "Tasks" ? "text-sky-700 font-semibold" : ""
+    }`}
+    onClick={() => setNavState("Tasks")}
+  >
+    Tasks
+  </button>
+</div>
           {navState == "Overview" &&  
           <div className="flex flex-col justify-between">
             <OverviewPage 

@@ -1625,101 +1625,101 @@ const handleItemTaxChange = (i: number, tax: string) => {
   <div className="space-y-6">
     {selections.map((selection, mainIndex) => (
       <div key={mainIndex} className="w-full">
-        <h3 className="font-semibold text-lg text-gray-700 mb-3">{selection.area}</h3>
-        <div className="overflow-x-auto rounded-lg border border-gray-200">
-          <table className="w-full bg-white">
-            <thead>
-              <tr className="bg-gray-100 text-gray-700 text-sm font-semibold">
-                <th className="py-3 px-4 text-center">SR</th>
-                <th className="py-3 px-4">Product Name</th>
-                <th className="py-3 px-4">Size</th>
-                <th className="py-3 px-4">MRP</th>
-                <th className="py-3 px-4">Quantity</th>
-                <th className="py-3 px-4">Subtotal</th>
-                <th className="py-3 px-4">Tax Rate(%)</th>
-                <th className="py-3 px-4">Tax Amount</th>
-                <th className="py-3 px-4">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {selection.areacollection && selection.areacollection.length > 0 ? (
-                selection.areacollection.map((collection, collectionIndex) => {
-                  if (!Array.isArray(collection.items) || !collection.items.length) {
-                    return (
-                      <tr key={`error-${collectionIndex}`}>
-                        <td colSpan={9} className="text-center text-red-500 py-4 text-sm">
-                          No items found for collection {collectionIndex + 1}
-                        </td>
-                      </tr>
-                    );
-                  }
-
-                  // Use the first item from items array
-                  const item = collection.items[0];
-                  const qty = collection.quantities?.[0] || 0;
-
-                  return (
-                    <tr
-                      key={`${mainIndex}-${collectionIndex}`}
-                      className="flex flex-col sm:table-row border-b border-gray-200 hover:bg-gray-50"
-                    >
-                      <td className="py-3 px-4 text-sm text-center">1</td>
-                      <td className="py-3 px-4 text-sm">{collection.productGroup[0] || "N/A"}</td>
-                      <td className="py-3 px-4 text-sm">
-                        {collection.measurement.width && collection.measurement.height
-                          ? `${collection.measurement.width} x ${collection.measurement.height} ${collection.measurement.unit || ""}`
-                          : "N/A"}
-                      </td>
-                      <td className="py-3 px-4 text-sm">
-                        INR {(item[4] * parseFloat(collection.measurement.quantity || "0")).toFixed(2)}
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex flex-col gap-1">
-                          <input
-                            type="number"
-                            value={collection.quantities?.[0] || ""}
-                            onChange={(e) =>
-                              handleQuantityChange(
-                                `${mainIndex}-${collectionIndex}-0`,
-                                e.target.value,
-                                mainIndex,
-                                collectionIndex,
-                                collection.measurement.quantity,
-                                item[4],
-                                item[5],
-                                0
-                              )
-                            }
-                            className="border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-20"
-                            min="0"
-                          />
-                          <p className="text-xs text-gray-500">{item[3] || "N/A"}</p>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4 text-sm">
-                        INR {(item[4] * parseFloat(collection.measurement.quantity || "0") * qty).toFixed(2)}
-                      </td>
-                      <td className="py-3 px-4 text-sm">{item[5] || "0"}%</td>
-                      <td className="py-3 px-4 text-sm">
-                        INR {collection.totalTax[0]?.toFixed(2) || "0.00"}
-                      </td>
-                      <td className="py-3 px-4 text-sm">
-                        INR {collection.totalAmount[0]?.toFixed(2) || "0.00"}
-                      </td>
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan={9} className="text-center py-4 text-gray-500 text-sm">
-                    No product data available.
+  <h3 className="font-semibold text-lg sm:text-xl md:text-2xl text-gray-700 mb-2 sm:mb-3">{selection.area}</h3>
+  <div className="overflow-x-auto rounded-lg border border-gray-200">
+    <table className="w-full bg-white min-w-[800px]">
+      <thead>
+        <tr className="bg-gray-100 text-gray-700 text-xs sm:text-sm md:text-base font-semibold">
+          <th className="py-2 sm:py-3 px-2 sm:px-4 text-center">SR</th>
+          <th className="py-2 sm:py-3 px-2 sm:px-4">Product Name</th>
+          <th className="py-2 sm:py-3 px-2 sm:px-4">Size</th>
+          <th className="py-2 sm:py-3 px-2 sm:px-4">MRP</th>
+          <th className="py-2 sm:py-3 px-2 sm:px-4">Quantity</th>
+          <th className="py-2 sm:py-3 px-2 sm:px-4">Subtotal</th>
+          <th className="py-2 sm:py-3 px-2 sm:px-4">Tax Rate(%)</th>
+          <th className="py-2 sm:py-3 px-2 sm:px-4">Tax Amount</th>
+          <th className="py-2 sm:py-3 px-2 sm:px-4">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {selection.areacollection && selection.areacollection.length > 0 ? (
+          selection.areacollection.map((collection, collectionIndex) => {
+            if (!Array.isArray(collection.items) || !collection.items.length) {
+              return (
+                <tr key={`error-${collectionIndex}`}>
+                  <td colSpan={9} className="text-center text-red-500 py-2 sm:py-4 text-xs sm:text-sm">
+                    No items found for collection {collectionIndex + 1}
                   </td>
                 </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+              );
+            }
+
+            // Use the first item from items array
+            const item = collection.items[0];
+            const qty = collection.quantities?.[0] || 0;
+
+            return (
+              <tr
+                key={`${mainIndex}-${collectionIndex}`}
+                className="border-b border-gray-200 hover:bg-gray-50"
+              >
+                <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm text-center">1</td>
+                <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">{collection.productGroup[0] || "N/A"}</td>
+                <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">
+                  {collection.measurement.width && collection.measurement.height
+                    ? `${collection.measurement.width} x ${collection.measurement.height} ${collection.measurement.unit || ""}`
+                    : "N/A"}
+                </td>
+                <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">
+                  INR {(item[4] * parseFloat(collection.measurement.quantity || "0")).toFixed(2)}
+                </td>
+                <td className="py-2 sm:py-3 px-2 sm:px-4">
+                  <div className="flex flex-col gap-1">
+                    <input
+                      type="number"
+                      value={collection.quantities?.[0] || ""}
+                      onChange={(e) =>
+                        handleQuantityChange(
+                          `${mainIndex}-${collectionIndex}-0`,
+                          e.target.value,
+                          mainIndex,
+                          collectionIndex,
+                          collection.measurement.quantity,
+                          item[4],
+                          item[5],
+                          0
+                        )
+                      }
+                      className="border border-gray-300 rounded-md px-1 sm:px-3 py-1 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-16 sm:w-20"
+                      min="0"
+                    />
+                    <p className="text-xs sm:text-sm text-gray-500">{item[3] || "N/A"}</p>
+                  </div>
+                </td>
+                <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">
+                  INR {(item[4] * parseFloat(collection.measurement.quantity || "0") * qty).toFixed(2)}
+                </td>
+                <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">{item[5] || "0"}%</td>
+                <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">
+                  INR {collection.totalTax[0]?.toFixed(2) || "0.00"}
+                </td>
+                <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">
+                  INR {collection.totalAmount[0]?.toFixed(2) || "0.00"}
+                </td>
+              </tr>
+            );
+          })
+        ) : (
+          <tr>
+            <td colSpan={9} className="text-center py-2 sm:py-4 text-gray-500 text-xs sm:text-sm">
+              No product data available.
+            </td>
+          </tr>
+        )}
+      </tbody>
+    </table>
+  </div>
+</div>
     ))}
 
     {/* Miscellaneous Section */}

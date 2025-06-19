@@ -107,9 +107,9 @@ const CustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer, pro
       <div className="flex md:!flex-nowrap flex-wrap flex-row justify-between gap-2">
         {/* Select Customer */}
         <div className="flex  flex-col md:!w-1/2 w-full">
-          <div className="flex  flex-row gap-3 px-2">
+          <div className="flex flex-wrap flex-row gap-3 px-2">
             <p className="">Select Customer</p>
-            <button className="mb-3 flex items-center px-2 py-1 border-1 border-blue-400 text-blue-500 font-semibold !rounded-xl hover:bg-blue-50 transition" onClick={() => setIsOpen(true)}>
+            <button className="mb-3 md:!text-[15px] !text-xs flex items-center px-2 py-1 border-1 border-blue-400 text-blue-500 font-semibold !rounded-xl hover:bg-blue-50 transition" onClick={() => setIsOpen(true)}>
             <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">+</span> Customer
           </button>
           </div>
