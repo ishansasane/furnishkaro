@@ -92,34 +92,33 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
         addPayment ? "hidden" : ""
       } flex flex-col gap-3 mt-3 w-full`}
     >
-      <p className="text-[1.3vw] font-semibold">Payments</p>
+      <p className="text-base sm:text-lg font-semibold mb-2">Payments</p>
 
-      <div className="flex flex-row w-full justify-between gap-3">
-        <div className="border rounded-lg w-1/4 p-3">
-          <p className="text-[1.3vw] text-gray-500">Total Amount</p>
-          <p className="text-[1.3vw]">{Amount.toFixed(2)}</p>
+      <div className="flex flex-col sm:flex-row w-full justify-between gap-3">
+        <div className="border rounded-lg w-full sm:w-1/4 p-3">
+          <p className="text-gray-500 text-xs sm:text-sm">Total Amount</p>
+          <p className="text-xs sm:text-sm">{Amount.toFixed(2)}</p>
         </div>
-        <div className="border rounded-lg w-1/4 p-3">
-          <p className="text-[1.3vw] text-gray-500">Payment Received</p>
-          <p className="text-[1.3vw]">{Received}</p>
+        <div className="border rounded-lg w-full sm:w-1/4 p-3">
+          <p className="text-gray-500 text-xs sm:text-sm">Payment Received</p>
+          <p className="text-xs sm:text-sm">{Received}</p>
         </div>
-        <div className="border rounded-lg w-1/4 p-3">
-          <p className="text-[1.3vw] text-gray-500">Payment Due</p>
-          <p className="text-[1.3vw]">{(Amount - Received).toFixed(2)}</p>
+        <div className="border rounded-lg w-full sm:w-1/4 p-3">
+          <p className="text-gray-500 text-xs sm:text-sm">Payment Due</p>
+          <p className="text-xs sm:text-sm">{(Amount - Received).toFixed(2)}</p>
         </div>
-        <div className="border rounded-lg w-1/4 p-3">
-          <p className="text-[1.3vw] text-gray-500">Discount</p>
-          <p className="text-[1.3vw]">{Discount + ` in ${discountType}`}</p>
+        <div className="border rounded-lg w-full sm:w-1/4 p-3">
+          <p className="text-gray-500 text-xs sm:text-sm">Discount</p>
+          <p className="text-xs sm:text-sm">{Discount + ` in ${discountType}`}</p>
         </div>
       </div>
 
       <div className="flex flex-col w-full">
-        <div className="flex flex-row justify-between mt-2">
-          <p className="text-[1.2vw] font-semibold">Received Payments</p>
+        <div className="flex flex-col sm:flex-row justify-between mt-2 gap-2">
+          <p className="text-base sm:text-lg font-semibold">Received Payments</p>
           <button
             onClick={() => setAddPayment(true)}
-            style={{ borderRadius: "8px" }}
-            className="shadow-xl hover:bg-sky-700 bg-sky-600 text-white px-2 h-8"
+            className="shadow-xl hover:bg-sky-700 bg-sky-600 text-white px-4 py-2 rounded-lg text-xs sm:text-sm"
           >
             Add Payment
           </button>
@@ -127,24 +126,32 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
 
         <table className="w-full border border-gray-300 mt-2">
           <thead>
-            <tr className="bg-gray-100">
-              <th className="text-left p-2">Amount Received</th>
-              <th className="text-left p-2">Received Date</th>
-              <th className="text-left p-2">Payment Mode</th>
-              <th className="text-left p-2">Remarks</th>
-              <th className="text-left p-2">Options</th>
+            <tr className="bg-gray-100 flex flex-col sm:flex-row hidden sm:flex">
+              <th className="w-full sm:w-1/5 text-left p-2 text-xs sm:text-sm">Amount Received</th>
+              <th className="w-full sm:w-1/5 text-left p-2 text-xs sm:text-sm">Received Date</th>
+              <th className="w-full sm:w-1/5 text-left p-2 text-xs sm:text-sm">Payment Mode</th>
+              <th className="w-full sm:w-1/5 text-left p-2 text-xs sm:text-sm">Remarks</th>
+              <th className="w-full sm:w-1/5 text-left p-2 text-xs sm:text-sm">Options</th>
             </tr>
           </thead>
           <tbody>
             {paymentData
               ?.filter((data) => data[1] === projectData.projectName)
               .map((data, index) => (
-                <tr key={index} className="border-t">
-                  <td className="p-2">{data[2]}</td>
-                  <td className="p-2">{data[3]}</td>
-                  <td className="p-2">{data[4]}</td>
-                  <td className="p-2">{data[5]}</td>
-                  <td className="p-2">
+                <tr key={index} className="border-t flex flex-col sm:flex-row">
+                  <td className="w-full sm:w-1/5 p-2 text-xs sm:text-sm before:content-['Amount_Received:_'] sm:before:content-none before:font-bold before:pr-2">
+                    {data[2]}
+                  </td>
+                  <td className="w-full sm:w-1/5 p-2 text-xs sm:text-sm before:content-['Received_Date:_'] sm:before:content-none before:font-bold before:pr-2">
+                    {data[3]}
+                  </td>
+                  <td className="w-full sm:w-1/5 p-2 text-xs sm:text-sm before:content-['Payment_Mode:_'] sm:before:content-none before:font-bold before:pr-2">
+                    {data[4]}
+                  </td>
+                  <td className="w-full sm:w-1/5 p-2 text-xs sm:text-sm before:content-['Remarks:_'] sm:before:content-none before:font-bold before:pr-2">
+                    {data[5]}
+                  </td>
+                  <td className="w-full sm:w-1/5 p-2 text-xs sm:text-sm before:content-['Options:_'] sm:before:content-none before:font-bold before:pr-2">
                     <div className="flex flex-row gap-2 items-center">
                       {canDeleteOrEdit && (
                         <>
@@ -168,20 +175,10 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
         </table>
       </div>
 
-      <div className="flex flex-row justify-between mt-4">
-        <button
-          onClick={() => setNavState("Tailors")}
-          className="rounded-lg border px-2 h-8 bg-white"
-        >
-          Back
-        </button>
-        <button
-          onClick={() => setNavState("Tasks")}
-          className="rounded-lg text-white border px-2 h-8 bg-sky-600"
-        >
-          Next
-        </button>
-      </div>
+      <div className="flex flex-row justify-between">
+                <button  onClick={() => setNavState("Tailors")} style={{ borderRadius : "8px" }} className="rounded-lg border px-2 h-8 bg-white">Back</button>
+                <button onClick={() => setNavState("Tasks")} style={{ borderRadius : "8px" }} className="rounded-lg text-white border px-2 h-8 bg-sky-600">Next</button>
+              </div>
     </div>
   );
 };

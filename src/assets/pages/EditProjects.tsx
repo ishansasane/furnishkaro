@@ -1790,188 +1790,202 @@ const sendProjectData = async () => {
           }
           {
             navState == "Quotation" && <div className="flex flex-col gap-3">
-<div className="flex flex-col p-6 border rounded-lg w-full shadow-2xl">
-      <p className="text-[1.1vw]">Quotation</p>
-      <div className="flex flex-col gap-3 w-full">
-        {selections.map((selection, mainindex) => (
-          <div key={mainindex} className="w-full">
-            <p className="text-[1.1vw] font-semibold mb-2">{selection.area}</p>
-            <table className="w-full border-collapse mb-6 text-[0.95vw]">
-              <thead>
-                <tr className="flex justify-between w-full bg-gray-100 p-2 border-b font-semibold">
-                  <td className="w-[10%]">Sr. No.</td>
-                  <td className="w-[45%]">Product Name</td>
-                  <td className="w-[45%]">Size</td>
-                  <td className="w-[20%]">MRP</td>
-                  <td className="w-[20%]">Quantity</td>
-                  <td className="w-[20%]">Subtotal</td>
-                  <td className="w-[20%]">Tax Rate (%)</td>
-                  <td className="w-[20%]">Tax Amount</td>
-                  <td className="w-[20%]">Total</td>
-                </tr>
-              </thead>
-              <tbody>
-{selection.areacollection && selection.areacollection.length > 0 ? (
-  selection.areacollection.map((collection, collectionIndex) => {
-    if (!Array.isArray(collection.items)) {
-      return (
-        <tr key={`error-${collectionIndex}`}>
-          <td colSpan={9} className="text-center text-red-500 text-sm py-2">
-            No items found for collection {collectionIndex + 1}
-          </td>
-        </tr>
-      );
-    }
 
-    return collection.items.map((item: any, itemIndex: number) => {
-      const key = `${mainindex}-${collectionIndex}-${itemIndex}`;
-      const qty = collection.quantities?.[itemIndex] || 0;
-
-      return (
-        <tr
-          key={key}
-          className="flex flex-col sm:flex-row justify-between w-full border-b p-2 sm:p-4"
-        >
-          <td className="w-full sm:w-[10%] text-xs sm:text-sm">{itemIndex + 1}</td>
-          <td className="w-full sm:w-[45%] text-xs sm:text-sm">
-            {item[0] + " * " + collection.measurement.quantity}
-          </td>
-          <td className="w-full sm:w-[45%] text-xs sm:text-sm">
-            {collection.measurement.width +
-              " x " +
-              collection.measurement.height +
-              " " +
-              collection.measurement.unit}
-          </td>
-          <td className="w-full sm:w-[20%] text-xs sm:text-sm">
-            {(item[4] * parseFloat(collection.measurement.quantity)).toFixed(2)}
-          </td>
-          <td className="w-full sm:w-[20%]">
-            <div className="flex flex-col">
-              <input
-                type="text"
-                value={collection.quantities?.[itemIndex] || ""}
-                onChange={(e) =>
-                  handleQuantityChange(
-                    key,
-                    e.target.value,
-                    mainindex,
-                    collectionIndex,
-                    collection.measurement.quantity,
-                    item[4],
-                    item[5],
-                    itemIndex
-                  )
+  <div className="flex flex-col p-6 border rounded-lg w-full shadow-2xl">
+      <p className="">Quotation</p>
+     <div className="flex flex-col gap-3 w-full">
+  {selections.map((selection, mainindex) => (
+    <div key={mainindex} className="w-full">
+      <p className="text-base sm:text-lg font-semibold mb-2">{selection.area}</p>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse mb-6 text-xs sm:text-sm min-w-[600px] sm:min-w-full">
+          <thead>
+            <tr className="flex flex-col sm:flex-row justify-between w-full bg-gray-100 p-2 border-b font-semibold hidden sm:flex">
+              <td className="w-full sm:w-[10%] py-1">Sr. No.</td>
+              <td className="w-full sm:w-[45%] py-1">Product Name</td>
+              <td className="w-full sm:w-[45%] py-1">Size</td>
+              <td className="w-full sm:w-[20%] py-1">MRP</td>
+              <td className="w-full sm:w-[20%] py-1">Quantity</td>
+              <td className="w-full sm:w-[20%] py-1">Subtotal</td>
+              <td className="w-full sm:w-[20%] py-1">Tax Rate (%)</td>
+              <td className="w-full sm:w-[20%] py-1">Tax Amount</td>
+              <td className="w-full sm:w-[20%] py-1">Total</td>
+            </tr>
+          </thead>
+          <tbody>
+            {selection.areacollection && selection.areacollection.length > 0 ? (
+              selection.areacollection.map((collection, collectionIndex) => {
+                if (!Array.isArray(collection.items)) {
+                  return (
+                    <tr key={`error-${collectionIndex}`}>
+                      <td colSpan={9} className="text-center text-red-500 text-xs sm:text-sm py-2">
+                        No items found for collection {collectionIndex + 1}
+                      </td>
+                    </tr>
+                  );
                 }
-                className="border w-full sm:w-2/5 px-2 py-1 rounded text-xs sm:text-sm"
-              />
-              <p className="text-[10px] sm:text-xs text-gray-600">{item[3]}</p>
-            </div>
-          </td>
-          <td className="w-full sm:w-[20%] text-xs sm:text-sm">
-            {(item[4] * parseFloat(collection.measurement.quantity) * qty).toFixed(2)}
-          </td>
-          <td className="w-full sm:w-[20%] text-xs sm:text-sm">{item[5]}</td>
-          <td className="w-full sm:w-[20%] text-xs sm:text-sm">
-            {collection.totalTax[itemIndex] ? collection.totalTax[itemIndex].toFixed(2) : "0.00"}
-          </td>
-          <td className="w-full sm:w-[20%] text-xs sm:text-sm">
-            {collection.totalAmount[itemIndex] ? collection.totalAmount[itemIndex].toFixed(2) : "0.00"}
-          </td>
-        </tr>
-      );
-    });
-  })
-) : (
-  <tr>
-    <td colSpan={9} className="text-center py-2 text-gray-500 text-sm sm:text-base">
-      No product data available.
-    </td>
-  </tr>
-)}
-</tbody>
 
-            </table>
-          </div>
-        ))}
+                return collection.items.map((item: any, itemIndex: number) => {
+                  const key = `${mainindex}-${collectionIndex}-${itemIndex}`;
+                  const qty = collection.quantities?.[itemIndex] || 0;
+
+                  return (
+                    <tr
+                      key={key}
+                      className="flex flex-col sm:flex-row justify-between w-full border-b p-2 sm:p-4"
+                    >
+                      <td className="w-full sm:w-[10%] text-xs sm:text-sm py-1 sm:text-center before:content-['Sr._No.:_'] sm:before:content-none before:font-bold before:pr-2">
+                        {itemIndex + 1}
+                      </td>
+                      <td className="w-full sm:w-[45%] text-xs sm:text-sm py-1 before:content-['Product_Name:_'] sm:before:content-none before:font-bold before:pr-2">
+                        {item[0] + " * " + collection.measurement.quantity}
+                      </td>
+                      <td className="w-full sm:w-[45%] text-xs sm:text-sm py-1 before:content-['Size:_'] sm:before:content-none before:font-bold before:pr-2">
+                        {collection.measurement.width +
+                          " x " +
+                          collection.measurement.height +
+                          " " +
+                          collection.measurement.unit}
+                      </td>
+                      <td className="w-full sm:w-[20%] text-xs sm:text-sm py-1 sm:text-center before:content-['MRP:_'] sm:before:content-none before:font-bold before:pr-2">
+                        {(item[4] * parseFloat(collection.measurement.quantity)).toFixed(2)}
+                      </td>
+                      <td className="w-full sm:w-[20%] py-1 before:content-['Quantity:_'] sm:before:content-none before:font-bold before:pr-2">
+                        <div className="flex flex-col">
+                          <input
+                            type="text"
+                            value={collection.quantities?.[itemIndex] || ""}
+                            onChange={(e) =>
+                              handleQuantityChange(
+                                key,
+                                e.target.value,
+                                mainindex,
+                                collectionIndex,
+                                collection.measurement.quantity,
+                                item[4],
+                                item[5],
+                                itemIndex
+                              )
+                            }
+                            className="border w-max sm:w-4/5 px-2 py-1 rounded text-xs sm:text-sm min-w-[80px]"
+                          />
+                          <p className="text-[10px] sm:text-xs text-gray-600 mt-1">{item[3]}</p>
+                        </div>
+                      </td>
+                      <td className="w-full sm:w-[20%] text-xs sm:text-sm py-1 sm:text-center before:content-['Subtotal:_'] sm:before:content-none before:font-bold before:pr-2">
+                        {(item[4] * parseFloat(collection.measurement.quantity) * qty).toFixed(2)}
+                      </td>
+                      <td className="w-full sm:w-[20%] text-xs sm:text-sm py-1 sm:text-center before:content-['Tax_Rate_(%):_'] sm:before:content-none before:font-bold before:pr-2">
+                        {item[5]}
+                      </td>
+                      <td className="w-full sm:w-[20%] text-xs sm:text-sm py-1 sm:text-center before:content-['Tax_Amount:_'] sm:before:content-none before:font-bold before:pr-2">
+                        {collection.totalTax[itemIndex] ? collection.totalTax[itemIndex].toFixed(2) : "0.00"}
+                      </td>
+                      <td className="w-full sm:w-[20%] text-xs sm:text-sm py-1 sm:text-center before:content-['Total:_'] sm:before:content-none before:font-bold before:pr-2">
+                        {collection.totalAmount[itemIndex] ? collection.totalAmount[itemIndex].toFixed(2) : "0.00"}
+                      </td>
+                    </tr>
+                  );
+                });
+              })
+            ) : (
+              <tr>
+                <td colSpan={9} className="text-center py-2 text-gray-500 text-xs sm:text-base">
+                  No product data available.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
-      <div className="border p-6 rounded-lg w-full flex flex-col">
-  <p className="text-[1.1vw] font-semibold">Miscellaneous</p>
+    </div>
+  ))}
+</div>
+      <div className="border p-4 sm:p-6 rounded-lg w-full flex flex-col">
+  <p className="text-base sm:text-lg font-semibold">Miscellaneous</p>
   <div className="flex w-full flex-col">
     <div className="flex flex-row justify-between items-center mt-4">
       <button
-        className="flex flex-row gap-2 rounded-xl bg-sky-50 hover:bg-sky-100 items-center px-2 py-1"
+        className="flex flex-row gap-2 rounded-xl bg-sky-50 hover:bg-sky-100 items-center px-2 py-1 text-sm"
         onClick={handleAddMiscItem}
       >
-        <FaPlus className="text-sky-500 mt-1" />
+        <FaPlus className="text-sky-500" />
         Add Item
       </button>
     </div>
 
     <table className="mt-3 w-full">
       <thead>
-        <tr className="ml-3 flex text-[1.1vw] w-full justify-between">
-          <td className="w-[3vw]">SR</td>
-          <td className="w-[6vw]">Item Name</td>
-          <td className="w-[6vw]">Quantity</td>
-          <td className="w-[6vw]">Rate</td>
-          <td className="w-[6vw]">Net Rate</td>
-          <td className="w-[6vw]">Tax (%)</td>
-          <td className="w-[6vw]">Tax Amount</td>
-          <td className="w-[6vw]">Total Amount</td>
-          <td className="w-[6vw]">Remark</td>
-          <td className="w-[6vw]">Actions</td>
+        <tr className="flex flex-col sm:flex-row w-full justify-between hidden sm:flex">
+          <td className="w-full sm:w-[10%] py-1 text-xs sm:text-sm text-center">SR</td>
+          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm">Item Name</td>
+          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm">Quantity</td>
+          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm">Rate</td>
+          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm text-center">Net Rate</td>
+          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm">Tax (%)</td>
+          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm text-center">Tax Amount</td>
+          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm text-center">Total Amount</td>
+          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm">Remark</td>
+          <td className="w-full sm:w-[10%] py-1 text-xs sm:text-sm text-center">Actions</td>
         </tr>
       </thead>
 
       <tbody className="flex flex-col w-full">
         {additionalItems.map((item, i) => (
-          <tr key={i} className="w-full flex flex-row justify-between mt-2">
-            <td className="text-center w-[3vw]">{i + 1}</td>
-            <td>
+          <tr key={i} className="w-full flex flex-col sm:flex-row justify-between mt-2 border-b sm:border-b-0">
+            <td className="w-full sm:w-[10%] py-1 text-xs sm:text-sm text-left sm:text-center before:content-['SR:_'] sm:before:content-none before:font-bold before:pr-2">
+              {i + 1}
+            </td>
+            <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Item_Name:_'] sm:before:content-none before:font-bold before:pr-2">
               <input
                 onChange={(e) => handleItemNameChange(i, e.target.value)}
-                className="pl-2 w-[6vw] border rounded-lg"
+                className="pl-2 w-full border rounded-lg text-xs sm:text-sm min-w-[80px]"
                 value={item.name || ""}
                 type="text"
               />
             </td>
-            <td>
+            <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Quantity:_'] sm:before:content-none before:font-bold before:pr-2">
               <input
                 onChange={(e) => handleItemQuantityChange(i, e.target.value)}
-                className="pl-2 w-[6vw] border rounded-lg"
+                className="pl-2 w-full border rounded-lg text-xs sm:text-sm min-w-[80px]"
                 value={item.quantity || ""}
                 type="text"
               />
             </td>
-            <td>
+            <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Rate:_'] sm:before:content-none before:font-bold before:pr-2">
               <input
                 onChange={(e) => handleItemRateChange(i, e.target.value)}
-                className="pl-2 w-[6vw] border rounded-lg"
+                className="pl-2 w-full border rounded-lg text-xs sm:text-sm min-w-[80px]"
                 value={item.rate || ""}
                 type="text"
               />
             </td>
-            <td className="w-[6vw] text-center">{item.netRate}</td>
-            <td>
+            <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm text-left sm:text-center before:content-['Net_Rate:_'] sm:before:content-none before:font-bold before:pr-2">
+              {item.netRate}
+            </td>
+            <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Tax_(%):_'] sm:before:content-none before:font-bold before:pr-2">
               <input
                 onChange={(e) => handleItemTaxChange(i, e.target.value)}
-                className="pl-2 w-[6vw] border rounded-lg"
+                className="pl-2 w-full border rounded-lg text-xs sm:text-sm min-w-[80px]"
                 value={item.tax || ""}
                 type="text"
               />
             </td>
-            <td className="w-[6vw] text-center">{item.taxAmount || 0}</td>
-            <td className="w-[6vw] text-center">{item.totalAmount || 0}</td>
-            <td>
+            <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm text-left sm:text-center before:content-['Tax_Amount:_'] sm:before:content-none before:font-bold before:pr-2">
+              {item.taxAmount || 0}
+            </td>
+            <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm text-left sm:text-center before:content-['Total_Amount:_'] sm:before:content-none before:font-bold before:pr-2">
+              {item.totalAmount || 0}
+            </td>
+            <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Remark:_'] sm:before:content-none before:font-bold before:pr-2">
               <input
                 onChange={(e) => handleItemRemarkChange(i, e.target.value)}
-                className="pl-2 w-[6vw] border rounded-lg"
+                className="pl-2 w-full border rounded-lg text-xs sm:text-sm min-w-[80px]"
                 value={item.remark || ""}
                 type="text"
               />
             </td>
-            <td className="w-[6vw] text-center">
+            <td className="w-full sm:w-[10%] py-1 text-xs sm:text-sm text-left sm:text-center before:content-['Actions:_'] sm:before:content-none before:font-bold before:pr-2">
               <button onClick={() => handleDeleteMiscItem(i)}>
                 <FaTrash className="text-red-500 hover:text-red-600" />
               </button>
@@ -1984,82 +1998,92 @@ const sendProjectData = async () => {
 </div>
 
     </div>
-        <div className="flex flex-row gap-3 justify-between w-full">
-          <div className="flex flex-col gap-2 w-1/2 rounded mt-3 p-6 shadow-xl border">
-            <div className="flex flex-row justify-between">
-              <select
-                className="border p-2 rounded w-1/2 h-16"
-                value={""}
-                
-              >
-                <option value="">Bank Details</option>
-                {bankDetails.map((data, index) => (
-                  <option key={index} value={data}>
-                    {data}
-                  </option>
-                ))}
-              </select>
-              <button><FaPlus size={18} className="text-sky-600 hover:text-sky-800"/></button>
-            </div>
-            <textarea placeholder="Description" className="w-full rounded-lg border py-2 pl-2"></textarea>
-            <select
-              className="border p-2 rounded w-1/2 h-16"
-              value={""}
-              
-            >
-              <option value="">Terms & Conditions</option>
-              {termsCondiditions.map((data, index) => (
-                <option key={index} value={data}>
-                  {data}
-                </option>
-              ))}
-            </select>
-            <textarea placeholder="Description" className="w-full rounded-lg border py-2 pl-2"></textarea>
-          </div>
-          <div className="shadow-xl p-6 flex flex-col gap-2 border w-1/2 rounded-lg">
-            <p className="text-[1.2vw]">Summary</p>
-            <div className="flex flex-row justify-between w-full">
-              <p className="text-[1.1vw]">Sub Total</p>
-              <p className="text-[1.1vw]">{Amount}</p>
-            </div>
-            <div className="flex flex-row justify-between w-full">
-              <p className="text-[1.1vw]">Total Tax Amount</p>
-              <p className="text-[1.1vw]">{Tax}</p>
-            </div>
-            <div className="flex flex-row justify-between w-full">
-              <p className="text-[1.1vw]">Total Amount</p>
-              <p className="text-[1.1vw]">{parseFloat((Amount).toFixed(2))}</p>
-            </div>
-            <div className="border border-gray-400"></div>
-            <div className="flex justify-between mt-1 w-full">
-              <p className="text-[1.1vw]">Discount</p>
-              <div className="flex items-center gap-2">
-              <select
-                value={discountType} // <- This ensures the selected value is reflected
-                onChange={(e) => {handleDiscountChange(Discount, e.target.value)}}
-                className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              >
-                <option value="cash">₹</option>
-                <option value="percent">%</option>
-              </select>
-
-                  <input
-                    className="w-24 border border-gray-300 rounded-md px-3 py-1 text-sm text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    value={Discount}
-                    onChange={(e) => {handleDiscountChange(e.target.value, discountType);}}
-                    type="number"
-                    min="0"
-                  />
-                </div>
-            </div>
-            <div className="border border-gray-400"></div>
-            <div className="flex w-full flex-row items-center justify-between">
-              <p className="text-[1.1vw]">Grand Total</p>
-              <p className="text-[1.1vw]">{grandTotal}</p>
-            </div>
-            <button onClick={sendProjectData} style={{borderRadius : "10px"}} className="rounded-lg bg-sky-700 hover:bg-sky-800 text-white p-[6px]">Edit Project & Generate Quote</button>
-          </div>
-        </div>
+       <div className="flex flex-col sm:flex-row gap-3 justify-between w-full">
+  <div className="flex flex-col gap-2 w-full sm:w-1/2 rounded mt-3 p-4 sm:p-6 shadow-xl border">
+    <div className="flex flex-row justify-between items-center">
+      <select
+        className="border p-2 rounded w-full sm:w-1/2 h-12 sm:h-16 text-xs sm:text-sm"
+        value={""}
+      >
+        <option value="">Bank Details</option>
+        {bankDetails.map((data, index) => (
+          <option key={index} value={data}>
+            {data}
+          </option>
+        ))}
+      </select>
+      <button>
+        <FaPlus size={18} className="text-sky-600 hover:text-sky-800" />
+      </button>
+    </div>
+    <textarea
+      placeholder="Description"
+      className="w-full rounded-lg border py-2 pl-2 text-xs sm:text-sm min-h-[80px]"
+    ></textarea>
+    <select
+      className="border p-2 rounded w-full sm:w-1/2 h-12 sm:h-16 text-xs sm:text-sm"
+      value={""}
+    >
+      <option value="">Terms & Conditions</option>
+      {termsCondiditions.map((data, index) => (
+        <option key={index} value={data}>
+          {data}
+        </option>
+      ))}
+    </select>
+    <textarea
+      placeholder="Description"
+      className="w-full rounded-lg border py-2 pl-2 text-xs sm:text-sm min-h-[80px]"
+    ></textarea>
+  </div>
+  <div className="shadow-xl p-4 sm:p-6 flex flex-col gap-2 border w-full sm:w-1/2 rounded-lg">
+    <p className="text-base sm:text-lg font-semibold">Summary</p>
+    <div className="flex flex-row justify-between w-full text-xs sm:text-sm">
+      <p>Sub Total</p>
+      <p>{Amount}</p>
+    </div>
+    <div className="flex flex-row justify-between w-full text-xs sm:text-sm">
+      <p>Total Tax Amount</p>
+      <p>{Tax}</p>
+    </div>
+    <div className="flex flex-row justify-between w-full text-xs sm:text-sm">
+      <p>Total Amount</p>
+      <p>{parseFloat((Amount).toFixed(2))}</p>
+    </div>
+    <div className="border border-gray-400"></div>
+    <div className="flex justify-between mt-1 w-full text-xs sm:text-sm">
+      <p>Discount</p>
+      <div className="flex items-center gap-2">
+        <select
+          value={discountType}
+          onChange={(e) => handleDiscountChange(Discount, e.target.value)}
+          className="border border-gray-300 rounded-md px-2 py-1 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+        >
+          <option value="cash">₹</option>
+          <option value="percent">%</option>
+        </select>
+        <input
+          className="w-20 sm:w-24 border border-gray-300 rounded-md px-3 py-1 text-xs sm:text-sm text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          value={Discount}
+          onChange={(e) => handleDiscountChange(e.target.value, discountType)}
+          type="number"
+          min="0"
+        />
+      </div>
+    </div>
+    <div className="border border-gray-400"></div>
+    <div className="flex w-full flex-row items-center justify-between text-xs sm:text-sm">
+      <p>Grand Total</p>
+      <p>{grandTotal}</p>
+    </div>
+    <button
+      onClick={sendProjectData}
+      className="rounded-lg bg-sky-700 hover:bg-sky-800 text-white px-4 py-2 text-xs sm:text-sm mt-2"
+    >
+      Edit Project & Generate Quote
+    </button>
+  </div>
+</div>
 
 
               <div className="flex flex-row justify-between">
@@ -2071,80 +2095,91 @@ const sendProjectData = async () => {
           }
           {
             navState == "Goods" && <div className="flex flex-col w-full gap-3 mt-3">
-              <div className="w-full">
-              <p className="text-[1.3vw] font-semibold">Goods</p>
-              <table className="w-full table-auto ">
-                <tr className="bg-gray-100 text-center">
-                  <th>Sr.No.</th>
-                  <th>Area</th>
-                  <th>Product Group</th>
-                  <th>Company</th>
-                  <th>Catalogue</th>
-                  <th>Design No</th>
-                  <th>Date</th>
-                  <th>Status</th>
-                  <th>Order ID</th>
-                  <th>Remark</th>
-                </tr>
-                <tbody>
-  {goodsArray != undefined && goodsArray.map((goods, index) => {
-    const selection = selections[goods.mainindex];
-    const collection = selection?.areacollection?.[goods.groupIndex];
-    return (
-      <tr key={index} className="text-center rounded-md">
-        <td>{index + 1}</td>
-        <td>{selection?.area || ""}</td>
-        <td>{goods?.item?.[0] || ""}</td>
-        <td>{collection.company[0] || ""}</td>
-        <td>{collection?.catalogue || ""}</td>
-        <td>{collection?.designNo || ""}</td>
-        <td>
-          <input
-            type="date"
-            className="border pl-2 rounded-lg w-[8vw] px-1 py-1 text-center mt-2"
-            value={goods?.date || ""}
-            onChange={(e) => setGoodsDate(index, e.target.value)}
-          />
-        </td>
-        <td>
-          <select
-            className="border px-2 py-1 mt-2 rounded w-full"
-            value={goods?.status || ""}
-            onChange={(e) => setGoodsStatus(index, e.target.value)}
-          >
-            <option value="">Pending</option>
-            {statusArray.map((data, i) => (
-              <option key={i} value={data}>
-                {data}
-              </option>
-            ))}
-          </select>
-        </td>
-        <td>
-          <input
-            type="text"
-            className="border pl-2 rounded-lg w-[5vw] px-1 py-1 text-center mt-2"
-            value={goods?.orderID || ""}
-            onChange={(e) => setGoodsOrderID(index, e.target.value)}
-          />
-        </td>
-        <td>
-          <input
-            type="text"
-            className="border pl-2 rounded-lg w-[8vw] px-1 py-1 text-center mt-2"
-            value={goods?.remark || ""}
-            onChange={(e) => setGoodsRemark(index, e.target.value)}
-          />
-        </td>
+             <div className="w-full">
+  <p className="text-base sm:text-lg font-semibold mb-2">Goods</p>
+  <table className="w-full table-auto">
+    <thead>
+      <tr className="bg-gray-100 flex flex-col sm:flex-row text-center hidden sm:flex">
+        <th className="w-full sm:w-[10%] py-1 text-xs sm:text-sm">Sr.No.</th>
+        <th className="w-full sm:w-[15%] py-1 text-xs sm:text-sm">Area</th>
+        <th className="w-full sm:w-[15%] py-1 text-xs sm:text-sm">Product Group</th>
+        <th className="w-full sm:w-[15%] py-1 text-xs sm:text-sm">Company</th>
+        <th className="w-full sm:w-[15%] py-1 text-xs sm:text-sm">Catalogue</th>
+        <th className="w-full sm:w-[15%] py-1 text-xs sm:text-sm">Design No</th>
+        <th className="w-full sm:w-[15%] py-1 text-xs sm:text-sm">Date</th>
+        <th className="w-full sm:w-[15%] py-1 text-xs sm:text-sm">Status</th>
+        <th className="w-full sm:w-[10%] py-1 text-xs sm:text-sm">Order ID</th>
+        <th className="w-full sm:w-[15%] py-1 text-xs sm:text-sm">Remark</th>
       </tr>
-    );
-  })}
-</tbody>
-
-
-            </table>
-
-              </div>
+    </thead>
+    <tbody>
+      {goodsArray != undefined && goodsArray.map((goods, index) => {
+        const selection = selections[goods.mainindex];
+        const collection = selection?.areacollection?.[goods.groupIndex];
+        return (
+          <tr key={index} className="flex flex-col sm:flex-row text-center border-b sm:border-b-0">
+            <td className="w-full sm:w-[10%] py-1 text-xs sm:text-sm before:content-['Sr.No.:_'] sm:before:content-none before:font-bold before:pr-2">
+              {index + 1}
+            </td>
+            <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Area:_'] sm:before:content-none before:font-bold before:pr-2">
+              {selection?.area || ""}
+            </td>
+            <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Product_Group:_'] sm:before:content-none before:font-bold before:pr-2">
+              {goods?.item?.[0] || ""}
+            </td>
+            <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Company:_'] sm:before:content-none before:font-bold before:pr-2">
+              {collection.company[0] || ""}
+            </td>
+            <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Catalogue:_'] sm:before:content-none before:font-bold before:pr-2">
+              {collection?.catalogue || ""}
+            </td>
+            <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Design_No:_'] sm:before:content-none before:font-bold before:pr-2">
+              {collection?.designNo || ""}
+            </td>
+            <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Date:_'] sm:before:content-none before:font-bold before:pr-2">
+              <input
+                type="date"
+                className="border rounded-lg w-full px-2 py-1 text-xs sm:text-sm text-center sm:min-w-[100px]"
+                value={goods?.date || ""}
+                onChange={(e) => setGoodsDate(index, e.target.value)}
+              />
+            </td>
+            <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Status:_'] sm:before:content-none before:font-bold before:pr-2">
+              <select
+                className="border rounded-lg w-full px-2 py-1 text-xs sm:text-sm sm:min-w-[100px]"
+                value={goods?.status || ""}
+                onChange={(e) => setGoodsStatus(index, e.target.value)}
+              >
+                <option value="">Pending</option>
+                {statusArray.map((data, i) => (
+                  <option key={i} value={data}>
+                    {data}
+                  </option>
+                ))}
+              </select>
+            </td>
+            <td className="w-full sm:w-[10%] py-1 text-xs sm:text-sm before:content-['Order_ID:_'] sm:before:content-none before:font-bold before:pr-2">
+              <input
+                type="text"
+                className="border rounded-lg w-full px-2 py-1 text-xs sm:text-sm text-center sm:min-w-[80px]"
+                value={goods?.orderID || ""}
+                onChange={(e) => setGoodsOrderID(index, e.target.value)}
+              />
+            </td>
+            <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Remark:_'] sm:before:content-none before:font-bold before:pr-2">
+              <input
+                type="text"
+                className="border rounded-lg w-full px-2 py-1 text-xs sm:text-sm sm:min-w-[100px]"
+                value={goods?.remark || ""}
+                onChange={(e) => setGoodsRemark(index, e.target.value)}
+              />
+            </td>
+          </tr>
+        );
+      })}
+    </tbody>
+  </table>
+</div>
               <div className="flex flex-row justify-between">
                 <button onClick={() => setNavState("Quotation")} style={{ borderRadius : "8px" }} className="rounded-lg border px-2 h-8 bg-white">Back</button>
                 <button onClick={() => setNavState("Tailors")} style={{ borderRadius : "8px" }} className="rounded-lg text-white border px-2 h-8 bg-sky-600">Next</button>
@@ -2187,19 +2222,19 @@ const sendProjectData = async () => {
           { 
             addPayment && <div className="flex flex-col z-50 justify-between gap-3 w-[50vw] border rounded-xl p-3">
               <div className="flex flex-col">
-                <div className="flex flex-row gap-1"><p className="text-[1.1vw]">Amount Received</p><p className="text-red-500">*</p></div>
+                <div className="flex flex-row gap-1"><p className=" ">Amount Received</p><p className="text-red-500">*</p></div>
                 <input type="text" value={payment} className="border-1 rounded-lg pl-2 h-8" onChange={(e) => setPayment(e.target.value == "" ? 0 : parseFloat(e.target.value))}/>
               </div>
               <div className="flex flex-col">
-                <div className="flex flex-row gap-1"><p className="text-[1.1vw]">Payment Date</p><p className="text-red-500">*</p></div>
+                <div className="flex flex-row gap-1"><p className=" ">Payment Date</p><p className="text-red-500">*</p></div>
                 <input type="date" value={paymentDate} className="border-1 rounded-lg pl-2 h-8 pr-2" onChange={(e) => setPaymentDate(e.target.value)}/>
               </div>
               <div className="flex flex-col">
-                <div className="flex flex-row gap-1"><p className="text-[1.1vw]">Payment Mode</p><p className="text-red-500">*</p></div>
+                <div className="flex flex-row gap-1"><p className=" ">Payment Mode</p><p className="text-red-500">*</p></div>
                 <input type="text" value={paymentMode}  className="border-1 rounded-lg pl-2 h-8" onChange={(e) => setPaymentMode(e.target.value)}/>
               </div>
               <div className="flex flex-col">
-                <div className="flex flex-row gap-1"><p className="text-[1.1vw]">Remarks</p><p className="text-red-500">*</p></div>
+                <div className="flex flex-row gap-1"><p className=" ">Remarks</p><p className="text-red-500">*</p></div>
                 <input type="text" value={paymentRemarks} className="border-1 rounded-lg pl-2 h-8" onChange={(e) => setPaymentRemarks(e.target.value)}/>
               </div>
               <div className="flex flex-row justify-end gap-3">
@@ -2210,75 +2245,120 @@ const sendProjectData = async () => {
             </div>
           }
           {
-            navState == "Tasks" && <div className="flex flex-col w-full justify-between gap-3 mt-3 p-3">
-              <div className="flex flex-row w-full justify-between items-center">
-                  <p className="text-[1.4vw] font-semibold">Tasks</p>
-                  <button onClick={() => setTaskDialogOpen(true)} style={{ borderRadius : "8px" }} className="bg-sky-600 text-white hover:bg-sky-700 px-2 h-8">Add Task</button>
-              </div>
-              <div className="flex flex-row gap-5">
-                <div className="flex flex-col gap-3">
-                  <button onClick={() => setTaskFilter("All Tasks")} className={` text-[1.1vw] text-gray-600 font-semibold`}>All Tasks</button>
-                  <div className={`${taskFilter != "All Tasks" ? "bg-white" : "bg-sky-500"} w-full h-[2px] rounded-full`}></div>
-                </div>
-                <div className="flex flex-col gap-3">
-                  <button onClick={() => setTaskFilter("To Do")} className={`text-[1.1vw] text-gray-600 font-semibold`}>To Do</button>
-                  <div className={`${taskFilter != "To Do" ? "bg-white" : "bg-sky-500"} w-full h-[2px] rounded-full`}></div>
-                </div>
-                <div className="flex flex-col gap-3">
-                  <button onClick={() => setTaskFilter("In Progress")} className={`text-[1.1vw] text-gray-600 font-semibold`}>In Progress</button>
-                  <div className={`${taskFilter != "In Progress" ? "bg-white" : "bg-sky-500"} w-full h-[2px] rounded-full`}></div>
-                </div>
-                <div className="flex flex-col gap-3">
-                  <button onClick={() => setTaskFilter("Completed")} className={`text-[1.1vw] text-gray-600 font-semibold`}>Completed</button>
-                  <div className={`${taskFilter != "Completed" ? "bg-white" : "bg-sky-500"} w-full h-[2px] rounded-full`}></div>
-                </div>
-              </div>
-              <table className="w-full p-3">
-                <thead>
-                  <tr>
-                    <td>Sr.No.</td>
-                    <td>Task Name</td>
-                    <td>Priority</td>
-                    <td>Project</td>
-                    <td>Assignee</td>
-                    <td>Due Date</td>
-                    <td>Status</td>
-                    <td>Created At</td>
-                    <td>Actions</td>
-                  </tr>
-                </thead>
-                <tbody className="overflow-y-scroll">
-                  {filteredTasks.map((task, index) => (
-                    <tr
-                      key={index}
-                      className="max-h-fit border-b border-gray-200 py-3" // Added padding for vertical spacing
-                    >
-                      <td className="py-2">{index + 1}</td>
-                      <td className="py-2">{task[0]}</td>
-                      <td className={`py-2 font-semibold ${task[6] == "Low" ? "text-green-600" : ""} ${task[6] == "Moderate" ? "text-yellow-600" : ""} ${task[6] == "High" ? "text-red-500" : ""}`}>{task[6]}</td>
-                      <td className="py-2">{task[5]}</td>
-                      <td className="py-2">{task[4]}</td>
-                      <td className="py-2">{task[2]}</td>
-                      <td className={`py-2 font-semibold ${task[7] == "Completed" ? "text-green-600" : ""} ${task[7] == "In Progress" ? "text-yellow-600" : ""} ${task[7] == "To Do" ? "text-red-500" : ""}`}>{task[7]}</td>
-                      <td className="py-2">{task[3]}</td>
-                      <td className="flex flex-row gap-2 items-center py-2">
-                        <button onClick={() => { setName(task[0]); setediting(task); setTaskDialogOpen(true);}}>
-                          <Edit size={18} />
-                        </button>
-                        <button onClick={() => deleteTask(task[0])}>
-                          <FaTrash size={18} className="text-red-500" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              <div className="flex flex-row justify-between">
-                <button onClick={() => setNavState("Payments")} style={{ borderRadius : "8px" }} className="rounded-lg border px-2 h-8 bg-white">Back</button>
+  navState == "Tasks" && (
+    <div className="flex flex-col w-full justify-between gap-3 mt-3 p-3">
+      <div className="flex flex-col sm:flex-row w-full justify-between items-start sm:items-center gap-2">
+        <p className="font-semibold">Tasks</p>
+        <button
+          onClick={() => setTaskDialogOpen(true)}
+          className="bg-sky-600 text-white hover:bg-sky-700 px-2 h-8 rounded-lg"
+        >
+          Add Task
+        </button>
+      </div>
+
+      {/* Task Filters - Responsive wrap */}
+      <div className="flex flex-wrap gap-5">
+        {["All Tasks", "To Do", "In Progress", "Completed"].map((label) => (
+          <div className="flex flex-col gap-3" key={label}>
+            <button
+              onClick={() => setTaskFilter(label)}
+              className="text-gray-600 font-semibold"
+            >
+              {label}
+            </button>
+            <div
+              className={`${
+                taskFilter !== label ? "bg-white" : "bg-sky-500"
+              } w-full h-[2px] rounded-full`}
+            ></div>
+          </div>
+        ))}
+      </div>
+
+      {/* Responsive Table Wrapper */}
+      <div className="overflow-x-auto w-full">
+        <table className="w-full min-w-[900px] p-3">
+          <thead>
+            <tr>
+              <td>Sr.No.</td>
+              <td>Task Name</td>
+              <td>Priority</td>
+              <td>Project</td>
+              <td>Assignee</td>
+              <td>Due Date</td>
+              <td>Status</td>
+              <td>Created At</td>
+              <td>Actions</td>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredTasks.map((task, index) => (
+              <tr
+                key={index}
+                className="max-h-fit border-b border-gray-200 py-3"
+              >
+                <td className="py-2">{index + 1}</td>
+                <td className="py-2">{task[0]}</td>
+                <td
+                  className={`py-2 font-semibold ${
+                    task[6] === "Low"
+                      ? "text-green-600"
+                      : task[6] === "Moderate"
+                      ? "text-yellow-600"
+                      : task[6] === "High"
+                      ? "text-red-500"
+                      : ""
+                  }`}
+                >
+                  {task[6]}
+                </td>
+                <td className="py-2">{task[5]}</td>
+                <td className="py-2">{task[4]}</td>
+                <td className="py-2">{task[2]}</td>
+                <td
+                  className={`py-2 font-semibold ${
+                    task[7] === "Completed"
+                      ? "text-green-600"
+                      : task[7] === "In Progress"
+                      ? "text-yellow-600"
+                      : task[7] === "To Do"
+                      ? "text-red-500"
+                      : ""
+                  }`}
+                >
+                  {task[7]}
+                </td>
+                <td className="py-2">{task[3]}</td>
+                <td className="flex flex-row gap-2 items-center py-2">
+                  <button
+                    onClick={() => {
+                      setName(task[0]);
+                      setediting(task);
+                      setTaskDialogOpen(true);
+                    }}
+                  >
+                    <Edit size={18} />
+                  </button>
+                  <button onClick={() => deleteTask(task[0])}>
+                    <FaTrash size={18} className="text-red-500" />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Navigation Buttons */}
+       <div className="flex flex-row justify-between">
+                <button  onClick={() => setNavState("Payments")} style={{ borderRadius : "8px" }} className="rounded-lg border px-2 h-8 bg-white">Back</button>
                 <button onClick={() => setNavState("Overview")} style={{ borderRadius : "8px" }} className="rounded-lg text-white border px-2 h-8 bg-sky-600">Next</button>
               </div>
-            </div>
-          }
+    </div>
+  )
+}
+
                 <AnimatePresence>
         {taskDialogOpen && (
           <>
