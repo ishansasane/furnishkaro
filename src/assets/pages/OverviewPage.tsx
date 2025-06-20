@@ -221,17 +221,17 @@ const OverviewPage = ({
           </div>
           <div className="flex flex-col gap-1 sm:gap-2">
             <div className="flex flex-row justify-between items-center border rounded-lg p-1 sm:p-2">
-              <div className="w-1 bg-gray-500 h-3 sm:h-4"></div>
+              <div className="w-1 bg-gray-500 !h-7 sm:h-4"></div>
               <p className="text-sm sm:text-base">Total Payment</p>
               <p className="text-sm sm:text-base">{(projectData.totalAmount + projectData.totalTax).toFixed(2)}</p>
             </div>
             <div className="flex flex-row justify-between items-center border rounded-lg p-1 sm:p-2">
-              <div className="w-1 bg-green-500 h-3 sm:h-4"></div>
+              <div className="w-1 bg-green-500 !h-7 sm:h-4"></div>
               <p className="text-sm sm:text-base">Payment Received</p>
               <p className="text-sm sm:text-base">{projectData.paid}</p>
             </div>
             <div className="flex flex-row justify-between items-center border rounded-lg p-1 sm:p-2">
-              <div className="w-1 bg-yellow-500 h-3 sm:h-4"></div>
+              <div className="w-1 bg-yellow-500 !h-7 sm:h-4"></div>
               <p className="text-sm sm:text-base">Due</p>
               <p className="text-sm sm:text-base">{(dueAmount).toFixed(2)}</p>
             </div>
