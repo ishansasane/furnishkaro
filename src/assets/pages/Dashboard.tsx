@@ -45,7 +45,8 @@ const Dashboard: React.FC = () => {
     comments: "",
     inquiryDate: "",
     followUpDate: "",
-    customer : ""
+    customer : "",
+    phonenumber : ""
   });
 
   const sendInquiry = async () => {
@@ -54,13 +55,14 @@ const Dashboard: React.FC = () => {
     const inquiryDate = inquiryForm.inquiryDate;
     const followUpDate = inquiryForm.followUpDate;
     const customer = inquiryForm.customer;
+    const phonenumber = inquiryForm.phonenumber;
 
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/sendInquiry", {
       method : "POST",
       headers : {
         "content-type" : "application/json"
       },
-      body : JSON.stringify({ projectName, comment, inquiryDate, projectDate : followUpDate, status : "New Inquiry", customer })
+      body : JSON.stringify({ projectName, phonenumber, comment, inquiryDate, projectDate : followUpDate, status : "New Inquiry", customer })
     });
 
     if(response.status === 200){
@@ -820,6 +822,17 @@ const Dashboard: React.FC = () => {
                       onChange={(e) => setInquiryForm({ ...inquiryForm, customer: e.target.value })}
                       className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
                       placeholder="Enter customer name"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                    <input
+                      type="text"
+                      value={inquiryForm.phonenumber}
+                      onChange={(e) => setInquiryForm({ ...inquiryForm, phonenumber: e.target.value })}
+                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                      placeholder="Enter Phone Number"
                       required
                     />
                   </div>

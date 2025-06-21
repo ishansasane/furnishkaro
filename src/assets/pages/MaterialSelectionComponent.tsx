@@ -393,7 +393,7 @@ const MaterialSelectionComponent = ({
                         <input 
                           type="text" 
                           placeholder='Design No' 
-                          value={design} 
+                          value={element.design} 
                           onChange={(e) => {
                             handleDesignNoChange(mainindex, i, e.target.value);
                             setDesign(e.target.value);

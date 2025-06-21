@@ -3,14 +3,14 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface BrandDialogProps {
-  setDialogOpen: (open: boolean) => void;
+  setDialogOpen: (state: boolean) => void;
   setRefresh: (state: boolean) => void;
   refresh: boolean;
   editingBrand: string[] | null;
   setEditingBrand: (brand: string[] | null) => void;
 }
 
-const BrandDialog: React.FC<BrandDialogProps> = ({ setDialogOpen, setRefresh, refresh, editingBrand, setEditingBrand }) => {
+const BrandDialog: React.FC<BrandDialogProps> = ({ setDialogOpen , setRefresh, refresh, editingBrand, setEditingBrand }) => {
   const navigate = useNavigate();
 
   const data = editingBrand;
@@ -33,11 +33,15 @@ const BrandDialog: React.FC<BrandDialogProps> = ({ setDialogOpen, setRefresh, re
 
     if (response.status === 200) {
       alert(editingBrand ? "Brand updated successfully" : "Brand added successfully");
-      setRefresh(!refresh);
-      setEditingBrand(null);
-      setDialogOpen(false);
     } else {
       alert("Error saving brand");
+    }
+    setDialogOpen(false);
+    setEditingBrand(null);
+    if(refresh){
+      setRefresh(false);
+    }else{
+      setRefresh(true);
     }
   };
 

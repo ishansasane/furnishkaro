@@ -156,7 +156,16 @@ export default function Brands() {
           </tbody>
         </table>
       </div>
-      {isDialogOpen && <BrandDialog setDialogOpen={setDialogOpen} setRefresh={setRefresh} refresh={refresh} editingBrand={editingBrand} setEditingBrand={setEditingBrand} />}
+     {isDialogOpen && (
+        <BrandDialog
+          setDialogOpen={setDialogOpen}
+          setRefresh={setRefresh}
+          refresh={refresh}
+          editingBrand={editingBrand}
+          setEditingBrand={setEditingBrand}
+        />
+      )}
+
     </div>
   );
 }

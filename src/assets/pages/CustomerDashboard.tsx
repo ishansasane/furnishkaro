@@ -99,6 +99,9 @@ async function fetchCustomers() {
       goodsArray: deepClone(parseSafely(row[15], [])),
       tailorsArray: deepClone(parseSafely(row[16], [])),
       projectAddress : row[17],
+      date: row[18],
+      grandTotal : row[19],
+      discountType : row[20]
     }));
 
     return projects;
@@ -117,6 +120,8 @@ const CustomerDashboard = ({ customerDashboardData, setCustomerDashboardData, se
     const [duePayment, setDuePayment] = useState(0);
     const [receivedPayment, setReceivedPayment] = useState(0);
     const [activeOrders, setActiveOrders] = useState(0);
+    const [receivedProjectsPayment , setReceivedProjectsPayment] = useState(0);
+    const [perProjectPayment, setPerProjectPayments] = useState([]);
 
     const dispatch = useDispatch();
 
@@ -137,107 +142,120 @@ const CustomerDashboard = ({ customerDashboardData, setCustomerDashboardData, se
     }, [])
 
 useEffect(() => {
-  const fetchProjects = async () => {
-    const cached = localStorage.getItem("projectData");
+  const fetchAndCalculate = async () => {
     const now = Date.now();
 
-    if (cached) {
-      const parsed = JSON.parse(cached);
+    // ---------- Fetch Project Data ----------
+    let projectList = [];
+    const cachedProjects = localStorage.getItem("projectData");
+
+    if (cachedProjects) {
+      const parsed = JSON.parse(cachedProjects);
       const timeDiff = now - parsed.time;
 
       if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
+        projectList = parsed.data;
         dispatch(setProjects(parsed.data));
-        calculateStats(parsed.data);
-        return;
-      }
-    }
-
-    try {
-      const data = await fetchProjectData();
-      dispatch(setProjects(data));
-      localStorage.setItem("projectData", JSON.stringify({ data, time: now }));
-      calculateStats(data);
-    } catch (error) {
-      console.error("Failed to fetch projects:", error);
-    }
-  };
-
-  const calculateStats = (projectList) => {
-    if (!customerDashboardData[0]) return;
-
-    const filtered = projectList.filter(p => p.customerLink[0] === customerDashboardData[0]);
-    setProjectData(filtered);
-    // 1. Count matching projects
-    setActiveOrders(filtered.length);
-
-    console.log(filtered);
-
-    // 2. Sum totalTax and totalAmount
-    let totalTax = 0;
-    let totalAmount = 0;
-
-    filtered.forEach((p) => {
-      totalTax += parseFloat(p.totalTax) || 0;
-      totalAmount += parseFloat(p.totalAmount) || 0;
-    });
-
-    setDuePayment(duePayment + totalAmount + totalTax);
-  };
-
-  if (!projects.length) {
-    fetchProjects();
-  } else {
-    calculateStats(projects);
-  }
-
-}, [dispatch, projects]); // 'name' is included as a dependency
-
-
-useEffect(() => {
-  const fetchPayments = async () => {
-    try {
-      const cached = localStorage.getItem("paymentData");
-      const now = Date.now();
-
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        const timeDiff = now - parsed.time;
-
-        if (timeDiff < 5 * 60 * 1000 && parsed.data.length) {
-          dispatch(setPaymentData(parsed.data));
-          calculatePayments(parsed.data);
-          return;
+      } else {
+        try {
+          const data = await fetchProjectData();
+          projectList = data;
+          dispatch(setProjects(data));
+          localStorage.setItem("projectData", JSON.stringify({ data, time: now }));
+        } catch (error) {
+          console.error("Failed to fetch projects:", error);
         }
       }
+    } else {
+      try {
+        const data = await fetchProjectData();
+        projectList = data;
+        dispatch(setProjects(data));
+        localStorage.setItem("projectData", JSON.stringify({ data, time: now }));
+      } catch (error) {
+        console.error("Failed to fetch projects:", error);
+      }
+    }
 
-      const data = await fetchPaymentData();
-      dispatch(setPaymentData(data));
-      localStorage.setItem("paymentData", JSON.stringify({ data, time: now }));
-      calculatePayments(data);
-    } catch (error) {
-      console.error("Failed to fetch payments:", error);
+    // ---------- Filter & Calculate Project Stats ----------
+    let filteredProjects = [];
+    if (customerDashboardData[0]) {
+      filteredProjects = projectList.filter(
+        (p) => p.customerLink[0] === customerDashboardData[0]
+      );
+      setProjectData(filteredProjects);
+      setActiveOrders(filteredProjects.length);
+
+      let totalAmount = 0;
+      let totalTax = 0;
+      filteredProjects.forEach((p) => {
+        totalTax += parseFloat(p.totalTax) || 0;
+        totalAmount += parseFloat(p.totalAmount) || 0;
+      });
+
+      setDuePayment(totalAmount); // totalTax is optional based on your logic
+    }
+
+    // ---------- Fetch Payment Data ----------
+    let paymentList = [];
+    const cachedPayments = localStorage.getItem("paymentData");
+
+    if (cachedPayments) {
+      const parsed = JSON.parse(cachedPayments);
+      const timeDiff = now - parsed.time;
+
+      if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
+        paymentList = parsed.data;
+        dispatch(setPaymentData(parsed.data));
+      } else {
+        try {
+          const data = await fetchPaymentData();
+          paymentList = data;
+          dispatch(setPaymentData(data));
+          localStorage.setItem("paymentData", JSON.stringify({ data, time: now }));
+        } catch (error) {
+          console.error("Failed to fetch payments:", error);
+        }
+      }
+    } else {
+      try {
+        const data = await fetchPaymentData();
+        paymentList = data;
+        dispatch(setPaymentData(data));
+        localStorage.setItem("paymentData", JSON.stringify({ data, time: now }));
+      } catch (error) {
+        console.error("Failed to fetch payments:", error);
+      }
+    }
+
+    // ---------- Calculate Total & Per-Project Received Payments ----------
+    if (customerDashboardData[0] && filteredProjects.length) {
+      let totalReceived = 0;
+      const projectPayments = filteredProjects.map((project) => {
+        const projectTotal = paymentList
+          .filter(
+            (payment) =>
+              payment[1] === project.projectName &&
+              payment[0] === customerDashboardData[0]
+          )
+          .reduce((sum, payment) => {
+            const amount = parseFloat(payment[2]);
+            return sum + (isNaN(amount) ? 0 : amount);
+          }, 0);
+
+        totalReceived += projectTotal;
+        return projectTotal;
+      });
+
+      setReceivedPayment(totalReceived);
+      setReceivedProjectsPayment(totalReceived);
+      setPerProjectPayments(projectPayments); // If you're using this in your component
     }
   };
 
-  const calculatePayments = (data) => {
-    if (!customerDashboardData[0]) return;
+  fetchAndCalculate();
+}, [dispatch, customerDashboardData]);
 
-    console.log(data);
-
-    const total = data
-      .filter(payment => payment[0] === customerDashboardData[0])
-      .reduce((sum, payment) => {
-        const amount = parseFloat(payment[2]);
-        return sum + (isNaN(amount) ? 0 : amount);
-      }, 0);
-
-    setReceivedPayment(total);
-  };
-
-  if (paymentData.length) {
-    fetchPayments();
-  }
-}, [dispatch]);
 
 
 
@@ -298,12 +316,16 @@ useEffect(() => {
                 <p className='text-[1.1vw]'>{activeOrders}</p>
             </div>
             <div className='flex flex-col border rounded-xl p-3 w-1/3'>
-                <p className='text-[1.2vw] text-green-600'>Payment Received</p>
+                <p className='text-[1.2vw] text-purple-600'>Total Payment by Customer</p>
                 <p className='text-[1.1vw]'>₹{Math.round(receivedPayment).toLocaleString("en-IN")}</p>
             </div>
             <div className='flex flex-col border rounded-xl p-3 w-1/3'>
+                <p className='text-[1.2vw] text-green-600'>Payment Received</p>
+                <p className='text-[1.1vw]'>₹{Math.round(receivedProjectsPayment).toLocaleString("en-IN")}</p>
+            </div>
+            <div className='flex flex-col border rounded-xl p-3 w-1/3'>
                 <p className='text-[1.2vw] text-red-500'>Payment Due</p>
-                <p className='text-[1.1vw]'>₹{Math.round(duePayment - receivedPayment).toLocaleString("en-IN")}</p>
+                <p className='text-[1.1vw]'>₹{Math.round(duePayment - receivedProjectsPayment).toLocaleString("en-IN")}</p>
             </div>
         </div>
         <div className='flex flex-col w-full border rounded-xl p-3'>
@@ -324,9 +346,9 @@ useEffect(() => {
                 <tr key={index} className=''>
                     <td>{project.projectName}</td>
                     <td>{project.status}</td>
-                    <td>₹{Math.round(duePayment).toLocaleString("en-IN")}</td>
-                    <td>₹{Math.round(receivedPayment).toLocaleString("en-IN")}</td>
-                    <td>₹{Math.round(duePayment - receivedPayment).toLocaleString("en-IN")}</td>
+                    <td>₹{Math.round(project.totalAmount).toLocaleString("en-IN")}</td>
+                    <td>₹{perProjectPayment != null && Math.round(perProjectPayment[index]).toLocaleString("en-IN")}</td>
+                    <td>₹{Math.round(duePayment - perProjectPayment[index]).toLocaleString("en-IN")}</td>
                     <td className='py-2'>{project.projectDate}</td>
                     <td className='py-2'>{project.quote}</td>
                 </tr>

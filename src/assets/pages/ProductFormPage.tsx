@@ -67,7 +67,13 @@ const handleGroupTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
   e.preventDefault();
 
-  const date = new Date();
+  let d = new Date();
+
+  let day = d.getDate();           // 1 to 31
+  let month = d.getMonth() + 1;    // 0 to 11 → add 1
+  let year = d.getFullYear();   
+
+  const date = day+"/"+month+"/"+year;
 
   // ✅ Step 1: Get current items (either from Redux or localStorage or by fetching)
   let currentItems = items; // from Redux
