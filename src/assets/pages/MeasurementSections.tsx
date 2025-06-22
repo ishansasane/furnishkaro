@@ -26,6 +26,26 @@ const MeasurementSection: React.FC<MeasurementSectionProps> = ({
   setSelections,
   handleGroupDelete
 }) => {
+  // Handler for Default Unit change
+  const handleDefaultUnitChange = (value: string) => {
+    const updatedSelections = selections.map(selection => ({
+      ...selection,
+      areacollection: selection.areacollection.map(collection => ({
+        ...collection,
+        measurement: {
+          ...collection.measurement,
+          unit: value
+        }
+      }))
+    }));
+    setSelections(updatedSelections);
+  };
+
+  // Determine the default unit value for the select
+  const defaultUnit = selections.every(selection =>
+    selection.areacollection.every(collection => collection.measurement.unit === selections[0]?.areacollection[0]?.measurement.unit)
+  ) ? selections[0]?.areacollection[0]?.measurement.unit || "" : "";
+
   return (
     <div className="rounded-lg border shadow-2xl w-full flex flex-col p-2 sm:p-4 md:p-6">
       <p className="text-lg sm:text-xl md:text-2xl font-semibold">Measurements</p>
@@ -36,7 +56,7 @@ const MeasurementSection: React.FC<MeasurementSectionProps> = ({
             <div key={index} className="flex items-center pl-2 sm:pl-4 py-1 sm:py-2">
               <p className="text-sm sm:text-base">{selection.area}</p>
               <button
-                className={`${selection.area == "" ? "hidden" : ""} ml-1 sm:ml-2 text-red-500 hover:text-red-700`}
+                className={`${selection.area == "" ? "hidden" : ""} !ml-1 sm:!ml-2 !mb-3 text-red-500 hover:text-red-700`}
                 onClick={() => handleRemoveArea(index)}
               >
                 <FaTrash />
@@ -50,8 +70,10 @@ const MeasurementSection: React.FC<MeasurementSectionProps> = ({
             <div className="flex items-center gap-1 sm:gap-2 w-full sm:w-auto">
               <select
                 className="border border-gray-300 p-1 sm:p-2 rounded-lg w-full text-xs sm:text-sm md:text-base focus:ring-2 focus:ring-blue-400"
-                value=""
+                value={defaultUnit}
+                onChange={(e) => handleDefaultUnitChange(e.target.value)}
               >
+                <option value="">Select Unit</option>
                 {units.map((unit) => (
                   <option key={unit} value={unit}>
                     {unit}

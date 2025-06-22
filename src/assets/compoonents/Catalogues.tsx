@@ -92,13 +92,16 @@ export default function Catalogues() {
       }
     };
 
-    if (refresh || !catalogueData || catalogueData.length === 0) {
-      fetchAndSetData();
-      setRefresh(false);
-    } else {
-      catalogueData !== catalogues && setCatalogues(catalogueData);
-    }
-  }, [catalogueData, dispatch, refresh]);
+    fetchAndSetData();
+    setRefresh(false);
+  }, [dispatch, refresh]); // Removed catalogueData from dependencies
+
+  // Filter catalogues based on search input
+  const filteredCatalogues = catalogues.filter((catalogue) =>
+    [catalogue[0], catalogue[1]]
+      .map((field) => (field || "").toString().toLowerCase())
+      .some((field) => field.includes(search.toLowerCase()))
+  );
 
   return (
     <div className="md:p-6 pt-20 h-full bg-gray-50">
@@ -110,56 +113,56 @@ export default function Catalogues() {
       </div>
       
       <div className="bg-white overflow-x-auto shadow rounded-lg p-5">
-      <div className="mb-4">
-        <input
-          type="text"
-          placeholder="Search catalogues..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border px-3 py-2 rounded-md w-full"
-        />
-      </div>
+        <div className="mb-4">
+          <input
+            type="text"
+            placeholder="Search catalogues..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="border px-3 py-2 rounded-md w-full"
+          />
+        </div>
 
-      <table className="w-full">
-        <thead className="bg-blue-50">
-          <tr>
-            <th className="px-4 py Zinc">Items</th>
-            <th className="px-4 py-3">Description</th>
-            <th className="px-4 py-3">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {catalogues.length > 0 ? (
-            catalogues.map((catalogue, index) => (
-              <tr key={index} className="hover:bg-blue-50">
-                <td className="px-4 py-2">{catalogue[0]}</td>
-                <td className="px-4 py-2">{catalogue[1]}</td>
-                <td className="px-4 py-2 flex gap-2">
-                  <button
-                    className="border px-2 py-1 rounded-md"
-                    onClick={() => {
-                      setEditingCatalogue(catalogue);
-                      setDialogOpen(true);
-                    }}
-                  >
-                    <Pencil size={16} />
-                  </button>
-                  <button
-                    className="border px-2 py-1 rounded-md"
-                    onClick={() => deleteCatalogue(catalogue[0], setRefresh)}
-                  >
-                    <XCircle size={16} />
-                  </button>
-                </td>
-              </tr>
-            ))
-          ) : (
+        <table className="w-full">
+          <thead className="bg-blue-50">
             <tr>
-              <td colSpan={3} className="text-center py-4">No catalogues found.</td>
+              <th className="px-4 py-3">Items</th>
+              <th className="px-4 py-3">Description</th>
+              <th className="px-4 py-3">Actions</th>
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {filteredCatalogues.length > 0 ? (
+              filteredCatalogues.map((catalogue, index) => (
+                <tr key={index} className="hover:bg-blue-50">
+                  <td className="px-4 py-2">{catalogue[0]}</td>
+                  <td className="px-4 py-2">{catalogue[1]}</td>
+                  <td className="px-4 py-2 flex gap-2">
+                    <button
+                      className="border px-2 py-1 rounded-md"
+                      onClick={() => {
+                        setEditingCatalogue(catalogue);
+                        setDialogOpen(true);
+                      }}
+                    >
+                      <Pencil size={16} />
+                    </button>
+                    <button
+                      className="border px-2 py-1 rounded-md"
+                      onClick={() => deleteCatalogue(catalogue[0], setRefresh)}
+                    >
+                      <XCircle size={16} />
+                    </button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={3} className="text-center py-4">No catalogues found.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
       {isDialogOpen && <CatalogueDialog setDialogOpen={setDialogOpen} setRefresh={setRefresh} refresh={refresh} editingCatalogue={editingCatalogue} setEditingCatalogue={setEditingCatalogue} />}
     </div>

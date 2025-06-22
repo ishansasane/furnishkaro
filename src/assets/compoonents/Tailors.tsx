@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Plus, Pencil, XCircle } from "lucide-react";
 import TailorDialog from "../compoonents/TailorDialog";
@@ -30,7 +31,7 @@ async function fetchTailors(): Promise<Tailor[]> {
 }
 
 // Delete a Tailor
-async function deleteTailor(tailorName: string, setRefresh: (state: boolean) => void) {
+async function deleteTailor(tailorName: string, setRefresh: (state: boolean) => void, dispatch: any, setTailors: (tailors: Tailor[]) => void) {
   try {
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletetailor", {
       method: "POST",
@@ -96,13 +97,16 @@ export default function Tailors() {
       }
     };
 
-    if (refresh || !tailorsFromRedux || tailorsFromRedux.length === 0) {
-      fetchAndSetData();
-      setRefresh(false);
-    } else {
-      tailorsFromRedux !== tailors && setTailors(tailorsFromRedux);
-    }
-  }, [tailorsFromRedux, dispatch, refresh]);
+    fetchAndSetData();
+    setRefresh(false);
+  }, [dispatch, refresh]); // Removed tailorsFromRedux from dependencies
+
+  // Filter tailors based on search input
+  const filteredTailors = tailors.filter((tailor) =>
+    [tailor[0], tailor[1], tailor[2], tailor[3]]
+      .map((field) => (field || "").toString().toLowerCase())
+      .some((field) => field.includes(search.toLowerCase()))
+  );
 
   return (
     <div className="md:p-6 pt-20 h-full bg-gray-50">
@@ -136,8 +140,8 @@ export default function Tailors() {
             </tr>
           </thead>
           <tbody>
-            {tailors.length > 0 ? (
-              tailors.map((tailor, index) => (
+            {filteredTailors.length > 0 ? (
+              filteredTailors.map((tailor, index) => (
                 <tr key={index} className="hover:bg-sky-50">
                   <td className="px-4 py-2">{tailor[0]}</td>
                   <td className="px-4 py-2">{tailor[1]}</td>
@@ -155,7 +159,7 @@ export default function Tailors() {
                     </button>
                     <button
                       className="border px-2 py-1 rounded-md"
-                      onClick={() => deleteTailor(tailor[0], setRefresh)}
+                      onClick={() => deleteTailor(tailor[0], setRefresh, dispatch, setTailors)}
                     >
                       <XCircle size={16} />
                     </button>

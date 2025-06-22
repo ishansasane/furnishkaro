@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Plus, Pencil, XCircle } from "lucide-react";
 import SalesAssociateDialog from "../compoonents/SalesAssociateDialog";
@@ -30,7 +31,7 @@ async function fetchSalesAssociates(): Promise<SalesAssociate[]> {
 }
 
 // Delete a Sales Associate
-async function deleteSalesAssociate(name: string, setRefresh: (state: boolean) => void) {
+async function deleteSalesAssociate(name: string, setRefresh: (state: boolean) => void, dispatch: any, setSalesAssociates: (salesAssociates: SalesAssociate[]) => void) {
   try {
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletesalesassociatedata", {
       method: "POST",
@@ -96,13 +97,16 @@ export default function SalesAssociates() {
       }
     };
 
-    if (refresh || !salesAssociatesFromRedux || salesAssociatesFromRedux.length === 0) {
-      fetchAndSetData();
-      setRefresh(false);
-    } else {
-      salesAssociatesFromRedux !== salesAssociates && setSalesAssociates(salesAssociatesFromRedux);
-    }
-  }, [salesAssociatesFromRedux, dispatch, refresh]);
+    fetchAndSetData();
+    setRefresh(false);
+  }, [dispatch, refresh]); // Removed salesAssociatesFromRedux from dependencies
+
+  // Filter sales associates based on search input
+  const filteredSalesAssociates = salesAssociates.filter((salesAssociate) =>
+    [salesAssociate[0], salesAssociate[1], salesAssociate[2], salesAssociate[3]]
+      .map((field) => (field || "").toString().toLowerCase())
+      .some((field) => field.includes(search.toLowerCase()))
+  );
 
   return (
     <div className="md:p-6 pt-20 h-full bg-gray-50">
@@ -136,8 +140,8 @@ export default function SalesAssociates() {
             </tr>
           </thead>
           <tbody>
-            {salesAssociates.length > 0 ? (
-              salesAssociates.map((salesAssociate, index) => (
+            {filteredSalesAssociates.length > 0 ? (
+              filteredSalesAssociates.map((salesAssociate, index) => (
                 <tr key={index} className="hover:bg-sky-50">
                   <td className="px-4 py-2">{salesAssociate[0]}</td>
                   <td className="px-4 py-2">{salesAssociate[1]}</td>
@@ -155,7 +159,7 @@ export default function SalesAssociates() {
                     </button>
                     <button
                       className="border px-2 py-1 rounded-md"
-                      onClick={() => deleteSalesAssociate(salesAssociate[0], setRefresh)}
+                      onClick={() => deleteSalesAssociate(salesAssociate[0], setRefresh, dispatch, setSalesAssociates)}
                     >
                       <XCircle size={16} />
                     </button>

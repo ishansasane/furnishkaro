@@ -11,7 +11,6 @@ interface Interior {
   data: string[];
 }
 
-
 // Fetch interiors from the server
 async function fetchInteriors(): Promise<Interior[]> {
   try {
@@ -31,9 +30,6 @@ async function fetchInteriors(): Promise<Interior[]> {
   }
 }
 
-// Delete an interior record
-
-
 export default function Interiors() {
   const navigate = useNavigate();
   const [interiors, setInteriors] = useState<Interior[]>([]);
@@ -46,78 +42,78 @@ export default function Interiors() {
   const dispatch = useDispatch();
   const interiorsFromRedux = useSelector((state: RootState) => state.data.interiors);
 
-
   async function deleteInterior(name: string, setRefresh: (state: boolean) => void) {
-  try {
-    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deleteinteriordata", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ name }),
-    });
-
-    if (response.ok) {
-      alert("Interior deleted");
-      const updatedInteriors = await fetchInteriors();
-      dispatch(setInteriorData(updatedInteriors));
-      setInteriors(updatedInteriors);
-      localStorage.setItem("interiorData", JSON.stringify({ data: updatedInteriors, time: Date.now() }));
-      setRefresh(true);
-    } else {
-      const errorText = await response.text();
-      alert(`Error deleting interior: ${errorText || response.statusText}`);
-    }
-  } catch (error) {
-    console.error("Error deleting interior:", error);
-    alert("Network or server error while deleting interior");
-  }
-}
-
-useEffect(() => {
-  const fetchInteriorsData = async () => {
     try {
-      const cached = localStorage.getItem("interiorData");
-      const now = Date.now();
-      const cacheExpiry = 5 * 60 * 1000; // 5 minutes
+      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deleteinteriordata", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ name }),
+      });
 
-      let finalData = [];
+      if (response.ok) {
+        alert("Interior deleted");
+        const updatedInteriors = await fetchInteriors();
+        dispatch(setInteriorData(updatedInteriors));
+        setInteriors(updatedInteriors);
+        localStorage.setItem("interiorData", JSON.stringify({ data: updatedInteriors, time: Date.now() }));
+        setRefresh(true);
+      } else {
+        const errorText = await response.text();
+        alert(`Error deleting interior: ${errorText || response.statusText}`);
+      }
+    } catch (error) {
+      console.error("Error deleting interior:", error);
+      alert("Network or server error while deleting interior");
+    }
+  }
 
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        const isCacheValid = parsed?.data?.length > 0 && (now - parsed.time < cacheExpiry);
+  useEffect(() => {
+    const fetchInteriorsData = async () => {
+      try {
+        const cached = localStorage.getItem("interiorData");
+        const now = Date.now();
+        const cacheExpiry = 5 * 60 * 1000; // 5 minutes
 
-        if (isCacheValid) {
-          finalData = parsed.data;
+        let finalData = [];
+
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          const isCacheValid = parsed?.data?.length > 0 && (now - parsed.time < cacheExpiry);
+
+          if (isCacheValid) {
+            finalData = parsed.data;
+            dispatch(setInteriorData(finalData));
+            setInteriors(finalData);
+            return;
+          }
+        }
+
+        const freshData = await fetchInteriors();
+
+        if (Array.isArray(freshData)) {
+          finalData = freshData;
           dispatch(setInteriorData(finalData));
           setInteriors(finalData);
-          return;
+          localStorage.setItem("interiorData", JSON.stringify({ data: finalData, time: now }));
+        } else {
+          console.warn("Fetched interior data is not an array:", freshData);
         }
+      } catch (error) {
+        console.error("Error fetching interiors:", error);
       }
+    };
 
-      const freshData = await fetchInteriors();
-
-      if (Array.isArray(freshData)) {
-        finalData = freshData;
-        dispatch(setInteriorData(finalData));
-        setInteriors(finalData);
-        localStorage.setItem("interiorData", JSON.stringify({ data: finalData, time: now }));
-      } else {
-        console.warn("Fetched interior data is not an array:", freshData);
-      }
-
-    } catch (error) {
-      console.error("Error fetching interiors:", error);
-    }
-  };
-
-  if (refresh || !interiorsFromRedux || interiorsFromRedux.length === 0) {
     fetchInteriorsData();
     setRefresh(false);
-  } else {
-    setInteriors(interiorsFromRedux);
-  }
-}, [interiorsFromRedux, dispatch, refresh]);
+  }, [dispatch, refresh]); // Removed interiorsFromRedux from dependencies
 
+  // Filter interiors based on search input
+  const filteredInteriors = interiors.filter((interior) =>
+    [interior[0], interior[1], interior[2], interior[3]]
+      .map((field) => (field || "").toString().toLowerCase())
+      .some((field) => field.includes(search.toLowerCase()))
+  );
 
   const [interiorPageData, setInteriorPageData] = useState(null);
 
@@ -153,9 +149,9 @@ useEffect(() => {
             </tr>
           </thead>
           <tbody>
-            {interiors.length > 0 ? (
-              interiors.map((interior, index) => (
-                <tr key={index} className="hover:bg-sky-50" onClick={() => {setInteriorPageData(interior); setInteriorOpen(true);}}> 
+            {filteredInteriors.length > 0 ? (
+              filteredInteriors.map((interior, index) => (
+                <tr key={index} className="hover:bg-sky-50" onClick={() => {setInteriorPageData(interior); setInteriorOpen(true);}}>
                   <td className="px-4 py-2">{interior[0]}</td>
                   <td className="px-4 py-2">{interior[1]}</td>
                   <td className="px-4 py-2">{interior[2]}</td>
@@ -163,7 +159,8 @@ useEffect(() => {
                   <td className="px-4 py-2 flex gap-2">
                     <button
                       className="border px-2 py-1 rounded-md"
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent row click from triggering
                         setEditingInterior(interior);
                         setDialogOpen(true);
                       }}
@@ -172,7 +169,10 @@ useEffect(() => {
                     </button>
                     <button
                       className="border px-2 py-1 rounded-md"
-                      onClick={() => deleteInterior(interior[0], setRefresh)}
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent row click from triggering
+                        deleteInterior(interior[0], setRefresh);
+                      }}
                     >
                       <XCircle size={16} />
                     </button>
@@ -187,7 +187,7 @@ useEffect(() => {
           </tbody>
         </table>
       </div>
-      {interiorOpen &&  <InteriorPage interiorData={interiorPageData} setInteriorOpen={setInteriorOpen} />}
+      {interiorOpen && <InteriorPage interiorData={interiorPageData} setInteriorOpen={setInteriorOpen} />}
       {isDialogOpen && <InteriorDialog setDialogOpen={setDialogOpen} setRefresh={setRefresh} refresh={refresh} editingInterior={editingInterior} setEditingInterior={setEditingInterior} />}
     </div>
   );

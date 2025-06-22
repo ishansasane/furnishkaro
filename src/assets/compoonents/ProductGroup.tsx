@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Plus, Pencil, XCircle } from "lucide-react";
 import ProductGroupDialog from "../compoonents/AddProductGroupDialog";
@@ -62,15 +63,10 @@ export default function ProductGroups() {
   
     const localStorageData = localStorage.getItem("productGroupData");
   
-    if (refresh) {
-      fetchAndSetData();
-      setRefresh(false);
-    } else if (products.length > 0) {
-      setProductGroups(products);
-    } else if (localStorageData) {
+    if (localStorageData) {
       const parsed = JSON.parse(localStorageData);
       const age = Date.now() - parsed.time;
-      if (age < 60 * 60 * 1000) {
+      if (age < 60 * 60 * 1000 && parsed.data?.length > 0) {
         dispatch(setProducts(parsed.data));
         setProductGroups(parsed.data);
       } else {
@@ -79,7 +75,15 @@ export default function ProductGroups() {
     } else {
       fetchAndSetData();
     }
-  }, [dispatch, products, refresh]);
+    setRefresh(false);
+  }, [dispatch, refresh]); // Removed products from dependencies
+
+  // Filter product groups based on search input
+  const filteredProductGroups = productGroups.filter((group) =>
+    [group[0], group[1], group[2]]
+      .map((field) => (field || "").toString().toLowerCase())
+      .some((field) => field.includes(search.toLowerCase()))
+  );
 
   async function deleteProductGroup(groupName: string) {
     try {
@@ -171,45 +175,40 @@ export default function ProductGroups() {
             </tr>
           </thead>
           <tbody>
-            {productGroups?.length > 0 ? (
-              productGroups.map((group, index) => (
+            {filteredProductGroups?.length > 0 ? (
+              filteredProductGroups.map((group, index) => (
                 <tr key={index} className="hover:bg-sky-50">
                   <td className="px-4 py-2">{group[0]}</td>
                   <td className="px-4 py-2">{group[1]}</td>
-                 <td className="px-4 py-2">
-  {Array.isArray(group[2])
-    ? group[2].join(", ")
-    : typeof group[2] === "string"
-    ? group[2]
-        .replace(/\\/g, "")          
-        .replace(/^\[|\]$/g, "")     
-        .replace(/"/g, "")           
-    : ""}
-</td>
-
-
+                  <td className="px-4 py-2">
+                    {Array.isArray(group[2])
+                      ? group[2].join(", ")
+                      : typeof group[2] === "string"
+                      ? group[2]
+                          .replace(/\\/g, "")          
+                          .replace(/^\[|\]$/g, "")     
+                          .replace(/"/g, "")           
+                      : ""}
+                  </td>
                   <td className="px-4 py-2">{group[3] === "TRUE" ? "Available" : "Not Available"}</td>
                   <td className="px-4 py-2 flex gap-2">
                     <button
                       className="border px-2 py-1 rounded-md"
-                     onClick={() => {
-  setEditingGroup(group);
-  setStatus(group[3] === "TRUE");
-
-  const cleanedAddon = Array.isArray(group[2])
-    ? group[2]
-    : group[2]
-        .replace(/\\/g, "")           
-        .replace(/[\[\]"]+/g, "")     
-        .split(",")
-        .map((item) => item.trim());  
-
-  setAddonProduct(cleanedAddon);
-  setMainProduct(group[1]);
-  setGroupName(group[0]);
-  setDialogOpen(true);
-}}
-
+                      onClick={() => {
+                        setEditingGroup(group);
+                        setStatus(group[3] === "TRUE");
+                        const cleanedAddon = Array.isArray(group[2])
+                          ? group[2]
+                          : group[2]
+                              .replace(/\\/g, "")           
+                              .replace(/[\[\]"]+/g, "")     
+                              .split(",")
+                              .map((item) => item.trim());  
+                        setAddonProduct(cleanedAddon);
+                        setMainProduct(group[1]);
+                        setGroupName(group[0]);
+                        setDialogOpen(true);
+                      }}
                     >
                       <Pencil size={16} />
                     </button>
@@ -271,80 +270,72 @@ export default function ProductGroups() {
                   </select>
                 </div>
               </div>
-             <div>
-  <label className="block text-sm font-medium text-gray-700 mb-1">
-    Addon Products
-  </label>
-  <div className="flex items-center gap-2 mb-2">
-    <button
-      onClick={() => navigate("/add-product")}
-      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-    >
-      + Product
-    </button>
-  </div>
-  <div className="border rounded-md p-3 max-h-40 overflow-y-auto space-y-1">
-    {items.map((item, index) => {
-      const isSelected = addonProduct.includes(item[0]);
-      return (
-        <div key={index}>
-          <input
-            type="checkbox"
-            id={`addon-${index}`}
-            value={item[0]}
-            checked={isSelected}
-            className="hidden"
-            onChange={() => {
-              if (isSelected) {
-                setAddonProduct((prev) => prev.filter((p) => p !== item[0]));
-              } else {
-                setAddonProduct((prev) => [...prev, item[0]]);
-              }
-            }}
-          />
-          <label
-            htmlFor={`addon-${index}`}
-            className={`cursor-pointer block px-3 py-1 rounded-md border ${
-              isSelected
-                ? "bg-blue-100 text-blue-800 border-blue-400"
-                : "bg-gray-50 hover:bg-gray-100 border-gray-300"
-            }`}
-          >
-            {item[0]}
-          </label>
-        </div>
-      );
-    })}
-  </div>
-
-  {addonProduct.length > 0 && (
-    <div className="mt-2">
-      <p className="text-sm font-medium text-gray-700">Selected Addon Products:</p>
-      <ul className="list-disc pl-5">
-        {addonProduct.map((product, index) => (
-          <li key={index} className="text-sm text-gray-600">
-            {product}{"  "}
-            <button
-              className="ml-2 mt-2 text-red-500 hover:text-red-700"
-              onClick={() => {
-                setAddonProduct(addonProduct.filter((p) => p !== product));
-              }}
-            >
-             <button
-                      className="border px-2 py-1 rounded-md"
-                     
-                    >
-                      <XCircle size={15} />
-                    </button> 
-            </button>
-          </li>
-        ))}
-      </ul>
-    </div>
-  )}
-</div>
-
-
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Addon Products
+                </label>
+                <div className="flex items-center gap-2 mb-2">
+                  <button
+                    onClick={() => navigate("/add-product")}
+                    className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                  >
+                    + Product
+                  </button>
+                </div>
+                <div className="border rounded-md p-3 max-h-40 overflow-y-auto space-y-1">
+                  {items.map((item, index) => {
+                    const isSelected = addonProduct.includes(item[0]);
+                    return (
+                      <div key={index}>
+                        <input
+                          type="checkbox"
+                          id={`addon-${index}`}
+                          value={item[0]}
+                          checked={isSelected}
+                          className="hidden"
+                          onChange={() => {
+                            if (isSelected) {
+                              setAddonProduct((prev) => prev.filter((p) => p !== item[0]));
+                            } else {
+                              setAddonProduct((prev) => [...prev, item[0]]);
+                            }
+                          }}
+                        />
+                        <label
+                          htmlFor={`addon-${index}`}
+                          className={`cursor-pointer block px-3 py-1 rounded-md border ${
+                            isSelected
+                              ? "bg-blue-100 text-blue-800 border-blue-400"
+                              : "bg-gray-50 hover:bg-gray-100 border-gray-300"
+                          }`}
+                        >
+                          {item[0]}
+                        </label>
+                      </div>
+                    );
+                  })}
+                </div>
+                {addonProduct.length > 0 && (
+                  <div className="mt-2">
+                    <p className="text-sm font-medium text-gray-700">Selected Addon Products:</p>
+                    <ul className="list-disc pl-5">
+                      {addonProduct.map((product, index) => (
+                        <li key={index} className="text-sm text-gray-600">
+                          {product}{" "}
+                          <button
+                            className="ml-2 mt-2 text-red-500 hover:text-red-700"
+                            onClick={() => {
+                              setAddonProduct(addonProduct.filter((p) => p !== product));
+                            }}
+                          >
+                            <XCircle size={15} />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
               <div className="grid grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">

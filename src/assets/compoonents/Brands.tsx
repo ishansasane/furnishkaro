@@ -4,7 +4,6 @@ import BrandDialog from "../compoonents/BrandDialog";
 import { useDispatch, useSelector } from "react-redux";
 import { setBrandData } from "../Redux/dataSlice";
 import { RootState } from "../Redux/Store";
-import { useNavigate } from "react-router-dom";
 
 // Fetch brands from the server
 async function fetchBrands() {
@@ -54,7 +53,6 @@ export default function Brands() {
   const [isDialogOpen, setDialogOpen] = useState(false);
   const [editingBrand, setEditingBrand] = useState(null);
   const [refresh, setRefresh] = useState(false);
-  const navigate = useNavigate();
 
   const dispatch = useDispatch();
   const brandData = useSelector((state: RootState) => state.data.brands);
@@ -88,19 +86,28 @@ export default function Brands() {
       }
     };
 
-    if (refresh || !brandData || brandData.length === 0) {
-      fetchAndSetBrands();
-      setRefresh(false);
-    } else {
-      setBrands(brandData);
-    }
-  }, [brandData, dispatch, refresh]);
+    fetchAndSetBrands();
+    setRefresh(false);
+  }, [dispatch, refresh]);
+
+  // Filter brands based on search input
+  const filteredBrands = brands.filter((brand) =>
+    [brand[0], brand[1]]
+      .map((field) => (field || "").toString().toLowerCase())
+      .some((field) => field.includes(search.toLowerCase()))
+  );
 
   return (
     <div className="md:p-6 pt-20 h-full bg-gray-50">
       <div className="flex flex-wrap justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Brands</h1>
-        <button className="flex !rounded-lg items-center gap-2 bg-blue-600 text-white px-4 py-2" onClick={() => navigate("/brand-dilog")}>
+        <button
+          className="flex !rounded-lg items-center gap-2 bg-blue-600 text-white px-4 py-2"
+          onClick={() => {
+            setEditingBrand(null); // Ensure we're adding a new brand
+            setDialogOpen(true); // Open the dialog
+          }}
+        >
           <Plus size={18} /> Add Brand
         </button>
       </div>
@@ -124,8 +131,8 @@ export default function Brands() {
             </tr>
           </thead>
           <tbody>
-            {brands.length > 0 ? (
-              brands.map((brand, index) => (
+            {filteredBrands.length > 0 ? (
+              filteredBrands.map((brand, index) => (
                 <tr key={index} className="hover:bg-sky-50">
                   <td className="px-4 py-2">{brand[0]}</td>
                   <td className="px-4 py-2">{brand[1]}</td>
@@ -156,7 +163,7 @@ export default function Brands() {
           </tbody>
         </table>
       </div>
-     {isDialogOpen && (
+      {isDialogOpen && (
         <BrandDialog
           setDialogOpen={setDialogOpen}
           setRefresh={setRefresh}
@@ -165,7 +172,6 @@ export default function Brands() {
           setEditingBrand={setEditingBrand}
         />
       )}
-
     </div>
   );
 }

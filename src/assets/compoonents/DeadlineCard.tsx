@@ -26,6 +26,8 @@ const DeadlineCard = ({
     hsl(${nameHash % 360}, 80%, 85%) 0%, 
     hsl(${(nameHash + 30) % 360}, 80%, 85%) 100%)`;
 
+
+    
   return (
     <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden group">
       {/* Gradient accent bar */}

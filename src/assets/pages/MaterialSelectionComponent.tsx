@@ -69,7 +69,6 @@ const SearchableSelect = ({ options, value, placeholder, name, mainindex, i, han
   );
 };
 
-
 const MaterialSelectionComponent = ({
   selections,
   availableAreas,
@@ -259,6 +258,18 @@ const MaterialSelectionComponent = ({
 
   const [design, setDesign] = useState("");
 
+  const handleCompanyKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      addCompany();
+    }
+  };
+
+  const handleCatalogueKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      addCatalogue();
+    }
+  };
+
   return (
     <div className="flex flex-col bg-white p-4 sm:p-6 rounded-lg shadow-lg">
       <p className="text-lg sm:text-xl font-semibold">Material Selection</p>
@@ -416,7 +427,7 @@ const MaterialSelectionComponent = ({
 
                       {/* Delete Button */}
                       <div className="flex flex-col w-full sm:w-auto">
-                        <p className="text-sm sm:text-base sm:block hidden">Delete</p>
+                        <p className="text-sm sm:text-base sm:block hidden"></p>
                         <button
                           onClick={(e) => handleGroupDelete(mainindex, i)}
                           className="text-red-600 hover:text-red-800 p-1"
@@ -440,6 +451,7 @@ const MaterialSelectionComponent = ({
               type="text" 
               value={companyName} 
               onChange={(e) => setCompanyName(e.target.value)} 
+              onKeyPress={handleCompanyKeyPress}
               className='w-full rounded-lg border p-2 pl-2 mb-3'
             />
             <div className="w-full flex flex-row justify-between">
@@ -468,6 +480,7 @@ const MaterialSelectionComponent = ({
               type="text" 
               value={catalogueName} 
               onChange={(e) => setCatalogueName(e.target.value)} 
+              onKeyPress={handleCatalogueKeyPress}
               className='w-full rounded-lg border p-2 pl-2 mb-3' 
               placeholder='Name'
             />
@@ -475,6 +488,7 @@ const MaterialSelectionComponent = ({
               type="text" 
               value={catalogueDescription} 
               onChange={(e) => setCatalogueDescription(e.target.value)} 
+              onKeyPress={handleCatalogueKeyPress}
               className='w-full rounded-lg border p-2 pl-2 mb-3' 
               placeholder='Description'
             />

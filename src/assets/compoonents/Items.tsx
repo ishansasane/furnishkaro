@@ -597,6 +597,13 @@ const Items = () => {
     }
   };
 
+  // Filter items based on search input
+  const filteredItems = items.filter((item: any) =>
+    [item[0], item[1], item[2], item[3]]
+      .map((field) => (field || "").toString().toLowerCase())
+      .some((field) => field.includes(search.toLowerCase()))
+  );
+
   return (
     <div className="bg-gray-50 min-h-screen pt-20 md:p-4">
       <div className="container mx-auto">
@@ -859,7 +866,7 @@ const Items = () => {
               </tr>
             </thead>
             <tbody>
-              {items != undefined && items.map((item: any, index: number) => (
+              {filteredItems && filteredItems.map((item: any, index: number) => (
                 <tr key={index} className="border-t relative hover:bg-sky-50">
                   <td onClick={() => editMenu(item)} className="py-2 px-4">{item[0]}</td>
                   <td className="py-2 px-4">{item[1]}</td>

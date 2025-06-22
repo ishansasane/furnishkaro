@@ -13,13 +13,13 @@ import {
   ChevronDown,
   Menu,
   X,
-  Box,
+  Package,
   Layers,
-  Tag,
+  Star,
   BookOpen,
   Home,
   Scissors,
-  UserCircle,
+  UserCheck,
   Store,
 } from "lucide-react";
 import {
@@ -46,15 +46,7 @@ export default function Sidebar() {
   const [mastersOpen, setMastersOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const toggleSidebar = () => {
-    setExpanded((prev) => {
-      // Close masters when collapsing if they were open
-      if (prev && !expanded && mastersOpen) {
-        setMastersOpen(false);
-      }
-      return !prev;
-    });
-  };
+  const toggleSidebar = () => setExpanded((prev) => !prev);
 
   useEffect(() => {
     const handleResize = () => {
@@ -71,12 +63,12 @@ export default function Sidebar() {
       {/* Desktop Sidebar */}
       <nav
         className={`h-full flex-col hidden md:flex transition-all duration-300 ease-in-out ${
-          expanded ? "w-64" : "w-20"
+          expanded ? "w-64" : "w-24"
         }`}
       >
         <div className="p-4 pb-2 flex justify-between items-center">
           <img
-            src="https://sheeladecor.free.nf/logo/sheelaDecore.png"
+            src="https://img.logoipsum.com/243.svg"
             className={`overflow-hidden transition-all duration-300 ${
               expanded ? "w-32" : "w-0"
             }`}
@@ -156,130 +148,82 @@ function SidebarContent({
     email: localStorage.getItem("auth_email") || "user@example.com",
   };
 
-  // Master items with icons
-  const masterItems = [
-    { text: "Products", path: "/masters/items", icon: <Box size={18} /> },
-    {
-      text: "Product Groups",
-      path: "/masters/product-groups",
-      icon: <Layers size={18} />,
-    },
-    { text: "Brands", path: "/masters/brands", icon: <Tag size={18} /> },
-    {
-      text: "Catalogues",
-      path: "/masters/catalogues",
-      icon: <BookOpen size={18} />,
-    },
-    { text: "Interiors", path: "/masters/interiors", icon: <Home size={18} /> },
-    { text: "Tailors", path: "/masters/tailors", icon: <Scissors size={18} /> },
-    {
-      text: "Sales Associate",
-      path: "/masters/sales-associate",
-      icon: <UserCircle size={18} />,
-    },
-    { text: "Stores", path: "/masters/stores", icon: <Store size={18} /> },
+  const mastersItems = [
+    { text: "Products", path: "/masters/items", icon: <Package size={20} /> },
+    { text: "Product Groups", path: "/masters/product-groups", icon: <Layers size={20} /> },
+    { text: "Brands", path: "/masters/brands", icon: <Star size={20} /> },
+    { text: "Catalogues", path: "/masters/catalogues", icon: <BookOpen size={20} /> },
+    { text: "Interiors", path: "/masters/interiors", icon: <Home size={20} /> },
+    { text: "Tailors", path: "/masters/tailors", icon: <Scissors size={20} /> },
+    { text: "Sales Associate", path: "/masters/sales-associate", icon: <UserCheck size={20} /> },
+    { text: "Stores", path: "/masters/stores", icon: <Store size={20} /> },
   ];
 
   return (
     <>
       <ul className="flex-1 px-3 pt-4 pb-2">
-        <SidebarItem
-          icon={<LayoutDashboard size={20} />}
-          text="Dashboard"
-          path="/"
-          setMobileMenuOpen={setMobileMenuOpen}
-        />
-        <SidebarItem
-          icon={<Briefcase size={20} />}
-          text="Projects"
-          path="/projects"
-          setMobileMenuOpen={setMobileMenuOpen}
-        />
-        <SidebarItem
-          icon={<Users size={20} />}
-          text="Customers"
-          path="/customers"
-          setMobileMenuOpen={setMobileMenuOpen}
-        />
+        <SidebarItem icon={<LayoutDashboard size={20} />} text="Dashboard" path="/" setMobileMenuOpen={setMobileMenuOpen} />
+        <SidebarItem icon={<Briefcase size={20} />} text="Projects" path="/projects" setMobileMenuOpen={setMobileMenuOpen} />
+        <SidebarItem icon={<Users size={20} />} text="Customers" path="/customers" setMobileMenuOpen={setMobileMenuOpen} />
 
-        {/* Dropdown Section */}
+        {/* Masters Section */}
         <li className="relative">
           <button
             onClick={() => setMastersOpen(!mastersOpen)}
             className="flex items-center w-full py-2 px-3 my-1 font-medium rounded-md transition-all text-gray-600 hover:bg-gray-200"
           >
             <ClipboardList size={20} />
-            <span
-              className={`transition-all ${
-                expanded ? "ml-3 w-10" : "w-0 overflow-hidden"
-              }`}
-            >
+            <span className={`transition-all ${expanded ? "ml-3 w-10" : "w-0 overflow-hidden"}`}>
               Masters
             </span>
-            {expanded && (
-              <ChevronDown
-                className={`ml-auto transform transition-transform duration-300 ${
-                  mastersOpen ? "rotate-180" : "rotate-0"
-                }`}
-              />
-            )}
+            <ChevronDown
+              className={`ml-auto transform transition-transform duration-300 ${mastersOpen ? "rotate-180" : "rotate-0"}`}
+            />
           </button>
 
+          {/* Masters Dropdown Always Renders for Smooth Animation */}
           <div
-            className={`transition-all duration-300 overflow-hidden ${
-              mastersOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
-            }`}
+            className={`transition-all duration-300 overflow-hidden ${mastersOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"} ${expanded ? "ml-8" : "ml-0"}`}
           >
-            <ul className={`${expanded ? "ml-8" : "ml-0"} mt-1 space-y-1`}>
-              {masterItems.map(({ text, path, icon }) => (
+            <ul className={`mt-1 space-y-1 ${expanded ? "" : "flex flex-col items-center"}`}>
+              {mastersItems.map(({ text, path, icon }) => (
                 <SidebarItem
                   key={path}
-                  icon={icon}
-                  text={text}
+                  icon={expanded ? null : icon}
+                  text={expanded ? text : ""}
                   path={path}
                   setMobileMenuOpen={setMobileMenuOpen}
-                  isChildItem
-                  showIconOnly={!expanded}
                 />
               ))}
             </ul>
           </div>
         </li>
 
-        <SidebarItem
-          icon={<ListChecks size={20} />}
-          text="Tasks"
-          path="/tasks"
-          setMobileMenuOpen={setMobileMenuOpen}
-        />
-        <SidebarItem
-          icon={<FileText size={20} />}
-          text="Reports"
-          path="/reports"
-          setMobileMenuOpen={setMobileMenuOpen}
-        />
-        <SidebarItem
-          icon={<Settings size={20} />}
-          text="Settings"
-          path="http://sheeladecor.free.nf/user-management.php"
-          isExternal
-          setMobileMenuOpen={setMobileMenuOpen}
-        />
+        <SidebarItem icon={<ListChecks size={20} />} text="Tasks" path="/tasks" setMobileMenuOpen={setMobileMenuOpen} />
+        <SidebarItem icon={<FileText size={20} />} text="Reports" path="/reports" setMobileMenuOpen={setMobileMenuOpen} />
+
+        <a
+          href="http://sheeladecor.free.nf/user-management.php"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ display: "flex", alignItems: "center", padding: "10px", textDecoration: "none", color: "inherit" }}
+        >
+          <Settings size={20} style={{ marginRight: expanded ? "8px" : "0" }} />
+          <span className={`transition-all ${expanded ? "ml-3 w-40" : "w-0 overflow-hidden"}`}>
+            {expanded && "Settings"}
+          </span>
+        </a>
       </ul>
 
       {/* User Profile Section */}
       <div className="relative border-t flex items-center p-3 cursor-pointer group">
         <img
-          src={`https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=${encodeURIComponent(
-            user.name
-          )}`}
+          src={`https://ui-avatars.com/api/?background=c7d2fe&color=3730a3&bold=true&name=${encodeURIComponent(user.name)}`}
           alt="User Avatar"
           className="w-10 h-10 rounded-md"
         />
         <div
-          className={`flex justify-between items-center overflow-hidden transition-all ${
-            expanded ? "w-52 ml-3" : "w-0"
-          }`}
+          className={`flex justify-between items-center overflow-hidden transition-all ${expanded ? "w-52 ml-3" : "w-0"}`}
           onClick={() => setDropdownOpen(!dropdownOpen)}
         >
           <div className="leading-4">
@@ -289,7 +233,6 @@ function SidebarContent({
           <MoreVertical size={20} className="ml-2" />
         </div>
 
-        {/* Dropdown Logout */}
         {dropdownOpen && expanded && (
           <div className="absolute bottom-14 right-4 bg-white shadow-lg rounded-md border w-40 z-50">
             <button
@@ -308,44 +251,38 @@ function SidebarContent({
   );
 }
 
-// Sidebar Item
 interface SidebarItemProps {
   icon: ReactNode | null;
   text: string;
   path: string;
   setMobileMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  isChildItem?: boolean;
-  isExternal?: boolean;
-  showIconOnly?: boolean;
 }
 
-function SidebarItem({
-  icon,
-  text,
-  path,
-  setMobileMenuOpen,
-  isChildItem = false,
-  isExternal = false,
-  showIconOnly = false,
-}: SidebarItemProps) {
+function SidebarItem({ icon, text, path, setMobileMenuOpen }: SidebarItemProps) {
   const context = useContext(SidebarContext);
   if (!context) return null;
   const { expanded } = context;
   const location = useLocation();
 
-  const content = (
-    <li
-      className={`relative flex items-center py-2 px-3 my-1 font-medium rounded-md cursor-pointer transition-all group
-      ${
-        location.pathname === path
-          ? "bg-indigo-100 text-indigo-800"
-          : "hover:bg-gray-200 text-gray-600"
-      } ${isChildItem ? (expanded ? "pl-8" : "pl-3") : ""}`}
+  return (
+    <Link
+      to={path}
+      onClick={() => {
+        if (window.innerWidth < 768) {
+          setMobileMenuOpen(false);
+        }
+      }}
+      className="block !no-underline hover:!no-underline"
     >
-      {icon && (
-        <span className={isChildItem && expanded ? "mr-2" : ""}>{icon}</span>
-      )}
-      {(!showIconOnly || !isChildItem) && (
+      <li
+        className={`relative flex items-center py-2 px-3 my-1 font-medium rounded-md cursor-pointer transition-all group
+        ${
+          location.pathname === path
+            ? "bg-indigo-100 text-indigo-800"
+            : "hover:bg-gray-200 text-gray-600"
+        }`}
+      >
+        {icon && icon}
         <span
           className={`overflow-hidden transition-all ${
             expanded ? "ml-3 w-40" : "w-0"
@@ -353,35 +290,7 @@ function SidebarItem({
         >
           {expanded && text}
         </span>
-      )}
-    </li>
-  );
-
-  return isExternal ? (
-    <a
-      href={path}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="block !no-underline hover:!no-underline"
-      onClick={() => {
-        if (window.innerWidth < 768) {
-          setMobileMenuOpen(false);
-        }
-      }}
-    >
-      {content}
-    </a>
-  ) : (
-    <Link
-      to={path}
-      className="block !no-underline hover:!no-underline"
-      onClick={() => {
-        if (window.innerWidth < 768) {
-          setMobileMenuOpen(false);
-        }
-      }}
-    >
-      {content}
+      </li>
     </Link>
   );
 }

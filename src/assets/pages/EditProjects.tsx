@@ -1604,7 +1604,7 @@ const sendProjectData = async () => {
             <p className=' font-semibold'>Order Overview</p>
             <button onClick={goBack} className="mb-4 px-3 py-1 text-white bg-red-500 rounded">← Back</button>
           </div>
-          <div className="flex flex-col sm:flex-row w-full max-w-full justify-between mb-2 sm:mb-3 bg-sky-50 px-1 sm:px-2 py-1 sm:py-2 rounded-lg">
+          <div className="flex flex-col sm:flex-row w-full max-w-full justify-between mb-2 sm:mb-3 bg-sky-50 px-1 sm:!px-4 py-1 sm:!py-4  rounded-lg">
   <button
     className={`w-full sm:w-auto text-sm sm:text-base ${
       navState === "Overview" ? "text-sky-700 font-semibold" : ""

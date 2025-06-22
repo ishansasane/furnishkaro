@@ -1344,12 +1344,12 @@ const handleItemTaxChange = (i: number, tax: string) => {
               srNo++,
               productName,
               size,
-              `INR ${mrp.toFixed(2)}`,
+              `₹ ${mrp.toFixed(2)}`,
               qty.toString(),
-              `INR ${subtotal.toFixed(2)}`,
+              `₹ ${subtotal.toFixed(2)}`,
               `${taxRate.toFixed(2)}%`,
-              `INR ${taxAmount.toFixed(2)}`,
-              `INR ${total.toFixed(2)}`,
+              `₹ ${taxAmount.toFixed(2)}`,
+              `₹ ${total.toFixed(2)}`,
             ]);
           });
         });
@@ -1372,12 +1372,12 @@ const handleItemTaxChange = (i: number, tax: string) => {
           srNo++,
           item.name || "N/A",
           "N/A",
-          `INR ${rate.toFixed(2)}`,
+          `₹ ${rate.toFixed(2)}`,
           qty.toString(),
-          `INR ${netRate.toFixed(2)}`,
+          `₹ ${netRate.toFixed(2)}`,
           `${tax.toFixed(2)}%`,
-          `INR ${taxAmount.toFixed(2)}`,
-          `INR ${totalAmount.toFixed(2)}`,
+          `₹ ${taxAmount.toFixed(2)}`,
+          `₹ ${totalAmount.toFixed(2)}`,
         ]);
       });
     }
@@ -1465,11 +1465,11 @@ const handleItemTaxChange = (i: number, tax: string) => {
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...secondaryColor);
     const summaryItems = [
-      { label: "Sub Total", value: `INR ${(amount || 0).toFixed(2)}` },
-      { label: "Total Tax", value: `INR ${(tax || 0).toFixed(2)}` },
-      { label: "Total Amount", value: `INR ${((amount + tax) || 0).toFixed(2)}` },
-      { label: "Discount", value: `INR ${(discount || 0).toFixed(2)}` },
-      { label: "Grand Total", value: `INR ${((amount + tax - discount) || 0).toFixed(2)}` },
+      { label: "Sub Total", value: `₹ ${(amount || 0).toFixed(2)}` },
+      { label: "Total Tax", value: `₹ ${(tax || 0).toFixed(2)}` },
+      { label: "Total Amount", value: `₹ ${((amount + tax) || 0).toFixed(2)}` },
+      { label: "Discount", value: `₹ ${(discount || 0).toFixed(2)}` },
+      { label: "Grand Total", value: `₹ ${((amount + tax - discount) || 0).toFixed(2)}` },
     ];
 
     summaryItems.forEach((item) => {
@@ -1522,6 +1522,20 @@ const handleItemTaxChange = (i: number, tax: string) => {
     // Save PDF
     doc.save(`Quotation_${projectName || "Project"}_${projectDate || new Date().toLocaleDateString()}.pdf`);
   };
+
+const handleMRPChange = (mainIndex, collectionIndex, value, measurementQuantity, taxRate, qty) => {
+  const updatedSelections = [...selections];
+  const measurementQty = parseFloat(measurementQuantity || "0");
+  const newMRP = parseFloat(value) || 0;
+  // Update item[4] to make item[4] * measurementQuantity equal the input MRP
+  updatedSelections[mainIndex].areacollection[collectionIndex].items[0][4] = measurementQty > 0 ? newMRP / measurementQty : newMRP;
+  // Recalculate Subtotal, Tax Amount, and Total
+  const subtotal = newMRP * qty;
+  const taxAmount = subtotal * (parseFloat(taxRate || "0") / 100);
+  updatedSelections[mainIndex].areacollection[collectionIndex].totalTax[0] = taxAmount;
+  updatedSelections[mainIndex].areacollection[collectionIndex].totalAmount[0] = subtotal + taxAmount;
+  setSelections(updatedSelections); // Adjust based on your state management
+};
 
   return (
     <div className="flex flex-col gap-6 p-6 bg-gray-50 min-h-screen w-full">
@@ -1657,6 +1671,7 @@ const handleItemTaxChange = (i: number, tax: string) => {
             // Use the first item from items array
             const item = collection.items[0];
             const qty = collection.quantities?.[0] || 0;
+            const calculatedMRP = (item[4] * parseFloat(collection.measurement.quantity || "0")).toFixed(2);
 
             return (
               <tr
@@ -1671,7 +1686,16 @@ const handleItemTaxChange = (i: number, tax: string) => {
                     : "N/A"}
                 </td>
                 <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">
-                  INR {(item[4] * parseFloat(collection.measurement.quantity || "0")).toFixed(2)}
+                  <input
+                    type="number"
+                    value={calculatedMRP}
+                    onChange={(e) =>
+                      handleMRPChange(mainIndex, collectionIndex, e.target.value, collection.measurement.quantity, item[5], qty)
+                    }
+                    className="border border-gray-300 rounded-md px-1 sm:px-3 py-1 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-20"
+                    min="0"
+                    step="0.01"
+                  />
                 </td>
                 <td className="py-2 sm:py-3 px-2 sm:px-4">
                   <div className="flex flex-col gap-1">
@@ -1697,14 +1721,14 @@ const handleItemTaxChange = (i: number, tax: string) => {
                   </div>
                 </td>
                 <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">
-                  INR {(item[4] * parseFloat(collection.measurement.quantity || "0") * qty).toFixed(2)}
+                  ₹ {(item[4] * parseFloat(collection.measurement.quantity || "0") * qty).toFixed(2)}
                 </td>
                 <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">{item[5] || "0"}%</td>
                 <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">
-                  INR {collection.totalTax[0]?.toFixed(2) || "0.00"}
+                  ₹ {collection.totalTax[0]?.toFixed(2) || "0.00"}
                 </td>
                 <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">
-                  INR {collection.totalAmount[0]?.toFixed(2) || "0.00"}
+                  ₹ {collection.totalAmount[0]?.toFixed(2) || "0.00"}
                 </td>
               </tr>
             );
@@ -1780,7 +1804,7 @@ const handleItemTaxChange = (i: number, tax: string) => {
                     min="0"
                   />
                 </td>
-                <td className="py-3 px-4 text-sm text-center">INR {item.netRate.toFixed(2)}</td>
+                <td className="py-3 px-4 text-sm text-center">₹ {item.netRate.toFixed(2)}</td>
                 <td className="py-3 px-4">
                   <input
                     onChange={(e) => handleItemTaxChange(i, e.target.value)}
@@ -1790,8 +1814,8 @@ const handleItemTaxChange = (i: number, tax: string) => {
                     min="0"
                   />
                 </td>
-                <td className="py-3 px-4 text-sm text-center">INR {item.taxAmount.toFixed(2)}</td>
-                <td className="py-3 px-4 text-sm text-center">INR {item.totalAmount.toFixed(2)}</td>
+                <td className="py-3 px-4 text-sm text-center">₹ {item.taxAmount.toFixed(2)}</td>
+                <td className="py-3 px-4 text-sm text-center">₹ {item.totalAmount.toFixed(2)}</td>
                 <td className="py-3 px-4">
                   <input
                     onChange={(e) => handleItemRemarkChange(i, e.target.value)}
@@ -1851,7 +1875,7 @@ const handleItemTaxChange = (i: number, tax: string) => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Net Rate</label>
-                  <span className="text-sm">INR {item.netRate.toFixed(2)}</span>
+                  <span className="text-sm">₹ {item.netRate.toFixed(2)}</span>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Tax (%)</label>
@@ -1865,11 +1889,11 @@ const handleItemTaxChange = (i: number, tax: string) => {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Tax Amount</label>
-                  <span className="text-sm">INR {item.taxAmount.toFixed(2)}</span>
+                  <span className="text-sm">₹ {item.taxAmount.toFixed(2)}</span>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Total Amount</label>
-                  <span className="text-sm">INR {item.totalAmount.toFixed(2)}</span>
+                  <span className="text-sm">₹ {item.totalAmount.toFixed(2)}</span>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Remark</label>
@@ -1888,7 +1912,6 @@ const handleItemTaxChange = (i: number, tax: string) => {
     </div>
   </div>
 </div>
-
         {/* Summary and Bank Details */}
         <div className="flex flex-col md:flex-row gap-6">
           {/* Bank Details and Terms */}
@@ -1932,15 +1955,15 @@ const handleItemTaxChange = (i: number, tax: string) => {
             <div className="space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Sub Total</span>
-                <span className="font-medium">INR {amount.toFixed(2)}</span>
+                <span className="font-medium">₹ {amount.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Total Tax Amount</span>
-                <span className="font-medium">INR {tax.toFixed(2)}</span>
+                <span className="font-medium">₹ {tax.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Total Amount</span>
-                <span className="font-medium">INR {(amount).toFixed(2)}</span>
+                <span className="font-medium">₹ {(amount).toFixed(2)}</span>
               </div>
               <hr className="border-gray-200" />
               <div className="flex justify-between items-center">
@@ -1962,7 +1985,7 @@ const handleItemTaxChange = (i: number, tax: string) => {
               <hr className="border-gray-200" />
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600 font-semibold">Grand Total</span>
-                <span className="font-semibold text-blue-600">INR {(grandTotal).toFixed(2)}</span>
+                <span className="font-semibold text-blue-600">₹ {(grandTotal).toFixed(2)}</span>
               </div>
               <div className=" flex gap-2 flex-col">
                 <button

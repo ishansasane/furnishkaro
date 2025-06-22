@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store";
 import { setProducts } from "../Redux/dataSlice";
 import { Link } from "react-router-dom";
+import { Plus, Pencil, XCircle } from "lucide-react";
 
 async function fetchProductGroups() {
   try {
@@ -196,14 +197,14 @@ const ProductGroupForm: React.FC = () => {
                   <li key={index} className="text-sm text-gray-600">
                     {product}
                     <button
-                      className="ml-2 text-red-500 hover:text-red-700"
+                      className="!ml-2  text-red-500 hover:text-red-700"
                       onClick={() => {
                         const updated = addonProducts.filter(p => p !== product);
                         setAddonProducts(updated);
                         console.log("Removed product, new addonProducts:", updated); // Debug
                       }}
                     >
-                      Remove
+                      <XCircle size={20} />
                     </button>
                   </li>
                 ))}
