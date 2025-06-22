@@ -9,6 +9,7 @@ import Sidebar, { SidebarContext } from "./assets/compoonents/Sidebar";
 import { useState } from "react";
 
 import Dashboard from "./assets/pages/Dashboard";
+import ColourPage from "./assets/pages/ColourPage.tsx";
 import Projects from "./assets/pages/Projects";
 import Customers from "./assets/pages/Customers";
 import Masters from "./assets/pages/Masters";
@@ -115,6 +116,7 @@ function App() {
                       <Route path="/areas" element={<Areas />} />
 
                       {/* Masters Subroutes */}
+                      {/* <Route path="/masters/colors" element={<ColourPage/>}/> */}
                       <Route path="/masters/stores" element={<Store />} />
                       <Route path="/masters/items" element={<Items />} />
                       <Route
