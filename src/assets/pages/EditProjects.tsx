@@ -25,6 +25,10 @@ const EditProjects = ({ Paid, setPaid, discountType, setDiscountType, grandTotal
     const [navState, setNavState] = useState("Overview");
     const [status, changeStatus] = useState("approved");
 
+    useEffect(() => {
+      setDiscountType(discountType);
+    })
+
     const dispatch = useDispatch();
     const customerData = useSelector((state : RootState) => state.data.customers);
     const interiorData = useSelector((state : RootState) => state.data.interiors);
@@ -1539,7 +1543,9 @@ const handleDiscountChange = (newDiscount, newDiscountType) => {
       projectAddress: row[17],
       date: row[18],
       grandTotal : row[19],
-      discountType : row[20]
+      discountType : row[20],
+      bankDetails : row[21],
+      termsConditions : row[22]
     }));
 
     return projects;
@@ -1575,7 +1581,9 @@ const sendProjectData = async () => {
           tailorsArray: JSON.stringify(tailorsArray),
           projectAddress: JSON.stringify(projectAddress),
           grandTotal,
-          discountType
+          discountType,
+          bankDetails,
+          termsConditions : termsCondiditions
         }),
       }
     );
@@ -2059,9 +2067,19 @@ const sendProjectData = async () => {
           onChange={(e) => handleDiscountChange(Discount, e.target.value)}
           className="border border-gray-300 rounded-md px-2 py-1 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         >
-          <option value="cash">₹</option>
-          <option value="percent">%</option>
+          {discountType === "cash" ? (
+            <>
+              <option value="cash">₹</option>
+              <option value="percent">%</option>
+            </>
+          ) : (
+            <>
+              <option value="percent">%</option>
+              <option value="cash">₹</option>
+            </>
+          )}
         </select>
+
         <input
           className="w-20 sm:w-24 border border-gray-300 rounded-md px-3 py-1 text-xs sm:text-sm text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           value={Discount}

@@ -407,7 +407,7 @@ export default function Projects() {
               (item[4] * parseFloat(collection.measurement.quantity)).toFixed(2),
               qty,
               (item[4] * parseFloat(collection.measurement.quantity) * qty).toFixed(2),
-              item[5].toFixed(2),
+              item[5],
               collection.totalTax[itemIndex]?.toFixed(2) || "0.00",
               collection.totalAmount[itemIndex]?.toFixed(2) || "0.00",
             ]);
@@ -459,7 +459,7 @@ export default function Projects() {
     yOffset += 7;
     doc.text(`Discount: ${project.discount.toFixed(2)}`, pageWidth - 80, yOffset);
     yOffset += 7;
-    doc.text(`Grand Total: ${(grandTotal).toFixed(2)}`, pageWidth - 80, yOffset);
+    doc.text(`Grand Total: ${(project.totalAmount).toFixed(2)}`, pageWidth - 80, yOffset);
 
     // Footer
     yOffset = pageHeight - 20;
@@ -513,23 +513,16 @@ export default function Projects() {
           </thead>
           <tbody>
             {filteredProjects.map((project, index) => (
-              <tr onClick={() => {
-                        setValues(index);
-                        setIndex(index);
-                        setSendProject(project);
-                        setDiscountType(project.discountType);
-                        setPaidAmount(projectPayments[index]);
-                        setFlag(true);
-                        console.log(project);
-                      }} key={index} className="hover:bg-sky-50">
-                <td className="px-4 py-2">{project.projectName}</td>
-                <td className="px-4 py-2">{project.customerLink ? project.customerLink[0] : ""}</td>
-                <td className="px-4 py-2">{project.grandTotal}</td>
-                <td className="px-4 py-2">{projectPayments[index]}</td>
-                <td className="px-4 py-2">{(project.grandTotal - (projectPayments[index] || 0)).toFixed(2)}</td>
-                <td className="px-4 py-2">{project.createdBy}</td>
-                <td className="px-4 py-2">{project.projectDate}</td>
-                <td className="px-4 py-2">{project.date}</td>
+              <tr key={index} className="hover:bg-sky-50">
+                                
+                <td onClick={() => {setValues(index); setIndex(index); setSendProject(project); setDiscountType(project.discountType); setFlag(true); }} className="px-4 py-2">{project.projectName}</td>
+                <td onClick={() => {setValues(index); setIndex(index); setSendProject(project); setDiscountType(project.discountType); setFlag(true); }} className="px-4 py-2">{project.customerLink ? project.customerLink[0] : ""}</td>
+                <td onClick={() => {setValues(index); setIndex(index); setSendProject(project); setDiscountType(project.discountType); setFlag(true); }} className="px-4 py-2">{project.grandTotal}</td>
+                <td onClick={() => {setValues(index); setIndex(index); setSendProject(project); setDiscountType(project.discountType); setFlag(true); }} className="px-4 py-2">{projectPayments[index]}</td>
+                <td onClick={() => {setValues(index); setIndex(index); setSendProject(project); setDiscountType(project.discountType); setFlag(true); }} className="px-4 py-2">{(project.grandTotal - (projectPayments[index] || 0)).toFixed(2)}</td>
+                <td onClick={() => {setValues(index); setIndex(index); setSendProject(project); setDiscountType(project.discountType); setFlag(true); }} className="px-4 py-2">{project.createdBy}</td>
+                <td onClick={() => {setValues(index); setIndex(index); setSendProject(project); setDiscountType(project.discountType); setFlag(true); }} className="px-4 py-2">{project.projectDate}</td>
+                <td onClick={() => {setValues(index); setIndex(index); setSendProject(project); setDiscountType(project.discountType); setFlag(true); }} className="px-4 py-2">{project.date}</td>
                 <td className="px-4 py-2">
                   <button
                     onClick={() => generatePDF(project)}
@@ -547,7 +540,6 @@ export default function Projects() {
                         setSendProject(project);
                         setDiscountType(project.discountType);
                         setFlag(true);
-                        console.log(project);
                       }}
                       className="border px-2 py-1 rounded-md"
                     >
