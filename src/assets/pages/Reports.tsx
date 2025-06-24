@@ -418,8 +418,6 @@ const totalAdvance = payments.reduce((acc, payment) => {
             setPaid={setPaidAmount}
           />
         )}
-        <BankDetails />
-        <TermsAndConditions />
     </div>
   );
 }
