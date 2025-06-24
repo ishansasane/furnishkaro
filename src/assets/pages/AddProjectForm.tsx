@@ -1758,7 +1758,7 @@ const handleItemTaxChange = (i: number, tax: string) => {
       <h3 className="text-lg font-semibold text-gray-800 mb-4">Miscellaneous</h3>
       <div className="flex justify-end mb-4">
         <button
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 !rounded-xl hover:bg-blue-700 transition-colors text-sm font-medium"
           onClick={handleAddMiscItem}
         >
           <FaPlus className="w-4 h-4" />
@@ -1927,7 +1927,7 @@ const handleItemTaxChange = (i: number, tax: string) => {
       <h3 className="text-lg font-semibold text-gray-800 mb-4">Miscellaneous</h3>
       <div className="flex justify-end mb-4">
         <button
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 !rounded-xl hover:bg-blue-700 transition-colors text-sm font-medium"
           onClick={handleAddMiscItem}
         >
           <FaPlus className="w-4 h-4" />
@@ -2167,13 +2167,13 @@ const handleItemTaxChange = (i: number, tax: string) => {
               <div className=" flex gap-2 flex-col">
                 <button
                   onClick={sendProjectData}
-                  className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium mt-4"
+                  className="w-full  bg-blue-600 text-white py-2 !rounded-xl hover:bg-blue-700 transition-colors text-sm font-medium mt-4"
                 >
                   Add Project & Generate Quote
                 </button>
                 <button
                   onClick={generatePDF}
-                  className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition-colors text-sm font-medium"
+                  className="w-full bg-green-600 text-white py-2 !rounded-xl hover:bg-green-700 transition-colors text-sm font-medium"
                 >
                   Download Quotation PDF
                 </button>
