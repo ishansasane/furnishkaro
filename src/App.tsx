@@ -116,7 +116,7 @@ function App() {
                       <Route path="/areas" element={<Areas />} />
 
                       {/* Masters Subroutes */}
-                      {/* <Route path="/masters/colors" element={<ColourPage/>}/> */}
+                      <Route path="/masters/colors" element={<ColourPage />} />
                       <Route path="/masters/stores" element={<Store />} />
                       <Route path="/masters/items" element={<Items />} />
                       <Route
