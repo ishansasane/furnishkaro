@@ -25,7 +25,7 @@ const ProjectDetails = ({
   projectAddress,
   setProjectAddress,
   setSalesData,
-  setInterior
+  setInterior,
 }) => {
   // Debugging logs for props
   console.log("Props received:", {
@@ -37,9 +37,12 @@ const ProjectDetails = ({
 
   async function fetchInteriors() {
     try {
-      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getinteriordata", {
-        credentials: "include",
-      });
+      const response = await fetch(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/getinteriordata",
+        {
+          credentials: "include",
+        }
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -59,7 +62,8 @@ const ProjectDetails = ({
   const [address, setAddress] = useState("");
 
   const handleSubmit = async () => {
-    const url = "https://sheeladecor.netlify.app/.netlify/functions/server/sendinteriordata";
+    const url =
+      "https://sheeladecor.netlify.app/.netlify/functions/server/sendinteriordata";
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -71,7 +75,10 @@ const ProjectDetails = ({
       const data = await fetchInteriors();
       dispatch(setInteriorData(data));
       setInterior(data);
-      localStorage.setItem("interiorData", JSON.stringify({ data, time: Date.now() }));
+      localStorage.setItem(
+        "interiorData",
+        JSON.stringify({ data, time: Date.now() })
+      );
       setIsOpen(false);
       setName("");
       setEmail("");
@@ -87,9 +94,12 @@ const ProjectDetails = ({
 
   async function fetchSalesAssociates() {
     try {
-      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsalesassociatedata", {
-        credentials: "include",
-      });
+      const response = await fetch(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/getsalesassociatedata",
+        {
+          credentials: "include",
+        }
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -107,19 +117,28 @@ const ProjectDetails = ({
   const [salesaddress, salesSetAddress] = useState("");
 
   const handleSalesSubmit = async () => {
-    const url = "https://sheeladecor.netlify.app/.netlify/functions/server/sendsalesassociatedata";
+    const url =
+      "https://sheeladecor.netlify.app/.netlify/functions/server/sendsalesassociatedata";
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ name: salesname, email: salesemail, phonenumber: salesphonenumber, address: salesaddress }),
+      body: JSON.stringify({
+        name: salesname,
+        email: salesemail,
+        phonenumber: salesphonenumber,
+        address: salesaddress,
+      }),
     });
 
     if (response.status === 200) {
       const data = await fetchSalesAssociates();
       dispatch(setSalesAssociateData(data));
       setSalesData(data);
-      localStorage.setItem("salesAssociateData", JSON.stringify({ data, time: Date.now() }));
+      localStorage.setItem(
+        "salesAssociateData",
+        JSON.stringify({ data, time: Date.now() })
+      );
       setIsSalesOpen(false);
       salesSetName("");
       salesSetEmail("");
@@ -160,12 +179,16 @@ const ProjectDetails = ({
 
   return (
     <div className="flex flex-col gap-3 w-full rounded-xl shadow-2xl border-2 border-gray-200 px-3 py-3 sm:px-4 md:px-6 lg:px-8">
-      <p className="font-semibold sm:text-[1.2vw] md:text-[1vw] lg:text-[0.9vw]">Project Details</p>
+      <p className="font-semibold sm:text-[1.2vw] md:text-[1vw] lg:text-[0.9vw]">
+        Project Details
+      </p>
 
       {/* Reference & Project Name */}
       <div className="flex flex-col sm:flex-row w-full gap-2">
         <div className="flex flex-col w-full sm:w-1/2">
-          <p className="text-sm sm:text-base">Project Name (type a unique name)</p>
+          <p className="text-sm sm:text-base">
+            Project Name (type a unique name)
+          </p>
           <input
             type="text"
             className="border p-2 rounded w-full text-sm sm:text-base"
@@ -206,13 +229,14 @@ const ProjectDetails = ({
       {selectedCustomer && (
         <div className="flex flex-col w-full gap-2">
           <div className="flex flex-col w-full">
-            <p className="text-sm sm:text-base">Any Additional Requests (optional)</p>
-            <input
+            <p className="text-sm sm:text-base">
+              Any Additional Requests (optional)
+            </p>
+            <textarea
               placeholder="Additional Requests"
-              type="text"
               value={additionalRequests || ""}
               onChange={(e) => setAdditionalRequests(e.target.value)}
-              className="border p-2 rounded w-full text-sm sm:text-base"
+              className="border p-2 rounded w-full text-sm sm:text-base resize-y min-h-[100px]"
             />
           </div>
         </div>
@@ -227,7 +251,9 @@ const ProjectDetails = ({
               className="mb-3 flex items-center md:!text-[15px] !text-xs px-2 py-1 border-1 border-blue-400 text-blue-500 font-semibold !rounded-xl hover:bg-blue-50 transition"
               onClick={() => setIsOpen(true)}
             >
-              <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">+</span>
+              <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">
+                +
+              </span>
               Interior
             </button>
           </div>
@@ -256,7 +282,9 @@ const ProjectDetails = ({
               onClick={() => setIsSalesOpen(true)}
               className="mb-3 flex items-center md:!text-[15px] !text-xs px-2 py-1 border-1 border-blue-400 text-blue-500 font-semibold !rounded-xl hover:bg-blue-50 transition"
             >
-             <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">+</span>
+              <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">
+                +
+              </span>
               Sales Associate
             </button>
           </div>
