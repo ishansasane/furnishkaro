@@ -1344,12 +1344,12 @@ const handleItemTaxChange = (i: number, tax: string) => {
               srNo++,
               productName,
               size,
-              `₹ ${mrp.toFixed(2)}`,
+              `INR ${mrp.toFixed(2)}`,
               qty.toString(),
-              `₹ ${subtotal.toFixed(2)}`,
+              `INR ${subtotal.toFixed(2)}`,
               `${taxRate.toFixed(2)}%`,
-              `₹ ${taxAmount.toFixed(2)}`,
-              `₹ ${total.toFixed(2)}`,
+              `INR ${taxAmount.toFixed(2)}`,
+              `INR ${total.toFixed(2)}`,
             ]);
           });
         });
@@ -1372,12 +1372,12 @@ const handleItemTaxChange = (i: number, tax: string) => {
           srNo++,
           item.name || "N/A",
           "N/A",
-          `₹ ${rate.toFixed(2)}`,
+          `INR ${rate.toFixed(2)}`,
           qty.toString(),
-          `₹ ${netRate.toFixed(2)}`,
+          `INR ${netRate.toFixed(2)}`,
           `${tax.toFixed(2)}%`,
-          `₹ ${taxAmount.toFixed(2)}`,
-          `₹ ${totalAmount.toFixed(2)}`,
+          `INR ${taxAmount.toFixed(2)}`,
+          `INR ${totalAmount.toFixed(2)}`,
         ]);
       });
     }
@@ -1465,11 +1465,11 @@ const handleItemTaxChange = (i: number, tax: string) => {
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...secondaryColor);
     const summaryItems = [
-      { label: "Sub Total", value: `₹ ${(amount || 0).toFixed(2)}` },
-      { label: "Total Tax", value: `₹ ${(tax || 0).toFixed(2)}` },
-      { label: "Total Amount", value: `₹ ${((amount + tax) || 0).toFixed(2)}` },
-      { label: "Discount", value: `₹ ${(discount || 0).toFixed(2)}` },
-      { label: "Grand Total", value: `₹ ${((amount + tax - discount) || 0).toFixed(2)}` },
+      { label: "Sub Total", value: `INR ${(amount || 0).toFixed(2)}` },
+      { label: "Total Tax", value: `INR ${(tax || 0).toFixed(2)}` },
+      { label: "Total Amount", value: `INR ${((amount + tax) || 0).toFixed(2)}` },
+      { label: "Discount", value: `INR ${(discount || 0).toFixed(2)}` },
+      { label: "Grand Total", value: `INR ${((amount + tax - discount) || 0).toFixed(2)}` },
     ];
 
     summaryItems.forEach((item) => {
@@ -1523,7 +1523,8 @@ const handleItemTaxChange = (i: number, tax: string) => {
     doc.save(`Quotation_${projectName || "Project"}_${projectDate || new Date().toLocaleDateString()}.pdf`);
   };
 
-const handleMRPChange = (mainIndex, collectionIndex, value, measurementQuantity, taxRate, qty) => {
+
+  const handleMRPChange = (mainIndex, collectionIndex, value, measurementQuantity, taxRate, qty) => {
   const updatedSelections = [...selections];
   const measurementQty = parseFloat(measurementQuantity || "0");
   const newMRP = parseFloat(value) || 0;
@@ -1640,6 +1641,12 @@ const handleMRPChange = (mainIndex, collectionIndex, value, measurementQuantity,
     {selections.map((selection, mainIndex) => (
       <div key={mainIndex} className="w-full">
   <h3 className="font-semibold text-lg sm:text-xl md:text-2xl text-gray-700 mb-2 sm:mb-3">{selection.area}</h3>
+  <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+  <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-4">Quotation</h2>
+  <div className="space-y-6">
+    {selections.map((selection, mainIndex) => (
+      <div key={mainIndex} className="w-full">
+  <h3 className="font-semibold text-lg sm:text-xl md:text-2xl text-gray-700 mb-2 sm:mb-3">{selection.area}</h3>
   <div className="overflow-x-auto rounded-lg border border-gray-200">
     <table className="w-full bg-white min-w-[800px]">
       <thead>
@@ -1721,14 +1728,14 @@ const handleMRPChange = (mainIndex, collectionIndex, value, measurementQuantity,
                   </div>
                 </td>
                 <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">
-                  ₹ {(item[4] * parseFloat(collection.measurement.quantity || "0") * qty).toFixed(2)}
+                  INR {(item[4] * parseFloat(collection.measurement.quantity || "0") * qty).toFixed(2)}
                 </td>
                 <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">{item[5] || "0"}%</td>
                 <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">
-                  ₹ {collection.totalTax[0]?.toFixed(2) || "0.00"}
+                  INR {collection.totalTax[0]?.toFixed(2) || "0.00"}
                 </td>
                 <td className="py-2 sm:py-3 px-2 sm:px-4 text-xs sm:text-sm">
-                  ₹ {collection.totalAmount[0]?.toFixed(2) || "0.00"}
+                  INR {collection.totalAmount[0]?.toFixed(2) || "0.00"}
                 </td>
               </tr>
             );
@@ -1751,7 +1758,7 @@ const handleMRPChange = (mainIndex, collectionIndex, value, measurementQuantity,
       <h3 className="text-lg font-semibold text-gray-800 mb-4">Miscellaneous</h3>
       <div className="flex justify-end mb-4">
         <button
-          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 !rounded-xl hover:bg-blue-700 transition-colors text-sm font-medium"
           onClick={handleAddMiscItem}
         >
           <FaPlus className="w-4 h-4" />
@@ -1804,7 +1811,7 @@ const handleMRPChange = (mainIndex, collectionIndex, value, measurementQuantity,
                     min="0"
                   />
                 </td>
-                <td className="py-3 px-4 text-sm text-center">₹ {item.netRate.toFixed(2)}</td>
+                <td className="py-3 px-4 text-sm text-center">INR {item.netRate.toFixed(2)}</td>
                 <td className="py-3 px-4">
                   <input
                     onChange={(e) => handleItemTaxChange(i, e.target.value)}
@@ -1814,8 +1821,8 @@ const handleMRPChange = (mainIndex, collectionIndex, value, measurementQuantity,
                     min="0"
                   />
                 </td>
-                <td className="py-3 px-4 text-sm text-center">₹ {item.taxAmount.toFixed(2)}</td>
-                <td className="py-3 px-4 text-sm text-center">₹ {item.totalAmount.toFixed(2)}</td>
+                <td className="py-3 px-4 text-sm text-center">INR {item.taxAmount.toFixed(2)}</td>
+                <td className="py-3 px-4 text-sm text-center">INR {item.totalAmount.toFixed(2)}</td>
                 <td className="py-3 px-4">
                   <input
                     onChange={(e) => handleItemRemarkChange(i, e.target.value)}
@@ -1875,7 +1882,7 @@ const handleMRPChange = (mainIndex, collectionIndex, value, measurementQuantity,
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Net Rate</label>
-                  <span className="text-sm">₹ {item.netRate.toFixed(2)}</span>
+                  <span className="text-sm">INR {item.netRate.toFixed(2)}</span>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Tax (%)</label>
@@ -1889,11 +1896,11 @@ const handleMRPChange = (mainIndex, collectionIndex, value, measurementQuantity,
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Tax Amount</label>
-                  <span className="text-sm">₹ {item.taxAmount.toFixed(2)}</span>
+                  <span className="text-sm">INR {item.taxAmount.toFixed(2)}</span>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Total Amount</label>
-                  <span className="text-sm">₹ {item.totalAmount.toFixed(2)}</span>
+                  <span className="text-sm">INR {item.totalAmount.toFixed(2)}</span>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Remark</label>
@@ -1912,6 +1919,176 @@ const handleMRPChange = (mainIndex, collectionIndex, value, measurementQuantity,
     </div>
   </div>
 </div>
+</div>
+    ))}
+
+    {/* Miscellaneous Section */}
+    <div className="mt-6 p-6 bg-gray-50 rounded-lg border border-gray-200">
+      <h3 className="text-lg font-semibold text-gray-800 mb-4">Miscellaneous</h3>
+      <div className="flex justify-end mb-4">
+        <button
+          className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 !rounded-xl hover:bg-blue-700 transition-colors text-sm font-medium"
+          onClick={handleAddMiscItem}
+        >
+          <FaPlus className="w-4 h-4" />
+          Add Item
+        </button>
+      </div>
+      <div className="overflow-x-auto rounded-lg border border-gray-200">
+        <table className="w-full bg-white hidden sm:table">
+          <thead>
+            <tr className="bg-gray-100 text-gray-700 text-sm font-semibold">
+              <th className="py-3 px-4 text-center">SR</th>
+              <th className="py-3 px-4">Item Name</th>
+              <th className="py-3 px-4">Quantity</th>
+              <th className="py-3 px-4">Rate</th>
+              <th className="py-3 px-4">Net Rate</th>
+              <th className="py-3 px-4">Tax (%)</th>
+              <th className="py-3 px-4">Tax Amount</th>
+              <th className="py-3 px-4">Total Amount</th>
+              <th className="py-3 px-4">Remark</th>
+              <th className="py-3 px-4 text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {additionalItems.map((item, i) => (
+              <tr key={i} className="border-b hover:bg-gray-50">
+                <td className="py-3 px-4 text-center text-sm">{i + 1}</td>
+                <td className="py-3 px-4">
+                  <input
+                    onChange={(e) => handleItemNameChange(i, e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    value={item.name || ""}
+                    type="text"
+                  />
+                </td>
+                <td className="py-3 px-4">
+                  <input
+                    onChange={(e) => handleItemQuantityChange(i, e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    value={item.quantity || ""}
+                    type="number"
+                    min="0"
+                  />
+                </td>
+                <td className="py-3 px-4">
+                  <input
+                    onChange={(e) => handleItemRateChange(i, e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    value={item.rate || ""}
+                    type="number"
+                    min="0"
+                  />
+                </td>
+                <td className="py-3 px-4 text-sm text-center">INR {item.netRate.toFixed(2)}</td>
+                <td className="py-3 px-4">
+                  <input
+                    onChange={(e) => handleItemTaxChange(i, e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    value={item.tax || ""}
+                    type="number"
+                    min="0"
+                  />
+                </td>
+                <td className="py-3 px-4 text-sm text-center">INR {item.taxAmount.toFixed(2)}</td>
+                <td className="py-3 px-4 text-sm text-center">INR {item.totalAmount.toFixed(2)}</td>
+                <td className="py-3 px-4">
+                  <input
+                    onChange={(e) => handleItemRemarkChange(i, e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    value={item.remark || ""}
+                    type="text"
+                  />
+                </td>
+                <td className="py-3 px-4 text-center">
+                  <button onClick={() => handleDeleteMiscItem(i)}>
+                    <FaTrash className="text-red-500 hover:text-red-600 w-4 h-4" />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {/* Mobile View for Miscellaneous */}
+        <div className="sm:hidden flex flex-col gap-4 mt-4">
+          {additionalItems.map((item, i) => (
+            <div key={i} className="bg-white p-4 rounded-lg shadow-sm border border-gray-200">
+              <div className="flex justify-between items-center mb-3">
+                <span className="font-semibold text-sm">SR: {i + 1}</span>
+                <button onClick={() => handleDeleteMiscItem(i)}>
+                  <FaTrash className="text-red-500 hover:text-red-600 w-4 h-4" />
+                </button>
+              </div>
+              <div className="grid grid-cols-1 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Item Name</label>
+                  <input
+                    onChange={(e) => handleItemNameChange(i, e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    value={item.name || ""}
+                    type="text"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Quantity</label>
+                  <input
+                    onChange={(e) => handleItemQuantityChange(i, e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    value={item.quantity || ""}
+                    type="number"
+                    min="0"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Rate</label>
+                  <input
+                    onChange={(e) => handleItemRateChange(i, e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    value={item.rate || ""}
+                    type="number"
+                    min="0"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Net Rate</label>
+                  <span className="text-sm">INR {item.netRate.toFixed(2)}</span>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Tax (%)</label>
+                  <input
+                    onChange={(e) => handleItemTaxChange(i, e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    value={item.tax || ""}
+                    type="number"
+                    min="0"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Tax Amount</label>
+                  <span className="text-sm">INR {item.taxAmount.toFixed(2)}</span>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Total Amount</label>
+                  <span className="text-sm">INR {item.totalAmount.toFixed(2)}</span>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Remark</label>
+                  <input
+                    onChange={(e) => handleItemRemarkChange(i, e.target.value)}
+                    className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    value={item.remark || ""}
+                    type="text"
+                  />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
         {/* Summary and Bank Details */}
         <div className="flex flex-col md:flex-row gap-6">
           {/* Bank Details and Terms */}
@@ -1955,15 +2132,15 @@ const handleMRPChange = (mainIndex, collectionIndex, value, measurementQuantity,
             <div className="space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Sub Total</span>
-                <span className="font-medium">₹ {amount.toFixed(2)}</span>
+                <span className="font-medium">INR {amount.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Total Tax Amount</span>
-                <span className="font-medium">₹ {tax.toFixed(2)}</span>
+                <span className="font-medium">INR {tax.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Total Amount</span>
-                <span className="font-medium">₹ {(amount).toFixed(2)}</span>
+                <span className="font-medium">INR {(amount).toFixed(2)}</span>
               </div>
               <hr className="border-gray-200" />
               <div className="flex justify-between items-center">
@@ -1985,18 +2162,18 @@ const handleMRPChange = (mainIndex, collectionIndex, value, measurementQuantity,
               <hr className="border-gray-200" />
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600 font-semibold">Grand Total</span>
-                <span className="font-semibold text-blue-600">₹ {(grandTotal).toFixed(2)}</span>
+                <span className="font-semibold text-blue-600">INR {(grandTotal).toFixed(2)}</span>
               </div>
               <div className=" flex gap-2 flex-col">
                 <button
                   onClick={sendProjectData}
-                  className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium mt-4"
+                  className="w-full  bg-blue-600 text-white py-2 !rounded-xl hover:bg-blue-700 transition-colors text-sm font-medium mt-4"
                 >
                   Add Project & Generate Quote
                 </button>
                 <button
                   onClick={generatePDF}
-                  className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 transition-colors text-sm font-medium"
+                  className="w-full bg-green-600 text-white py-2 !rounded-xl hover:bg-green-700 transition-colors text-sm font-medium"
                 >
                   Download Quotation PDF
                 </button>

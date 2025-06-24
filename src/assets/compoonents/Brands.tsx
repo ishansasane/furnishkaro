@@ -8,9 +8,12 @@ import { RootState } from "../Redux/Store";
 // Fetch brands from the server
 async function fetchBrands() {
   try {
-    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getbrands", {
-      credentials: "include",
-    });
+    const response = await fetch(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/getbrands",
+      {
+        credentials: "include",
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
@@ -25,14 +28,20 @@ async function fetchBrands() {
 }
 
 // Delete a brand
-async function deleteBrand(brandName: string, setRefresh: (state: boolean) => void) {
+async function deleteBrand(
+  brandName: string,
+  setRefresh: (state: boolean) => void
+) {
   try {
-    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletebrand", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ brandName }),
-    });
+    const response = await fetch(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/deletebrand",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ brandName }),
+      }
+    );
 
     if (response.ok) {
       alert("Brand deleted");
@@ -77,7 +86,10 @@ export default function Brands() {
         if (Array.isArray(data)) {
           dispatch(setBrandData(data));
           setBrands(data);
-          localStorage.setItem("brandData", JSON.stringify({ data, time: now }));
+          localStorage.setItem(
+            "brandData",
+            JSON.stringify({ data, time: now })
+          );
         } else {
           console.error("Fetched brand data is invalid:", data);
         }
@@ -148,7 +160,14 @@ export default function Brands() {
                     </button>
                     <button
                       className="border px-2 py-1 rounded-md"
-                      onClick={() => deleteBrand(brand[0], setRefresh)}
+                      onClick={() => {
+                        const confirmed = window.confirm(
+                          `Are you sure you want to delete the brand "${brand[0]}"?`
+                        );
+                        if (confirmed) {
+                          deleteBrand(brand[0], setRefresh);
+                        }
+                      }}
                     >
                       <XCircle size={16} />
                     </button>
@@ -157,7 +176,9 @@ export default function Brands() {
               ))
             ) : (
               <tr>
-                <td colSpan={3} className="text-center py-4">No brands found.</td>
+                <td colSpan={3} className="text-center py-4">
+                  No brands found.
+                </td>
               </tr>
             )}
           </tbody>

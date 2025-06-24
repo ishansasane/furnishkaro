@@ -10,10 +10,12 @@ import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 
 const getItemsData = async () => {
-  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts");
+  const response = await fetch(
+    "https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts"
+  );
   const data = await response.json();
   return data.body;
-}
+};
 
 const Items = () => {
   const groupTypes = [
@@ -23,7 +25,7 @@ const Items = () => {
     ["Piece Based", ["Piece", "Items", "Sets"]],
     ["Fixed Length Items", ["Piece"]],
     ["Fixed Area Items", ["Piece", "Roll"]],
-    ["Tailoring", ["Parts", "Sq.Feet"]]
+    ["Tailoring", ["Parts", "Sq.Feet"]],
   ];
   const [search, setSearch] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -46,7 +48,8 @@ const Items = () => {
 
   const [needsTailoring, setNeedsTailoring] = useState(false);
   const [selectedGroupType, setSelectedGroupType] = useState("");
-  const selectedUnits = groupTypes.find((type) => type[0] === selectedGroupType)?.[1] || [];
+  const selectedUnits =
+    groupTypes.find((type) => type[0] === selectedGroupType)?.[1] || [];
 
   const [openMenu, setOpenMenu] = useState(-1);
   const menuRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -112,7 +115,7 @@ const Items = () => {
     const fetchData = async () => {
       const cached = localStorage.getItem("itemData");
       const oneHour = 60 * 60 * 1000;
-  
+
       if (cached) {
         const { data, time } = JSON.parse(cached);
         if (Date.now() - time < oneHour && Array.isArray(data)) {
@@ -121,13 +124,16 @@ const Items = () => {
           return;
         }
       }
-  
+
       const freshData = await getItemsData();
       dispatch(setItemData(freshData));
       setItems(freshData);
-      localStorage.setItem("itemData", JSON.stringify({ data: freshData, time: Date.now() }));
+      localStorage.setItem(
+        "itemData",
+        JSON.stringify({ data: freshData, time: Date.now() })
+      );
     };
-  
+
     fetchData();
   }, [isFormOpen, deleted, dispatch]);
 
@@ -167,11 +173,11 @@ const Items = () => {
   const duplicateItem = async (item: Array<string>, index: number) => {
     let date = new Date();
 
-    const day = date.getDate();               // 1-31
-    const month = date.getMonth() + 1;        // 0-11, so add 1
-    const year = date.getFullYear();  
-    
-    date = day+month+year; 
+    const day = date.getDate(); // 1-31
+    const month = date.getMonth() + 1; // 0-11, so add 1
+    const year = date.getFullYear();
+
+    const formattedDate = new Date().toLocaleDateString("en-GB");
 
     try {
       const response = await fetch(
@@ -190,7 +196,7 @@ const Items = () => {
             mrp: item[4],
             taxRate: item[5],
             needsTailoring: item[7],
-            date: date
+            date: formattedDate,
           }),
         }
       );
@@ -204,7 +210,7 @@ const Items = () => {
       const reorderedData = [
         ...items.slice(0, index + 1),
         duplicatedItem,
-        ...items.slice(index + 1)
+        ...items.slice(index + 1),
       ];
 
       dispatch(setItemData(reorderedData));
@@ -228,7 +234,7 @@ const Items = () => {
     "Piece based",
     "Fixed length items",
     "Fixed area items",
-    "Tailoring"
+    "Tailoring",
   ];
 
   const sellingUnits = {
@@ -238,17 +244,21 @@ const Items = () => {
     "Piece based": ["Piece", "Items", "Sets"],
     "Fixed length items": ["Piece"],
     "Fixed area items": ["Piece", "Roll"],
-    Tailoring: ["Parts", "Sq. feet"]
+    Tailoring: ["Parts", "Sq. feet"],
   };
 
   const additionalFields: Record<string, string[]> = {
-    Fabric: ["Coverage in Width", "Wastage in Height", "Threshold For Parts Calculation"],
+    Fabric: [
+      "Coverage in Width",
+      "Wastage in Height",
+      "Threshold For Parts Calculation",
+    ],
     "Area Based": ["Coverage in Area"],
     "Running length based": [],
     "Piece based": [],
     "Fixed length items": ["Length of Item"],
     "Fixed area items": ["Area Covered"],
-    Tailoring: []
+    Tailoring: [],
   };
 
   const sideDropdownOptions: Record<string, string[]> = {
@@ -258,7 +268,7 @@ const Items = () => {
     "Piece based": [],
     "Fixed length items": ["Meter", "Inch", "Centimeter", "Feet"],
     "Fixed area items": ["Sq. Feet", "Sq. Meter"],
-    Tailoring: []
+    Tailoring: [],
   };
 
   const [formData, setFormData] = useState({
@@ -269,7 +279,7 @@ const Items = () => {
     mrp: "",
     taxRate: "",
     additionalInputs: {},
-    sideDropdown: ""
+    sideDropdown: "",
   });
 
   const handleGroupChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -279,16 +289,19 @@ const Items = () => {
       groupType: selectedGroup,
       sellingUnit: sellingUnits[selectedGroup]?.[0] || "",
       additionalInputs: additionalFields[selectedGroup]
-        ? additionalFields[selectedGroup].reduce((acc: any, field: string) => ({ ...acc, [field]: "" }), {})
+        ? additionalFields[selectedGroup].reduce(
+            (acc: any, field: string) => ({ ...acc, [field]: "" }),
+            {}
+          )
         : {},
-      sideDropdown: sideDropdownOptions[selectedGroup]?.[0] || ""
+      sideDropdown: sideDropdownOptions[selectedGroup]?.[0] || "",
     });
   };
 
   const handleAdditionalInputChange = (field: string, value: string) => {
     setFormData({
       ...formData,
-      additionalInputs: { ...formData.additionalInputs, [field]: value }
+      additionalInputs: { ...formData.additionalInputs, [field]: value },
     });
   };
 
@@ -309,7 +322,7 @@ const Items = () => {
             sellingUnit,
             mrp,
             taxRate,
-            needsTailoring
+            needsTailoring,
           }),
         }
       );
@@ -337,7 +350,7 @@ const Items = () => {
         mrp: "",
         taxRate: "",
         additionalInputs: {},
-        sideDropdown: ""
+        sideDropdown: "",
       });
     } catch (error) {
       console.error("Edit error:", error);
@@ -346,14 +359,13 @@ const Items = () => {
   };
 
   const handleSubmit = async () => {
-
     let date = new Date();
 
-    const day = date.getDate();               // 1-31
-    const month = date.getMonth() + 1;        // 0-11, so add 1
-    const year = date.getFullYear();  
-    
-    date = day+month+year;
+    const day = date.getDate(); // 1-31
+    const month = date.getMonth() + 1; // 0-11, so add 1
+    const year = date.getFullYear();
+
+    const formattedDate = new Date().toLocaleDateString("en-GB");
 
     const newItem = {
       id: items.length + 1,
@@ -361,12 +373,12 @@ const Items = () => {
       description: formData.productDetails,
       costingType: formData.sellingUnit,
       groupType: formData.groupType,
-      entryDate: date,
+      entryDate: formattedDate,
       additionalInputs: formData.additionalInputs,
       sideDropdown: formData.sideDropdown,
       mrp: formData.mrp,
       taxrate: formData.taxRate,
-      needsTailoring: needsTailoring
+      needsTailoring: needsTailoring,
     };
 
     try {
@@ -385,8 +397,8 @@ const Items = () => {
             sellingUnit: newItem.costingType,
             mrp: newItem.mrp,
             taxRate: newItem.taxrate,
-            needsTailoring
-          })
+            needsTailoring,
+          }),
         }
       );
 
@@ -397,7 +409,10 @@ const Items = () => {
       const updatedData = await getItemsData();
       dispatch(setItemData(updatedData));
       setItems(updatedData);
-      localStorage.setItem("itemData", JSON.stringify({ data: updatedData, time: Date.now() }));
+      localStorage.setItem(
+        "itemData",
+        JSON.stringify({ data: updatedData, time: Date.now() })
+      );
       alert("Item Added");
       setIsFormOpen(false);
       setFormData({
@@ -408,7 +423,7 @@ const Items = () => {
         mrp: "",
         taxRate: "",
         additionalInputs: {},
-        sideDropdown: ""
+        sideDropdown: "",
       });
       setNeedsTailoring(false);
     } catch (error) {
@@ -419,14 +434,14 @@ const Items = () => {
 
   // Handle file import
   const handleFileImport = async (file: File) => {
-    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
-      setFileError('Please upload a valid Excel file (.xlsx or .xls)');
+    if (!file.name.endsWith(".xlsx") && !file.name.endsWith(".xls")) {
+      setFileError("Please upload a valid Excel file (.xlsx or .xls)");
       return;
     }
 
     try {
       const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data, { type: 'array' });
+      const workbook = XLSX.read(data, { type: "array" });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
@@ -439,15 +454,22 @@ const Items = () => {
         row["Costing Type"] || "",
         row["MRP"] || "",
         row["Tax Rate"] || "",
-        row["Added Date"] || new Date().toLocaleDateString(),
-        row["Needs Tailoring"] || false
+        row["Added Date"]
+          ? new Date(row["Added Date"]).toLocaleDateString("en-GB")
+          : new Date().toLocaleDateString("en-GB"),
+        row["Needs Tailoring"] || false,
       ]);
 
       // Validate imported data
-      const validItems = importedItems.filter(item => item[0] && groupOptions.includes(item[2]) && sellingUnits[item[2]]?.includes(item[3]));
+      const validItems = importedItems.filter(
+        (item) =>
+          item[0] &&
+          groupOptions.includes(item[2]) &&
+          sellingUnits[item[2]]?.includes(item[3])
+      );
 
       if (validItems.length === 0) {
-        setFileError('No valid items found in the Excel file');
+        setFileError("No valid items found in the Excel file");
         return;
       }
 
@@ -469,8 +491,8 @@ const Items = () => {
               mrp: item[4],
               taxRate: item[5],
               needsTailoring: item[7],
-              date: item[6]
-            })
+              date: item[6],
+            }),
           }
         );
 
@@ -483,13 +505,16 @@ const Items = () => {
       const updatedData = await getItemsData();
       dispatch(setItemData(updatedData));
       setItems(updatedData);
-      localStorage.setItem("itemData", JSON.stringify({ data: updatedData, time: Date.now() }));
+      localStorage.setItem(
+        "itemData",
+        JSON.stringify({ data: updatedData, time: Date.now() })
+      );
       setIsImportModalOpen(false);
       setFileError(null);
       alert("Items imported successfully");
     } catch (error) {
       console.error("Error importing file:", error);
-      setFileError('Failed to import Excel file');
+      setFileError("Failed to import Excel file");
     }
   };
 
@@ -529,14 +554,14 @@ const Items = () => {
       "Description",
       "Costing Type",
       "Group Type",
-      "Added Date"
+      "Added Date",
     ];
     const rows = items.map((item: any) => [
       item[0] || "",
       item[1] || "",
       item[3] || "",
       item[2] || "",
-      item[6] || ""
+      item[6] ? new Date(item[6]).toLocaleDateString("en-GB") : "",
     ]);
     autoTable(doc, {
       head: [columns],
@@ -544,7 +569,7 @@ const Items = () => {
       startY: 30,
       theme: "striped",
       styles: { fontSize: 10 },
-      headStyles: { fillColor: [50, 150, 150] }
+      headStyles: { fillColor: [50, 150, 150] },
     });
     doc.save("products-table.pdf");
   };
@@ -562,14 +587,16 @@ const Items = () => {
         "Description",
         "Costing Type",
         "Group Type",
-        "Added Date"
+        "Added Date",
       ];
       const rows = items.map((item: any) => ({
         "Product Name": item[0] || "",
-        "Description": item[1] || "",
+        Description: item[1] || "",
         "Costing Type": item[3] || "",
         "Group Type": item[2] || "",
-        "Added Date": item[6] || ""
+        "Added Date": item[6]
+          ? new Date(item[6]).toLocaleDateString("en-GB")
+          : "",
       }));
       const worksheet = XLSX.utils.json_to_sheet(rows);
       worksheet["!cols"] = [
@@ -577,7 +604,7 @@ const Items = () => {
         { wch: 30 },
         { wch: 15 },
         { wch: 15 },
-        { wch: 15 }
+        { wch: 15 },
       ];
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Products");
@@ -610,7 +637,13 @@ const Items = () => {
         <div className="flex justify-between flex-wrap items-center mb-4">
           <div className="flex items-center gap-5">
             {isFormOpen && (
-              <button onClick={() => { setIsFormOpen(false); setEditing(false) }} className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100">
+              <button
+                onClick={() => {
+                  setIsFormOpen(false);
+                  setEditing(false);
+                }}
+                className="p-1.5 rounded-lg bg-gray-50 hover:bg-gray-100"
+              >
                 <ChevronFirst />
               </button>
             )}
@@ -618,12 +651,20 @@ const Items = () => {
           </div>
           <div className="flex items-center md:!gap-5 flex-wrap gap-2">
             <div className="dropdown">
-              <button className="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <button
+                className="btn btn-secondary dropdown-toggle"
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
                 More Options
               </button>
               <ul className="dropdown-menu">
                 <li>
-                  <button className="dropdown-item" onClick={() => setIsImportModalOpen(true)}>
+                  <button
+                    className="dropdown-item"
+                    onClick={() => setIsImportModalOpen(true)}
+                  >
                     Import Product
                   </button>
                 </li>
@@ -667,7 +708,7 @@ const Items = () => {
               </div>
               <div
                 className={`border-2 border-dashed rounded-lg p-6 text-center ${
-                  isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+                  isDragging ? "border-blue-500 bg-blue-50" : "border-gray-300"
                 }`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -689,12 +730,13 @@ const Items = () => {
                   className="hidden"
                   onChange={handleFileInputChange}
                 />
-                {fileError && (
-                  <p className="text-red-500 mt-2">{fileError}</p>
-                )}
+                {fileError && <p className="text-red-500 mt-2">{fileError}</p>}
               </div>
               <div className="mt-4 text-sm text-gray-500">
-                <p>Expected columns: Product Name, Description, Group Type, Costing Type, MRP, Tax Rate, Added Date, Needs Tailoring</p>
+                <p>
+                  Expected columns: Product Name, Description, Group Type,
+                  Costing Type, MRP, Tax Rate, Added Date, Needs Tailoring
+                </p>
               </div>
               <div className="flex justify-end mt-6">
                 <button
@@ -715,7 +757,12 @@ const Items = () => {
         {isFormOpen && (
           <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
             <h2 className="text-2xl font-semibold mb-4">Product Details</h2>
-            <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); }}>
+            <form
+              className="space-y-4"
+              onSubmit={(e) => {
+                e.preventDefault();
+              }}
+            >
               <div>
                 <label className="block font-medium">
                   Product Name <span className="text-red-500">*</span>
@@ -730,7 +777,7 @@ const Items = () => {
                   required
                 />
               </div>
-      
+
               <div>
                 <label className="block font-medium">Description</label>
                 <textarea
@@ -741,7 +788,7 @@ const Items = () => {
                   className="w-full p-2 border rounded-md"
                 />
               </div>
-      
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block font-medium">
@@ -762,7 +809,7 @@ const Items = () => {
                     ))}
                   </select>
                 </div>
-      
+
                 <div>
                   <label className="block font-medium">
                     Selling Unit <span className="text-red-500">*</span>
@@ -783,7 +830,7 @@ const Items = () => {
                   </select>
                 </div>
               </div>
-      
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block font-medium">MRP</label>
@@ -825,11 +872,20 @@ const Items = () => {
                   </div>
                 </div>
               </div>
-      
+
               <div className="flex gap-2 justify-end space-x-4">
                 <button
                   type="button"
-                  onClick={() => { setIsFormOpen(false); setEditing(false); setProductName(""); setDescription(""); setGroupType(""); setSellingUnit(""); setMrp(""); setTaxRate(""); }}
+                  onClick={() => {
+                    setIsFormOpen(false);
+                    setEditing(false);
+                    setProductName("");
+                    setDescription("");
+                    setGroupType("");
+                    setSellingUnit("");
+                    setMrp("");
+                    setTaxRate("");
+                  }}
                   className="px-4 py-2 border !rounded-lg"
                 >
                   Cancel
@@ -846,7 +902,12 @@ const Items = () => {
           </div>
         )}
 
-        <div className={`bg-white shadow rounded-lg p-4 mt-4 overflow-x-auto ${isFormOpen ? "hidden" : ""}`} ref={tableRef}>
+        <div
+          className={`bg-white shadow rounded-lg p-4 mt-4 overflow-x-auto ${
+            isFormOpen ? "hidden" : ""
+          }`}
+          ref={tableRef}
+        >
           <input
             type="text"
             placeholder="Search items..."
@@ -866,53 +927,61 @@ const Items = () => {
               </tr>
             </thead>
             <tbody>
-              {filteredItems && filteredItems.map((item: any, index: number) => (
-                <tr key={index} className="border-t relative hover:bg-sky-50">
-                  <td onClick={() => editMenu(item)} className="py-2 px-4">{item[0]}</td>
-                  <td className="py-2 px-4">{item[1]}</td>
-                  <td className="py-2 px-4">{item[3]}</td>
-                  <td className="py-2 px-4">{item[2]}</td>
-                  <td className="py-2 px-4">{item[6]}</td>
-                  <td className="py-2 px-4 relative">
-                    <button
-                      onClick={() => toggleMenu(index)}
-                      className="p-2 rounded hover:bg-gray-200 text-gray-600 text-xl"
-                      aria-expanded={openMenu === index}
-                      aria-controls={`menu-${index}`}
-                    >
-                      ⋮
-                    </button>
-                    <div
-                      id={`menu-${index}`}
-                      className={`absolute right-4 top-10 w-32 bg-white shadow-md border rounded-md z-50 transition-all duration-200 ease-in-out ${
-                        openMenu === index
-                          ? 'opacity-100 scale-100'
-                          : 'opacity-0 scale-95 pointer-events-none'
-                      }`}
-                      ref={(el) => (menuRefs.current[index] = el)}
-                    >
+              {filteredItems &&
+                filteredItems.map((item: any, index: number) => (
+                  <tr key={index} className="border-t relative hover:bg-sky-50">
+                    <td onClick={() => editMenu(item)} className="py-2 px-4">
+                      {item[0]}
+                    </td>
+                    <td className="py-2 px-4">{item[1]}</td>
+                    <td className="py-2 px-4">{item[3]}</td>
+                    <td className="py-2 px-4">{item[2]}</td>
+                    <td className="py-2 px-4">
+                      {item[6]
+                        ? new Date(item[6]).toLocaleDateString("en-GB")
+                        : ""}
+                    </td>
+
+                    <td className="py-2 px-4 relative">
                       <button
-                        className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                        onClick={() => editMenu(item)}
+                        onClick={() => toggleMenu(index)}
+                        className="p-2 rounded hover:bg-gray-200 text-gray-600 text-xl"
+                        aria-expanded={openMenu === index}
+                        aria-controls={`menu-${index}`}
                       >
-                        Edit
+                        ⋮
                       </button>
-                      <button
-                        className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                        onClick={() => duplicateItem(item, index)}
+                      <div
+                        id={`menu-${index}`}
+                        className={`absolute right-4 top-10 w-32 bg-white shadow-md border rounded-md z-50 transition-all duration-200 ease-in-out ${
+                          openMenu === index
+                            ? "opacity-100 scale-100"
+                            : "opacity-0 scale-95 pointer-events-none"
+                        }`}
+                        ref={(el) => (menuRefs.current[index] = el)}
                       >
-                        Duplicate
-                      </button>
-                      <button
-                        className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-100"
-                        onClick={() => deleteItem(item[0])}
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                        <button
+                          className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                          onClick={() => editMenu(item)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                          onClick={() => duplicateItem(item, index)}
+                        >
+                          Duplicate
+                        </button>
+                        <button
+                          className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-100"
+                          onClick={() => deleteItem(item[0])}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>

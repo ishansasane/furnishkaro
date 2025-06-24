@@ -23,13 +23,16 @@ const EditProjectDetails = ({
   setAdditionalRequests,
   additionalRequests,
   projectData,
-  setsalesdata
+  setsalesdata,
 }) => {
   async function fetchInteriors() {
     try {
-      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getinteriordata", {
-        credentials: "include",
-      });
+      const response = await fetch(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/getinteriordata",
+        {
+          credentials: "include",
+        }
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -43,9 +46,12 @@ const EditProjectDetails = ({
 
   async function fetchSalesAssociates() {
     try {
-      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsalesassociatedata", {
-        credentials: "include",
-      });
+      const response = await fetch(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/getsalesassociatedata",
+        {
+          credentials: "include",
+        }
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -71,7 +77,8 @@ const EditProjectDetails = ({
   const [salesaddress, salesSetAddress] = useState("");
 
   const handleSubmit = async () => {
-    const url = "https://sheeladecor.netlify.app/.netlify/functions/server/sendinteriordata";
+    const url =
+      "https://sheeladecor.netlify.app/.netlify/functions/server/sendinteriordata";
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -83,7 +90,10 @@ const EditProjectDetails = ({
       const data = await fetchInteriors();
       dispatch(setInteriorData(data));
       setInterior(data);
-      localStorage.setItem("interiorData", JSON.stringify({ data, time: Date.now() }));
+      localStorage.setItem(
+        "interiorData",
+        JSON.stringify({ data, time: Date.now() })
+      );
       setName("");
       setEmail("");
       setPhoneNumber("");
@@ -96,19 +106,28 @@ const EditProjectDetails = ({
   };
 
   const handleSalesSubmit = async () => {
-    const url = "https://sheeladecor.netlify.app/.netlify/functions/server/sendsalesassociatedata";
+    const url =
+      "https://sheeladecor.netlify.app/.netlify/functions/server/sendsalesassociatedata";
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ name: salesname, email: salesemail, phonenumber: salesphonenumber, address: salesaddress }),
+      body: JSON.stringify({
+        name: salesname,
+        email: salesemail,
+        phonenumber: salesphonenumber,
+        address: salesaddress,
+      }),
     });
 
     if (response.status === 200) {
       const data = await fetchSalesAssociates();
       dispatch(setSalesAssociateData(data));
       setsalesdata(data);
-      localStorage.setItem("salesAssociateData", JSON.stringify({ data, time: Date.now() }));
+      localStorage.setItem(
+        "salesAssociateData",
+        JSON.stringify({ data, time: Date.now() })
+      );
       salesSetName("");
       salesSetEmail("");
       salesSetPhoneNumber("");
@@ -136,7 +155,9 @@ const EditProjectDetails = ({
           />
         </div>
         <div className="flex flex-col w-full sm:w-1/2">
-          <p className="text-sm sm:text-base">Project Name (type a unique name)</p>
+          <p className="text-sm sm:text-base">
+            Project Name (type a unique name)
+          </p>
           <input
             type="text"
             className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
@@ -162,12 +183,13 @@ const EditProjectDetails = ({
       {/* Additional Requests */}
       {projectData.additionalRequests && (
         <div className="flex flex-col w-full">
-          <p className="text-sm sm:text-base">Any Additional Requests (optional)</p>
-          <input
-            type="text"
+          <p className="text-sm sm:text-base">
+            Any Additional Requests (optional)
+          </p>
+          <textarea
             value={additionalRequests}
             onChange={(e) => setAdditionalRequests(e.target.value)}
-            className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
+            className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base focus:ring-2 focus:ring-blue-400 resize-y min-h-[100px]"
           />
         </div>
       )}
@@ -187,7 +209,9 @@ const EditProjectDetails = ({
           <select
             className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base opacity-80 focus:opacity-100 focus:ring-2 focus:ring-blue-400"
             value={interiorArray ? JSON.stringify(interiorArray) : ""}
-            onChange={(e) => setInteriorArray(e.target.value ? JSON.parse(e.target.value) : [])}
+            onChange={(e) =>
+              setInteriorArray(e.target.value ? JSON.parse(e.target.value) : [])
+            }
           >
             <option value="">Select Interior Name (optional)</option>
             {interior.map((data, index) => (
@@ -210,8 +234,14 @@ const EditProjectDetails = ({
           </div>
           <select
             className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base opacity-80 focus:opacity-100 focus:ring-2 focus:ring-blue-400"
-            value={salesAssociateArray ? JSON.stringify(salesAssociateArray) : ""}
-            onChange={(e) => setSalesAssociateArray(e.target.value ? JSON.parse(e.target.value) : [])}
+            value={
+              salesAssociateArray ? JSON.stringify(salesAssociateArray) : ""
+            }
+            onChange={(e) =>
+              setSalesAssociateArray(
+                e.target.value ? JSON.parse(e.target.value) : []
+              )
+            }
           >
             <option value="">Select Sales Associate (optional)</option>
             {salesdata.map((data, index) => (
@@ -296,7 +326,9 @@ const EditProjectDetails = ({
       {isSalesOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-white p-4 sm:p-6 rounded-xl shadow-xl w-full max-w-xs sm:max-w-md">
-            <h2 className="text-lg sm:text-xl font-bold mb-4">Add Sales Associate</h2>
+            <h2 className="text-lg sm:text-xl font-bold mb-4">
+              Add Sales Associate
+            </h2>
             <input
               className="border border-gray-300 p-2 rounded w-full mb-3 text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
               placeholder="Name"
