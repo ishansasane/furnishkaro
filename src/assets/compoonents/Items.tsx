@@ -177,7 +177,7 @@ const Items = () => {
     const month = date.getMonth() + 1; // 0-11, so add 1
     const year = date.getFullYear();
 
-    date = day + month + year;
+    const formattedDate = new Date().toLocaleDateString("en-GB");
 
     try {
       const response = await fetch(
@@ -196,7 +196,7 @@ const Items = () => {
             mrp: item[4],
             taxRate: item[5],
             needsTailoring: item[7],
-            date: date,
+            date: formattedDate,
           }),
         }
       );
@@ -365,7 +365,7 @@ const Items = () => {
     const month = date.getMonth() + 1; // 0-11, so add 1
     const year = date.getFullYear();
 
-    date = day + month + year;
+    const formattedDate = new Date().toLocaleDateString("en-GB");
 
     const newItem = {
       id: items.length + 1,
@@ -373,7 +373,7 @@ const Items = () => {
       description: formData.productDetails,
       costingType: formData.sellingUnit,
       groupType: formData.groupType,
-      entryDate: date,
+      entryDate: formattedDate,
       additionalInputs: formData.additionalInputs,
       sideDropdown: formData.sideDropdown,
       mrp: formData.mrp,

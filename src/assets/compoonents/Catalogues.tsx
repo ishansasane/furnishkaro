@@ -13,9 +13,12 @@ interface Catalogue {
 // Fetch catalogues from the server
 async function fetchCatalogues(): Promise<Catalogue[]> {
   try {
-    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getcatalogues", {
-      credentials: "include",
-    });
+    const response = await fetch(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/getcatalogues",
+      {
+        credentials: "include",
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
@@ -30,14 +33,20 @@ async function fetchCatalogues(): Promise<Catalogue[]> {
 }
 
 // Delete a catalogue
-async function deleteCatalogue(catalogueName: string, setRefresh: (state: boolean) => void) {
+async function deleteCatalogue(
+  catalogueName: string,
+  setRefresh: (state: boolean) => void
+) {
   try {
-    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletecatalogue", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ catalogueName }),
-    });
+    const response = await fetch(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/deletecatalogue",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ catalogueName }),
+      }
+    );
 
     if (response.ok) {
       alert("Catalogue deleted");
@@ -57,11 +66,15 @@ export default function Catalogues() {
   const [catalogues, setCatalogues] = useState<Catalogue[]>([]);
   const [search, setSearch] = useState("");
   const [isDialogOpen, setDialogOpen] = useState(false);
-  const [editingCatalogue, setEditingCatalogue] = useState<Catalogue | null>(null);
+  const [editingCatalogue, setEditingCatalogue] = useState<Catalogue | null>(
+    null
+  );
   const [refresh, setRefresh] = useState(false);
 
   const dispatch = useDispatch();
-  const catalogueData = useSelector((state: RootState) => state.data.catalogues);
+  const catalogueData = useSelector(
+    (state: RootState) => state.data.catalogues
+  );
 
   useEffect(() => {
     const fetchAndSetData = async () => {
@@ -83,7 +96,10 @@ export default function Catalogues() {
         if (Array.isArray(data)) {
           dispatch(setCatalogues(data));
           setCatalogues(data);
-          localStorage.setItem("catalogueData", JSON.stringify({ data, time: now }));
+          localStorage.setItem(
+            "catalogueData",
+            JSON.stringify({ data, time: now })
+          );
         } else {
           console.error("Fetched catalogue data is invalid:", data);
         }
@@ -107,11 +123,14 @@ export default function Catalogues() {
     <div className="md:p-6 pt-20 h-full bg-gray-50">
       <div className="flex flex-wrap justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Catalogues</h1>
-        <button className="flex !rounded-md items-center gap-2 bg-blue-600 text-white px-6 py-2 rounded-md" onClick={() => navigate("/catalogue-dialog")}>
+        <button
+          className="flex !rounded-md items-center gap-2 bg-blue-600 text-white px-6 py-2 rounded-md"
+          onClick={() => navigate("/catalogue-dialog")}
+        >
           <Plus size={18} /> Add Catalogue
         </button>
       </div>
-      
+
       <div className="bg-white overflow-x-auto shadow rounded-lg p-5">
         <div className="mb-4">
           <input
@@ -149,7 +168,14 @@ export default function Catalogues() {
                     </button>
                     <button
                       className="border px-2 py-1 rounded-md"
-                      onClick={() => deleteCatalogue(catalogue[0], setRefresh)}
+                      onClick={() => {
+                        const confirmed = window.confirm(
+                          `Are you sure you want to delete the catalogue "${catalogue[0]}"?`
+                        );
+                        if (confirmed) {
+                          deleteCatalogue(catalogue[0], setRefresh);
+                        }
+                      }}
                     >
                       <XCircle size={16} />
                     </button>
@@ -158,13 +184,23 @@ export default function Catalogues() {
               ))
             ) : (
               <tr>
-                <td colSpan={3} className="text-center py-4">No catalogues found.</td>
+                <td colSpan={3} className="text-center py-4">
+                  No catalogues found.
+                </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
-      {isDialogOpen && <CatalogueDialog setDialogOpen={setDialogOpen} setRefresh={setRefresh} refresh={refresh} editingCatalogue={editingCatalogue} setEditingCatalogue={setEditingCatalogue} />}
+      {isDialogOpen && (
+        <CatalogueDialog
+          setDialogOpen={setDialogOpen}
+          setRefresh={setRefresh}
+          refresh={refresh}
+          editingCatalogue={editingCatalogue}
+          setEditingCatalogue={setEditingCatalogue}
+        />
+      )}
     </div>
   );
 }
