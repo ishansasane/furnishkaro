@@ -643,46 +643,46 @@ const Dashboard: React.FC = () => {
           flag ? "hidden" : ""
         } grid grid-cols-1 lg:grid-cols-3 gap-2 mt-2`}
       >
-        <div className="bg-white shadow-md rounded-xl p-6">
-          <p
-            style={{ fontFamily: "Poppins, sans-serif" }}
-            className="md:text-[1.7vw] font-semibold mb-4 text-gray-800"
-          >
-            Project Deadlines
-          </p>
+       <div className="bg-white shadow-md rounded-xl p-6">
+  <p
+    style={{ fontFamily: "Poppins, sans-serif" }}
+    className="md:text-[1.7vw] font-semibold mb-4 text-gray-800"
+  >
+    Project Deadlines
+  </p>
 
-          <div className="space-y-4">
-            {projects &&
-              projects.map((project, index) => (
-                <div
-                  key={index}
-                  onClick={() => {
-                    setSendProject(project);
-                    setIndex(index);
-                    setTax(project.totalTax);
-                    setAmount(project.totalAmount);
-                    setProjectDiscount(project.discount);
-                    setFlag(true);
-                  }}
-                >
-                  <DeadlineCard
-                    setFlag={setFlag}
-                    setTax={setTax}
-                    setProjectDiscount={setProjectDiscount}
-                    setAmount={setAmount}
-                    setSendProject={setSendProject}
-                    index={index}
-                    setIndex={setIndex}
-                    project={project}
-                    projectName={project.projectName}
-                    date={project.projectDate}
-                  />
-                </div>
-              ))}
-          </div>
+  <div className="space-y-4 overflow-y-auto max-h-[500px] pr-2">
+    {projects &&
+      projects.map((project, index) => (
+        <div
+          key={index}
+          onClick={() => {
+            setSendProject(project);
+            setIndex(index);
+            setTax(project.totalTax);
+            setAmount(project.totalAmount);
+            setProjectDiscount(project.discount);
+            setFlag(true);
+          }}
+        >
+          <DeadlineCard
+            setFlag={setFlag}
+            setTax={setTax}
+            setProjectDiscount={setProjectDiscount}
+            setAmount={setAmount}
+            setSendProject={setSendProject}
+            index={index}
+            setIndex={setIndex}
+            project={project}
+            projectName={project.projectName}
+            date={project.projectDate}
+          />
         </div>
+      ))}
+  </div>
+</div>
 
-        <div className="bg-white shadow-md rounded-xl p-3 col-span-2">
+        <div className="bg-white shadow-md rounded-xl p-3 col-span-2  overflow-y-auto max-h-[650px] pr-2">
           <div className="flex flex-row w-full justify-between items-center mb-4">
             <Link to="/tasks" className="!no-underline">
               <p

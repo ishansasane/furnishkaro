@@ -10,15 +10,14 @@ const DeadlineCard = ({
   setProjectDiscount,
   setFlag,
 }) => {
-  // Format date with elegant styling
+  // Format date
   const formattedDate = new Date(date).toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
     day: "numeric",
-    weekday: "short",
   });
 
-  // Subtle gradient background based on project name hash
+  // Gradient background based on project name hash
   const nameHash = projectName
     .split("")
     .reduce((acc, char) => char.charCodeAt(0) + acc, 0);
@@ -26,23 +25,21 @@ const DeadlineCard = ({
     hsl(${nameHash % 360}, 80%, 85%) 0%, 
     hsl(${(nameHash + 30) % 360}, 80%, 85%) 100%)`;
 
-
-    
   return (
-    <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 border border-gray-100 overflow-hidden group">
+    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-100 overflow-hidden">
       {/* Gradient accent bar */}
-      <div className="h-1.5 w-full" style={{ background: bgGradient }}></div>
+      <div className="h-1 w-full" style={{ background: bgGradient }}></div>
 
-      <div className="p-5">
+      <div className="p-3">
         {/* Header */}
-        <div className="flex justify-between items-start mb-4">
+        <div className="flex justify-between items-center mb-2">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 line-clamp-1 group-hover:text-blue-600 transition-colors">
+            <h3 className="text-base font-semibold text-gray-900 line-clamp-1 hover:text-blue-600 transition-colors">
               {projectName}
             </h3>
-            <div className="flex items-center mt-1 space-x-2">
+            <div className="flex items-center mt-0.5 space-x-1">
               <svg
-                className="w-4 h-4 text-gray-400"
+                className="w-3 h-3 text-gray-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -54,48 +51,46 @@ const DeadlineCard = ({
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
               </svg>
-              <p className="text-sm text-gray-500 font-medium">
-                {formattedDate}
-              </p>
+              <p className="text-xs text-gray-500">{formattedDate}</p>
             </div>
           </div>
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 animate-pulse">
-            <span className="w-2 h-2 mr-1 rounded-full bg-green-500"></span>
+          <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+            <span className="w-1.5 h-1.5 mr-1 rounded-full bg-green-500"></span>
             Active
           </span>
         </div>
 
         {/* Items Section */}
-        <div className="mt-4">
-          <div className="flex items-center mb-2">
-            <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+        <div className="mt-2">
+          <div className="flex items-center mb-1">
+            <h4 className="text-xs font-medium text-gray-500 uppercase">
               Items
             </h4>
-            <span className="ml-2 text-xs font-medium text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+            <span className="ml-1 text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded-full">
               {project.goodsArray.length}
             </span>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {project.goodsArray.slice(0, 4).map((arr, idx) => (
+          <div className="flex flex-wrap gap-1">
+            {project.goodsArray.slice(0, 3).map((arr, idx) => (
               <span
                 key={idx}
-                className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-white text-gray-700 border border-gray-200 shadow-xs hover:shadow-sm transition-all"
+                className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-white text-gray-700 border border-gray-200"
               >
                 {arr.item?.[0]}
               </span>
             ))}
-            {project.goodsArray.length > 4 && (
-              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-50 text-gray-500">
-                +{project.goodsArray.length - 4} more
+            {project.goodsArray.length > 3 && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-500">
+                +{project.goodsArray.length - 3}
               </span>
             )}
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-6 pt-4 border-t border-gray-100 flex justify-end space-x-3">
+        <div className="mt-3 pt-2 border-t border-gray-100 flex justify-end space-x-2">
           <button
-            className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-all border border-gray-200 flex items-center"
+            className="px-3 py-1 text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-md border border-gray-200 flex items-center"
             onClick={() => {
               setSendProject(project);
               setIndex(index);
@@ -106,7 +101,7 @@ const DeadlineCard = ({
             }}
           >
             <svg
-              className="w-4 h-4 mr-2"
+              className="w-3 h-3 mr-1"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -126,9 +121,9 @@ const DeadlineCard = ({
             </svg>
             Details
           </button>
-          <button className="px-4 py-2 text-sm font-medium text-white rounded-lg transition-all bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-sm hover:shadow-md flex items-center">
+          <button className="px-3 py-1 text-xs font-medium text-white rounded-md bg-blue-500 hover:bg-blue-600 flex items-center">
             <svg
-              className="w-4 h-4 mr-2"
+              className="w-3 h-3 mr-1"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
