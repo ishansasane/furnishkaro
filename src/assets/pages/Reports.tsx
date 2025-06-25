@@ -5,6 +5,8 @@ import { RootState } from "../Redux/store";
 import { setPaymentData, setProjects, setProjectFlag, setTasks } from "../Redux/dataSlice";
 import { useDispatch, useSelector } from "react-redux";
 import EditProjects from "./EditProjects";
+import BankDetails from "./BankDetails";
+import TermsAndConditions from "./TermsAndConditions";
 
 function Reports() {
 

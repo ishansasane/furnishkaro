@@ -18,6 +18,8 @@ interface DataState {
   companyData : any[];
   designData : any[];
   inquiry : any[];
+  bankData : any[];
+  termsData : any[];
 }
 
 const initialState: DataState = {
@@ -38,6 +40,8 @@ const initialState: DataState = {
   companyData : [],
   designData : [],
   inquiry : [],
+  bankData : [],
+  termsData : []
 };
 
 const dataSlice = createSlice({
@@ -95,6 +99,12 @@ const dataSlice = createSlice({
     setInquiryData : (state, action : PayloadAction<any[]>) => {
       state.inquiry = action.payload;
     },
+    setBankData : (state, action : PayloadAction<any[]>) => {
+      state.bankData = action.payload;
+    },
+    setTermsData : (state, action : PayloadAction<any[]>) => {
+      state.termsData = action.payload;
+    },
   },
 });
 
@@ -115,7 +125,9 @@ export const {
   setPaymentData,
   setCompanyData,
   setDesignData,
-  setInquiryData
+  setInquiryData,
+  setBankData,
+  setTermsData
 } = dataSlice.actions;
 
 export default dataSlice.reducer;
