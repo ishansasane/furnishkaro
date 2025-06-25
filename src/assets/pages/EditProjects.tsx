@@ -877,7 +877,7 @@ const handleItemQuantityChange = (i: number, quantity: string) => {
   item.taxAmount = taxAmount;
   item.totalAmount = totalAmount;
 
-  setAdditionalItems(updated);
+  setAdditionaItems(updated);
 
   const { totalTax, totalAmount: grandSubtotal } = recalculateTotals(selections, updated);
   setTax(totalTax);
@@ -916,8 +916,7 @@ const handleAddMiscItem = () => {
 const handleDeleteMiscItem = (itemIndex: number) => {
   const updated = [...additionalItems];
   updated.splice(itemIndex, 1);
-  setAdditionalItems(updated);
-
+  setAdditionaItems(updated);
   // Recalculate totals
   const { totalTax, totalAmount } = recalculateTotals(selections, updated);
   setTax(totalTax);
@@ -982,7 +981,7 @@ const recalculateItemTotals = (items: Additional[]) => {
     };
   });
 
-  setAdditionalItems(updatedItems);
+  setAdditionaItems(updatedItems);
   setItemTax(parseFloat(totalTax.toFixed(2)));
   setItemTotal(parseFloat(totalAmount.toFixed(2)));
 };
@@ -1020,7 +1019,7 @@ const handleItemRateChange = (i: number, rate: string) => {
 
   updated[i] = item;
 
-  setAdditionalItems(updated);
+  setAdditionaItems(updated);
 
   const { totalTax, totalAmount } = recalculateTotals(selections, updated);
   setTax(totalTax);
@@ -1061,7 +1060,7 @@ const handleItemTaxChange = (i: number, tax: string) => {
 
   updated[i] = item;
 
-  setAdditionalItems(updated);
+  setAdditionaItems(updated);
 
   const { totalTax, totalAmount } = recalculateTotals(selections, updated);
   setTax(totalTax);
