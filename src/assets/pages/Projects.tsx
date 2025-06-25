@@ -349,126 +349,172 @@ export default function Projects() {
   };
 
   // PDF Generation Function
-  const generatePDF = (project: any) => {
+const generatePDF = (project: any) => {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     let yOffset = 20;
 
-    // Header
+    // Header with background
+    doc.setFillColor(0, 48, 135); // Dark blue #003087
+    doc.rect(0, 0, pageWidth, 30, 'F');
+    doc.setTextColor(255, 255, 255); // White text
     doc.setFontSize(18);
     doc.setFont("helvetica", "bold");
-    doc.text("Quotation", pageWidth / 2, yOffset, { align: "center" });
-    yOffset += 10;
+    doc.text("Quotation", pageWidth / 2, 25, { align: "center" });
+    yOffset = 40;
 
     // Company Details
+    doc.setTextColor(0, 0, 0); // Black text
     doc.setFontSize(12);
     doc.setFont("helvetica", "normal");
     doc.text("Sheela Decor", 20, yOffset);
     yOffset += 7;
     doc.text("123 Business Street, City, Country", 20, yOffset);
     yOffset += 7;
-    doc.text("Email: contact@sheeladecor.com", 20, yOffset);
-    yOffset += 7;
-    doc.text("Phone: +123 456 7890", 20, yOffset);
+    doc.text("Email: contact@sheeladecor.com | Phone: +123 456 7890", 20, yOffset);
+    yOffset += 10;
+    doc.setDrawColor(0, 0, 255); // Blue line
+    doc.line(20, yOffset, pageWidth - 20, yOffset);
     yOffset += 10;
 
     // Customer and Project Details
     doc.setFontSize(10);
-    doc.text(`Quotation Date: ${project.projectDate || "N/A"}`, 20, yOffset);
-    doc.text(`Project: ${project.projectName || "N/A"}`, pageWidth - 80, yOffset);
+    doc.text("Project Details", 20, yOffset);
+    doc.text("Customer Details", pageWidth / 2 + 20, yOffset);
     yOffset += 7;
-    doc.text(`Customer: ${project.customerLink?.[0] || "N/A"}`, 20, yOffset);
-    doc.text(`Reference: ${project.projectReference || "N/A"}`, pageWidth - 80, yOffset);
+    doc.text(`Project Name: ${project.projectName || "N/A"}`, 20, yOffset);
+    doc.text(`Customer: ${project.customerLink?.[0] || "N/A"}`, pageWidth / 2 + 20, yOffset);
+    yOffset += 7;
+    doc.text(`Date: ${project.projectDate || "6/25/2025"}`, 20, yOffset);
+    doc.text("Address: N/A", pageWidth / 2 + 20, yOffset);
     yOffset += 15;
 
-    // Quotation Table
-    const tableData: any[] = [];
+    // Quotation Table (Main Items)
+    const mainTableData: any[] = [];
     let srNo = 1;
 
     // Process allData (selections)
     project.allData.forEach((selection: any) => {
       if (selection.areacollection && selection.areacollection.length > 0) {
         selection.areacollection.forEach((collection: any) => {
-          const pg = collection.productGroup;
-          if (!Array.isArray(pg) || pg.length < 2) return;
-          const relevantPG = pg.length > 2 ? pg.slice(1, -2) : [];
-          const matchedItems = relevantPG.map((pgItem: string) => {
-            const matched = collection.items.find((item: any) => item[0] === pgItem);
-            return matched || pgItem;
-          });
-          const validMatchedItems = matchedItems.filter((el: any) => Array.isArray(el));
-          validMatchedItems.forEach((item: any, itemIndex: number) => {
-            const qty = collection.quantities?.[itemIndex] || 0;
-            tableData.push([
-              srNo++,
-              `${item[0]} * ${collection.measurement.quantity}`,
-              `${collection.measurement.width} x ${collection.measurement.height} ${collection.measurement.unit}`,
-              (item[4] * parseFloat(collection.measurement.quantity)).toFixed(2),
-              qty,
-              (item[4] * parseFloat(collection.measurement.quantity) * qty).toFixed(2),
-              item[5],
-              collection.totalTax[itemIndex]?.toFixed(2) || "0.00",
-              collection.totalAmount[itemIndex]?.toFixed(2) || "0.00",
-            ]);
-          });
+          if (!Array.isArray(collection.items) || !collection.items.length) return;
+
+          // Use the first item from items array, matching UI logic
+          const item = collection.items[0];
+          const qty = collection.quantities?.[0] || 0;
+          const calculatedMRP = (item[4] * parseFloat(collection.measurement.quantity || "0")).toFixed(2);
+
+          mainTableData.push([
+            srNo++,
+            collection.productGroup[0] || "N/A",
+            collection.measurement.width && collection.measurement.height
+              ? `${collection.measurement.width} x ${collection.measurement.height} ${collection.measurement.unit || ""}`
+              : "N/A",
+            calculatedMRP,
+            qty,
+            (item[4] * parseFloat(collection.measurement.quantity || "0") * qty).toFixed(2),
+            item[5] || "0",
+            collection.totalTax[0]?.toFixed(2) || "0.00",
+            collection.totalAmount[0]?.toFixed(2) || "0.00",
+          ]);
         });
       }
     });
 
-    // Miscellaneous Items
-    project.additionalItems.forEach((item: any) => {
-      tableData.push([
-        srNo++,
-        item.name || "N/A",
-        "N/A",
-        item.rate.toFixed(2),
-        item.quantity,
-        item.netRate.toFixed(2),
-        item.tax.toFixed(2),
-        item.taxAmount.toFixed(2),
-        item.totalAmount.toFixed(2),
-      ]);
-    });
+    // Draw Main Quotation Table
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Quotation Items", 20, yOffset);
+    yOffset += 10;
 
     autoTable(doc, {
       startY: yOffset,
       head: [
-        ["Sr. No.", "Product Name", "Size", "MRP", "Quantity", "Subtotal", "Tax Rate (%)", "Tax Amount", "Total"],
+        ["Sr. No.", "Product Name", "Size", "MRP", "Qty", "Subtotal", "Tax Rate (%)", "Tax Amount", "Total"],
       ],
-      body: tableData,
+      body: mainTableData.length > 0 ? mainTableData : [[{ content: "No product data available.", colSpan: 9, styles: { halign: "center" } }]],
       theme: "grid",
       styles: { fontSize: 8, cellPadding: 2 },
-      headStyles: { fillColor: [0, 102, 204], textColor: [255, 255, 255] },
+      headStyles: { fillColor: [0, 48, 135], textColor: [255, 255, 255], fontStyle: "bold" }, // Dark blue header
       alternateRowStyles: { fillColor: [240, 240, 240] },
     });
 
-    yOffset = (doc as any).lastAutoTable.finalY + 10;
+    yOffset = (doc as any).lastAutoTable.finalY + 15;
 
-    // Summary
+    // Miscellaneous Table
+    const miscTableData: any[] = [];
+    let miscSrNo = 1;
+
+    // Process miscellaneousData
+    if (project.miscellaneousData && Array.isArray(project.miscellaneousData)) {
+      project.miscellaneousData.forEach((misc: any) => {
+        miscTableData.push([
+          miscSrNo++,
+          misc.productName || "N/A",
+          misc.size || "N/A",
+          misc.mrp?.toFixed(2) || "0.00",
+          misc.quantity || 0,
+          misc.subtotal?.toFixed(2) || "0.00",
+          misc.taxRate || "0",
+          misc.taxAmount?.toFixed(2) || "0.00",
+          misc.total?.toFixed(2) || "0.00",
+        ]);
+      });
+    }
+
+    // Draw Miscellaneous Table
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text("Miscellaneous Items", 20, yOffset);
+    yOffset += 10;
+
+    autoTable(doc, {
+      startY: yOffset,
+      head: [
+        ["Sr. No.", "Product Name", "Size", "MRP", "Qty", "Subtotal", "Tax Rate (%)", "Tax Amount", "Total"],
+      ],
+      body: miscTableData.length > 0 ? miscTableData : [[{ content: "No miscellaneous data available.", colSpan: 9, styles: { halign: "center" } }]],
+      theme: "grid",
+      styles: { fontSize: 8, cellPadding: 2 },
+      headStyles: { fillColor: [0, 48, 135], textColor: [255, 255, 255], fontStyle: "bold" }, // Dark blue header
+      alternateRowStyles: { fillColor: [240, 240, 240] },
+    });
+
+    yOffset = (doc as any).lastAutoTable.finalY + 15;
+
+    // Summary with background
+    doc.setFillColor(245, 245, 245); // Light gray #f5f5f5
+    doc.rect(pageWidth / 2 + 10, yOffset - 10, pageWidth / 2 - 40, 70, 'F');
     doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
-    doc.text("Summary", 20, yOffset);
+    doc.text("Summary", pageWidth / 3 + 60, yOffset);
     yOffset += 7;
     doc.setFont("helvetica", "normal");
-    doc.text(`Sub Total: ${project.totalAmount.toFixed(2)}`, pageWidth - 80, yOffset);
+    doc.text("Sub Total:", pageWidth / 2 + 20, yOffset);
+    doc.text(`INR ${project.totalAmount.toFixed(2)}`, pageWidth - 40, yOffset, { align: "right" });
     yOffset += 7;
-    doc.text(`Total Tax Amount: ${project.totalTax.toFixed(2)}`, pageWidth - 80, yOffset);
+    doc.text("Total Tax:", pageWidth / 2 + 20, yOffset);
+    doc.text(`INR ${project.totalTax.toFixed(2)}`, pageWidth - 40, yOffset, { align: "right" });
     yOffset += 7;
-    doc.text(`Total Amount: ${(project.totalAmount + project.totalTax).toFixed(2)}`, pageWidth - 80, yOffset);
+    doc.text("Total Amount:", pageWidth / 2 + 20, yOffset);
+    doc.text(`INR ${(project.totalAmount + project.totalTax).toFixed(2)}`, pageWidth - 40, yOffset, { align: "right" });
     yOffset += 7;
-    doc.text(`Discount: ${project.discount.toFixed(2)}`, pageWidth - 80, yOffset);
+    doc.text("Discount:", pageWidth / 2 + 20, yOffset);
+    doc.text(`INR ${project.discount.toFixed(2)}`, pageWidth - 40, yOffset, { align: "right" });
     yOffset += 7;
-    doc.text(`Grand Total: ${(project.totalAmount).toFixed(2)}`, pageWidth - 80, yOffset);
+    doc.text("Grand Total:", pageWidth / 2 + 20, yOffset);
+    doc.text(`INR ${(project.totalAmount).toFixed(2)}`, pageWidth - 40, yOffset, { align: "right" });
 
     // Footer
     yOffset = pageHeight - 20;
     doc.setFontSize(8);
+    doc.setTextColor(0, 0, 0);
     doc.text("Thank you for your business!", pageWidth / 2, yOffset, { align: "center" });
 
     // Save PDF
-    doc.save(`Quotation_${project.projectName || "Project"}_${project.projectDate || "Date"}.pdf`);
-  };
+    doc.save(`Quotation_${project.projectName || "Project"}_${project.projectDate || "6/25/2025"}.pdf`);
+};
 
   const [paidAmount, setPaidAmount] = useState(0);
 
