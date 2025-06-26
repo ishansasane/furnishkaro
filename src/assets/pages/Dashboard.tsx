@@ -301,6 +301,8 @@ const Dashboard: React.FC = () => {
               tailorsArray: deepClone(parseSafely(row[16], [])),
               projectAddress: row[17] || "",
               date: row[18] || "",
+              grandTotal : row[19],
+              discountType : row[20]
             };
           } catch (error) {
             console.error(
@@ -600,6 +602,8 @@ const Dashboard: React.FC = () => {
       }
   };
 
+  const [discountType, setDiscountType] = useState(null);
+
   return (
     <div className="p-6 md:mt-0 mt-20 bg-gray-100 min-h-screen">
       <div
@@ -662,6 +666,7 @@ const Dashboard: React.FC = () => {
             setTax(project.totalTax);
             setAmount(project.totalAmount);
             setProjectDiscount(project.discount);
+            setDiscountType(project.discountType);
             setFlag(true);
           }}
         >
@@ -676,6 +681,8 @@ const Dashboard: React.FC = () => {
             project={project}
             projectName={project.projectName}
             date={project.projectDate}
+            discountType={discountType}
+            setDiscountType={setDiscountType}
           />
         </div>
       ))}
@@ -1090,6 +1097,8 @@ const Dashboard: React.FC = () => {
           setAmount={setAmount}
           Discount={projectDiscount}
           setDiscount={setProjectDiscount}
+          setDiscountType={setDiscountType}
+          discountType={discountType}
         />
       )}
     </div>
