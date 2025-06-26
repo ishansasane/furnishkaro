@@ -387,7 +387,7 @@ const MaterialSelectionComponent = ({
                         </div>
                         <SearchableSelect
                           options={catalogueData}
-                          value={element.catalogue}
+                          value={element.catalogue[0]}
                           i = { i }
                           mainindex={mainindex}
                           handleProductGroupChange={handleCatalogueChange}

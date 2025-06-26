@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const InquiryCard = ({
@@ -11,6 +11,7 @@ const InquiryCard = ({
   handleDelete,
   onCardClick,
   customer,
+  inquiryData
 }) => {
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [previousStatus, setPreviousStatus] = useState(status);
@@ -34,6 +35,10 @@ const InquiryCard = ({
     setShowDeletePopup(false);
     handlestatuschange(project, previousStatus);
   };
+
+  useEffect(() => {
+    console.log(inquiryData);
+  })
 
   return (
     <>

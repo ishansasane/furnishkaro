@@ -27,10 +27,32 @@ async function fetchBrands() {
   }
 }
 
+async function refreshBrands(
+  dispatch: any,
+  setBrands: (data: string[][]) => void
+) {
+  try {
+    const data = await fetchBrands();
+    const now = Date.now();
+
+    if (Array.isArray(data)) {
+      dispatch(setBrandData(data));
+      setBrands(data);
+      localStorage.setItem("brandData", JSON.stringify({ data, time: now }));
+    } else {
+      console.error("Fetched brand data is invalid:", data);
+    }
+  } catch (error) {
+    console.error("Error refreshing brand data:", error);
+  }
+}
+
+
 // Delete a brand
 async function deleteBrand(
   brandName: string,
-  setRefresh: (state: boolean) => void
+  dispatch: any,
+  setBrands: (data: string[][]) => void
 ) {
   try {
     const response = await fetch(
@@ -45,7 +67,7 @@ async function deleteBrand(
 
     if (response.ok) {
       alert("Brand deleted");
-      setRefresh(true); // Trigger refresh to fetch updated data
+      await refreshBrands(dispatch, setBrands); // 🔄 Refresh Redux + LocalStorage
     } else {
       const errorText = await response.text();
       alert(`Error deleting brand: ${errorText || response.statusText}`);
@@ -66,41 +88,40 @@ export default function Brands() {
   const dispatch = useDispatch();
   const brandData = useSelector((state: RootState) => state.data.brands);
 
-  useEffect(() => {
-    const fetchAndSetBrands = async () => {
-      try {
-        const cached = localStorage.getItem("brandData");
-        const now = Date.now();
-        const cacheExpiry = 5 * 60 * 1000; // 5 minutes
+    useEffect(() => {
+      const fetchAndSetBrands = async () => {
+        try {
+          const cached = localStorage.getItem("brandData");
+          const now = Date.now();
+          const cacheExpiry = 5 * 60 * 1000; // 5 minutes
 
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (parsed.data?.length > 0 && now - parsed.time < cacheExpiry) {
-            dispatch(setBrandData(parsed.data));
-            setBrands(parsed.data);
-            return;
+          if (cached) {
+            const parsed = JSON.parse(cached);
+            if (parsed.data?.length > 0 && now - parsed.time < cacheExpiry) {
+              dispatch(setBrandData(parsed.data));
+              setBrands(parsed.data);
+              return;
+            }
           }
-        }
 
-        const data = await fetchBrands();
-        if (Array.isArray(data)) {
-          dispatch(setBrandData(data));
-          setBrands(data);
-          localStorage.setItem(
-            "brandData",
-            JSON.stringify({ data, time: now })
-          );
-        } else {
-          console.error("Fetched brand data is invalid:", data);
+          const data = await fetchBrands();
+          if (Array.isArray(data)) {
+            dispatch(setBrandData(data));
+            setBrands(data);
+            localStorage.setItem(
+              "brandData",
+              JSON.stringify({ data, time: now })
+            );
+          } else {
+            console.error("Fetched brand data is invalid:", data);
+          }
+        } catch (error) {
+          console.error("Error fetching brands:", error);
         }
-      } catch (error) {
-        console.error("Error fetching brands:", error);
-      }
-    };
+      };
 
-    fetchAndSetBrands();
-    setRefresh(false);
-  }, [dispatch, refresh]);
+      fetchAndSetBrands();
+    }, [dispatch, brandData]);
 
   // Filter brands based on search input
   const filteredBrands = brands.filter((brand) =>
@@ -165,7 +186,7 @@ export default function Brands() {
                           `Are you sure you want to delete the brand "${brand[0]}"?`
                         );
                         if (confirmed) {
-                          deleteBrand(brand[0], setRefresh);
+                          deleteBrand(brand[0], dispatch, setBrands);
                         }
                       }}
                     >
