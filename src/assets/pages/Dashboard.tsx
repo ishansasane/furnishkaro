@@ -49,31 +49,67 @@ const Dashboard: React.FC = () => {
     phonenumber : ""
   });
 
-  const sendInquiry = async () => {
-    const projectName = inquiryForm.project;
-    const comment  = inquiryForm.comments;
-    const inquiryDate = inquiryForm.inquiryDate;
-    const followUpDate = inquiryForm.followUpDate;
-    const customer = inquiryForm.customer;
-    const phonenumber = inquiryForm.phonenumber;
+const sendInquiry = async () => {
+  const projectName = inquiryForm.project.trim();
+  const comment = inquiryForm.comments;
+  const inquiryDate = inquiryForm.inquiryDate;
+  const followUpDate = inquiryForm.followUpDate;
+  const customer = inquiryForm.customer.trim();
+  const phonenumber = inquiryForm.phonenumber.trim();
 
-    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/sendInquiry", {
-      method : "POST",
-      headers : {
-        "content-type" : "application/json"
-      },
-      body : JSON.stringify({ projectName, phonenumber, comment, inquiryDate, projectDate : followUpDate, status : "New Inquiry", customer })
+  // ✅ Check required fields
+  if (!projectName || !customer || !phonenumber || !inquiryDate) {
+    alert("Please fill in project name, customer name, phone number, and inquiry date.");
+    return;
+  }
+
+  // ✅ Check if project name already exists in inquiries (case-insensitive)
+  const isDuplicate = inquiries.some(
+    inquiry => inquiry[0]?.toLowerCase() === projectName.toLowerCase()
+  );
+
+  if (isDuplicate) {
+    alert("An inquiry for this project name already exists.");
+    return;
+  }
+
+  // ✅ Proceed to send the inquiry
+  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/sendInquiry", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json"
+    },
+    body: JSON.stringify({
+      projectName,
+      phonenumber,
+      comment,
+      inquiryDate,
+      projectDate: followUpDate,
+      status: "New Inquiry",
+      customer
+    })
+  });
+
+  if (response.status === 200) {
+    alert("Inquiry Added");
+    setInquiryForm({
+      project: "",
+      comments: "",
+      inquiryDate: "",
+      followUpDate: "",
+      customer: "",
+      phonenumber: ""
     });
 
-    if(response.status === 200){
-      alert("Inquiry Added");
-      const data = await fetchInquiryData();
-      dispatch(setInquiryData(data));
-      setInquiryFormOpen(false);
-    }else{
-      alert("Error in adding inquiry");
-    }
+    const data = await fetchInquiryData();
+    dispatch(setInquiryData(data));
+    setInquiryFormOpen(false);
+  } else {
+    alert("Error in adding inquiry");
   }
+};
+
+
 
   const dispatch = useDispatch();
   const tasks = useSelector((state: RootState) => state.data.tasks);
@@ -895,7 +931,7 @@ const Dashboard: React.FC = () => {
                   <div className="flex justify-end gap-3">
                     <button
                       type="button"
-                      onClick={() => setInquiryFormOpen(false)}
+                      onClick={() => {setInquiryForm({project: "",comments: "",inquiryDate: "",followUpDate: "",customer : "",phonenumber : ""}); setInquiryFormOpen(false)}}
                       className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
                     >
                       Cancel
@@ -926,18 +962,20 @@ const Dashboard: React.FC = () => {
               <div className="space-y-3 p-3 text-gray-700 text-sm">
                 <p className="flex justify-between">
                   <strong>Status:</strong>
-                  <span className={`inline-block px-2 py-1 rounded text-white ${selectedInquiry[4] == 'approved' ? 'bg-green-500' : selectedInquiry[4] === 'New Inquiry' ? 'bg-blue-500' : selectedInquiry[4] === 'In Progress' ? 'bg-yellow-500' : selectedInquiry[4] === 'Convert to Project' ? 'bg-purple-500' : selectedInquiry[4] == "Not Intrested" ? "bg-red-500" : "bg-black" }`}>
-                    {selectedInquiry[4]}
+                  <span className={`inline-block px-2 py-1 rounded text-white ${selectedInquiry[5] == 'approved' ? 'bg-green-500' : selectedInquiry[5] === 'New Inquiry' ? 'bg-blue-500' : selectedInquiry[5] === 'In Progress' ? 'bg-yellow-500' : selectedInquiry[5] === 'Convert to Project' ? 'bg-purple-500' : selectedInquiry[5] == "Not Intrested" ? "bg-red-500" : "bg-black" }`}>
+                    {selectedInquiry[5]}
                   </span>
                 </p>
                 <hr />
-                <p className="flex justify-between"><strong>Customer:</strong> {selectedInquiry[5]}</p>
+                <p className="flex justify-between"><strong>Customer:</strong> {selectedInquiry[6]}</p>
                 <hr />
-                <p className="flex justify-between"><strong>Comments:</strong> {selectedInquiry[1]}</p>
+                <p className="flex justify-between"><strong>Phone Number:</strong> {selectedInquiry[1]}</p>
                 <hr />
-                <p className="flex justify-between"><strong>Inquiry Date:</strong> {selectedInquiry[2]}</p>
+                <p className="flex justify-between"><strong>Comments:</strong> {selectedInquiry[3]}</p>
                 <hr />
-                <p className="flex justify-between"><strong>Follow-Up Date:</strong> {selectedInquiry[3]}</p>
+                <p className="flex justify-between"><strong>Inquiry Date:</strong> {selectedInquiry[3]}</p>
+                <hr />
+                <p className="flex justify-between"><strong>Follow-Up Date:</strong> {selectedInquiry[4]}</p>
                 <hr />
               </div>
               <div className="flex justify-between mt-6">
@@ -985,11 +1023,12 @@ const Dashboard: React.FC = () => {
             <div key={index}>
               <InquiryCard
                 project={inquiry[0]}
-                comments={inquiry[1]}
-                inquiryDate={inquiry[2]}
-                followUpDate={inquiry[3]}
-                status={inquiry[4]}
-                customer={inquiry[5]}
+                comments={inquiry[2]}
+                inquiryDate={inquiry[3]}
+                followUpDate={inquiry[4]}
+                status={inquiry[5]}
+                customer={inquiry[6]}
+                inquiryData={inquiry} 
                 handlestatuschange={handleStatusChange}
                 onCardClick={() => { setSelectedInquiry(inquiry); setInquiryDialogOpen(true); }}
               />
