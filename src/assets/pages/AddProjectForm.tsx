@@ -571,6 +571,14 @@ function AddProjectForm() {
   };
 
   const units = ["Inches (in)", "Centimeter (cm)", "Meters (m)", "Feet (ft)"];
+  const getSubtotal = (
+    rate: number,
+    measurementQty: number,
+    quantity: number
+  ): string => {
+    const subtotal = rate * measurementQty * quantity;
+    return subtotal.toFixed(2);
+  };
 
   const handleWidthChange = (
     mainindex: number,
@@ -797,6 +805,38 @@ function AddProjectForm() {
         remark: "",
       },
     ]);
+  };
+  const handleTaxChange = (
+    mainIndex: number,
+    collectionIndex: number,
+    newTaxRate: number,
+    rate: number,
+    measurementQty: number,
+    qty: number
+  ) => {
+    const updatedSelections = [...selections];
+    const collection =
+      updatedSelections[mainIndex].areacollection[collectionIndex];
+
+    const totalMRP = rate * parseFloat(measurementQty || "0");
+    const subtotal = totalMRP * qty;
+    const taxAmount = subtotal * (newTaxRate / 100);
+    const total = subtotal + taxAmount;
+
+    // Update tax rate in item
+    collection.items[0][5] = newTaxRate;
+    collection.totalTax[0] = taxAmount;
+    collection.totalAmount[0] = total;
+
+    setSelections(updatedSelections);
+
+    const { totalTax, totalAmount } = recalculateTotals(
+      updatedSelections,
+      additionalItems
+    );
+    setTax(totalTax);
+    setAmount(totalAmount);
+    setGrandTotal(parseFloat(totalAmount.toFixed(2)));
   };
 
   // Delete item by index
@@ -1894,6 +1934,22 @@ function AddProjectForm() {
             projectData={projectData}
           />
         </div>
+        {/* Measurement Section */}
+        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+          <MeasurementSection
+            selections={selections}
+            units={units}
+            handleRemoveArea={handleRemoveArea}
+            handleReferenceChange={handleReferenceChange}
+            handleunitchange={handleUnitChange}
+            handlewidthchange={handleWidthChange}
+            handleheightchange={handleHeightChange}
+            handlequantitychange={handleQuantityChangeMain}
+            setSelections={setSelections}
+            handleGroupDelete={handleGroupDelete}
+          />
+        </div>
+
         {/* Quotation Section */}
         <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
           <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-4">
@@ -1911,6 +1967,7 @@ function AddProjectForm() {
                   <th className="py-2 px-4">Quantity</th>
                   <th className="py-2 px-4">Subtotal</th>
                   <th className="py-2 px-4">Tax Rate(%)</th>
+                  <th className="py-2 px-4">Tax Amount</th>
                   <th className="py-2 px-4">Tax Amount</th>
                   <th className="py-2 px-4">Total</th>
                 </tr>
@@ -1959,9 +2016,71 @@ function AddProjectForm() {
                                 } ${collection.measurement.unit || ""}`
                               : "N/A"}
                           </td>
-                          <td className="py-2 px-4 text-sm">{calculatedMRP}</td>
-                          <td className="py-2 px-4 text-sm">{qty}</td>
-                          <td className="py-2 px-4 text-sm">INR {subtotal}</td>
+                          <td className="py-2 px-4 text-sm">
+                            <input
+                              type="number"
+                              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                              value={calculatedMRP}
+                              onChange={(e) =>
+                                handleMRPChange(
+                                  mainIndex,
+                                  collectionIndex,
+                                  e.target.value,
+                                  collection.measurement.quantity,
+                                  item[5],
+                                  qty
+                                )
+                              }
+                            />
+                          </td>
+                          <td className="py-2 px-4 text-sm">
+                            <input
+                              type="number"
+                              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                              value={qty}
+                              onChange={(e) =>
+                                handleQuantityChange(
+                                  `${mainIndex}-${collectionIndex}`,
+                                  e.target.value,
+                                  mainIndex,
+                                  collectionIndex,
+                                  collection.measurement.quantity,
+                                  parseFloat(item[4]),
+                                  parseFloat(item[5]),
+                                  0
+                                )
+                              }
+                            />
+                          </td>
+                          <td className="py-2 px-4 text-sm">
+                            INR{" "}
+                            {(
+                              parseFloat(item[4]) *
+                              parseFloat(
+                                collection.measurement.quantity || "0"
+                              ) *
+                              parseFloat(qty || "0")
+                            ).toFixed(2)}
+                          </td>
+
+                          <td className="py-2 px-4 text-sm">
+                            <input
+                              type="number"
+                              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                              value={item[5]}
+                              onChange={(e) =>
+                                handleTaxChange(
+                                  mainIndex,
+                                  collectionIndex,
+                                  parseFloat(e.target.value),
+                                  item[4],
+                                  collection.measurement.quantity,
+                                  qty
+                                )
+                              }
+                            />
+                          </td>
+
                           <td className="py-2 px-4 text-sm">
                             {item[5] || "0"}%
                           </td>
@@ -2192,7 +2311,6 @@ function AddProjectForm() {
             </div>
           </div>
         </div>
-
         {/* Summary and Bank Details */}
         <div className="flex flex-col md:flex-row gap-6">
           {/* Bank Details and Terms */}
