@@ -951,14 +951,7 @@ const EditProjects = ({
   ) => {
     const updatedSelections = [...selections];
     const areaCol = updatedSelections[mainIndex].areacollection[index];
-
     areaCol.measurement.quantity = quantity;
-
-    // ✅ Sync quotation quantities array
-    if (!areaCol.quantities) areaCol.quantities = [];
-    for (let i = 0; i < areaCol.items.length; i++) {
-      areaCol.quantities[i] = 1; // Default to 1 if not set, or preserve previous value
-    }
 
     const discountRaw =
       discountType === "cash" ? `${Discount}` : `${Discount}%`;
@@ -1020,7 +1013,6 @@ const EditProjects = ({
     setAmount(totalAmount);
     setGrandTotal(parseInt(totalAmount.toFixed(2))); // ✅ Grand Total = Amount + Tax
   };
-
   const handleunitchange = (mainindex: number, index: number, unit) => {
     const updatedSelection = [...selections];
     updatedSelection[mainindex].areacollection[index].measurement.unit = unit;
@@ -1034,61 +1026,73 @@ const EditProjects = ({
     value: string,
     mainIndex: number,
     collectionIndex: number,
-    measurementQuantity: string,
-    rate: number,
-    taxPercent: number,
+    quantity: string,
+    num1: number, // rate
+    num2: number, // tax %
     itemIndex: number
   ) => {
     const updatedSelections = [...selections];
+
     const areaCol =
       updatedSelections[mainIndex].areacollection[collectionIndex];
+    const quantityNum = parseFloat(quantity) || 0;
+    const valueNum = parseFloat(value) || 0;
 
-    const inputQuantity = parseFloat(value) || 0;
-    const measurementQty = parseFloat(measurementQuantity) || 0;
-    const ratePerUnit = parseFloat(rate as any) || 0;
-    const taxRate = parseFloat(taxPercent as any) || 0;
-
-    if (!areaCol.quantities) areaCol.quantities = [];
-    if (!areaCol.totalTax) areaCol.totalTax = [];
-    if (!areaCol.totalAmount) areaCol.totalAmount = [];
-
-    // ✅ Update quotation quantity
+    // Ensure quantities array exists
+    if (!areaCol.quantities) {
+      areaCol.quantities = [];
+    }
     areaCol.quantities[itemIndex] = value;
 
-    // ✅ Also sync measurement section
-    areaCol.measurement.quantity = measurementQty;
+    // Step 1: Base cost
+    const baseCost = num1 * quantityNum * valueNum;
 
-    // ✅ Calculate base cost: MRP × Quantity × MeasurementQty
-    const baseCost = ratePerUnit * inputQuantity * measurementQty;
-
-    // ✅ Compute effective discount
+    // Step 2: Compute effective discount
     let effectiveDiscountPercent = 0;
+
     if (discountType === "percent") {
       effectiveDiscountPercent = Discount;
-    } else if (discountType === "cash" && baseCost > 0) {
-      effectiveDiscountPercent = (Discount / baseCost) * 100;
+    } else if (discountType === "cash") {
+      const totalBeforeDiscount = baseCost;
+      effectiveDiscountPercent =
+        totalBeforeDiscount > 0 ? (Discount / totalBeforeDiscount) * 100 : 0;
     }
 
+    // Step 3: Apply discount
     const discountAmount = (baseCost * effectiveDiscountPercent) / 100;
     const discountedCost = baseCost - discountAmount;
 
-    // ✅ Calculate Tax and Total
-    const taxAmount = parseFloat(((discountedCost * taxRate) / 100).toFixed(2));
+    // Step 4: Apply tax
+    const taxAmount = parseFloat(((discountedCost * num2) / 100).toFixed(2));
     const totalWithTax = parseFloat((discountedCost + taxAmount).toFixed(2));
+
+    // Step 5: Set tax & total
+    if (!areaCol.totalTax) areaCol.totalTax = [];
+    if (!areaCol.totalAmount) areaCol.totalAmount = [];
 
     areaCol.totalTax[itemIndex] = taxAmount;
     areaCol.totalAmount[itemIndex] = totalWithTax;
 
     setSelections(updatedSelections);
 
-    // ✅ Recalculate summary
+    // Step 6: Recalculate overall tax/amount
     const { totalTax, totalAmount } = recalculateTotals(
       updatedSelections,
       additionalItems
     );
     setTax(totalTax);
     setAmount(totalAmount);
-    setGrandTotal(parseFloat(totalAmount.toFixed(2)));
+
+    // Optional: Update grand total
+    let discountAmt = 0;
+    if (discountType === "percent") {
+      discountAmt = (totalAmount * Discount) / 100;
+    } else if (discountType === "cash") {
+      discountAmt = Discount;
+    }
+
+    const grandTotal = parseFloat(totalAmount.toFixed(2)); // if you're tracking this
+    setGrandTotal(grandTotal);
   };
 
   const handleItemQuantityChange = (i: number, quantity: string) => {
@@ -1563,15 +1567,15 @@ const EditProjects = ({
   const [filteredTasks, setFilteredTasks] = useState([]);
 
   useEffect(() => {
-    const filteredTasks = Tasks.filter(
+    const filtered = Tasks.filter(
       (task) => task[5] === projectData.projectName
     ).filter((task) => {
       if (taskFilter === "All Tasks") return true;
       return task[7] === taskFilter;
     });
 
-    setFilteredTasks(filteredTasks);
-  }, [projectData]);
+    setFilteredTasks(filtered);
+  }, [taskFilter, projectData, Tasks]);
 
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [editing, setediting] = useState<[]>(null);
@@ -2138,131 +2142,146 @@ const EditProjects = ({
                       <table className="w-full border-collapse mb-6 text-xs sm:text-sm min-w-[600px] sm:min-w-full">
                         <thead>
                           <tr className="flex flex-col sm:flex-row justify-between w-full bg-gray-100 p-2 border-b font-semibold hidden sm:flex">
-                            <td className="w-[5%] py-1">Sr. No.</td>
-                            <td className="w-[25%] py-1">Product Name</td>
-                            <td className="w-[15%] py-1">Size</td>
-                            <td className="w-[10%] py-1">MRP</td>
-                            <td className="w-[10%] py-1">Quantity</td>
-                            <td className="w-[10%] py-1">Subtotal</td>
-                            <td className="w-[10%] py-1">Tax Rate (%)</td>
-                            <td className="w-[10%] py-1">Tax Amount</td>
-                            <td className="w-[10%] py-1">Total</td>
+                            <td className="w-full sm:w-[10%] py-1">Sr. No.</td>
+                            <td className="w-full sm:w-[45%] py-1">
+                              Product Name
+                            </td>
+                            <td className="w-full sm:w-[45%] py-1">Size</td>
+                            <td className="w-full sm:w-[20%] py-1">MRP</td>
+                            <td className="w-full sm:w-[20%] py-1">Quantity</td>
+                            <td className="w-full sm:w-[20%] py-1">Subtotal</td>
+                            <td className="w-full sm:w-[20%] py-1">
+                              Tax Rate (%)
+                            </td>
+                            <td className="w-full sm:w-[20%] py-1">
+                              Tax Amount
+                            </td>
+                            <td className="w-full sm:w-[20%] py-1">Total</td>
                           </tr>
                         </thead>
                         <tbody>
-                          {selection.areacollection?.map(
-                            (collection, collectionIndex) =>
-                              collection.items?.map((item, itemIndex) => {
-                                const qty =
-                                  parseFloat(
-                                    collection.quantities?.[itemIndex]
-                                  ) || 0;
-                                const measurementQty =
-                                  parseFloat(
-                                    collection.measurement?.quantity
-                                  ) || 0;
-                                const rate = parseFloat(item[4]) || 0;
-                                const taxRate = parseFloat(item[5]) || 0;
-                                const subtotal = parseFloat(
-                                  (rate * qty * measurementQty).toFixed(2)
-                                );
-                                const taxAmount = parseFloat(
-                                  ((subtotal * taxRate) / 100).toFixed(2)
-                                );
-                                const total = parseFloat(
-                                  (subtotal + taxAmount).toFixed(2)
-                                );
-                                const key = `${mainindex}-${collectionIndex}-${itemIndex}`;
+                          {selection.areacollection &&
+                          selection.areacollection.length > 0 ? (
+                            selection.areacollection.map(
+                              (collection, collectionIndex) => {
+                                if (!Array.isArray(collection.items)) {
+                                  return (
+                                    <tr key={`error-${collectionIndex}`}>
+                                      <td
+                                        colSpan={9}
+                                        className="text-center text-red-500 text-xs sm:text-sm py-2"
+                                      >
+                                        No items found for collection{" "}
+                                        {collectionIndex + 1}
+                                      </td>
+                                    </tr>
+                                  );
+                                }
 
-                                return (
-                                  <tr
-                                    key={key}
-                                    className="flex flex-col sm:flex-row justify-between w-full border-b p-2 sm:p-4"
-                                  >
-                                    <td className="w-[5%] text-center">
-                                      {itemIndex + 1}
-                                    </td>
+                                return collection.items.map(
+                                  (item: any, itemIndex: number) => {
+                                    const key = `${mainindex}-${collectionIndex}-${itemIndex}`;
+                                    const qty =
+                                      collection.quantities?.[itemIndex] || 0;
 
-                                    <td className="w-[25%]">
-                                      {item[0]} × {qty} × {measurementQty}
-                                    </td>
-
-                                    <td className="w-[15%]">
-                                      {collection.measurement.width} x{" "}
-                                      {collection.measurement.height}{" "}
-                                      {collection.measurement.unit}
-                                    </td>
-
-                                    <td className="w-[10%] text-right">
-                                      ₹ {rate.toFixed(2)}
-                                    </td>
-
-                                    <td className="w-[10%]">
-                                      <div className="flex flex-col space-y-1">
-                                        <div className="relative">
-                                          <input
-                                            type="number"
-                                            value={qty}
-                                            className="w-full border px-2 py-1 rounded text-xs sm:text-sm pr-12"
-                                            onChange={(e) =>
-                                              handleQuantityChange(
-                                                key,
-                                                e.target.value,
-                                                mainindex,
-                                                collectionIndex,
-                                                collection.measurement.quantity,
-                                                item[4],
-                                                item[5],
+                                    return (
+                                      <tr
+                                        key={key}
+                                        className="flex flex-col sm:flex-row justify-between w-full border-b p-2 sm:p-4"
+                                      >
+                                        <td className="w-full sm:w-[10%] text-xs sm:text-sm py-1 sm:text-center before:content-['Sr._No.:_'] sm:before:content-none before:font-bold before:pr-2">
+                                          {itemIndex + 1}
+                                        </td>
+                                        <td className="w-full sm:w-[45%] text-xs sm:text-sm py-1 before:content-['Product_Name:_'] sm:before:content-none before:font-bold before:pr-2">
+                                          {item[0] +
+                                            " * " +
+                                            collection.measurement.quantity}
+                                        </td>
+                                        <td className="w-full sm:w-[45%] text-xs sm:text-sm py-1 before:content-['Size:_'] sm:before:content-none before:font-bold before:pr-2">
+                                          {collection.measurement.width +
+                                            " x " +
+                                            collection.measurement.height +
+                                            " " +
+                                            collection.measurement.unit}
+                                        </td>
+                                        <td className="w-full sm:w-[20%] text-xs sm:text-sm py-1 sm:text-center before:content-['MRP:_'] sm:before:content-none before:font-bold before:pr-2">
+                                          {(
+                                            item[4] *
+                                            parseFloat(
+                                              collection.measurement.quantity
+                                            )
+                                          ).toFixed(2)}
+                                        </td>
+                                        <td className="w-full sm:w-[20%] py-1 before:content-['Quantity:_'] sm:before:content-none before:font-bold before:pr-2">
+                                          <div className="flex flex-col">
+                                            <input
+                                              type="text"
+                                              value={
+                                                collection.quantities?.[
+                                                  itemIndex
+                                                ] || ""
+                                              }
+                                              onChange={(e) =>
+                                                handleQuantityChange(
+                                                  key,
+                                                  e.target.value,
+                                                  mainindex,
+                                                  collectionIndex,
+                                                  collection.measurement
+                                                    .quantity,
+                                                  item[4],
+                                                  item[5],
+                                                  itemIndex
+                                                )
+                                              }
+                                              className="border w-max sm:w-4/5 px-2 py-1 rounded text-xs sm:text-sm min-w-[80px]"
+                                            />
+                                            <p className="text-[10px] sm:text-xs text-gray-600 mt-1">
+                                              {item[3]}
+                                            </p>
+                                          </div>
+                                        </td>
+                                        <td className="w-full sm:w-[20%] text-xs sm:text-sm py-1 sm:text-center before:content-['Subtotal:_'] sm:before:content-none before:font-bold before:pr-2">
+                                          {(
+                                            item[4] *
+                                            parseFloat(
+                                              collection.measurement.quantity
+                                            ) *
+                                            qty
+                                          ).toFixed(2)}
+                                        </td>
+                                        <td className="w-full sm:w-[20%] text-xs sm:text-sm py-1 sm:text-center before:content-['Tax_Rate_(%):_'] sm:before:content-none before:font-bold before:pr-2">
+                                          {item[5]}
+                                        </td>
+                                        <td className="w-full sm:w-[20%] text-xs sm:text-sm py-1 sm:text-center before:content-['Tax_Amount:_'] sm:before:content-none before:font-bold before:pr-2">
+                                          {collection.totalTax[itemIndex]
+                                            ? collection.totalTax[
                                                 itemIndex
-                                              )
-                                            }
-                                          />
-                                          <span className="absolute top-1/2 -translate-y-1/2 right-2 text-[10px] text-gray-500">
-                                            × {measurementQty}
-                                          </span>
-                                        </div>
-                                        <div className="text-[10px] text-gray-500">
-                                          Per item: {item[3]}
-                                        </div>
-                                      </div>
-                                    </td>
-
-                                    <td className="w-[10%] text-right">
-                                      ₹ {subtotal.toFixed(2)}
-                                    </td>
-
-                                    <td className="w-[10%]">
-                                      <input
-                                        type="number"
-                                        className="w-full border px-2 py-1 rounded text-xs sm:text-sm"
-                                        value={item[5]}
-                                        onChange={(e) => {
-                                          const newTax =
-                                            parseFloat(e.target.value) || 0;
-                                          item[5] = newTax;
-                                          handleQuantityChange(
-                                            key,
-                                            collection.quantities?.[itemIndex],
-                                            mainindex,
-                                            collectionIndex,
-                                            collection.measurement.quantity,
-                                            item[4],
-                                            newTax,
-                                            itemIndex
-                                          );
-                                        }}
-                                      />
-                                    </td>
-
-                                    <td className="w-[10%] text-right">
-                                      ₹ {taxAmount.toFixed(2)}
-                                    </td>
-                                    <td className="w-[10%] text-right font-semibold">
-                                      ₹ {total.toFixed(2)}
-                                    </td>
-                                  </tr>
+                                              ].toFixed(2)
+                                            : "0.00"}
+                                        </td>
+                                        <td className="w-full sm:w-[20%] text-xs sm:text-sm py-1 sm:text-center before:content-['Total:_'] sm:before:content-none before:font-bold before:pr-2">
+                                          {collection.totalAmount[itemIndex]
+                                            ? collection.totalAmount[
+                                                itemIndex
+                                              ].toFixed(2)
+                                            : "0.00"}
+                                        </td>
+                                      </tr>
+                                    );
+                                  }
                                 );
-                              })
+                              }
+                            )
+                          ) : (
+                            <tr>
+                              <td
+                                colSpan={9}
+                                className="text-center py-2 text-gray-500 text-xs sm:text-base"
+                              >
+                                No product data available.
+                              </td>
+                            </tr>
                           )}
                         </tbody>
                       </table>
