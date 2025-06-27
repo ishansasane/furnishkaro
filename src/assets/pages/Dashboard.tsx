@@ -12,6 +12,7 @@ import TaskDialog from "../compoonents/TaskDialog.tsx";
 import { AnimatePresence, motion } from "framer-motion";
 import EditProjects from "./EditProjects.tsx";
 import { useNavigate } from "react-router-dom";
+import BankDetails from "./BankDetails.tsx";
 
 const fetchTaskData = async () => {
   const response = await fetch(
@@ -338,7 +339,9 @@ const sendInquiry = async () => {
               projectAddress: row[17] || "",
               date: row[18] || "",
               grandTotal : row[19],
-              discountType : row[20]
+              discountType : row[20],
+              bankDetails : deepClone(parseSafely(row[21], [])),
+              termsConditions : deepClone(parseSafely(row[22], [])),
             };
           } catch (error) {
             console.error(

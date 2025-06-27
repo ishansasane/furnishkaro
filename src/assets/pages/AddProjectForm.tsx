@@ -1895,7 +1895,6 @@ function AddProjectForm() {
       }.pdf`
     );
   };
-
   const handleMRPChange = (
     mainIndex,
     collectionIndex,

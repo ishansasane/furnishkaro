@@ -60,12 +60,12 @@ const formatDate = (date: Date | null): string => {
 const Items = () => {
   const groupTypes = [
     ["Fabric", ["Meter"]],
-    ["Area Based", ["Sq.Feet"]],
-    ["Running Length based", ["Meter", "Feet"]],
-    ["Piece Based", ["Piece", "Items", "Sets"]],
-    ["Fixed Length Items", ["Piece"]],
-    ["Fixed Area Items", ["Piece", "Roll"]],
-    ["Tailoring", ["Parts", "Sq.Feet"]],
+    ["Area Based", ["Sq. Feet"]],
+    ["Running length based", ["Meter", "Feet"]],
+    ["Piece based", ["Piece", "Items", "Sets"]],
+    ["Fixed length items", ["Piece"]],
+    ["Fixed area items", ["Piece", "Roll"]],
+    ["Tailoring", ["Parts", "Sq. Feet"]],
   ];
 
   const [search, setSearch] = useState("");
@@ -101,13 +101,13 @@ const Items = () => {
   const editMenu = (item: any) => {
     setIsFormOpen(true);
     setEditing(true);
-    setProductName(item[0] || "");
-    setDescription(item[1] || "");
-    setSelectedGroupType(item[2] || "");
-    setSellingUnit(item[3] || "");
-    setMrp(item[4] || "");
-    setTaxRate(item[5] || "");
-    setNeedsTailoring(item[6] === "TRUE" || item[6] === true);
+    setProductName(item[0]);
+    setDescription(item[1]);
+    setSelectedGroupType(item[2]);
+    setSellingUnit(item[3]);
+    setMrp(item[4]);
+    setTaxRate(item[5]);
+    setNeedsTailoring(item[7]);
   };
 
   // Close dropdown when clicking outside
@@ -208,9 +208,9 @@ const Items = () => {
     }
   };
 
-  const duplicateItem = async (item: any[], index: number) => {
-    const date = new Date();
-    const formattedDate = formatDate(date);
+  const duplicateItem = async (item: Array<string>, index: number) => {
+    let date = new Date();
+    const formattedDate = new Date().toLocaleDateString("en-GB");
 
     try {
       const response = await fetch(
@@ -258,6 +258,84 @@ const Items = () => {
       console.error("Error duplicating item:", err);
       alert("Failed to duplicate item");
     }
+  };
+
+  const groupOptions: string[] = [
+    "Fabric",
+    "Area Based",
+    "Running length based",
+    "Piece based",
+    "Fixed length items",
+    "Fixed area items",
+    "Tailoring",
+  ];
+
+  const sellingUnits: { [key: string]: string[] } = {
+    Fabric: ["Meter"],
+    "Area Based": ["Sq. Feet", "Sq. Meter"],
+    "Running length based": ["Meter", "Feet"],
+    "Piece based": ["Piece", "Items", "Sets"],
+    "Fixed length items": ["Piece"],
+    "Fixed area items": ["Piece", "Roll"],
+    Tailoring: ["Parts", "Sq. Feet"],
+  };
+
+  const additionalFields: Record<string, string[]> = {
+    Fabric: [
+      "Coverage in Width",
+      "Wastage in Height",
+      "Threshold For Parts Calculation",
+    ],
+    "Area Based": ["Coverage in Area"],
+    "Running length based": [],
+    "Piece based": [],
+    "Fixed length items": ["Length of Item"],
+    "Fixed area items": ["Area Covered"],
+    Tailoring: [],
+  };
+
+  const sideDropdownOptions: Record<string, string[]> = {
+    Fabric: ["Inch", "Centimeter", "Meter"],
+    "Area Based": ["Sq. Feet", "Sq. Meter"],
+    "Running length based": [],
+    "Piece based": [],
+    "Fixed length items": ["Meter", "Inch", "Centimeter", "Feet"],
+    "Fixed area items": ["Sq. Feet", "Sq. Meter"],
+    Tailoring: [],
+  };
+
+  const [formData, setFormData] = useState({
+    productName: "",
+    productDetails: "",
+    groupType: "",
+    sellingUnit: "",
+    mrp: "",
+    taxRate: "",
+    additionalInputs: {},
+    sideDropdown: "",
+  });
+
+  const handleGroupChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const selectedGroup: string = e.target.value;
+    setFormData({
+      ...formData,
+      groupType: selectedGroup,
+      sellingUnit: sellingUnits[selectedGroup]?.[0] || "",
+      additionalInputs: additionalFields[selectedGroup]
+        ? additionalFields[selectedGroup].reduce(
+            (acc: any, field: string) => ({ ...acc, [field]: "" }),
+            {}
+          )
+        : {},
+      sideDropdown: sideDropdownOptions[selectedGroup]?.[0] || "",
+    });
+  };
+
+  const handleAdditionalInputChange = (field: string, value: string) => {
+    setFormData({
+      ...formData,
+      additionalInputs: { ...formData.additionalInputs, [field]: value },
+    });
   };
 
   const editItemData = async () => {
@@ -311,8 +389,22 @@ const Items = () => {
   };
 
   const handleSubmit = async () => {
-    const date = new Date();
-    const formattedDate = formatDate(date);
+    let date = new Date();
+    const formattedDate = new Date().toLocaleDateString("en-GB");
+
+    const newItem = {
+      id: items.length + 1,
+      name: formData.productName,
+      description: formData.productDetails,
+      costingType: formData.sellingUnit,
+      groupType: formData.groupType,
+      entryDate: formattedDate,
+      additionalInputs: formData.additionalInputs,
+      sideDropdown: formData.sideDropdown,
+      mrp: formData.mrp,
+      taxrate: formData.taxRate,
+      needsTailoring: needsTailoring,
+    };
 
     try {
       const response = await fetch(
@@ -384,9 +476,9 @@ const Items = () => {
         row["MRP"] || "",
         row["Tax Rate"] || "",
         row["Added Date"]
-          ? formatDate(parseDate(row["Added Date"]))
-          : formatDate(new Date()),
-        row["Needs Tailoring"] || false,
+          ? new Date(row["Added Date"]).toLocaleDateString("en-GB")
+          : new Date().toLocaleDateString("en-GB"),
+        row["Needs Tailoring"] === "Yes" || row["Needs Tailoring"] === true,
       ]);
 
       const groupOptions = groupTypes.map((type) => type[0]);
@@ -478,14 +570,20 @@ const Items = () => {
       "Description",
       "Costing Type",
       "Group Type",
+      "MRP",
+      "Tax Rate",
       "Added Date",
+      "Needs Tailoring",
     ];
     const rows = items.map((item: any) => [
       item[0] || "",
       item[1] || "",
       item[3] || "",
       item[2] || "",
-      item[6] ? formatDate(parseDate(item[6])) : "",
+      item[4] || "",
+      item[5] || "",
+      item[6] ? new Date(item[6]).toLocaleDateString("en-GB") : "",
+      item[7] ? "Yes" : "No",
     ]);
     autoTable(doc, {
       head: [columns],
@@ -508,22 +606,33 @@ const Items = () => {
       const columns = [
         "Product Name",
         "Description",
-        "Costing Type",
         "Group Type",
+        "Costing Type",
+        "MRP",
+        "Tax Rate",
         "Added Date",
+        "Needs Tailoring",
       ];
       const rows = items.map((item: any) => ({
         "Product Name": item[0] || "",
         Description: item[1] || "",
-        "Costing Type": item[3] || "",
         "Group Type": item[2] || "",
-        "Added Date": item[6] ? formatDate(parseDate(item[6])) : "",
+        "Costing Type": item[3] || "",
+        MRP: item[4] || "",
+        "Tax Rate": item[5] || "",
+        "Added Date": item[6]
+          ? new Date(item[6]).toLocaleDateString("en-GB")
+          : "",
+        "Needs Tailoring": item[7] ? "Yes" : "No",
       }));
-      const worksheet = XLSX.utils.json_to_sheet(rows);
+      const worksheet = XLSX.utils.json_to_sheet(rows, { header: columns });
       worksheet["!cols"] = [
         { wch: 20 },
         { wch: 30 },
         { wch: 15 },
+        { wch: 15 },
+        { wch: 10 },
+        { wch: 10 },
         { wch: 15 },
         { wch: 15 },
       ];

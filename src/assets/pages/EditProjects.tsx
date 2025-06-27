@@ -98,6 +98,7 @@ const EditProjects = ({
     setTerms(projectData.termsCondiditions || "NA");
     console.log(projectData.bankDetails);
     console.log(projectData.termsCondiditions);
+    changeStatus(projectData.status || "Approved");
   }, []);
 
   interface additional {
@@ -1243,44 +1244,39 @@ const EditProjects = ({
     const updated = [...additionalItems];
     const item = updated[i];
 
-    // Parse the rate value (handle empty string case)
-    const parsedRate = rate === "" ? 0 : parseFloat(rate);
-
-    // Update the rate
-    item.rate = isNaN(parsedRate) ? 0 : parsedRate;
-
-    // Calculate base net amount (quantity * rate)
+    item.rate = parseFloat(rate) || 0;
     const baseNet = item.quantity * item.rate;
 
-    // Calculate effective discount percentage
+    // Step 1: Calculate total before discount (for cash discount % conversion)
+    const totalBeforeDiscount = updated.reduce(
+      (acc, itm) => acc + itm.quantity * itm.rate,
+      0
+    );
+
+    // Step 2: Determine effective discount %
     let effectiveDiscountPercent = 0;
     if (discountType === "percent") {
-      effectiveDiscountPercent = Discount;
-    } else if (discountType === "cash") {
-      const totalBeforeDiscount = updated.reduce(
-        (acc, itm) => acc + itm.quantity * itm.rate,
-        0
-      );
-      effectiveDiscountPercent =
-        totalBeforeDiscount > 0 ? (Discount / totalBeforeDiscount) * 100 : 0;
+      effectiveDiscountPercent = discount;
+    } else if (discountType === "cash" && totalBeforeDiscount > 0) {
+      effectiveDiscountPercent = (discount / totalBeforeDiscount) * 100;
     }
 
-    // Apply discount
+    // Step 3: Apply discount and compute tax
     const discountAmount = (baseNet * effectiveDiscountPercent) / 100;
     const discountedNet = baseNet - discountAmount;
 
-    // Update item properties
     item.netRate = parseFloat(discountedNet.toFixed(2));
     item.taxAmount = parseFloat(((discountedNet * item.tax) / 100).toFixed(2));
     item.totalAmount = parseFloat((item.netRate + item.taxAmount).toFixed(2));
 
+    updated[i] = item;
+
     setAdditionaItems(updated);
 
-    // Recalculate totals
     const { totalTax, totalAmount } = recalculateTotals(selections, updated);
     setTax(totalTax);
     setAmount(totalAmount);
-    setGrandTotal(parseFloat(totalAmount.toFixed(2)));
+    setGrandTotal(parseFloat(totalAmount.toFixed(2))); // ✅ Grand total logic added
   };
 
   // Update tax and auto-update tax amount and total amount
@@ -1288,44 +1284,39 @@ const EditProjects = ({
     const updated = [...additionalItems];
     const item = updated[i];
 
-    // Parse the tax value (handle empty string case)
-    const parsedTax = tax === "" ? 0 : parseFloat(tax);
-
-    // Update the tax rate
-    item.tax = isNaN(parsedTax) ? 0 : parsedTax;
-
-    // Calculate base net amount (quantity * rate)
+    item.tax = parseFloat(tax) || 0;
     const baseNet = item.quantity * item.rate;
 
-    // Calculate effective discount percentage
+    // Step 1: Calculate total before discount (for cash discount % conversion)
+    const totalBeforeDiscount = updated.reduce(
+      (acc, itm) => acc + itm.quantity * itm.rate,
+      0
+    );
+
+    // Step 2: Determine effective discount %
     let effectiveDiscountPercent = 0;
     if (discountType === "percent") {
-      effectiveDiscountPercent = Discount;
-    } else if (discountType === "cash") {
-      const totalBeforeDiscount = updated.reduce(
-        (acc, itm) => acc + itm.quantity * itm.rate,
-        0
-      );
-      effectiveDiscountPercent =
-        totalBeforeDiscount > 0 ? (Discount / totalBeforeDiscount) * 100 : 0;
+      effectiveDiscountPercent = discount;
+    } else if (discountType === "cash" && totalBeforeDiscount > 0) {
+      effectiveDiscountPercent = (discount / totalBeforeDiscount) * 100;
     }
 
-    // Apply discount
+    // Step 3: Apply discount and compute tax
     const discountAmount = (baseNet * effectiveDiscountPercent) / 100;
     const discountedNet = baseNet - discountAmount;
 
-    // Update item properties
     item.netRate = parseFloat(discountedNet.toFixed(2));
     item.taxAmount = parseFloat(((discountedNet * item.tax) / 100).toFixed(2));
     item.totalAmount = parseFloat((item.netRate + item.taxAmount).toFixed(2));
 
+    updated[i] = item;
+
     setAdditionaItems(updated);
 
-    // Recalculate totals
     const { totalTax, totalAmount } = recalculateTotals(selections, updated);
     setTax(totalTax);
     setAmount(totalAmount);
-    setGrandTotal(parseFloat(totalAmount.toFixed(2)));
+    setGrandTotal(parseFloat(totalAmount.toFixed(2))); // ✅ Grand total logic added
   };
   const handleItemRemarkChange = (i, remark) => {
     const updated = [...additionalItems];
@@ -1984,8 +1975,8 @@ const EditProjects = ({
           <div className="flex flex-col justify-between">
             <OverviewPage
               projectData={projectData}
-              status={currentStatus}
-              setStatus={setCurrentStatus}
+              status={status}
+              setStatus={changeStatus}
               tasks={Tasks}
               setNavState={setNavState}
               tailorsArray={tailorsArray}

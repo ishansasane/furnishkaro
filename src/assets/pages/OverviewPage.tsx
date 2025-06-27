@@ -45,6 +45,11 @@ const OverviewPage = ({
   const [tailorordered, setTailorOrdered] = useState(0);
   const [tailorreceived, setTailorReceived] = useState(0);
 
+  
+    useEffect(() => {
+      console.log(status)
+    })
+
   useEffect(() => {
     let pendingCount = 0;
     let orderedCount = 0;
@@ -174,11 +179,12 @@ const OverviewPage = ({
               onChange={(e) => setStatus(e.target.value)}
               className="border border-gray-300 px-2 sm:px-4 py-1 sm:py-2 rounded-md text-sm sm:text-base focus:ring-2 focus:ring-blue-400 w-full sm:w-auto"
             >
-              <option value="Unsent">Unsent</option>
-              <option value="Pending">Pending</option>
               <option value="Approved">Approved</option>
-              <option value="Delivered">Delivered</option>
-              <option value="Rejected">Rejected</option>
+              <option value="Goods Pending">Goods Pending</option>
+              <option value="Goods Complete">Goods Complete</option>
+              <option value="Tailor Complete">Tailor Complete</option>
+              <option value="Tailor Pending">Tailor Pending</option>
+              <option value="Completed">Completed</option>
             </select>
           </div>
           <div className="flex flex-col gap-2 sm:gap-4">
