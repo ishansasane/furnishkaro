@@ -35,11 +35,6 @@ const InquiryCard = ({
     setShowDeletePopup(false);
     handlestatuschange(project, previousStatus);
   };
-
-  useEffect(() => {
-    console.log(inquiryData);
-  })
-
   return (
     <>
       <div

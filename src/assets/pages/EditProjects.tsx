@@ -68,6 +68,7 @@ const EditProjects = ({ Paid, setPaid, discountType, setDiscountType, grandTotal
       setTerms(projectData.termsCondiditions || "NA");
       console.log(projectData.bankDetails);
       console.log(projectData.termsCondiditions);
+      changeStatus(projectData.status || "Approved");
     }, [])
 
     interface additional{
@@ -1761,8 +1762,8 @@ const sendProjectData = async () => {
           <div className="flex flex-col justify-between">
             <OverviewPage 
             projectData={projectData}
-            status={currentStatus}
-            setStatus={setCurrentStatus}
+            status={status}
+            setStatus={changeStatus}
             tasks={Tasks}
             setNavState={setNavState}
             tailorsArray={tailorsArray}
