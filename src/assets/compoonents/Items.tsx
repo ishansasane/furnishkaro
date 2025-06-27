@@ -20,12 +20,12 @@ const getItemsData = async () => {
 const Items = () => {
   const groupTypes = [
     ["Fabric", ["Meter"]],
-    ["Area Based", ["Sq.Feet"]],
-    ["Running Length based", ["Meter", "Feet"]],
-    ["Piece Based", ["Piece", "Items", "Sets"]],
-    ["Fixed Length Items", ["Piece"]],
-    ["Fixed Area Items", ["Piece", "Roll"]],
-    ["Tailoring", ["Parts", "Sq.Feet"]],
+    ["Area Based", ["Sq. Feet"]],
+    ["Running length based", ["Meter", "Feet"]],
+    ["Piece based", ["Piece", "Items", "Sets"]],
+    ["Fixed length items", ["Piece"]],
+    ["Fixed area items", ["Piece", "Roll"]],
+    ["Tailoring", ["Parts", "Sq. Feet"]],
   ];
   const [search, setSearch] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -73,7 +73,7 @@ const Items = () => {
     setSellingUnit(item[3]);
     setMrp(item[4]);
     setTaxRate(item[5]);
-    setNeedsTailoring(item[6]);
+    setNeedsTailoring(item[7]);
   };
 
   // Close dropdown when clicking outside
@@ -172,11 +172,6 @@ const Items = () => {
 
   const duplicateItem = async (item: Array<string>, index: number) => {
     let date = new Date();
-
-    const day = date.getDate(); // 1-31
-    const month = date.getMonth() + 1; // 0-11, so add 1
-    const year = date.getFullYear();
-
     const formattedDate = new Date().toLocaleDateString("en-GB");
 
     try {
@@ -237,14 +232,14 @@ const Items = () => {
     "Tailoring",
   ];
 
-  const sellingUnits = {
+  const sellingUnits: { [key: string]: string[] } = {
     Fabric: ["Meter"],
-    "Area Based": ["Sq. feet", "Sq. meter"],
+    "Area Based": ["Sq. Feet", "Sq. Meter"],
     "Running length based": ["Meter", "Feet"],
     "Piece based": ["Piece", "Items", "Sets"],
     "Fixed length items": ["Piece"],
     "Fixed area items": ["Piece", "Roll"],
-    Tailoring: ["Parts", "Sq. feet"],
+    Tailoring: ["Parts", "Sq. Feet"],
   };
 
   const additionalFields: Record<string, string[]> = {
@@ -360,11 +355,6 @@ const Items = () => {
 
   const handleSubmit = async () => {
     let date = new Date();
-
-    const day = date.getDate(); // 1-31
-    const month = date.getMonth() + 1; // 0-11, so add 1
-    const year = date.getFullYear();
-
     const formattedDate = new Date().toLocaleDateString("en-GB");
 
     const newItem = {
@@ -398,6 +388,7 @@ const Items = () => {
             mrp: newItem.mrp,
             taxRate: newItem.taxrate,
             needsTailoring,
+            date: formattedDate,
           }),
         }
       );
@@ -457,7 +448,7 @@ const Items = () => {
         row["Added Date"]
           ? new Date(row["Added Date"]).toLocaleDateString("en-GB")
           : new Date().toLocaleDateString("en-GB"),
-        row["Needs Tailoring"] || false,
+        row["Needs Tailoring"] === "Yes" || row["Needs Tailoring"] === true,
       ]);
 
       // Validate imported data
@@ -554,14 +545,20 @@ const Items = () => {
       "Description",
       "Costing Type",
       "Group Type",
+      "MRP",
+      "Tax Rate",
       "Added Date",
+      "Needs Tailoring",
     ];
     const rows = items.map((item: any) => [
       item[0] || "",
       item[1] || "",
       item[3] || "",
       item[2] || "",
+      item[4] || "",
+      item[5] || "",
       item[6] ? new Date(item[6]).toLocaleDateString("en-GB") : "",
+      item[7] ? "Yes" : "No",
     ]);
     autoTable(doc, {
       head: [columns],
@@ -585,24 +582,33 @@ const Items = () => {
       const columns = [
         "Product Name",
         "Description",
-        "Costing Type",
         "Group Type",
+        "Costing Type",
+        "MRP",
+        "Tax Rate",
         "Added Date",
+        "Needs Tailoring",
       ];
       const rows = items.map((item: any) => ({
         "Product Name": item[0] || "",
         Description: item[1] || "",
-        "Costing Type": item[3] || "",
         "Group Type": item[2] || "",
+        "Costing Type": item[3] || "",
+        MRP: item[4] || "",
+        "Tax Rate": item[5] || "",
         "Added Date": item[6]
           ? new Date(item[6]).toLocaleDateString("en-GB")
           : "",
+        "Needs Tailoring": item[7] ? "Yes" : "No",
       }));
-      const worksheet = XLSX.utils.json_to_sheet(rows);
+      const worksheet = XLSX.utils.json_to_sheet(rows, { header: columns });
       worksheet["!cols"] = [
         { wch: 20 },
         { wch: 30 },
         { wch: 15 },
+        { wch: 15 },
+        { wch: 10 },
+        { wch: 10 },
         { wch: 15 },
         { wch: 15 },
       ];
