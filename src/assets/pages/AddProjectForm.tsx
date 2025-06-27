@@ -645,6 +645,8 @@ function AddProjectForm() {
     const updatedSelections = [...selections];
     const areaCol = updatedSelections[mainIndex].areacollection[index];
     areaCol.measurement.quantity = quantity;
+    areaCol.measurement.quantity = quantity;
+    areaCol.quantities[0] = quantity.toString();
 
     const discountRaw =
       discountType === "cash" ? `${discount}` : `${discount}%`;
@@ -738,7 +740,7 @@ function AddProjectForm() {
     if (!areaCol.quantities) {
       areaCol.quantities = [];
     }
-    areaCol.quantities[itemIndex] = value;
+    areaCol.measurement.quantity = valueNum;
 
     // Step 1: Base cost
     const baseCost = num1 * quantityNum * valueNum;
@@ -2019,7 +2021,7 @@ function AddProjectForm() {
                           <td className="py-2 px-4 text-sm">
                             <input
                               type="number"
-                              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                              className="w-[120px] border border-gray-300 rounded px-2 py-1 text-sm"
                               value={calculatedMRP}
                               onChange={(e) =>
                                 handleMRPChange(
@@ -2105,10 +2107,10 @@ function AddProjectForm() {
               Miscellaneous
             </h2>
             <button
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition-colors text-sm font-medium"
+              className="flex items-center gap-1 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white text-xs sm:text-sm font-medium !rounded-xl hover:bg-blue-700 transition-colors"
               onClick={handleAddMiscItem}
             >
-              <FaPlus className="w-4 h-4" />
+              <FaPlus className="w-3 h-3 sm:w-4 sm:h-4" />
               Add Item
             </button>
           </div>
@@ -2158,7 +2160,7 @@ function AddProjectForm() {
                         onChange={(e) =>
                           handleItemRateChange(i, e.target.value)
                         }
-                        className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-[70px] border border-gray-300 rounded px-2 py-1 text-sm"
                         value={item.rate || ""}
                         type="number"
                         min="0"
@@ -2170,7 +2172,7 @@ function AddProjectForm() {
                     <td className="py-3 px-4">
                       <input
                         onChange={(e) => handleItemTaxChange(i, e.target.value)}
-                        className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-[70px] border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         value={item.tax || ""}
                         type="number"
                         min="0"
