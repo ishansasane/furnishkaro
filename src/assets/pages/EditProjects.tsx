@@ -1243,39 +1243,44 @@ const EditProjects = ({
     const updated = [...additionalItems];
     const item = updated[i];
 
-    item.rate = parseFloat(rate) || 0;
+    // Parse the rate value (handle empty string case)
+    const parsedRate = rate === "" ? 0 : parseFloat(rate);
+
+    // Update the rate
+    item.rate = isNaN(parsedRate) ? 0 : parsedRate;
+
+    // Calculate base net amount (quantity * rate)
     const baseNet = item.quantity * item.rate;
 
-    // Step 1: Calculate total before discount (for cash discount % conversion)
-    const totalBeforeDiscount = updated.reduce(
-      (acc, itm) => acc + itm.quantity * itm.rate,
-      0
-    );
-
-    // Step 2: Determine effective discount %
+    // Calculate effective discount percentage
     let effectiveDiscountPercent = 0;
     if (discountType === "percent") {
-      effectiveDiscountPercent = discount;
-    } else if (discountType === "cash" && totalBeforeDiscount > 0) {
-      effectiveDiscountPercent = (discount / totalBeforeDiscount) * 100;
+      effectiveDiscountPercent = Discount;
+    } else if (discountType === "cash") {
+      const totalBeforeDiscount = updated.reduce(
+        (acc, itm) => acc + itm.quantity * itm.rate,
+        0
+      );
+      effectiveDiscountPercent =
+        totalBeforeDiscount > 0 ? (Discount / totalBeforeDiscount) * 100 : 0;
     }
 
-    // Step 3: Apply discount and compute tax
+    // Apply discount
     const discountAmount = (baseNet * effectiveDiscountPercent) / 100;
     const discountedNet = baseNet - discountAmount;
 
+    // Update item properties
     item.netRate = parseFloat(discountedNet.toFixed(2));
     item.taxAmount = parseFloat(((discountedNet * item.tax) / 100).toFixed(2));
     item.totalAmount = parseFloat((item.netRate + item.taxAmount).toFixed(2));
 
-    updated[i] = item;
-
     setAdditionaItems(updated);
 
+    // Recalculate totals
     const { totalTax, totalAmount } = recalculateTotals(selections, updated);
     setTax(totalTax);
     setAmount(totalAmount);
-    setGrandTotal(parseFloat(totalAmount.toFixed(2))); // ✅ Grand total logic added
+    setGrandTotal(parseFloat(totalAmount.toFixed(2)));
   };
 
   // Update tax and auto-update tax amount and total amount
@@ -1283,39 +1288,44 @@ const EditProjects = ({
     const updated = [...additionalItems];
     const item = updated[i];
 
-    item.tax = parseFloat(tax) || 0;
+    // Parse the tax value (handle empty string case)
+    const parsedTax = tax === "" ? 0 : parseFloat(tax);
+
+    // Update the tax rate
+    item.tax = isNaN(parsedTax) ? 0 : parsedTax;
+
+    // Calculate base net amount (quantity * rate)
     const baseNet = item.quantity * item.rate;
 
-    // Step 1: Calculate total before discount (for cash discount % conversion)
-    const totalBeforeDiscount = updated.reduce(
-      (acc, itm) => acc + itm.quantity * itm.rate,
-      0
-    );
-
-    // Step 2: Determine effective discount %
+    // Calculate effective discount percentage
     let effectiveDiscountPercent = 0;
     if (discountType === "percent") {
-      effectiveDiscountPercent = discount;
-    } else if (discountType === "cash" && totalBeforeDiscount > 0) {
-      effectiveDiscountPercent = (discount / totalBeforeDiscount) * 100;
+      effectiveDiscountPercent = Discount;
+    } else if (discountType === "cash") {
+      const totalBeforeDiscount = updated.reduce(
+        (acc, itm) => acc + itm.quantity * itm.rate,
+        0
+      );
+      effectiveDiscountPercent =
+        totalBeforeDiscount > 0 ? (Discount / totalBeforeDiscount) * 100 : 0;
     }
 
-    // Step 3: Apply discount and compute tax
+    // Apply discount
     const discountAmount = (baseNet * effectiveDiscountPercent) / 100;
     const discountedNet = baseNet - discountAmount;
 
+    // Update item properties
     item.netRate = parseFloat(discountedNet.toFixed(2));
     item.taxAmount = parseFloat(((discountedNet * item.tax) / 100).toFixed(2));
     item.totalAmount = parseFloat((item.netRate + item.taxAmount).toFixed(2));
 
-    updated[i] = item;
-
     setAdditionaItems(updated);
 
+    // Recalculate totals
     const { totalTax, totalAmount } = recalculateTotals(selections, updated);
     setTax(totalTax);
     setAmount(totalAmount);
-    setGrandTotal(parseFloat(totalAmount.toFixed(2))); // ✅ Grand total logic added
+    setGrandTotal(parseFloat(totalAmount.toFixed(2)));
   };
   const handleItemRemarkChange = (i, remark) => {
     const updated = [...additionalItems];
@@ -1884,7 +1894,7 @@ const EditProjects = ({
     <div className="p-6">
       <div className="flex flex-col">
         <div className="flex flex-row justify-between items-center">
-          <p className=" font-semibold">Order Overview</p>
+          {/* <p className=" font-semibold">Order Overview</p> */}
           <button
             onClick={goBack}
             className="mb-4 px-3 py-1 text-white bg-red-500 rounded"
