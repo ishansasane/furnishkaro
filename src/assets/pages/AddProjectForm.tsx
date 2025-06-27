@@ -644,7 +644,11 @@ function AddProjectForm() {
   ) => {
     const updatedSelections = [...selections];
     const areaCol = updatedSelections[mainIndex].areacollection[index];
-    areaCol.measurement.quantity = quantity;
+
+    // Ensure quantities array is initialized
+    if (!areaCol.quantities) areaCol.quantities = [];
+
+    // Sync both measurement and quotation section
     areaCol.measurement.quantity = quantity;
     areaCol.quantities[0] = quantity.toString();
 
@@ -730,30 +734,28 @@ function AddProjectForm() {
     itemIndex: number
   ) => {
     const updatedSelections = [...selections];
-
     const areaCol =
       updatedSelections[mainIndex].areacollection[collectionIndex];
+
     const quantityNum = parseFloat(quantity) || 0;
     const valueNum = parseFloat(value) || 0;
 
-    // Ensure quantities array exists
-    if (!areaCol.quantities) {
-      areaCol.quantities = [];
-    }
+    // Ensure quantities array is initialized
+    if (!areaCol.quantities) areaCol.quantities = [];
+
+    // Sync both quotation and measurement
+    areaCol.quantities[itemIndex] = value;
     areaCol.measurement.quantity = valueNum;
 
-    // Step 1: Base cost
-    const baseCost = num1 * quantityNum * valueNum;
-
+    // Step 2: Compute effective discount
     // Step 2: Compute effective discount
     let effectiveDiscountPercent = 0;
+    const baseCost = num1 * quantityNum * valueNum;
 
     if (discountType === "percent") {
       effectiveDiscountPercent = discount;
     } else if (discountType === "cash") {
-      const totalBeforeDiscount = baseCost;
-      effectiveDiscountPercent =
-        totalBeforeDiscount > 0 ? (discount / totalBeforeDiscount) * 100 : 0;
+      effectiveDiscountPercent = baseCost > 0 ? (discount / baseCost) * 100 : 0;
     }
 
     // Step 3: Apply discount
