@@ -104,7 +104,7 @@ const TermsAndConditions = () => {
         {!termsDialog && (
           <button
             onClick={() => setTermsDialog(true)}
-            className="flex items-center gap-1 bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-lg shadow"
+            className="flex items-center gap-1 bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 !rounded-xl shadow"
           >
             <PlusCircle size={18} />
             Add New
