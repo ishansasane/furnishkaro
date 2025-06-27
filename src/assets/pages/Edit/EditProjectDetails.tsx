@@ -146,7 +146,9 @@ const EditProjectDetails = ({
       {/* Reference & Project Name */}
       <div className="flex flex-col sm:flex-row w-full gap-4">
         <div className="flex flex-col w-full sm:w-1/2">
-          <p className="text-sm sm:text-base">Reference (optional)</p>
+          <p className="text-sm sm:text-base">
+            Reference <span className="text-gray-500">(optional)</span>
+          </p>
           <input
             type="text"
             className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
@@ -156,7 +158,7 @@ const EditProjectDetails = ({
         </div>
         <div className="flex flex-col w-full sm:w-1/2">
           <p className="text-sm sm:text-base">
-            Project Name (type a unique name)
+            Project Name <span className="text-gray-500">(Unique name )</span>
           </p>
           <input
             type="text"
@@ -184,7 +186,8 @@ const EditProjectDetails = ({
       {projectData.additionalRequests && (
         <div className="flex flex-col w-full">
           <p className="text-sm sm:text-base">
-            Any Additional Requests (optional)
+            Any Additional Requests{" "}
+            <span className="text-gray-500">(optional)</span>
           </p>
           <textarea
             value={additionalRequests}

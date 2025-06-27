@@ -5,12 +5,18 @@ import { setCustomerData } from "../../Redux/dataSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../Redux/store";
 
-const EditCustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer, projectData, setCustomers }) => {
+const EditCustomerDetails = ({
+  customers,
+  selectedCustomer,
+  setSelectedCustomer,
+  projectData,
+  setCustomers,
+}) => {
   const handleCustomerChange = (e) => {
     if (e.target.value === "") {
       setSelectedCustomer(null);
     } else {
-      const customerObj = customers.find(c => c[0] === e.target.value);
+      const customerObj = customers.find((c) => c[0] === e.target.value);
       setSelectedCustomer(customerObj);
     }
   };
@@ -52,12 +58,13 @@ const EditCustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer,
     const now = new Date();
     date = now.toISOString().slice(0, 16);
 
-    const api = "https://sheeladecor.netlify.app/.netlify/functions/server/sendcustomerdata";
+    const api =
+      "https://sheeladecor.netlify.app/.netlify/functions/server/sendcustomerdata";
 
     const response = await fetch(api, {
       method: "POST",
       headers: {
-        "content-type": "application/json"
+        "content-type": "application/json",
       },
       credentials: "include",
       body: JSON.stringify({
@@ -66,15 +73,18 @@ const EditCustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer,
         email,
         address,
         alternatenumber: alternateNumber,
-        addedDate: date
-      })
+        addedDate: date,
+      }),
     });
 
     if (response.status === 200) {
       const data = await fetchCustomers();
       dispatch(setCustomerData(data));
       setCustomers(data);
-      localStorage.setItem("customerData", JSON.stringify({ data, time: Date.now() }));
+      localStorage.setItem(
+        "customerData",
+        JSON.stringify({ data, time: Date.now() })
+      );
       setName("");
       setAddress("");
       setMobile("");
@@ -96,7 +106,7 @@ const EditCustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer,
         <div className="flex flex-col w-full sm:w-1/2">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
             <p className="text-sm sm:text-base">Select Customer</p>
-            <button 
+            <button
               className="flex items-center px-3 py-1 border border-blue-400 text-blue-500 font-semibold rounded-lg hover:bg-blue-50 transition-colors"
               onClick={() => setIsOpen(true)}
             >
@@ -127,7 +137,9 @@ const EditCustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer,
         {/* Email Field */}
         {projectData.customerLink && selectedCustomer && (
           <div className="flex flex-col w-full sm:w-1/2">
-            <p className="text-sm sm:text-base">Email (optional)</p>
+            <p className="text-sm sm:text-base">
+              Email <span className="text-gray-500">(optional)</span>
+            </p>
             <input
               type="text"
               className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base bg-gray-100"
@@ -151,7 +163,10 @@ const EditCustomerDetails = ({ customers, selectedCustomer, setSelectedCustomer,
             />
           </div>
           <div className="flex flex-col w-full sm:w-1/2">
-            <p className="text-sm sm:text-base">Alternate Phone Number (optional)</p>
+            <p className="text-sm sm:text-base">
+              Alternate Phone Number
+              <span className="text-gray-500">(optional)</span>
+            </p>
             <input
               type="text"
               className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base bg-gray-100"

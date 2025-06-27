@@ -187,7 +187,8 @@ const ProjectDetails = ({
       <div className="flex flex-col sm:flex-row w-full gap-2">
         <div className="flex flex-col w-full sm:w-1/2">
           <p className="text-sm sm:text-base">
-            Project Name (type a unique name)
+            Project Name{" "}
+            <span className="text-gray-500">(type a unique name)</span>
           </p>
           <input
             type="text"
@@ -198,7 +199,10 @@ const ProjectDetails = ({
           />
         </div>
         <div className="flex flex-col w-full sm:w-1/2">
-          <p className="text-sm sm:text-base">Reference (optional)</p>
+          <p className="text-sm sm:text-base">
+            Reference <span className="text-gray-500">(optional)</span>
+          </p>
+
           <input
             type="text"
             className="border p-2 rounded w-full text-sm sm:text-base"
@@ -230,7 +234,8 @@ const ProjectDetails = ({
         <div className="flex flex-col w-full gap-2">
           <div className="flex flex-col w-full">
             <p className="text-sm sm:text-base">
-              Any Additional Requests (optional)
+              Any Additional Requests{" "}
+              <span className="text-gray-500">(optional)</span>
             </p>
             <textarea
               placeholder="Additional Requests"
