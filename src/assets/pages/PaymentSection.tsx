@@ -61,6 +61,22 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
 }) => {
   const [canDeleteOrEdit, setCanDeleteOrEdit] = useState(false);
 
+  const [paymentReceived, setPaymentReceived] = useState(0);
+
+  useEffect(() => {
+    if (!projectData?.projectName || !paymentData?.length) return;
+
+    const total = paymentData
+      .filter(payment => payment[1]?.toLowerCase() === projectData.projectName.toLowerCase())
+      .reduce((sum, payment) => {
+        const amount = parseFloat(payment[2]);
+        return sum + (isNaN(amount) ? 0 : amount);
+      }, 0);
+
+    setPaymentReceived(total);
+  }, [projectData.projectName, paymentData]);
+
+
   // ✅ Check if "/delete-payments" permission exists
   useEffect(() => {
     try {
@@ -101,11 +117,11 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
         </div>
         <div className="border rounded-lg w-full sm:w-1/4 p-3">
           <p className="text-gray-500 text-xs sm:text-sm">Payment Received</p>
-          <p className="text-xs sm:text-sm">{Received}</p>
+          <p className="text-xs sm:text-sm">{paymentReceived}</p>
         </div>
         <div className="border rounded-lg w-full sm:w-1/4 p-3">
           <p className="text-gray-500 text-xs sm:text-sm">Payment Due</p>
-          <p className="text-xs sm:text-sm">{(Amount - Received).toFixed(2)}</p>
+          <p className="text-xs sm:text-sm">{(Amount - paymentReceived).toFixed(2)}</p>
         </div>
         <div className="border rounded-lg w-full sm:w-1/4 p-3">
           <p className="text-gray-500 text-xs sm:text-sm">Discount</p>
@@ -160,7 +176,7 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
                           </button>
                           <button
                             onClick={() =>
-                              deletePayment(data[1], data[2], data[3], data[4])
+                              deletePayment(data[2], data[3], data[4], data[5])
                             }
                           >
                             <FaTrash className="text-red-500" />

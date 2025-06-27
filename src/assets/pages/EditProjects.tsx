@@ -68,7 +68,9 @@ const EditProjects = ({ Paid, setPaid, discountType, setDiscountType, grandTotal
       setTerms(projectData.termsCondiditions || "NA");
       console.log(projectData.bankDetails);
       console.log(projectData.termsCondiditions);
+
       changeStatus(projectData.status || "Approved");
+
     }, [])
 
     interface additional{

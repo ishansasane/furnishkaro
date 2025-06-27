@@ -10,6 +10,8 @@ import {
   setCatalogs,
   setProjects,
   setItemData,
+  setTermsData,
+  setBankData
 } from "../Redux/dataSlice";
 import { Plus, Upload } from "lucide-react";
 import { FaPlus, FaTrash } from "react-icons/fa";
@@ -43,6 +45,11 @@ function AddProjectForm() {
   const [interior, setInterior] = useState<any[]>([]);
   const [salesData, setSalesData] = useState<any[]>([]);
 
+  const termData = useSelector(( state : RootState ) => state.data.termsData);
+  const bankData = useSelector(( state : RootState ) => state.data.bankData);
+
+  const [terms, setTerms] = useState("NA");
+  const [bank, setBank] = useState("NA");
   const [availableProductGroups, setAvailableProductGroups] = useState<any[]>(
     []
   );
@@ -243,6 +250,65 @@ function AddProjectForm() {
       return [];
     }
   }
+  const fetchTermsData = async () => {
+    const response = await fetch(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/getTermsData"
+    );
+    const data = await response.json();
+    return data.body || [];
+  };
+    const fetchBankData = async () => {
+      const response = await fetch(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/getBankData"
+      );
+      const data = await response.json();
+      return data.body || [];
+
+    };
+    useEffect(() => {
+      const fetchAndCacheBankData = async () => {
+        const now = Date.now();
+        const cached = localStorage.getItem("bankData");
+  
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          const timeDiff = now - parsed.time;
+          if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
+            dispatch(setBankData(parsed.data));
+            return;
+          }
+        }
+  
+        const data = await fetchBankData();
+        dispatch(setBankData(data));
+        localStorage.setItem("bankData", JSON.stringify({ data, time: now }));
+      };
+  
+      fetchAndCacheBankData();
+    }, [dispatch]);
+
+    useEffect(() => {
+      const fetchAndCacheTermData = async () => {
+        const now = Date.now();
+        const cached = localStorage.getItem("termData");
+  
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          const timeDiff = now - parsed.time;
+  
+          if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
+            dispatch(setTermsData(parsed.data));
+            return;
+          }
+        }
+  
+        const data = await fetchTermsData();
+        dispatch(setTermsData(data));
+        localStorage.setItem("termData", JSON.stringify({ data, time: now }));
+      };
+  
+      fetchAndCacheTermData();
+    }, [dispatch]);
 
   const handleAddArea = () => {
     setSelections([...selections, { area: "", areacollection: [] }]);
@@ -355,9 +421,9 @@ function AddProjectForm() {
   };
 
   const handleCatalogueChange = (
-    mainindex: number,
-    i: number,
-    catalogue: any
+    mainindex,
+    i,
+    catalogue
   ) => {
     const updatedSelections = [...selections];
 
@@ -385,7 +451,7 @@ function AddProjectForm() {
       };
     }
 
-    updatedSelections[mainindex].areacollection[i].catalogue = catalogue;
+    updatedSelections[mainindex].areacollection[i].catalogue = catalogue[0];
     setSelections(updatedSelections);
   };
 
@@ -644,7 +710,13 @@ function AddProjectForm() {
   ) => {
     const updatedSelections = [...selections];
     const areaCol = updatedSelections[mainIndex].areacollection[index];
+
+    // Ensure quantities array is initialized
+    if (!areaCol.quantities) areaCol.quantities = [];
+
+    // Sync both measurement and quotation section
     areaCol.measurement.quantity = quantity;
+    areaCol.quantities[0] = quantity.toString();
 
     const discountRaw =
       discountType === "cash" ? `${discount}` : `${discount}%`;
@@ -728,30 +800,28 @@ function AddProjectForm() {
     itemIndex: number
   ) => {
     const updatedSelections = [...selections];
-
     const areaCol =
       updatedSelections[mainIndex].areacollection[collectionIndex];
+
     const quantityNum = parseFloat(quantity) || 0;
     const valueNum = parseFloat(value) || 0;
 
-    // Ensure quantities array exists
-    if (!areaCol.quantities) {
-      areaCol.quantities = [];
-    }
-    areaCol.quantities[itemIndex] = value;
+    // Ensure quantities array is initialized
+    if (!areaCol.quantities) areaCol.quantities = [];
 
-    // Step 1: Base cost
-    const baseCost = num1 * quantityNum * valueNum;
+    // Sync both quotation and measurement
+    areaCol.quantities[itemIndex] = value;
+    areaCol.measurement.quantity = valueNum;
 
     // Step 2: Compute effective discount
+    // Step 2: Compute effective discount
     let effectiveDiscountPercent = 0;
+    const baseCost = num1 * quantityNum * valueNum;
 
     if (discountType === "percent") {
       effectiveDiscountPercent = discount;
     } else if (discountType === "cash") {
-      const totalBeforeDiscount = baseCost;
-      effectiveDiscountPercent =
-        totalBeforeDiscount > 0 ? (discount / totalBeforeDiscount) * 100 : 0;
+      effectiveDiscountPercent = baseCost > 0 ? (discount / baseCost) * 100 : 0;
     }
 
     // Step 3: Apply discount
@@ -1142,6 +1212,8 @@ function AddProjectForm() {
       date: row[18],
       grandTotal: row[19],
       discountType: row[20],
+      bankDetails :  deepClone(parseSafely(row[21], [])),
+      termsConditions :  deepClone(parseSafely(row[22], [])),
     }));
 
     return projects;
@@ -1297,7 +1369,12 @@ function AddProjectForm() {
         return;
       }
 
-      const date = Date.now();
+      let date = new Date()
+      const day = date.getDay()
+      const month = date.getMonth()
+      const year = date.getFullYear()
+
+      const newdate = day+"/"+month+"/"+year;
 
       const response = await fetch(
         "https://sheeladecor.netlify.app/.netlify/functions/server/sendprojectdata",
@@ -1326,9 +1403,11 @@ function AddProjectForm() {
             goodsArray: JSON.stringify(goodsArray),
             tailorsArray: JSON.stringify(tailorsArray),
             projectAddress: JSON.stringify(projectAddress),
-            date,
+            date : newdate,
             grandTotal,
             discountType,
+            bankDetails : JSON.stringify(bank),
+            termsConditions : JSON.stringify(terms)
           }),
         }
       );
@@ -2019,7 +2098,7 @@ function AddProjectForm() {
                           <td className="py-2 px-4 text-sm">
                             <input
                               type="number"
-                              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                              className="w-[120px] border border-gray-300 rounded px-2 py-1 text-sm"
                               value={calculatedMRP}
                               onChange={(e) =>
                                 handleMRPChange(
@@ -2105,10 +2184,10 @@ function AddProjectForm() {
               Miscellaneous
             </h2>
             <button
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition-colors text-sm font-medium"
+              className="flex items-center gap-1 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white text-xs sm:text-sm font-medium !rounded-xl hover:bg-blue-700 transition-colors"
               onClick={handleAddMiscItem}
             >
-              <FaPlus className="w-4 h-4" />
+              <FaPlus className="w-3 h-3 sm:w-4 sm:h-4" />
               Add Item
             </button>
           </div>
@@ -2158,7 +2237,7 @@ function AddProjectForm() {
                         onChange={(e) =>
                           handleItemRateChange(i, e.target.value)
                         }
-                        className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-[70px] border border-gray-300 rounded px-2 py-1 text-sm"
                         value={item.rate || ""}
                         type="number"
                         min="0"
@@ -2170,7 +2249,7 @@ function AddProjectForm() {
                     <td className="py-3 px-4">
                       <input
                         onChange={(e) => handleItemTaxChange(i, e.target.value)}
-                        className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-[70px] border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         value={item.tax || ""}
                         type="number"
                         min="0"
@@ -2319,24 +2398,25 @@ function AddProjectForm() {
               Bank Details & Terms
             </h3>
             <div className="space-y-4">
-              <select className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <select value={bank} onChange={(e) => setBank((e.target.value).split(","))} className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 <option value="">Select Bank Details</option>
-                {bankDetails.map((data, index) => (
+                {bankData.map((data, index) => (
                   <option key={index} value={data}>
-                    {data}
+                    <div className="flex flex-row gap-3"><span className="">Name : {data[0]}||</span><p>Account Number : {data[1]}</p></div>
                   </option>
                 ))}
               </select>
               <textarea
                 placeholder="Bank Details Description"
+                value={`Customer Name : ${bank == "NA"? "" : bank[0]} \nAccount Number : ${bank == "NA" ? "" : bank[1]}\nIFSC code : ${bank == "NA" ? "" : bank[2]}`}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 rows={3}
               ></textarea>
-              <select className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+              <select value={terms} onChange={(e) => setTerms((e.target.value).split(","))} className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                 <option value="">Select Terms & Conditions</option>
-                {termsConditions.map((data, index) => (
+                {termData.map((data, index) => (
                   <option key={index} value={data}>
-                    {data}
+                    {data[0]}
                   </option>
                 ))}
               </select>
@@ -2344,8 +2424,7 @@ function AddProjectForm() {
                 placeholder="Terms & Conditions Description"
                 className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 rows={3}
-                value={termsAndConditions}
-                onChange={(e) => setTermsAndConditions(e.target.value)}
+                value={`Terms & Conditions : ${terms == "NA" ? "" : terms[0]}`}
               ></textarea>
             </div>
           </div>
