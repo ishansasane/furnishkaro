@@ -187,6 +187,15 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
               required
             />
           )}
+          {isEditing && (
+            <input
+              type="text"
+              placeholder="Task Name"
+              value={taskName}
+              className="w-full border p-2 rounded mb-3"
+              required
+            />
+          )}
 
           {/* Description */}
           <textarea

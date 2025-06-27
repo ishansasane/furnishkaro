@@ -9,6 +9,7 @@ import EditProjects from "./EditProjects";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import ConfirmBox from "./ConfirmBox";
+import BankDetails from "./BankDetails";
 
 // Define the type for a project
 interface Project {
@@ -136,7 +137,9 @@ export default function Projects() {
       projectAddress: row[17],
       date: row[18],
       grandTotal : row[19],
-      discountType : row[20]
+      discountType : row[20],
+      bankDetails : deepClone(parseSafely(row[21], [])),
+      termsConditions : deepClone(parseSafely(row[22], [])),
     }));
 
     return projects;

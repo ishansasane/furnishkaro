@@ -21,7 +21,8 @@ const OverviewPage = ({
   setGoodsArray,
   projectDate,
   setPRojectDate,
-  projects
+  projects,
+  paymentData
 }) => {
   const dueAmount = projectData.totalAmount + projectData.totalTax - projectData.paid;
   const dispatch = useDispatch();
@@ -96,6 +97,23 @@ const OverviewPage = ({
     setTailorOrdered(tailorOrderedCount);
     setTailorReceived(tailorReceivedCount);
   }, [goodsArray, tailorsArray]);
+
+  const [paymentReceived, setPaymentReceived] = useState(0);
+
+  useEffect(() => {
+    if (!projectData?.projectName || !paymentData?.length) return;
+
+    const total = paymentData
+      .filter(payment => payment[1]?.toLowerCase() === projectData.projectName.toLowerCase())
+      .reduce((sum, payment) => {
+        const amount = parseFloat(payment[2]);
+        return sum + (isNaN(amount) ? 0 : amount);
+      }, 0);
+
+    setPaymentReceived(total);
+  }, [projectData.projectName, paymentData]);
+
+
 
   return (
     <div className="flex flex-col gap-2 sm:gap-4 p-2 sm:p-4 md:p-6">
@@ -206,13 +224,13 @@ const OverviewPage = ({
             <p className="text-base sm:text-lg md:text-xl font-medium">Payments</p>
             <div className="flex flex-row gap-1 sm:gap-2 mt-1 sm:mt-0">
               <button
-                onClick={() => setAddPayment(true)}
+                onClick={() => { setNavState("Payments"); setAddPayment(true)}}
                 className="text-white bg-sky-600 rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-base hover:bg-sky-700 w-full sm:w-auto"
               >
                 Add
               </button>
               <button
-                onClick={() => navigate("/paymentsPage")}
+                onClick={() => setNavState("Payments")}
                 className="text-white bg-sky-600 rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-base hover:bg-sky-700 w-full sm:w-auto"
               >
                 View
@@ -223,17 +241,17 @@ const OverviewPage = ({
             <div className="flex flex-row justify-between items-center border rounded-lg p-1 sm:p-2">
               <div className="w-1 bg-gray-500 !h-7 sm:h-4"></div>
               <p className="text-sm sm:text-base">Total Payment</p>
-              <p className="text-sm sm:text-base">{(projectData.totalAmount + projectData.totalTax).toFixed(2)}</p>
+              <p className="text-sm sm:text-base">{(projectData.totalAmount).toFixed(2)}</p>
             </div>
             <div className="flex flex-row justify-between items-center border rounded-lg p-1 sm:p-2">
               <div className="w-1 bg-green-500 !h-7 sm:h-4"></div>
               <p className="text-sm sm:text-base">Payment Received</p>
-              <p className="text-sm sm:text-base">{projectData.paid}</p>
+              <p className="text-sm sm:text-base">{paymentReceived}</p>
             </div>
             <div className="flex flex-row justify-between items-center border rounded-lg p-1 sm:p-2">
               <div className="w-1 bg-yellow-500 !h-7 sm:h-4"></div>
               <p className="text-sm sm:text-base">Due</p>
-              <p className="text-sm sm:text-base">{(dueAmount).toFixed(2)}</p>
+              <p className="text-sm sm:text-base">{(projectData.totalAmount - paymentReceived).toFixed(2)}</p>
             </div>
           </div>
         </div>
