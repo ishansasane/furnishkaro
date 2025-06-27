@@ -220,7 +220,7 @@ export default function Projects() {
     if (!tasks.length || deleted) {
       fetchTasks();
     }
-  }, [dispatch, tasks.length, deleted]);
+  }, [dispatch, tasks, deleted]);
   
   // --- Fetch Payments after Projects are available ---
   useEffect(() => {
