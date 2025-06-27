@@ -179,9 +179,9 @@ const ProjectDetails = ({
 
   return (
     <div className="flex flex-col gap-3 w-full rounded-xl shadow-2xl border-2 border-gray-200 px-3 py-3 sm:px-4 md:px-6 lg:px-8">
-      <p className="font-semibold sm:text-[1.2vw] md:text-[1vw] lg:text-[0.9vw]">
+      <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-4">
         Project Details
-      </p>
+      </h2>
 
       {/* Reference & Project Name */}
       <div className="flex flex-col sm:flex-row w-full gap-2">

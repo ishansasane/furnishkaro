@@ -1933,7 +1933,6 @@ function AddProjectForm() {
             singleItems={singleItems}
             projectData={projectData}
           />
-          
         </div>
         {/* Measurement Section */}
         <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
@@ -1953,7 +1952,7 @@ function AddProjectForm() {
 
         {/* Quotation Section */}
         <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-          <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-4">
+          <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-4 pl-4 md:pl-4">
             Quotation
           </h2>
           <div className="overflow-x-auto rounded-lg border border-gray-200">
@@ -2101,12 +2100,12 @@ function AddProjectForm() {
 
         {/* Miscellaneous Section */}
         <div className="mt-6 p-6 bg-gray-50 rounded-lg border border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">
-            Miscellaneous
-          </h3>
-          <div className="flex justify-end mb-4">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl md:text-2xl font-semibold text-gray-800">
+              Miscellaneous
+            </h2>
             <button
-              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 !rounded-xl hover:bg-blue-700 transition-colors text-sm font-medium"
+              className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition-colors text-sm font-medium"
               onClick={handleAddMiscItem}
             >
               <FaPlus className="w-4 h-4" />

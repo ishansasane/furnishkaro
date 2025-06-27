@@ -50,6 +50,7 @@ import DuePage from "./assets/pages/DuePage.tsx";
 import ProtectedRoute from "./auth/ProtectedRoute.tsx";
 import TokenHandler from "./auth/TokenHandler.tsx"; // ✅ Handles URL token saving
 import BankDetails from "./assets/pages/BankDetails.tsx";
+import TermsAndConditions from "./assets/pages/TermsAndConditions.tsx";
 
 function App() {
   const [expanded, setExpanded] = useState(true);
@@ -94,7 +95,7 @@ function App() {
                       <Route path="/settings" element={<SettingsPage />} />
                       <Route path="/add-project" element={<AddProjectForm />} />
                       <Route path="/brand-dilog" element={<BrandDialog />} />
-                      
+
                       <Route
                         path="/catalogue-dialog"
                         element={<CatalogueDialog />}
@@ -103,6 +104,10 @@ function App() {
                         path="/interior-dialog"
                         element={<InteriorDialog />}
                       />
+
+                      <Route path="/bank" element={<BankDetails />} />
+                      <Route path="/terms" element={<TermsAndConditions />} />
+
                       <Route path="/tailor-dialog" element={<TailorDialog />} />
                       <Route
                         path="/sales-associateDialog"

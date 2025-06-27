@@ -1,20 +1,28 @@
-import { Divide } from 'lucide-react';
-import React, { useEffect, useState, useRef } from 'react';
-import { FaEdit, FaPlus, FaTrash } from 'react-icons/fa';
-import { useDispatch, useSelector } from 'react-redux';
-import { setCatalogs } from '../Redux/dataSlice';
-import { RootState } from '../Redux/store';
-import { setCompanyData, setDesignData } from '../Redux/dataSlice';
+import { Divide } from "lucide-react";
+import React, { useEffect, useState, useRef } from "react";
+import { FaEdit, FaPlus, FaTrash } from "react-icons/fa";
+import { useDispatch, useSelector } from "react-redux";
+import { setCatalogs } from "../Redux/dataSlice";
+import { RootState } from "../Redux/store";
+import { setCompanyData, setDesignData } from "../Redux/dataSlice";
 
-const SearchableSelect = ({ options, value, placeholder, name, mainindex, i, handleProductGroupChange }) => {
+const SearchableSelect = ({
+  options,
+  value,
+  placeholder,
+  name,
+  mainindex,
+  i,
+  handleProductGroupChange,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [filteredOptions, setFilteredOptions] = useState(options);
   const dropdownRef = useRef(null);
 
   useEffect(() => {
     setFilteredOptions(
-      options.filter(option => 
+      options.filter((option) =>
         option[0].toLowerCase().includes(searchTerm.toLowerCase())
       )
     );
@@ -24,13 +32,13 @@ const SearchableSelect = ({ options, value, placeholder, name, mainindex, i, han
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
-        setSearchTerm('');
+        setSearchTerm("");
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -54,7 +62,7 @@ const SearchableSelect = ({ options, value, placeholder, name, mainindex, i, han
                 onClick={() => {
                   handleProductGroupChange(mainindex, i, option);
                   setIsOpen(false);
-                  setSearchTerm('');
+                  setSearchTerm("");
                 }}
               >
                 {option[0]}
@@ -88,7 +96,7 @@ const MaterialSelectionComponent = ({
   handleGroupDelete,
   projectData,
   setAvailableAreas,
-  singleItems
+  singleItems,
 }) => {
   const dispatch = useDispatch();
   const [combinedData, setCombinedData] = useState([]);
@@ -100,16 +108,18 @@ const MaterialSelectionComponent = ({
 
   const fetchCompanyData = async () => {
     try {
-      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getCompany", {
-        credentials: "include",
-      });
+      const response = await fetch(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/getCompany",
+        {
+          credentials: "include",
+        }
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const data = await response.json();
       return Array.isArray(data.body) ? data.body : [];
-    }
-    catch (error) { 
+    } catch (error) {
       console.error("Error fetching company data:", error);
       return [];
     }
@@ -117,9 +127,12 @@ const MaterialSelectionComponent = ({
 
   const fetchDesignData = async () => {
     try {
-      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getDesign", {
-        credentials: "include",
-      });
+      const response = await fetch(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/getDesign",
+        {
+          credentials: "include",
+        }
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -129,19 +142,19 @@ const MaterialSelectionComponent = ({
       console.error("Error fetching brand data:", error);
       return [];
     }
-  }; 
+  };
 
   const companyData = useSelector((state: RootState) => state.data.companyData);
   const designData = useSelector((state: RootState) => state.data.designData);
 
   const ONE_HOUR = 3600 * 1000;
-  
+
   const useInitialFetch = (dispatch, setCompanyData, setDesignData) => {
     useEffect(() => {
       const fetchAndCache = async (key, fetchFn, dispatchFn) => {
         const cached = localStorage.getItem(key);
         const now = Date.now();
-  
+
         if (cached) {
           const { data, time } = JSON.parse(cached);
           if (now - time < ONE_HOUR) {
@@ -149,7 +162,7 @@ const MaterialSelectionComponent = ({
             return;
           }
         }
-  
+
         try {
           const data = await fetchFn();
           dispatch(dispatchFn(data));
@@ -158,23 +171,26 @@ const MaterialSelectionComponent = ({
           console.error(`Failed to fetch ${key}:`, error);
         }
       };
-  
+
       fetchAndCache("companyData", fetchCompanyData, setCompanyData);
       fetchAndCache("designData", fetchDesignData, setDesignData);
     }, [dispatch]);
   };
-  
+
   useInitialFetch(dispatch, setCompanyData, setDesignData);
 
   const [isCompanyOpen, setIsCompantyOpen] = useState(false);
-  const [isCatalogueOpen, setIsCatalogueOpen] = useState(false); 
+  const [isCatalogueOpen, setIsCatalogueOpen] = useState(false);
   const [isDesignNoOpen, setIsDesignNoOpen] = useState(false);
 
   async function fetchCatalogues() {
     try {
-      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getcatalogues", {
-        credentials: "include",
-      });
+      const response = await fetch(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/getcatalogues",
+        {
+          credentials: "include",
+        }
+      );
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
@@ -187,14 +203,17 @@ const MaterialSelectionComponent = ({
   }
 
   const addArea = async (name) => {
-    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/addArea", {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "content-type": "application/json"
-      },
-      body: JSON.stringify({ name: name }),
-    });
+    const response = await fetch(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/addArea",
+      {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ name: name }),
+      }
+    );
 
     if (response.status === 200) {
       const newareas = [...availableAreas];
@@ -204,7 +223,7 @@ const MaterialSelectionComponent = ({
     } else {
       alert("Error");
     }
-  }
+  };
 
   const [catalogueName, setCatalogueName] = useState("");
   const [catalogueDescription, setCatalogueDescription] = useState("");
@@ -212,19 +231,28 @@ const MaterialSelectionComponent = ({
   const [designName, setDesignName] = useState("");
 
   const addCatalogue = async () => {
-    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/addcatalogue", {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "content-type": "application/json"
-      },
-      body: JSON.stringify({ catalogueName: catalogueName, description: catalogueDescription }),
-    });
+    const response = await fetch(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/addcatalogue",
+      {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          catalogueName: catalogueName,
+          description: catalogueDescription,
+        }),
+      }
+    );
 
     if (response.status === 200) {
       const data = await fetchCatalogues();
       dispatch(setCatalogs(data));
-      localStorage.setItem("catalogueData", JSON.stringify({ data, time: Date.now() }));
+      localStorage.setItem(
+        "catalogueData",
+        JSON.stringify({ data, time: Date.now() })
+      );
       setCatalogueName("");
       setCatalogueDescription("");
       setIsCatalogueOpen(false);
@@ -232,47 +260,55 @@ const MaterialSelectionComponent = ({
     } else {
       alert("Error");
     }
-  }
+  };
 
   const addCompany = async () => {
     const date = new Date();
-    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/sendCompany", {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "content-type": "application/json"
-      },
-      body: JSON.stringify({ companyName, date }),
-    });
+    const response = await fetch(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/sendCompany",
+      {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ companyName, date }),
+      }
+    );
 
     if (response.status === 200) {
       const data = await fetchCompanyData();
       dispatch(setCompanyData(data));
-      localStorage.setItem("companyData", JSON.stringify({ data, time: Date.now() }));
+      localStorage.setItem(
+        "companyData",
+        JSON.stringify({ data, time: Date.now() })
+      );
       setIsCompantyOpen(false);
       alert("Company Added");
     } else {
       alert("Error");
     }
-  }
+  };
 
   const [design, setDesign] = useState("");
 
   const handleCompanyKeyPress = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       addCompany();
     }
   };
 
   const handleCatalogueKeyPress = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       addCatalogue();
     }
   };
 
   return (
     <div className="flex flex-col bg-white p-4 sm:p-6 rounded-lg shadow-lg">
-      <p className="text-lg sm:text-xl font-semibold">Material Selection</p>
+      <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-4">
+        Material Selection
+      </h2>
       <div className="flex flex-col sm:flex-row gap-4 sm:gap-5">
         {/* Left Column: Area Selection */}
         <div className="w-full sm:w-1/4">
@@ -280,7 +316,10 @@ const MaterialSelectionComponent = ({
           {selections.map((selection, index) => {
             const currentArea = selection.area || "";
             return (
-              <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mb-4">
+              <div
+                key={index}
+                className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mb-4"
+              >
                 <div className="flex flex-col gap-2 w-full">
                   <select
                     className="border border-black opacity-50 p-2 sm:p-3 rounded-lg w-full text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
@@ -330,9 +369,14 @@ const MaterialSelectionComponent = ({
             <p className="text-sm sm:text-base">Select Product Groups</p>
           </div>
           {selections.map((selection, mainindex) => (
-            <div key={mainindex} className="mb-4 border p-3 rounded-lg shadow-sm bg-gray-50">
+            <div
+              key={mainindex}
+              className="mb-4 border p-3 rounded-lg shadow-sm bg-gray-50"
+            >
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-                <p className="text-base sm:text-lg font-medium">{selection.area}</p>
+                <p className="text-base sm:text-lg font-medium">
+                  {selection.area}
+                </p>
                 <button
                   className="mt-2 sm:mt-0 !rounded-md px-3 py-2 text-sm sm:text-base text-white bg-sky-600 hover:bg-sky-700"
                   onClick={() => handleAddNewGroup(mainindex)}
@@ -342,15 +386,20 @@ const MaterialSelectionComponent = ({
               </div>
               {selection.area ? (
                 selection.areacollection.map((element, i) => (
-                  <div key={i} className="mt-3 border p-3 rounded-lg shadow-sm bg-gray-50">
+                  <div
+                    key={i}
+                    className="mt-3 border p-3 rounded-lg shadow-sm bg-gray-50"
+                  >
                     <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
                       {/* Product Group */}
                       <div className="flex flex-col w-full sm:w-1/5">
-                        <p className="text-sm sm:text-base">Product Group / Items</p>
+                        <p className="text-sm sm:text-base">
+                          Product Group / Items
+                        </p>
                         <SearchableSelect
                           options={combinedData}
                           value={element.productGroup[0]}
-                          i = { i }
+                          i={i}
                           mainindex={mainindex}
                           handleProductGroupChange={handleProductGroupChange}
                           placeholder="Select Product Group"
@@ -360,16 +409,21 @@ const MaterialSelectionComponent = ({
 
                       {/* Company */}
                       <div>
-                        <div className='flex flex-row gap-3'>
-                          <p className=''>Company</p>
-                          <button className='mb-3' onClick={() => setIsCompantyOpen(true)}>
-                            <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">+</span>
+                        <div className="flex flex-row gap-3">
+                          <p className="">Company</p>
+                          <button
+                            className="mb-3"
+                            onClick={() => setIsCompantyOpen(true)}
+                          >
+                            <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">
+                              +
+                            </span>
                           </button>
                         </div>
                         <SearchableSelect
                           options={companyData}
                           value={element.company[0]}
-                          i = { i }
+                          i={i}
                           mainindex={mainindex}
                           handleProductGroupChange={handleCompanyChange}
                           placeholder="Select Company"
@@ -379,16 +433,21 @@ const MaterialSelectionComponent = ({
 
                       {/* Catalogue */}
                       <div>
-                        <div className='flex flex-row gap-3'>
-                          <p className=''>Catalogue</p>
-                          <button className='mb-3' onClick={() => setIsCatalogueOpen(true)}>
-                            <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">+</span>
+                        <div className="flex flex-row gap-3">
+                          <p className="">Catalogue</p>
+                          <button
+                            className="mb-3"
+                            onClick={() => setIsCatalogueOpen(true)}
+                          >
+                            <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">
+                              +
+                            </span>
                           </button>
                         </div>
                         <SearchableSelect
                           options={catalogueData}
                           value={element.catalogue[0]}
-                          i = { i }
+                          i={i}
                           mainindex={mainindex}
                           handleProductGroupChange={handleCatalogueChange}
                           placeholder="Select Catalogue"
@@ -398,18 +457,18 @@ const MaterialSelectionComponent = ({
 
                       {/* Design No */}
                       <div>
-                        <div className='flex flex-row gap-3'>
-                          <p className=''>Design No.</p>
+                        <div className="flex flex-row gap-3">
+                          <p className="">Design No.</p>
                         </div>
-                        <input 
-                          type="text" 
-                          placeholder='Design No' 
-                          value={element.design} 
+                        <input
+                          type="text"
+                          placeholder="Design No"
+                          value={element.design}
                           onChange={(e) => {
                             handleDesignNoChange(mainindex, i, e.target.value);
                             setDesign(e.target.value);
-                          }} 
-                          className='border rounded-lg pl-2 py-2 w-24'
+                          }}
+                          className="border rounded-lg pl-2 py-2 w-24"
                         />
                       </div>
 
@@ -420,7 +479,9 @@ const MaterialSelectionComponent = ({
                           type="text"
                           value={element.reference}
                           placeholder="Enter reference..."
-                          onChange={(e) => handleReferenceChange(mainindex, i, e.target.value)}
+                          onChange={(e) =>
+                            handleReferenceChange(mainindex, i, e.target.value)
+                          }
                           className="border p-2 sm:p-3 rounded w-full text-sm sm:text-base"
                         />
                       </div>
@@ -438,7 +499,9 @@ const MaterialSelectionComponent = ({
                     </div>
                   </div>
                 ))
-              ) : <div></div>}
+              ) : (
+                <div></div>
+              )}
             </div>
           ))}
         </div>
@@ -447,23 +510,23 @@ const MaterialSelectionComponent = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/50">
           <div className="w-[300px] p-6 rounded-xl shadow-xl text-center bg-white">
             <p className="text-[1.3vw]">Add Company</p>
-            <input 
-              type="text" 
-              value={companyName} 
-              onChange={(e) => setCompanyName(e.target.value)} 
+            <input
+              type="text"
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
               onKeyPress={handleCompanyKeyPress}
-              className='w-full rounded-lg border p-2 pl-2 mb-3'
+              className="w-full rounded-lg border p-2 pl-2 mb-3"
             />
             <div className="w-full flex flex-row justify-between">
-              <button 
-                style={{ borderRadius: "6px" }} 
-                onClick={addCompany} 
+              <button
+                style={{ borderRadius: "6px" }}
+                onClick={addCompany}
                 className="px-2 py-1 text-white bg-sky-600 hover:bg-sky-700"
               >
                 Add
               </button>
-              <button 
-                onClick={() => setIsCompantyOpen(false)} 
+              <button
+                onClick={() => setIsCompantyOpen(false)}
                 className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
               >
                 Close
@@ -476,32 +539,32 @@ const MaterialSelectionComponent = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/50">
           <div className="w-[300px] p-6 rounded-xl shadow-xl text-center bg-white">
             <p className="text-[1.3vw]">Add Catalogue</p>
-            <input 
-              type="text" 
-              value={catalogueName} 
-              onChange={(e) => setCatalogueName(e.target.value)} 
+            <input
+              type="text"
+              value={catalogueName}
+              onChange={(e) => setCatalogueName(e.target.value)}
               onKeyPress={handleCatalogueKeyPress}
-              className='w-full rounded-lg border p-2 pl-2 mb-3' 
-              placeholder='Name'
+              className="w-full rounded-lg border p-2 pl-2 mb-3"
+              placeholder="Name"
             />
-            <input 
-              type="text" 
-              value={catalogueDescription} 
-              onChange={(e) => setCatalogueDescription(e.target.value)} 
+            <input
+              type="text"
+              value={catalogueDescription}
+              onChange={(e) => setCatalogueDescription(e.target.value)}
               onKeyPress={handleCatalogueKeyPress}
-              className='w-full rounded-lg border p-2 pl-2 mb-3' 
-              placeholder='Description'
+              className="w-full rounded-lg border p-2 pl-2 mb-3"
+              placeholder="Description"
             />
             <div className="w-full flex flex-row justify-between">
-              <button 
-                onClick={addCatalogue} 
-                style={{ borderRadius: "6px" }} 
+              <button
+                onClick={addCatalogue}
+                style={{ borderRadius: "6px" }}
                 className="px-2 py-1 text-white bg-sky-600 hover:bg-sky-700"
               >
                 Add
               </button>
-              <button 
-                onClick={() => setIsCatalogueOpen(false)} 
+              <button
+                onClick={() => setIsCatalogueOpen(false)}
                 className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
               >
                 Close
@@ -514,22 +577,22 @@ const MaterialSelectionComponent = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/50">
           <div className="w-[300px] p-6 rounded-xl shadow-xl text-center bg-white">
             <p className="text-[1.3vw]">Add Design No</p>
-            <input 
-              type="text" 
-              value={designName} 
-              onChange={(e) => setDesignName(e.target.value)} 
-              className='w-full rounded-lg border p-2 pl-2 mb-3'
+            <input
+              type="text"
+              value={designName}
+              onChange={(e) => setDesignName(e.target.value)}
+              className="w-full rounded-lg border p-2 pl-2 mb-3"
             />
             <div className="w-full flex flex-row justify-between">
-              <button 
-                style={{ borderRadius: "6px" }} 
-                onClick={addDesign} 
+              <button
+                style={{ borderRadius: "6px" }}
+                onClick={addDesign}
                 className="px-2 py-1 text-white bg-sky-600 hover:bg-sky-700"
               >
                 Add
               </button>
-              <button 
-                onClick={() => setIsDesignNoOpen(false)} 
+              <button
+                onClick={() => setIsDesignNoOpen(false)}
                 className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
               >
                 Close
