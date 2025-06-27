@@ -1894,7 +1894,7 @@ const EditProjects = ({
     <div className="p-6">
       <div className="flex flex-col">
         <div className="flex flex-row justify-between items-center">
-          {/* <p className=" font-semibold">Order Overview</p> */}
+          <p className=" font-semibold">Order Overview</p>
           <button
             onClick={goBack}
             className="mb-4 px-3 py-1 text-white bg-red-500 rounded"
