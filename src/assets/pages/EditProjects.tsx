@@ -3,7 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store";
 import OverviewPage from './OverviewPage';
-import { setPaymentData , setSalesAssociateData, setInteriorData, setCustomerData, setProducts, setCatalogs, setProjects, setItemData, setProjectFlag, setTasks, setTailorData } from "../Redux/dataSlice";
+import { setTermsData, setBankData, setPaymentData , setSalesAssociateData, setInteriorData, setCustomerData, setProducts, setCatalogs, setProjects, setItemData, setProjectFlag, setTasks, setTailorData } from "../Redux/dataSlice";
 import CustomerDetails from "./CustomerDetails";
 import ProjectDetails from "./ProjectDetails";
 import EditCustomerDetails from "./Edit/EditCustomerDetails";
@@ -25,9 +25,7 @@ const EditProjects = ({ Paid, setPaid, discountType, setDiscountType, grandTotal
     const [navState, setNavState] = useState("Overview");
     const [status, changeStatus] = useState("approved");
 
-    useEffect(() => {
-      setDiscountType(discountType);
-    })
+
 
     const dispatch = useDispatch();
     const customerData = useSelector((state : RootState) => state.data.customers);
@@ -54,9 +52,25 @@ const EditProjects = ({ Paid, setPaid, discountType, setDiscountType, grandTotal
     const [ salesdata, setsalesdata ] = useState([]);
     const [availableProductGroups, setAvailableProductGroups] = useState([]);
 
+    const termData = useSelector(( state : RootState ) => state.data.termsData);
+    const bankData = useSelector(( state : RootState ) => state.data.bankData);
+
+    const [terms, setTerms] = useState("NA");
+    const [bank, setBank] = useState("NA");
+
     const [additionalItems, setAdditionaItems] = useState<additional[]>([]);
 
     const [editPayments, setEditPayments] = useState(undefined);
+
+    useEffect(() => {
+      setDiscountType(discountType);
+      setBank(projectData.bankDetails || "NA");
+      setTerms(projectData.termsCondiditions || "NA");
+      console.log(projectData.bankDetails);
+      console.log(projectData.termsCondiditions);
+      changeStatus(projectData.status || "Approved");
+    }, [])
+
     interface additional{
       name : string;
       quantity : number;
@@ -258,6 +272,65 @@ const EditProjects = ({ Paid, setPaid, discountType, setDiscountType, grandTotal
           return [];
         }
       }
+        const fetchTermsData = async () => {
+          const response = await fetch(
+            "https://sheeladecor.netlify.app/.netlify/functions/server/getTermsData"
+          );
+          const data = await response.json();
+          return data.body || [];
+        };
+          const fetchBankData = async () => {
+            const response = await fetch(
+              "https://sheeladecor.netlify.app/.netlify/functions/server/getBankData"
+            );
+            const data = await response.json();
+            return data.body || [];
+      
+          };
+          useEffect(() => {
+            const fetchAndCacheBankData = async () => {
+              const now = Date.now();
+              const cached = localStorage.getItem("bankData");
+        
+              if (cached) {
+                const parsed = JSON.parse(cached);
+                const timeDiff = now - parsed.time;
+                if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
+                  dispatch(setBankData(parsed.data));
+                  return;
+                }
+              }
+        
+              const data = await fetchBankData();
+              dispatch(setBankData(data));
+              localStorage.setItem("bankData", JSON.stringify({ data, time: now }));
+            };
+        
+            fetchAndCacheBankData();
+          }, [dispatch]);
+      
+          useEffect(() => {
+            const fetchAndCacheTermData = async () => {
+              const now = Date.now();
+              const cached = localStorage.getItem("termData");
+        
+              if (cached) {
+                const parsed = JSON.parse(cached);
+                const timeDiff = now - parsed.time;
+        
+                if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
+                  dispatch(setTermsData(parsed.data));
+                  return;
+                }
+              }
+        
+              const data = await fetchTermsData();
+              dispatch(setTermsData(data));
+              localStorage.setItem("termData", JSON.stringify({ data, time: now }));
+            };
+        
+            fetchAndCacheTermData();
+          }, [dispatch]);
 
       useEffect(() => {
         const clonedSelections = JSON.parse(JSON.stringify(projectData.allData || []));
@@ -469,7 +542,7 @@ const EditProjects = ({ Paid, setPaid, discountType, setDiscountType, grandTotal
   
   
 
-  const handleCatalogueChange = (mainindex: number, i: number, catalogue: string) => {
+  const handleCatalogueChange = (mainindex, i, catalogue) => {
     const updatedSelections = [...selections];
   
     if (!updatedSelections[mainindex].areacollection) {
@@ -491,7 +564,7 @@ const EditProjects = ({ Paid, setPaid, discountType, setDiscountType, grandTotal
       };
     }
   
-    updatedSelections[mainindex].areacollection[i].catalogue = catalogue
+    updatedSelections[mainindex].areacollection[i].catalogue = catalogue[0]
       .split(",")
       .map(item => item.trim())
       .filter(item => item);
@@ -1284,7 +1357,7 @@ const deletePayment = async (p, pd, pm, re) => {
     headers : {
       "content-type" : "application/json",
     },
-    body : JSON.stringify({ Name : projectData.projectName, Received : p, ReceivedDate : pd, PaymentMode : pm, Remarks : re })
+    body : JSON.stringify({ customerName : projectData.customerLink[0] ,Name : projectData.projectName, Received : p, ReceivedDate : pd, PaymentMode : pm, Remarks : re })
   });
 
   if(response.status == 200){
@@ -1543,8 +1616,8 @@ const handleDiscountChange = (newDiscount, newDiscountType) => {
       date: row[18],
       grandTotal : row[19],
       discountType : row[20],
-      bankDetails : row[21],
-      termsConditions : row[22]
+      bankDetails : deepClone(parseSafely(row[21], [])),
+      termsConditions : deepClone(parseSafely(row[22], []))
     }));
 
     return projects;
@@ -1581,8 +1654,8 @@ const sendProjectData = async () => {
           projectAddress: JSON.stringify(projectAddress),
           grandTotal,
           discountType,
-          bankDetails,
-          termsConditions : termsCondiditions
+          bankDetails : JSON.stringify(bank),
+          termsConditions : JSON.stringify(terms)
         }),
       }
     );
@@ -1689,8 +1762,8 @@ const sendProjectData = async () => {
           <div className="flex flex-col justify-between">
             <OverviewPage 
             projectData={projectData}
-            status={currentStatus}
-            setStatus={setCurrentStatus}
+            status={status}
+            setStatus={changeStatus}
             tasks={Tasks}
             setNavState={setNavState}
             tailorsArray={tailorsArray}
@@ -1704,6 +1777,7 @@ const sendProjectData = async () => {
             projects={projects}
             setAddPayment={setAddPayment}
             addPayment={addPayment}
+            paymentData={paymentData}
             />
             <div className="flex flex-row justify-between mt-3">
                 <button onClick={() => setNavState("Tasks")} style={{ borderRadius : "8px" }} className="rounded-lg border px-2 h-8 bg-white">Back</button>
@@ -2006,43 +2080,41 @@ const sendProjectData = async () => {
 
     </div>
        <div className="flex flex-col sm:flex-row gap-3 justify-between w-full">
-  <div className="flex flex-col gap-2 w-full sm:w-1/2 rounded mt-3 p-4 sm:p-6 shadow-xl border">
-    <div className="flex flex-row justify-between items-center">
-      <select
-        className="border p-2 rounded w-full sm:w-1/2 h-12 sm:h-16 text-xs sm:text-sm"
-        value={""}
-      >
-        <option value="">Bank Details</option>
-        {bankDetails.map((data, index) => (
-          <option key={index} value={data}>
-            {data}
-          </option>
-        ))}
-      </select>
-      <button>
-        <FaPlus size={18} className="text-sky-600 hover:text-sky-800" />
-      </button>
-    </div>
-    <textarea
-      placeholder="Description"
-      className="w-full rounded-lg border py-2 pl-2 text-xs sm:text-sm min-h-[80px]"
-    ></textarea>
-    <select
-      className="border p-2 rounded w-full sm:w-1/2 h-12 sm:h-16 text-xs sm:text-sm"
-      value={""}
-    >
-      <option value="">Terms & Conditions</option>
-      {termsCondiditions.map((data, index) => (
-        <option key={index} value={data}>
-          {data}
-        </option>
-      ))}
-    </select>
-    <textarea
-      placeholder="Description"
-      className="w-full rounded-lg border py-2 pl-2 text-xs sm:text-sm min-h-[80px]"
-    ></textarea>
-  </div>
+          <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 w-full md:w-1/2">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              Bank Details & Terms
+            </h3>
+            <div className="space-y-4">
+              <select value={bank} onChange={(e) => setBank((e.target.value).split(","))} className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="">Select Bank Details</option>
+                {bankData.map((data, index) => (
+                  <option key={index} value={data}>
+                    <div className="flex flex-row gap-3"><span className="">Name : {data[0]}||</span><p>Account Number : {data[1]}</p></div>
+                  </option>
+                ))}
+              </select>
+              <textarea
+                placeholder="Bank Details Description"
+                value={`Customer Name : ${bank == "NA"? "" : bank[0]} \nAccount Number : ${bank == "NA" ? "" : bank[1]}\nIFSC code : ${bank == "NA" ? "" : bank[2]}`}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                rows={3}
+              ></textarea>
+              <select value={terms} onChange={(e) => setTerms((e.target.value).split(","))} className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <option value="">Select Terms & Conditions</option>
+                {termData.map((data, index) => (
+                  <option key={index} value={data}>
+                    {data[0]}
+                  </option>
+                ))}
+              </select>
+              <textarea
+                placeholder="Terms & Conditions Description"
+                className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                rows={3}
+                value={`Terms & Conditions : ${terms == "NA" ? "" : terms[0]}`}
+              ></textarea>
+            </div>
+          </div>
   <div className="shadow-xl p-4 sm:p-6 flex flex-col gap-2 border w-full sm:w-1/2 rounded-lg">
     <p className="text-base sm:text-lg font-semibold">Summary</p>
     <div className="flex flex-row justify-between w-full text-xs sm:text-sm">
