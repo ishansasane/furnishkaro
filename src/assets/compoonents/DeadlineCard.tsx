@@ -14,6 +14,7 @@ interface DeadlineCardProps {
   setProjectDiscount: (discount: number) => void;
   setFlag: (flag: boolean) => void;
   clickFunction : any;
+  clickInverseFunction : any;
 }
 
 // Optional ErrorBoundary component for single card error safety
@@ -50,7 +51,8 @@ const DeadlineCard: React.FC<DeadlineCardProps> = ({
   setAmount,
   setProjectDiscount,
   setFlag,
-  clickFunction
+  clickFunction,
+  clickInverseFunction
 }) => {
   // Safely format date
   const formattedDate = date
@@ -241,10 +243,17 @@ const DeadlineCard: React.FC<DeadlineCardProps> = ({
               </div>
               </div>
           <div className=" border-t border-gray-100 space-x-2">
-
-            <button onClick={markAsCompleted} style={{ borderRadius : "6px" }} className="px-2 py-1 text-[0.9vw] text-white rounded-md bg-blue-500 hover:bg-blue-600">
+            <button
+              onClick={(e) => {
+                e.stopPropagation(); // ⛔ Prevents click from reaching the card container
+                markAsCompleted();
+              }}
+              style={{ borderRadius: "6px" }}
+              className="px-2 py-1 text-[0.9vw] text-white rounded-md bg-blue-500 hover:bg-blue-600"
+            >
               Mark as Completed
             </button>
+
           </div>
           </div>
 

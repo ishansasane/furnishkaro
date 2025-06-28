@@ -722,6 +722,15 @@ const sendInquiry = async () => {
     setDiscountType(project.discountType);
     setFlag(true);
   }}
+  clickInverseFunction={() => {
+    setSendProject(project);
+    setIndex(index);
+    setTax(project.totalTax);
+    setAmount(project.totalAmount);
+    setProjectDiscount(project.discount);
+    setDiscountType(project.discountType);
+    setFlag(false);
+  }}
 />
 
         </div>
