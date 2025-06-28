@@ -206,12 +206,12 @@ const BankDetails = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Customer Name
+                  Account Name
                 </label>
                 <input
                   type="text"
                   name="customerName"
-                  placeholder="Enter customer name"
+                  placeholder="Enter Account Name"
                   value={formData.customerName}
                   onChange={handleInputChange}
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -284,7 +284,7 @@ const BankDetails = () => {
                         #
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Customer Name
+                        Account Name
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Account Number

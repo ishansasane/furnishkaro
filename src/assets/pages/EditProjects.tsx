@@ -397,6 +397,8 @@ const EditProjects = ({
     setSalesAssociateArray(projectData.salesAssociateArray);
     setProjectReference(projectData.projectReference);
     setProjectAddress(projectData.projectAddres);
+    setProjectName(projectData.projectName);
+    setProjectReference(projectData.projectReference);
     if (Object.isFrozen(additionalItems)) {
       console.log("frozen");
     }
