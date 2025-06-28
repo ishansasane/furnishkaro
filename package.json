@@ -19,6 +19,7 @@
     "furnishkaro": "file:",
     "jspdf": "^2.5.2",
     "jspdf-autotable": "^3.8.4",
+    "link": "^2.1.1",
     "lucide-react": "^0.475.0",
     "react": "^19.0.0",
     "react-datepicker": "^8.2.1",
