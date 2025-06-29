@@ -1,6 +1,7 @@
 import React from "react";
 import { useDispatch } from "react-redux";
 import { setProjects } from "../Redux/dataSlice";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 interface DeadlineCardProps {
   projectName: string;
@@ -16,7 +17,6 @@ interface DeadlineCardProps {
   clickFunction: any;
   clickInverseFunction: any;
 }
-
 class CardErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
   constructor(props: any) {
     super(props);
@@ -69,7 +69,7 @@ const DeadlineCard: React.FC<DeadlineCardProps> = ({
   const dispatch = useDispatch();
 
   const fetchProjectData = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
       { credentials: "include" }
     );
@@ -77,11 +77,14 @@ const DeadlineCard: React.FC<DeadlineCardProps> = ({
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
     const data = await response.json();
-    if (!data.body || !Array.isArray(data.body)) throw new Error("Invalid data format");
+    if (!data.body || !Array.isArray(data.body))
+      throw new Error("Invalid data format");
 
     const parseSafely = (value: any, fallback: any) => {
       try {
-        return typeof value === "string" ? JSON.parse(value) : value || fallback;
+        return typeof value === "string"
+          ? JSON.parse(value)
+          : value || fallback;
       } catch {
         return fallback;
       }
@@ -134,15 +137,16 @@ const DeadlineCard: React.FC<DeadlineCardProps> = ({
   };
 
   const markAsCompleted = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/updateprojectdata",
       {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers: {
+          "content-type": "application/json",
+        },
         body: JSON.stringify({ projectName, status: "Completed" }),
       }
     );
-
     if (response.ok) {
       const updatedData = await fetchProjectData();
       dispatch(setProjects(updatedData));
@@ -165,14 +169,27 @@ const DeadlineCard: React.FC<DeadlineCardProps> = ({
 
         <div className="p-1 space-y-1">
           {/* Header */}
-          <div onClick={() => clickFunction()} className="flex flex-col sm:flex-row sm:justify-between sm:items-center cursor-pointer">
+          <div
+            onClick={() => clickFunction()}
+            className="flex flex-col sm:flex-row sm:justify-between sm:items-center cursor-pointer"
+          >
             <div>
               <p className="text-[1.1vw] font-semibold text-gray-900 line-clamp-1 hover:text-blue-600">
                 {projectName}
               </p>
               <div className="flex items-center gap-1 text-gray-500 text-[0.9vw]">
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                <svg
+                  className="w-3 h-3"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
                 </svg>
                 <span>{formattedDate}</span>
               </div>
@@ -185,11 +202,18 @@ const DeadlineCard: React.FC<DeadlineCardProps> = ({
           </div>
 
           {/* Items Section */}
-          <div onClick={() => clickFunction()} className="flex flex-col sm:flex-row sm:justify-between sm:items-center">
+          <div
+            onClick={() => clickFunction()}
+            className="flex flex-col sm:flex-row sm:justify-between sm:items-center"
+          >
             <div>
               <div className="flex gap-1 items-center">
-                <p className="text-[0.9vw] font-medium text-gray-500 uppercase">Items :</p>
-                <span className="text-[0.8vw] text-gray-400 bg-gray-100 rounded-full px-1">{goodsArray.length}</span>
+                <p className="text-[0.9vw] font-medium text-gray-500 uppercase">
+                  Items :
+                </p>
+                <span className="text-[0.8vw] text-gray-400 bg-gray-100 rounded-full px-1">
+                  {goodsArray.length}
+                </span>
               </div>
 
               <div className="flex flex-wrap gap-0.5 mt-0.5">

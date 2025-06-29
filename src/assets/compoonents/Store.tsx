@@ -4,6 +4,7 @@ import { RootState, store } from "../Redux/Store.ts";
 import { setStoreData } from "../Redux/dataSlice.ts";
 import { useNavigate } from "react-router-dom";
 import StoreDialog from "./StoreDialog.tsx";
+import { fetchWithLoading } from "../Redux/fetchWithLoading.ts";
 
 interface Store {
   name: string;
@@ -13,7 +14,7 @@ interface Store {
 }
 
 async function getStoreData(): Promise<Store[]> {
-  const response = await fetch(
+  const response = await fetchWithLoading(
     "https://sheeladecor.netlify.app/.netlify/functions/server/getallstores",
     {
       credentials: "include",
@@ -65,7 +66,7 @@ const Store: React.FC = () => {
       ? "https://sheeladecor.netlify.app/.netlify/functions/server/updatestore"
       : "https://sheeladecor.netlify.app/.netlify/functions/server/addstore";
 
-    await fetch(url, {
+    await fetchWithLoading(url, {
       method: "POST",
       headers: { "content-type": "application/json" },
       credentials: "include",
@@ -110,7 +111,7 @@ const Store: React.FC = () => {
   const handleDelete = async (store) => {
     const storeName = store.name || store[0];
 
-    await fetch(
+    await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/deletestore",
       {
         method: "POST",

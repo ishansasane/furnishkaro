@@ -6,16 +6,23 @@ import InquiryCard from "../compoonents/InquiryCard.tsx"; // Corrected import pa
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store.ts";
-import { setTasks, setProjects, setPaymentData, setProjectFlag, setInquiryData } from "../Redux/dataSlice.ts";
+import {
+  setTasks,
+  setProjects,
+  setPaymentData,
+  setProjectFlag,
+  setInquiryData,
+} from "../Redux/dataSlice.ts";
 
 import TaskDialog from "../compoonents/TaskDialog.tsx";
 import { AnimatePresence, motion } from "framer-motion";
 import EditProjects from "./EditProjects.tsx";
 import { useNavigate } from "react-router-dom";
 import BankDetails from "./BankDetails.tsx";
+import { fetchWithLoading } from "../Redux/fetchWithLoading.ts";
 
 const fetchTaskData = async () => {
-  const response = await fetch(
+  const response = await fetchWithLoading(
     "https://sheeladecor.netlify.app/.netlify/functions/server/gettasks"
   );
   const data = await response.json();
@@ -27,7 +34,9 @@ const fetchTaskData = async () => {
 };
 
 const fetchInquiryData = async () => {
-  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getInquiry");
+  const response = await fetchWithLoading(
+    "https://sheeladecor.netlify.app/.netlify/functions/server/getInquiry"
+  );
   const data = await response.json();
   if (data.body) {
     return data.body;
@@ -46,71 +55,74 @@ const Dashboard: React.FC = () => {
     comments: "",
     inquiryDate: "",
     followUpDate: "",
-    customer : "",
-    phonenumber : ""
+    customer: "",
+    phonenumber: "",
   });
 
-const sendInquiry = async () => {
-  const projectName = inquiryForm.project.trim();
-  const comment = inquiryForm.comments;
-  const inquiryDate = inquiryForm.inquiryDate;
-  const followUpDate = inquiryForm.followUpDate;
-  const customer = inquiryForm.customer.trim();
-  const phonenumber = inquiryForm.phonenumber.trim();
+  const sendInquiry = async () => {
+    const projectName = inquiryForm.project.trim();
+    const comment = inquiryForm.comments;
+    const inquiryDate = inquiryForm.inquiryDate;
+    const followUpDate = inquiryForm.followUpDate;
+    const customer = inquiryForm.customer.trim();
+    const phonenumber = inquiryForm.phonenumber.trim();
 
-  // ✅ Check required fields
-  if (!projectName || !customer || !phonenumber || !inquiryDate) {
-    alert("Please fill in project name, customer name, phone number, and inquiry date.");
-    return;
-  }
+    // ✅ Check required fields
+    if (!projectName || !customer || !phonenumber || !inquiryDate) {
+      alert(
+        "Please fill in project name, customer name, phone number, and inquiry date."
+      );
+      return;
+    }
 
-  // ✅ Check if project name already exists in inquiries (case-insensitive)
-  const isDuplicate = inquiries.some(
-    inquiry => inquiry[0]?.toLowerCase() === projectName.toLowerCase()
-  );
+    // ✅ Check if project name already exists in inquiries (case-insensitive)
+    const isDuplicate = inquiries.some(
+      (inquiry) => inquiry[0]?.toLowerCase() === projectName.toLowerCase()
+    );
 
-  if (isDuplicate) {
-    alert("An inquiry for this project name already exists.");
-    return;
-  }
+    if (isDuplicate) {
+      alert("An inquiry for this project name already exists.");
+      return;
+    }
 
-  // ✅ Proceed to send the inquiry
-  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/sendInquiry", {
-    method: "POST",
-    headers: {
-      "content-type": "application/json"
-    },
-    body: JSON.stringify({
-      projectName,
-      phonenumber,
-      comment,
-      inquiryDate,
-      projectDate: followUpDate,
-      status: "New Inquiry",
-      customer
-    })
-  });
+    // ✅ Proceed to send the inquiry
+    const response = await fetchWithLoading(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/sendInquiry",
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          projectName,
+          phonenumber,
+          comment,
+          inquiryDate,
+          projectDate: followUpDate,
+          status: "New Inquiry",
+          customer,
+        }),
+      }
+    );
 
-  if (response.status === 200) {
-    alert("Inquiry Added");
-    setInquiryForm({
-      project: "",
-      comments: "",
-      inquiryDate: "",
-      followUpDate: "",
-      customer: "",
-      phonenumber: ""
-    });
+    if (response.status === 200) {
+      alert("Inquiry Added");
+      setInquiryForm({
+        project: "",
+        comments: "",
+        inquiryDate: "",
+        followUpDate: "",
+        customer: "",
+        phonenumber: "",
+      });
 
-    const data = await fetchInquiryData();
-    dispatch(setInquiryData(data));
-    setInquiryFormOpen(false);
-  } else {
-    alert("Error in adding inquiry");
-  }
-};
-
-
+      const data = await fetchInquiryData();
+      dispatch(setInquiryData(data));
+      setInquiryFormOpen(false);
+    } else {
+      alert("Error in adding inquiry");
+    }
+  };
 
   const dispatch = useDispatch();
   const tasks = useSelector((state: RootState) => state.data.tasks);
@@ -118,7 +130,7 @@ const sendInquiry = async () => {
   const projects = useSelector((state: RootState) => state.data.projects);
   const paymentData = useSelector((state: RootState) => state.data.paymentData);
   const projectsData = useSelector((state: RootState) => state.data.projects);
-  const inquiries = useSelector((state : RootState) => state.data.inquiry);
+  const inquiries = useSelector((state: RootState) => state.data.inquiry);
   const [Amount, setAmount] = useState(0);
   const [Tax, setTax] = useState(0);
   const [projectDiscount, setProjectDiscount] = useState(0);
@@ -138,7 +150,7 @@ const sendInquiry = async () => {
 
   const deleteTask = async (name: string) => {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/deletetask",
         {
           method: "POST",
@@ -192,10 +204,7 @@ const sendInquiry = async () => {
     }
   }, [inquiries, dispatch]);
 
-
-  useEffect(() => {
-
-  })
+  useEffect(() => {});
 
   useEffect(() => {
     let isMounted = true;
@@ -221,7 +230,7 @@ const sendInquiry = async () => {
           }
         }
 
-        const taskRes = await fetch(
+        const taskRes = await fetchWithLoading(
           "https://sheeladecor.netlify.app/.netlify/functions/server/gettasks",
           {
             credentials: "include",
@@ -258,7 +267,7 @@ const sendInquiry = async () => {
 
   const fetchProjectData = async () => {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
         {
           credentials: "include",
@@ -338,10 +347,10 @@ const sendInquiry = async () => {
               tailorsArray: deepClone(parseSafely(row[16], [])),
               projectAddress: row[17] || "",
               date: row[18] || "",
-              grandTotal : row[19],
-              discountType : row[20],
-              bankDetails : deepClone(parseSafely(row[21], [])),
-              termsConditions : deepClone(parseSafely(row[22], [])),
+              grandTotal: row[19],
+              discountType: row[20],
+              bankDetails: deepClone(parseSafely(row[21], [])),
+              termsConditions: deepClone(parseSafely(row[22], [])),
             };
           } catch (error) {
             console.error(
@@ -363,7 +372,7 @@ const sendInquiry = async () => {
 
   const fetchPaymentData = async () => {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getPayments"
       );
       if (!response.ok) {
@@ -458,7 +467,7 @@ const sendInquiry = async () => {
 
   const handleMarkAsCompleted = async (status, name) => {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/updatetask",
         {
           method: "POST",
@@ -581,64 +590,73 @@ const sendInquiry = async () => {
     });
   };
   const handleDeleteInquiry = async (projectName) => {
-      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deleteInquiry", {
-        method : "POST",
-        headers : {
-          "content-type" : "application/json",
+    const response = await fetchWithLoading(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/deleteInquiry",
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
         },
-        body : JSON.stringify({ projectName })
-      })
-
-      if(response.status === 200){
-        const data = await fetchInquiryData();
-        dispatch(setInquiryData(data));
-        alert("Inquiry Deleted");
-        setInquiryDialogOpen(false);
-      }else{
-        alert("Error");
+        body: JSON.stringify({ projectName }),
       }
+    );
+
+    if (response.status === 200) {
+      const data = await fetchInquiryData();
+      dispatch(setInquiryData(data));
+      alert("Inquiry Deleted");
+      setInquiryDialogOpen(false);
+    } else {
+      alert("Error");
+    }
   };
 
   const handleMarkAsApproved = async (projectName, status) => {
-        const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/updateInquiry", {
-        method : "POST",
-        headers : {
-          "content-type" : "application/json",
+    const response = await fetchWithLoading(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/updateInquiry",
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
         },
-        body : JSON.stringify({ projectName, status })
-      })
+        body: JSON.stringify({ projectName, status }),
+      }
+    );
 
-      if(response.status === 200){
-        const data = await fetchInquiryData();
-        dispatch(setInquiryData(data));
-        alert("Status changed");
-        setInquiryDialogOpen(false);
-        navigate("/add-project");
-      }else{
-        alert("Error");
-      }    
+    if (response.status === 200) {
+      const data = await fetchInquiryData();
+      dispatch(setInquiryData(data));
+      alert("Status changed");
+      setInquiryDialogOpen(false);
+      navigate("/add-project");
+    } else {
+      alert("Error");
+    }
   };
 
   const handleStatusChange = async (projectName, status) => {
-        const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/updateInquiry", {
-        method : "POST",
-        headers : {
-          "content-type" : "application/json",
+    const response = await fetchWithLoading(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/updateInquiry",
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
         },
-        body : JSON.stringify({ projectName, status })
-      })
-
-      if(response.status === 200){
-        const data = await fetchInquiryData();
-        dispatch(setInquiryData(data));
-        alert("Status changed");
-        setInquiryDialogOpen(false);
-        if(status == "Convert to Project"){
-            navigate("/add-project");
-        }
-      }else{
-        alert("Error");
+        body: JSON.stringify({ projectName, status }),
       }
+    );
+
+    if (response.status === 200) {
+      const data = await fetchInquiryData();
+      dispatch(setInquiryData(data));
+      alert("Status changed");
+      setInquiryDialogOpen(false);
+      if (status == "Convert to Project") {
+        navigate("/add-project");
+      }
+    } else {
+      alert("Error");
+    }
   };
 
   const [discountType, setDiscountType] = useState(null);
@@ -686,59 +704,56 @@ const sendInquiry = async () => {
           flag ? "hidden" : ""
         } grid grid-cols-1 lg:grid-cols-3 gap-2 mt-2`}
       >
-       <div className="bg-white shadow-md rounded-xl p-6">
-  <p
-    style={{ fontFamily: "Poppins, sans-serif" }}
-    className="md:text-[1.7vw] font-semibold mb-4 text-gray-800"
-  >
-    Project Deadlines
-  </p>
+        <div className="bg-white shadow-md !rounded-xl p-6">
+          <p
+            style={{ fontFamily: "Poppins, sans-serif" }}
+            className="md:text-[1.7vw] font-semibold mb-4 text-gray-800"
+          >
+            Project Deadlines
+          </p>
 
-  <div className="space-y-4 overflow-y-auto max-h-[500px] pr-2">
-    {projects &&
-      projects.map((project, index) => (
-        <div
-          key={index}
-        >
-<DeadlineCard
-  setFlag={setFlag}
-  setTax={setTax}
-  setProjectDiscount={setProjectDiscount}
-  setAmount={setAmount}
-  setSendProject={setSendProject}
-  index={index}
-  setIndex={setIndex}
-  project={project}
-  projectName={project.projectName}
-  date={project.projectDate}
-  discountType={discountType}
-  setDiscountType={setDiscountType}
-  clickFunction={() => {
-    setSendProject(project);
-    setIndex(index);
-    setTax(project.totalTax);
-    setAmount(project.totalAmount);
-    setProjectDiscount(project.discount);
-    setDiscountType(project.discountType);
-    setFlag(true);
-  }}
-  clickInverseFunction={() => {
-    setSendProject(project);
-    setIndex(index);
-    setTax(project.totalTax);
-    setAmount(project.totalAmount);
-    setProjectDiscount(project.discount);
-    setDiscountType(project.discountType);
-    setFlag(false);
-  }}
-/>
-
+          <div className="space-y-4 overflow-y-auto max-h-[500px] pr-2">
+            {projects &&
+              projects.map((project, index) => (
+                <div key={index}>
+                  <DeadlineCard
+                    setFlag={setFlag}
+                    setTax={setTax}
+                    setProjectDiscount={setProjectDiscount}
+                    setAmount={setAmount}
+                    setSendProject={setSendProject}
+                    index={index}
+                    setIndex={setIndex}
+                    project={project}
+                    projectName={project.projectName}
+                    date={project.projectDate}
+                    discountType={discountType}
+                    setDiscountType={setDiscountType}
+                    clickFunction={() => {
+                      setSendProject(project);
+                      setIndex(index);
+                      setTax(project.totalTax);
+                      setAmount(project.totalAmount);
+                      setProjectDiscount(project.discount);
+                      setDiscountType(project.discountType);
+                      setFlag(true);
+                    }}
+                    clickInverseFunction={() => {
+                      setSendProject(project);
+                      setIndex(index);
+                      setTax(project.totalTax);
+                      setAmount(project.totalAmount);
+                      setProjectDiscount(project.discount);
+                      setDiscountType(project.discountType);
+                      setFlag(false);
+                    }}
+                  />
+                </div>
+              ))}
+          </div>
         </div>
-      ))}
-  </div>
-</div>
 
-        <div className="bg-white shadow-md rounded-xl p-3 col-span-2  overflow-y-auto max-h-[650px] pr-2">
+        <div className="bg-white shadow-md !rounded-xl p-3 col-span-2  overflow-y-auto max-h-[650px] pr-2">
           <div className="flex flex-row w-full justify-between items-center mb-4">
             <Link to="/tasks" className="!no-underline">
               <p
@@ -750,7 +765,7 @@ const sendInquiry = async () => {
             </Link>
             <button
               onClick={() => setTaskDialog(true)}
-              className="relative overflow-hidden group mb-2 px-4 py-2 text-sm font-medium text-white transition-all duration-300 ease-out rounded-lg shadow-sm bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 hover:shadow-md"
+              className="relative overflow-hidden group mb-2 px-4 py-2 text-sm font-medium text-white transition-all duration-300 ease-out !rounded-lg shadow-sm bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 hover:shadow-md"
             >
               {/* Animated background elements */}
               <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></span>
@@ -774,7 +789,7 @@ const sendInquiry = async () => {
               </div>
 
               {/* Ripple effect (optional) */}
-              <span className="absolute inset-0 scale-0 rounded-full bg-white opacity-20 group-hover:scale-100 transition-transform duration-500"></span>
+              <span className="absolute inset-0 scale-0 !rounded-full bg-white opacity-20 group-hover:scale-100 transition-transform duration-500"></span>
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto max-h-[90vh] pr-2">
@@ -841,14 +856,14 @@ const sendInquiry = async () => {
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-md relative border border-gray-200">
+              <div className="bg-white !rounded-lg shadow-md p-6 w-full max-w-md relative border border-gray-200">
                 <button
                   onClick={() => setInquiryFormOpen(false)}
                   className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 transition-colors"
                 >
                   ✕
                 </button>
-                <h2 className="relative text-2xl font-bold mb-6 text-gray-800 after:absolute after:bottom-[-8px] after:left-0 after:w-12 after:h-1 after:bg-blue-500 after:rounded-full">
+                <h2 className="relative text-2xl font-bold mb-6 text-gray-800 after:absolute after:bottom-[-8px] after:left-0 after:w-12 after:h-1 after:bg-blue-500 after:!rounded-full">
                   Add Inquiry
                 </h2>
                 <form onSubmit={handleInquirySubmit} className="space-y-4">
@@ -865,35 +880,51 @@ const sendInquiry = async () => {
                           project: e.target.value,
                         })
                       }
-                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                      className="mt-1 block w-full border border-gray-300 !rounded-md px-3 py-2 text-sm"
                       placeholder="Enter project name"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Customer Name</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Customer Name
+                    </label>
                     <input
                       type="text"
                       value={inquiryForm.customer}
-                      onChange={(e) => setInquiryForm({ ...inquiryForm, customer: e.target.value })}
-                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                      onChange={(e) =>
+                        setInquiryForm({
+                          ...inquiryForm,
+                          customer: e.target.value,
+                        })
+                      }
+                      className="mt-1 block w-full border border-gray-300 !rounded-md px-3 py-2 text-sm"
                       placeholder="Enter customer name"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Phone Number
+                    </label>
                     <input
                       type="text"
                       value={inquiryForm.phonenumber}
-                      onChange={(e) => setInquiryForm({ ...inquiryForm, phonenumber: e.target.value })}
-                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                      onChange={(e) =>
+                        setInquiryForm({
+                          ...inquiryForm,
+                          phonenumber: e.target.value,
+                        })
+                      }
+                      className="mt-1 block w-full border border-gray-300 !rounded-md px-3 py-2 text-sm"
                       placeholder="Enter Phone Number"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Comments</label>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Comments
+                    </label>
                     <textarea
                       value={inquiryForm.comments}
                       onChange={(e) =>
@@ -902,7 +933,7 @@ const sendInquiry = async () => {
                           comments: e.target.value,
                         })
                       }
-                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                      className="mt-1 block w-full border border-gray-300 !rounded-md px-3 py-2 text-sm"
                       placeholder="Enter comments"
                       rows={4}
                     />
@@ -920,7 +951,7 @@ const sendInquiry = async () => {
                           inquiryDate: e.target.value,
                         })
                       }
-                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                      className="mt-1 block w-full border border-gray-300 !rounded-md px-3 py-2 text-sm"
                       required
                     />
                   </div>
@@ -937,22 +968,35 @@ const sendInquiry = async () => {
                           followUpDate: e.target.value,
                         })
                       }
-                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                      className="mt-1 block w-full border border-gray-300 !rounded-md px-3 py-2 text-sm"
                       required
                     />
                   </div>
                   <div className="flex justify-end gap-3">
                     <button
                       type="button"
-                      onClick={() => {setInquiryForm({project: "",comments: "",inquiryDate: "",followUpDate: "",customer : "",phonenumber : ""}); setInquiryFormOpen(false)}}
-                      className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+                      onClick={() => {
+                        setInquiryForm({
+                          project: "",
+                          comments: "",
+                          inquiryDate: "",
+                          followUpDate: "",
+                          customer: "",
+                          phonenumber: "",
+                        });
+                        setInquiryFormOpen(false);
+                      }}
+                      className="bg-gray-200 text-gray-700 px-4 py-2 !rounded-lg hover:bg-gray-300 transition-colors"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-700 transition-colors"
-                      onClick={(e) => {e.preventDefault(); sendInquiry(); }}
+                      className="bg-sky-600 text-white px-4 py-2 !rounded-lg hover:bg-sky-700 transition-colors"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        sendInquiry();
+                      }}
                     >
                       Submit
                     </button>
@@ -964,31 +1008,58 @@ const sendInquiry = async () => {
         )}
         {isInquiryDialogOpen && selectedInquiry && (
           <div className="fixed inset-0 backdrop-blur-sm bg-black/50 bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-md relative border border-gray-200">
+            <div className="bg-white !rounded-lg shadow-md p-6 w-full max-w-md relative border border-gray-200">
               <button
                 onClick={() => setInquiryDialogOpen(false)}
                 className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 transition-colors"
               >
                 ✕
               </button>
-              <h2 className="text-xl font-bold mb-2 text-gray-800"> {selectedInquiry[0]}</h2>
+              <h2 className="text-xl font-bold mb-2 text-gray-800">
+                {" "}
+                {selectedInquiry[0]}
+              </h2>
               <div className="space-y-3 p-3 text-gray-700 text-sm">
                 <p className="flex justify-between">
                   <strong>Status:</strong>
-                  <span className={`inline-block px-2 py-1 rounded text-white ${selectedInquiry[5] == 'approved' ? 'bg-green-500' : selectedInquiry[5] === 'New Inquiry' ? 'bg-blue-500' : selectedInquiry[5] === 'In Progress' ? 'bg-yellow-500' : selectedInquiry[5] === 'Convert to Project' ? 'bg-purple-500' : selectedInquiry[5] == "Not Intrested" ? "bg-red-500" : "bg-black" }`}>
+                  <span
+                    className={`inline-block px-2 py-1 !rounded text-white ${
+                      selectedInquiry[5] == "approved"
+                        ? "bg-green-500"
+                        : selectedInquiry[5] === "New Inquiry"
+                        ? "bg-blue-500"
+                        : selectedInquiry[5] === "In Progress"
+                        ? "bg-yellow-500"
+                        : selectedInquiry[5] === "Convert to Project"
+                        ? "bg-purple-500"
+                        : selectedInquiry[5] == "Not Intrested"
+                        ? "bg-red-500"
+                        : "bg-black"
+                    }`}
+                  >
                     {selectedInquiry[5]}
                   </span>
                 </p>
                 <hr />
-                <p className="flex justify-between"><strong>Customer:</strong> {selectedInquiry[6]}</p>
+                <p className="flex justify-between">
+                  <strong>Customer:</strong> {selectedInquiry[6]}
+                </p>
                 <hr />
-                <p className="flex justify-between"><strong>Phone Number:</strong> {selectedInquiry[1]}</p>
+                <p className="flex justify-between">
+                  <strong>Phone Number:</strong> {selectedInquiry[1]}
+                </p>
                 <hr />
-                <p className="flex justify-between"><strong>Comments:</strong> {selectedInquiry[3]}</p>
+                <p className="flex justify-between">
+                  <strong>Comments:</strong> {selectedInquiry[3]}
+                </p>
                 <hr />
-                <p className="flex justify-between"><strong>Inquiry Date:</strong> {selectedInquiry[3]}</p>
+                <p className="flex justify-between">
+                  <strong>Inquiry Date:</strong> {selectedInquiry[3]}
+                </p>
                 <hr />
-                <p className="flex justify-between"><strong>Follow-Up Date:</strong> {selectedInquiry[4]}</p>
+                <p className="flex justify-between">
+                  <strong>Follow-Up Date:</strong> {selectedInquiry[4]}
+                </p>
                 <hr />
               </div>
               <div className="flex justify-between mt-6">
@@ -999,8 +1070,15 @@ const sendInquiry = async () => {
                   Delete
                 </button>
                 <button
-                  onClick={() => handleMarkAsApproved(selectedInquiry[0], "Convert to Project")}
-                  className={`${selectedInquiry[4] == "Convert to Project" ? "hidden" : ""} flex items-center bg-gray-200 text-gray-700 px-4 py-2 !rounded-lg hover:bg-gray-300 transition-colors`}
+                  onClick={() =>
+                    handleMarkAsApproved(
+                      selectedInquiry[0],
+                      "Convert to Project"
+                    )
+                  }
+                  className={`${
+                    selectedInquiry[4] == "Convert to Project" ? "hidden" : ""
+                  } flex items-center bg-gray-200 text-gray-700 px-4 py-2 !rounded-lg hover:bg-gray-300 transition-colors`}
                 >
                   <span className="mr-2">✔</span> Mark As Approved
                 </button>
@@ -1011,12 +1089,11 @@ const sendInquiry = async () => {
       </AnimatePresence>
 
       <div
-        className={`bg-white shadow-md rounded-xl p-6 mt-2 ${
+        className={`bg-white shadow-md !rounded-xl p-6 mt-2 ${
           flag ? "hidden" : ""
         }`}
       >
         <div className="flex justify-between items-center">
-
           <h2
             className="text-xl font-bold text-gray-800 mb-4"
             style={{ fontFamily: "Poppins, sans-serif" }}
@@ -1041,9 +1118,12 @@ const sendInquiry = async () => {
                 followUpDate={inquiry[4]}
                 status={inquiry[5]}
                 customer={inquiry[6]}
-                inquiryData={inquiry} 
+                inquiryData={inquiry}
                 handlestatuschange={handleStatusChange}
-                onCardClick={() => { setSelectedInquiry(inquiry); setInquiryDialogOpen(true); }}
+                onCardClick={() => {
+                  setSelectedInquiry(inquiry);
+                  setInquiryDialogOpen(true);
+                }}
               />
             </div>
           ))}
@@ -1052,7 +1132,7 @@ const sendInquiry = async () => {
 
       {isTaskDialogOpen && selectedTask && (
         <div className="fixed inset-0 backdrop-blur-sm bg-black/50 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-md relative border border-gray-200">
+          <div className="bg-white !rounded-lg shadow-md p-6 w-full max-w-md relative border border-gray-200">
             <button
               onClick={() => setTaskDialogOpen(false)}
               className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 transition-colors"
@@ -1067,7 +1147,7 @@ const sendInquiry = async () => {
               <p className="flex justify-between">
                 <strong>Priority :</strong>{" "}
                 <span
-                  className={`inline-block px-2 py-1 rounded text-white ${
+                  className={`inline-block px-2 py-1 !rounded text-white ${
                     selectedTask[6].toLowerCase() === "high"
                       ? "bg-red-500"
                       : selectedTask[6].toLowerCase() === "moderate"
@@ -1082,7 +1162,7 @@ const sendInquiry = async () => {
               <p className="flex justify-between">
                 <strong>Status :</strong>{" "}
                 <span
-                  className={`inline-block px-2 py-1 rounded text-white ${
+                  className={`inline-block px-2 py-1 !rounded text-white ${
                     selectedTask[7].toLowerCase() === "completed"
                       ? "bg-green-500"
                       : "bg-gray-500"

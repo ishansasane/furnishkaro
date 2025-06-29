@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { FaPlus } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { setInteriorData, setSalesAssociateData } from "../Redux/dataSlice";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 const ProjectDetails = ({
   selectedCustomer,
@@ -37,7 +38,7 @@ const ProjectDetails = ({
 
   async function fetchInteriors() {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getinteriordata",
         {
           credentials: "include",
@@ -64,7 +65,7 @@ const ProjectDetails = ({
   const handleSubmit = async () => {
     const url =
       "https://sheeladecor.netlify.app/.netlify/functions/server/sendinteriordata";
-    const response = await fetch(url, {
+    const response = await fetchWithLoading(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -94,7 +95,7 @@ const ProjectDetails = ({
 
   async function fetchSalesAssociates() {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getsalesassociatedata",
         {
           credentials: "include",
@@ -119,7 +120,7 @@ const ProjectDetails = ({
   const handleSalesSubmit = async () => {
     const url =
       "https://sheeladecor.netlify.app/.netlify/functions/server/sendsalesassociatedata";
-    const response = await fetch(url, {
+    const response = await fetchWithLoading(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",

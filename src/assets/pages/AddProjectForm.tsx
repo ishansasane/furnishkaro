@@ -21,6 +21,7 @@ import MaterialSelectionComponent from "./MaterialSelectionComponent";
 import MeasurementSection from "./MeasurementSections";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 function AddProjectForm() {
   const dispatch = useDispatch();
@@ -149,7 +150,7 @@ function AddProjectForm() {
   const [availableAreas, setAvailableAreas] = useState([]);
 
   const getItemsData = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts"
     );
     const data = await response.json();
@@ -158,7 +159,7 @@ function AddProjectForm() {
 
   const fetchCustomers = async () => {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getcustomerdata",
         {
           credentials: "include",
@@ -177,7 +178,7 @@ function AddProjectForm() {
 
   async function fetchCatalogues() {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getcatalogues",
         {
           credentials: "include",
@@ -196,7 +197,7 @@ function AddProjectForm() {
 
   async function fetchInteriors() {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getinteriordata",
         {
           credentials: "include",
@@ -215,7 +216,7 @@ function AddProjectForm() {
 
   async function fetchSalesAssociates() {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getsalesassociatedata",
         {
           credentials: "include",
@@ -234,7 +235,7 @@ function AddProjectForm() {
 
   async function fetchProductGroups(): Promise<ProductGroup[]> {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getallproductgroup",
         {
           credentials: "include",
@@ -251,14 +252,14 @@ function AddProjectForm() {
     }
   }
   const fetchTermsData = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getTermsData"
     );
     const data = await response.json();
     return data.body || [];
   };
   const fetchBankData = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getBankData"
     );
     const data = await response.json();
@@ -1134,7 +1135,7 @@ function AddProjectForm() {
   >(null);
 
   const fetchProjectData = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
       {
         credentials: "include",
@@ -1371,7 +1372,7 @@ function AddProjectForm() {
 
       const newdate = day + "/" + month + "/" + year;
 
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/sendprojectdata",
         {
           method: "POST",
@@ -1520,7 +1521,7 @@ function AddProjectForm() {
           }
         }
 
-        const response = await fetch(
+        const response = await fetchWithLoading(
           "https://sheeladecor.netlify.app/.netlify/functions/server/getAreas"
         );
         const data = await response.json();
@@ -1818,16 +1819,21 @@ function AddProjectForm() {
     doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...secondaryColor);
-    const summaryItems = [
-      { label: "Sub Total", value: `INR ${(amount || 0).toFixed(2)}` },
-      { label: "Total Tax", value: `INR ${(tax || 0).toFixed(2)}` },
-      { label: "Total Amount", value: `INR ${(amount + tax || 0).toFixed(2)}` },
-      { label: "Discount", value: `INR ${(discount || 0).toFixed(2)}` },
-      {
-        label: "Grand Total",
-        value: `INR ${(amount + tax - discount || 0).toFixed(2)}`,
-      },
-    ];
+    const numericAmount = Number(amount) || 0;
+const numericTax = Number(tax) || 0;
+const numericDiscount = Number(discount) || 0;
+
+const summaryItems = [
+  { label: "Sub Total", value: `INR ${numericAmount.toFixed(2)}` },
+  { label: "Total Tax", value: `INR ${numericTax.toFixed(2)}` },
+  { label: "Total Amount", value: `INR ${(numericAmount + numericTax).toFixed(2)}` },
+  { label: "Discount", value: `INR ${numericDiscount.toFixed(2)}` },
+  {
+    label: "Grand Total",
+    value: `INR ${(numericAmount + numericTax - numericDiscount).toFixed(2)}`,
+  },
+];
+
 
     summaryItems.forEach((item) => {
       doc.setFont("helvetica", "bold");
@@ -1896,28 +1902,57 @@ function AddProjectForm() {
     );
   };
   const handleMRPChange = (
-    mainIndex,
-    collectionIndex,
-    value,
-    measurementQuantity,
-    taxRate,
-    qty
+    mainIndex: number,
+    collectionIndex: number,
+    value: string,
+    measurementQuantity: number,
+    taxRate: number,
+    qty: number
   ) => {
     const updatedSelections = [...selections];
-    const measurementQty = parseFloat(measurementQuantity || "0");
+    const measurementQty = parseFloat(measurementQuantity.toString() || "0");
     const newMRP = parseFloat(value) || 0;
+
     // Update item[4] to make item[4] * measurementQuantity equal the input MRP
     updatedSelections[mainIndex].areacollection[collectionIndex].items[0][4] =
       measurementQty > 0 ? newMRP / measurementQty : newMRP;
+
     // Recalculate Subtotal, Tax Amount, and Total
     const subtotal = newMRP * qty;
-    const taxAmount = subtotal * (parseFloat(taxRate || "0") / 100);
+    const taxAmount = subtotal * (parseFloat(taxRate.toString() || "0") / 100);
     updatedSelections[mainIndex].areacollection[collectionIndex].totalTax[0] =
       taxAmount;
-    updatedSelections[mainIndex].areacollection[
-      collectionIndex
-    ].totalAmount[0] = subtotal + taxAmount;
-    setSelections(updatedSelections); // Adjust based on your state management
+    updatedSelections[mainIndex].areacollection[collectionIndex].totalAmount[0] =
+      subtotal + taxAmount;
+
+    // Apply discount
+    let effectiveDiscountPercent = 0;
+    if (discountType === "percent") {
+      effectiveDiscountPercent = discount;
+    } else if (discountType === "cash") {
+      effectiveDiscountPercent = subtotal > 0 ? (discount / subtotal) * 100 : 0;
+    }
+
+    const discountAmount = (subtotal * effectiveDiscountPercent) / 100;
+    const discountedSubtotal = subtotal - discountAmount;
+    const discountedTaxAmount = (discountedSubtotal * parseFloat(taxRate.toString() || "0")) / 100;
+    const discountedTotal = discountedSubtotal + discountedTaxAmount;
+
+    updatedSelections[mainIndex].areacollection[collectionIndex].totalTax[0] =
+      parseFloat(discountedTaxAmount.toFixed(2));
+    updatedSelections[mainIndex].areacollection[collectionIndex].totalAmount[0] =
+      parseFloat(discountedTotal.toFixed(2));
+
+    setSelections(updatedSelections);
+
+    // Recalculate totals for summary
+    const { totalTax, totalAmount } = recalculateTotals(
+      updatedSelections,
+      additionalItems
+    );
+    setTax(totalTax);
+    setAmount(totalAmount);
+    setGrandTotal(parseFloat(totalAmount.toFixed(2)));
   };
 
   return (
@@ -1946,7 +1981,7 @@ function AddProjectForm() {
       {/* Main Content */}
       <div className="space-y-6">
         {/* Customer Details */}
-        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+        <div className="bg-white p-6 rounded-xl shadow-none border border-gray-200">
           <CustomerDetails
             customers={customers}
             selectedCustomer={selectedCustomer}
@@ -1957,7 +1992,7 @@ function AddProjectForm() {
         </div>
 
         {/* Project Details */}
-        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+        <div className="bg-white p-6 rounded-xl shadow-none border border-gray-200">
           <ProjectDetails
             selectedCustomer={selectedCustomer}
             interior={interior}
@@ -1984,7 +2019,7 @@ function AddProjectForm() {
         </div>
 
         {/* Material Selection */}
-        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+        <div className="bg-white p-6 rounded-xl shadow-none border border-gray-200">
           <MaterialSelectionComponent
             selections={selections}
             availableAreas={availableAreas}
@@ -2008,7 +2043,7 @@ function AddProjectForm() {
           />
         </div>
         {/* Measurement Section */}
-        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+        <div className="bg-white p-6 rounded-xl shadow-none border border-gray-200">
           <MeasurementSection
             selections={selections}
             units={units}
@@ -2130,7 +2165,7 @@ function AddProjectForm() {
               {additionalItems.map((item, i) => (
                 <div
                   key={i}
-                  className="bg-white p-4 rounded-lg shadow-sm border border-gray-200"
+                  className="bg-white p-4 rounded-lg shadow-none border border-gray-200"
                 >
                   <div className="flex justify-between items-center mb-3">
                     <span className="font-semibold text-sm">SR: {i + 1}</span>
@@ -2387,7 +2422,7 @@ function AddProjectForm() {
         {/* Summary and Bank Details */}
         <div className="flex flex-col md:flex-row gap-6">
           {/* Bank Details and Terms */}
-          <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 w-full md:w-1/2">
+          <div className="bg-white p-6 rounded-xl shadow-none border border-gray-200 w-full md:w-1/2">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">
               Bank Details & Terms
             </h3>
@@ -2400,7 +2435,7 @@ function AddProjectForm() {
                 <option value="">Select Bank Details</option>
                 {bankData.map((data, index) => (
                   <option key={index} value={data}>
-                      Account Name : {data[0]}   -    Account Number : {data[1]}
+                    Account Name : {data[0]} - Account Number : {data[1]}
                   </option>
                 ))}
               </select>

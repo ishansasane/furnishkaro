@@ -48,19 +48,37 @@ import Areas from "./assets/compoonents/Areas.tsx";
 import Payments from "./assets/pages/Payments.tsx";
 import DuePage from "./assets/pages/DuePage.tsx";
 import ProtectedRoute from "./auth/ProtectedRoute.tsx";
-import TokenHandler from "./auth/TokenHandler.tsx"; // ✅ Handles URL token saving
+import TokenHandler from "./auth/TokenHandler.tsx";
 import BankDetails from "./assets/pages/BankDetails.tsx";
 import TermsAndConditions from "./assets/pages/TermsAndConditions.tsx";
 
+// 🔽 NEW: Redux for loading state
+import { useSelector } from "react-redux";
+import { RootState } from "./Redux/Store";
+
 function App() {
   const [expanded, setExpanded] = useState(true);
+  const loading = useSelector((state: RootState) => state.data.loading); // 🔽 track loading state
 
   return (
     <SidebarContext.Provider
       value={{ expanded, toggleSidebar: () => setExpanded((prev) => !prev) }}
     >
       <Router>
-        <TokenHandler /> {/* ✅ ensures token saved early */}
+        {/* 🔽 Global Fullscreen Loading Overlay */}
+        {loading && (
+          <div className="fixed inset-0 z-[9999] bg-white/60 backdrop-blur-sm flex items-center justify-center">
+            <div className="relative">
+              <div className="w-16 h-16 border-[6px] border-blue-500 border-t-transparent rounded-full animate-spin" />
+              <p className="mt-4 text-center text-blue-600 font-medium">
+                Loading...
+              </p>
+            </div>
+          </div>
+        )}
+
+        <TokenHandler />
+
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
@@ -95,7 +113,6 @@ function App() {
                       <Route path="/settings" element={<SettingsPage />} />
                       <Route path="/add-project" element={<AddProjectForm />} />
                       <Route path="/brand-dilog" element={<BrandDialog />} />
-
                       <Route
                         path="/catalogue-dialog"
                         element={<CatalogueDialog />}
@@ -104,10 +121,8 @@ function App() {
                         path="/interior-dialog"
                         element={<InteriorDialog />}
                       />
-
                       <Route path="/bank" element={<BankDetails />} />
                       <Route path="/terms" element={<TermsAndConditions />} />
-
                       <Route path="/tailor-dialog" element={<TailorDialog />} />
                       <Route
                         path="/sales-associateDialog"

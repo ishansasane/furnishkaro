@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setCatalogs } from "../Redux/dataSlice";
 import { RootState } from "../Redux/store";
 import { setCompanyData, setDesignData } from "../Redux/dataSlice";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 const SearchableSelect = ({
   options,
@@ -108,7 +109,7 @@ const MaterialSelectionComponent = ({
 
   const fetchCompanyData = async () => {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getCompany",
         {
           credentials: "include",
@@ -127,7 +128,7 @@ const MaterialSelectionComponent = ({
 
   const fetchDesignData = async () => {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getDesign",
         {
           credentials: "include",
@@ -185,7 +186,7 @@ const MaterialSelectionComponent = ({
 
   async function fetchCatalogues() {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getcatalogues",
         {
           credentials: "include",
@@ -203,7 +204,7 @@ const MaterialSelectionComponent = ({
   }
 
   const addArea = async (name) => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/addArea",
       {
         method: "POST",
@@ -231,7 +232,7 @@ const MaterialSelectionComponent = ({
   const [designName, setDesignName] = useState("");
 
   const addCatalogue = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/addcatalogue",
       {
         method: "POST",
@@ -264,7 +265,7 @@ const MaterialSelectionComponent = ({
 
   const addCompany = async () => {
     const date = new Date();
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/sendCompany",
       {
         method: "POST",

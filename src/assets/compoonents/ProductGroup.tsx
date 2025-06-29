@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Plus, Pencil, XCircle } from "lucide-react";
 import ProductGroupDialog from "../compoonents/AddProductGroupDialog";
@@ -6,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/Store.ts";
 import { setProducts } from "../Redux/dataSlice.ts";
 import { useNavigate } from "react-router-dom";
+import { fetchWithLoading } from "../Redux/fetchWithLoading.ts";
 
 interface ProductGroup {
   groupName: string;
@@ -18,9 +18,12 @@ interface ProductGroup {
 // Fetch product groups from the server
 async function fetchProductGroups(): Promise<ProductGroup[]> {
   try {
-    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getallproductgroup", {
-      credentials: "include",
-    });
+    const response = await fetchWithLoading(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/getallproductgroup",
+      {
+        credentials: "include",
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
@@ -38,7 +41,7 @@ export default function ProductGroups() {
   const navigate = useNavigate();
   const [productGroups, setProductGroups] = useState<ProductGroup[]>([]);
   const [search, setSearch] = useState("");
-  const [isDialogOpen, setDialogOpen] = useState(false);  
+  const [isDialogOpen, setDialogOpen] = useState(false);
   const [editingGroup, setEditingGroup] = useState<ProductGroup | null>(null);
   const [refresh, setRefresh] = useState(false);
 
@@ -48,7 +51,7 @@ export default function ProductGroups() {
   const [color, setColor] = useState("#ffffff");
   const [status, setStatus] = useState<boolean>(true);
   const [needsTailoring, setNeedsTailoring] = useState(false);
-  
+
   const dispatch = useDispatch();
   const items = useSelector((state: RootState) => state.data.items);
   const products = useSelector((state: RootState) => state.data.products);
@@ -58,11 +61,14 @@ export default function ProductGroups() {
       const data = await fetchProductGroups();
       dispatch(setProducts(data));
       setProductGroups(data);
-      localStorage.setItem("productGroupData", JSON.stringify({ data, time: Date.now() }));
+      localStorage.setItem(
+        "productGroupData",
+        JSON.stringify({ data, time: Date.now() })
+      );
     };
-  
+
     const localStorageData = localStorage.getItem("productGroupData");
-  
+
     if (localStorageData) {
       const parsed = JSON.parse(localStorageData);
       const age = Date.now() - parsed.time;
@@ -87,16 +93,22 @@ export default function ProductGroups() {
 
   async function deleteProductGroup(groupName: string) {
     try {
-      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deleteproductgroup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ groupName }),
-      });
+      const response = await fetchWithLoading(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/deleteproductgroup",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ groupName }),
+        }
+      );
       const data = await fetchProductGroups();
       dispatch(setProducts(data));
       setProductGroups(data);
-      localStorage.setItem("productGroupData", JSON.stringify({ data, time: Date.now() }));
+      localStorage.setItem(
+        "productGroupData",
+        JSON.stringify({ data, time: Date.now() })
+      );
       if (response.status === 200) {
         alert("Product group deleted");
         setRefresh(true);
@@ -111,16 +123,27 @@ export default function ProductGroups() {
 
   const handleEditGroup = async () => {
     try {
-      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/updateproductgroup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ groupName, mainProducts: mainProduct, addonProducts: JSON.stringify(addonProduct), status })
-      });
+      const response = await fetchWithLoading(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/updateproductgroup",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            groupName,
+            mainProducts: mainProduct,
+            addonProducts: JSON.stringify(addonProduct),
+            status,
+          }),
+        }
+      );
       const data = await fetchProductGroups();
       dispatch(setProducts(data));
       setProductGroups(data);
-      localStorage.setItem("productGroupData", JSON.stringify({ data, time: Date.now() }));
+      localStorage.setItem(
+        "productGroupData",
+        JSON.stringify({ data, time: Date.now() })
+      );
       if (response.status === 200) {
         alert("Product group edited");
         setDialogOpen(false);
@@ -137,8 +160,12 @@ export default function ProductGroups() {
     }
   };
 
-  const handleAddonProductChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedOptions = Array.from(e.target.selectedOptions).map(option => option.value);
+  const handleAddonProductChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const selectedOptions = Array.from(e.target.selectedOptions).map(
+      (option) => option.value
+    );
     setAddonProduct(selectedOptions);
   };
 
@@ -153,14 +180,14 @@ export default function ProductGroups() {
           <Plus size={18} /> Add Product Group
         </button>
       </div>
-      <div className="bg-white shadow rounded-lg overflow-x-auto p-5">
+      <div className="bg-white shadow !rounded-lg overflow-x-auto p-5">
         <div className="mb-4">
           <input
             type="text"
             placeholder="Search product groups..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="border px-3 py-2 rounded-md w-full"
+            className="border px-3 py-2 !rounded-md w-full"
           />
         </div>
 
@@ -185,25 +212,27 @@ export default function ProductGroups() {
                       ? group[2].join(", ")
                       : typeof group[2] === "string"
                       ? group[2]
-                          .replace(/\\/g, "")          
-                          .replace(/^\[|\]$/g, "")     
-                          .replace(/"/g, "")           
+                          .replace(/\\/g, "")
+                          .replace(/^\[|\]$/g, "")
+                          .replace(/"/g, "")
                       : ""}
                   </td>
-                  <td className="px-4 py-2">{group[3] === "TRUE" ? "Available" : "Not Available"}</td>
+                  <td className="px-4 py-2">
+                    {group[3] === "TRUE" ? "Available" : "Not Available"}
+                  </td>
                   <td className="px-4 py-2 flex gap-2">
                     <button
-                      className="border px-2 py-1 rounded-md"
+                      className="border px-2 py-1 !rounded-md"
                       onClick={() => {
                         setEditingGroup(group);
                         setStatus(group[3] === "TRUE");
                         const cleanedAddon = Array.isArray(group[2])
                           ? group[2]
                           : group[2]
-                              .replace(/\\/g, "")           
-                              .replace(/[\[\]"]+/g, "")     
+                              .replace(/\\/g, "")
+                              .replace(/[\[\]"]+/g, "")
                               .split(",")
-                              .map((item) => item.trim());  
+                              .map((item) => item.trim());
                         setAddonProduct(cleanedAddon);
                         setMainProduct(group[1]);
                         setGroupName(group[0]);
@@ -213,7 +242,7 @@ export default function ProductGroups() {
                       <Pencil size={16} />
                     </button>
                     <button
-                      className="border px-2 py-1 rounded-md"
+                      className="border px-2 py-1 !rounded-md"
                       onClick={() => deleteProductGroup(group[0])}
                     >
                       <XCircle size={16} />
@@ -223,7 +252,9 @@ export default function ProductGroups() {
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="text-center py-4">No product groups found.</td>
+                <td colSpan={5} className="text-center py-4">
+                  No product groups found.
+                </td>
               </tr>
             )}
           </tbody>
@@ -231,8 +262,10 @@ export default function ProductGroups() {
       </div>
       {isDialogOpen && (
         <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-black/30 z-50">
-          <div className="max-w-4xl w-full mx-4 bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-2xl font-semibold text-gray-800">Edit Product Group</h2>
+          <div className="max-w-4xl w-full mx-4 bg-white p-6 !rounded-lg shadow-md">
+            <h2 className="text-2xl font-semibold text-gray-800">
+              Edit Product Group
+            </h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700">
@@ -243,7 +276,7 @@ export default function ProductGroups() {
                   value={groupName}
                   onChange={(e) => setGroupName(e.target.value)}
                   placeholder="Enter Product Name"
-                  className="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full px-4 py-2 border !rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                   required
                 />
               </div>
@@ -252,13 +285,16 @@ export default function ProductGroups() {
                   Main Products <span className="text-red-500">*</span>
                 </label>
                 <div className="flex items-center gap-2 mt-1">
-                  <button onClick={() => navigate("/add-product")} className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
+                  <button
+                    onClick={() => navigate("/add-product")}
+                    className="bg-blue-500 text-white px-3 py-1 !rounded hover:bg-blue-600"
+                  >
                     + Product
                   </button>
                   <select
                     value={mainProduct}
                     onChange={(e) => setMainProduct(e.target.value)}
-                    className="w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-4 py-2 border !rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     required
                   >
                     <option value="">Select Main Product</option>
@@ -277,12 +313,12 @@ export default function ProductGroups() {
                 <div className="flex items-center gap-2 mb-2">
                   <button
                     onClick={() => navigate("/add-product")}
-                    className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                    className="bg-blue-500 text-white px-3 py-1 !rounded hover:bg-blue-600"
                   >
                     + Product
                   </button>
                 </div>
-                <div className="border rounded-md p-3 max-h-40 overflow-y-auto space-y-1">
+                <div className="border !rounded-md p-3 max-h-40 overflow-y-auto space-y-1">
                   {items.map((item, index) => {
                     const isSelected = addonProduct.includes(item[0]);
                     return (
@@ -295,7 +331,9 @@ export default function ProductGroups() {
                           className="hidden"
                           onChange={() => {
                             if (isSelected) {
-                              setAddonProduct((prev) => prev.filter((p) => p !== item[0]));
+                              setAddonProduct((prev) =>
+                                prev.filter((p) => p !== item[0])
+                              );
                             } else {
                               setAddonProduct((prev) => [...prev, item[0]]);
                             }
@@ -303,7 +341,7 @@ export default function ProductGroups() {
                         />
                         <label
                           htmlFor={`addon-${index}`}
-                          className={`cursor-pointer block px-3 py-1 rounded-md border ${
+                          className={`cursor-pointer block px-3 py-1 !rounded-md border ${
                             isSelected
                               ? "bg-blue-100 text-blue-800 border-blue-400"
                               : "bg-gray-50 hover:bg-gray-100 border-gray-300"
@@ -317,7 +355,9 @@ export default function ProductGroups() {
                 </div>
                 {addonProduct.length > 0 && (
                   <div className="mt-2">
-                    <p className="text-sm font-medium text-gray-700">Selected Addon Products:</p>
+                    <p className="text-sm font-medium text-gray-700">
+                      Selected Addon Products:
+                    </p>
                     <ul className="list-disc pl-5">
                       {addonProduct.map((product, index) => (
                         <li key={index} className="text-sm text-gray-600">
@@ -325,7 +365,9 @@ export default function ProductGroups() {
                           <button
                             className="ml-2 mt-2 text-red-500 hover:text-red-700"
                             onClick={() => {
-                              setAddonProduct(addonProduct.filter((p) => p !== product));
+                              setAddonProduct(
+                                addonProduct.filter((p) => p !== product)
+                              );
                             }}
                           >
                             <XCircle size={15} />
@@ -342,13 +384,13 @@ export default function ProductGroups() {
                     Status
                   </label>
                   <div
-                    className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer ${
+                    className={`w-12 h-6 flex items-center !rounded-full p-1 cursor-pointer ${
                       status ? "bg-blue-500" : "bg-gray-300"
                     }`}
                     onClick={() => setStatus(!status)}
                   >
                     <div
-                      className={`w-5 h-5 bg-white rounded-full shadow-md transform ${
+                      className={`w-5 h-5 bg-white !rounded-full shadow-md transform ${
                         status ? "translate-x-6" : "translate-x-0"
                       } transition`}
                     />
@@ -364,13 +406,13 @@ export default function ProductGroups() {
                     setStatus(true);
                     setDialogOpen(false);
                   }}
-                  className="border px-4 py-2 rounded text-gray-700 hover:bg-gray-100"
+                  className="border px-4 py-2 !rounded text-gray-700 hover:bg-gray-100"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleEditGroup}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  className="bg-blue-600 text-white px-4 py-2 !rounded hover:bg-blue-700"
                 >
                   Edit Group
                 </button>

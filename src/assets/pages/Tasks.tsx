@@ -11,6 +11,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store";
 import { motion, AnimatePresence } from "framer-motion";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 interface Task {
   task: string;
@@ -54,7 +55,7 @@ export default function Tasks() {
   );
 
   const deleteTask = async (name: string) => {
-    await fetch(
+    await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/deletetask",
       {
         method: "POST",
@@ -72,7 +73,7 @@ export default function Tasks() {
 
   const fetchProjectData = async () => {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
         {
           credentials: "include",
@@ -240,14 +241,24 @@ export default function Tasks() {
     { label: "Completed", value: "Completed" },
   ];
 
+  // Filter tasks based on search query and selected filter
+  const filteredTasks = tasks.filter((task) => {
+    const matchesFilter = filter === "All Tasks" || task[7] === filter;
+    const matchesSearch = searchQuery
+      ? task[0].toLowerCase().includes(searchQuery.toLowerCase()) ||
+        task[5].toLowerCase().includes(searchQuery.toLowerCase())
+      : true;
+    return matchesFilter && matchesSearch;
+  });
+
   return (
     <div className="p-6 bg-gray-50 md:mt-0 mt-20 h-screen">
       <div className="flex flex-wrap justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold"> Tasks</h1>
+        <h1 className="text-2xl font-bold">Tasks</h1>
         <button
           onClick={() => setDialogOpen(true)}
           style={{ borderRadius: "8px" }}
-          className="flex items-center gap-2 bg-blue-600 rounded-3xl shadow-2xl text-white px-4 py-2"
+          className="flex items-center gap-2 bg-blue-600 !rounded-md shadow-2xl text-white px-4 py-2"
         >
           <Plus size={18} /> Add Task
         </button>
@@ -257,7 +268,7 @@ export default function Tasks() {
         {filterOptions.map((option) => (
           <button
             key={option.value}
-            className={`px-4 py-2 rounded transition ${
+            className={`px-4 py-2 !rounded transition ${
               filter === option.value
                 ? "bg-blue-600 text-white"
                 : "bg-gray-200 hover:bg-gray-300"
@@ -269,11 +280,13 @@ export default function Tasks() {
         ))}
       </div>
 
-      <div className="bg-white p-5 rounded-md shadow overflow-x-auto">
+      <div className="bg-white p-5 !rounded-md shadow overflow-x-auto">
         <input
           type="text"
           placeholder="Search tasks..."
-          className="border px-3 py-2 rounded-md w-full mb-4"
+          className="border px-3 py-2 !rounded-md w-full mb-4"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
         />
         <table className="w-full border-collapse border border-gray-300">
           <thead className="bg-sky-50">
@@ -289,63 +302,61 @@ export default function Tasks() {
             </tr>
           </thead>
           <tbody>
-            {tasks != null &&
-              tasks.map((task, index) =>
-                task[7] === `${filter}` || filter === "All Tasks" ? (
-                  <tr key={index} className="hover:bg-sky-50">
-                    <td className="px-4 py-2">{task[0]}</td>
-                    <td
-                      className={`font-bold px-4 ${
-                        task[6] === "High"
-                          ? "text-red-600"
-                          : task[6] === "Moderate"
-                          ? "text-yellow-400"
-                          : "text-green-600"
-                      }`}
+            {filteredTasks != null &&
+              filteredTasks.map((task, index) => (
+                <tr key={index} className="hover:bg-sky-50">
+                  <td className="px-4 py-2">{task[0]}</td>
+                  <td
+                    className={`font-bold px-4 ${
+                      task[6] === "High"
+                        ? "text-red-600"
+                        : task[6] === "Moderate"
+                        ? "text-yellow-400"
+                        : "text-green-600"
+                    }`}
+                  >
+                    {task[6]}
+                  </td>
+                  <td className="px-4 py-2">{task[5]}</td>
+                  <td className="px-4 py-2">{task[2]}</td>
+                  <td className="px-4 py-2">{task[3]}</td>
+                  <td className="px-4 py-2">{task[4]}</td>
+                  <td className="px-4 py-2">{task[7]}</td>
+                  <td className="px-4 py-2 relative">
+                    <button
+                      className="p-2 hover:bg-gray-200 !rounded-full"
+                      onClick={() =>
+                        setOpenDropdown(openDropdown === index ? null : index)
+                      }
                     >
-                      {task[6]}
-                    </td>
-                    <td className="px-4 py-2">{task[5]}</td>
-                    <td className="px-4 py-2">{task[2]}</td>
-                    <td className="px-4 py-2">{task[3]}</td>
-                    <td className="px-4 py-2">{task[4]}</td>
-                    <td className="px-4 py-2">{task[7]}</td>
-                    <td className="px-4 py-2 relative">
-                      <button
-                        className="p-2 hover:bg-gray-200 rounded-full"
-                        onClick={() =>
-                          setOpenDropdown(openDropdown === index ? null : index)
-                        }
-                      >
-                        <MoreVertical size={18} />
-                      </button>
-                      {openDropdown === index && (
-                        <div className="absolute w-32 bg-white shadow-md rounded-md z-[50] border">
-                          <button
-                            className="w-full text-left px-3 py-2 hover:bg-gray-100 flex items-center gap-2"
-                            onClick={() => {
-                              setOpenDropdown(null);
-                              setDialogOpen(true);
-                              setediting(task);
-                            }}
-                          >
-                            <Edit size={16} /> Edit
-                          </button>
-                          <button
-                            className="w-full text-left px-3 py-2 hover:bg-red-100 text-red-600 flex items-center gap-2"
-                            onClick={() => {
-                              deleteTask(task[0]);
-                              setOpenDropdown(null);
-                            }}
-                          >
-                            <Trash2 size={16} /> Delete
-                          </button>
-                        </div>
-                      )}
-                    </td>
-                  </tr>
-                ) : null
-              )}
+                      <MoreVertical size={18} />
+                    </button>
+                    {openDropdown === index && (
+                      <div className="absolute w-32 bg-white shadow-md !rounded-md z-[50] border">
+                        <button
+                          className="w-full text-left px-3 py-2 hover:bg-gray-100 flex items-center gap-2"
+                          onClick={() => {
+                            setOpenDropdown(null);
+                            setDialogOpen(true);
+                            setediting(task);
+                          }}
+                        >
+                          <Edit size={16} /> Edit
+                        </button>
+                        <button
+                          className="w-full text-left px-3 py-2 hover:bg-red-100 text-red-600 flex items-center gap-2"
+                          onClick={() => {
+                            deleteTask(task[0]);
+                            setOpenDropdown(null);
+                          }}
+                        >
+                          <Trash2 size={16} /> Delete
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>

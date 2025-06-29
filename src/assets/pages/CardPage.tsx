@@ -9,10 +9,10 @@ interface CardProps {
 
 const Card: React.FC<CardProps> = ({ title, value, color, isCurrency = false }) => {
   return (
-    <div className="flex items-center bg-transparent shadow-md border border-zinc-790 rounded-lg p-2 w-full max-w-sm">
+    <div className="flex items-center bg-transparent shadow-md border border-zinc-790 !rounded-lg p-2 w-full max-w-sm">
 
       {/* Vertical Colored Line */}
-      <div className={`w-1 h-full ${color} rounded-full`}></div>
+      <div className={`w-1 h-full ${color} !rounded-full`}></div>
 
       {/* Content */}
       <div className="ml-4 flex flex-col">
