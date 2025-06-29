@@ -4,6 +4,7 @@ import AddCustomerDialog from "../compoonents/AddCustomerDialog";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../Redux/store";
 import { setCustomerData } from "../Redux/dataSlice";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 const CustomerDetails = ({
   customers,
@@ -24,7 +25,7 @@ const CustomerDetails = ({
 
   async function fetchCustomers() {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getcustomerdata",
         { credentials: "include" }
       );
@@ -62,7 +63,7 @@ const CustomerDetails = ({
     const api =
       "https://sheeladecor.netlify.app/.netlify/functions/server/sendcustomerdata";
 
-    const response = await fetch(api, {
+    const response = await fetchWithLoading(api, {
       method: "POST",
       headers: {
         "content-type": "application/json",

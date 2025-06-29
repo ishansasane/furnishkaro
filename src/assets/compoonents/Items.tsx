@@ -8,10 +8,11 @@ import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 const getItemsData = async () => {
   try {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts"
     );
     const data = await response.json();
@@ -177,7 +178,7 @@ const Items = () => {
 
   const deleteItem = async (name: string) => {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/deletesingleproduct",
         {
           method: "POST",
@@ -213,7 +214,7 @@ const Items = () => {
     const formattedDate = new Date().toLocaleDateString("en-GB");
 
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct",
         {
           method: "POST",
@@ -340,7 +341,7 @@ const Items = () => {
 
   const editItemData = async () => {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/updatesingleproduct",
         {
           method: "POST",
@@ -407,7 +408,7 @@ const Items = () => {
     };
 
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct",
         {
           method: "POST",
@@ -495,7 +496,7 @@ const Items = () => {
       }
 
       for (const item of validItems) {
-        const response = await fetch(
+        const response = await fetchWithLoading(
           "https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct",
           {
             method: "POST",

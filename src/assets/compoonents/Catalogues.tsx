@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setCatalogs } from "../Redux/dataSlice";
 import { RootState } from "../Redux/Store";
 import { useNavigate } from "react-router-dom";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 interface Catalogue {
   data: string[];
@@ -13,7 +14,7 @@ interface Catalogue {
 // Fetch catalogues from the server
 async function fetchCatalogues(): Promise<Catalogue[]> {
   try {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getcatalogues",
       {
         credentials: "include",
@@ -38,7 +39,7 @@ async function deleteCatalogue(
   setRefresh: (state: boolean) => void
 ) {
   try {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/deletecatalogue",
       {
         method: "POST",

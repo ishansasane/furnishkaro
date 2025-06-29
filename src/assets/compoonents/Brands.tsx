@@ -4,11 +4,12 @@ import BrandDialog from "../compoonents/BrandDialog";
 import { useDispatch, useSelector } from "react-redux";
 import { setBrandData } from "../Redux/dataSlice";
 import { RootState } from "../Redux/Store";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 // Fetch brands from the server
 async function fetchBrands() {
   try {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getbrands",
       {
         credentials: "include",
@@ -47,7 +48,6 @@ async function refreshBrands(
   }
 }
 
-
 // Delete a brand
 async function deleteBrand(
   brandName: string,
@@ -55,7 +55,7 @@ async function deleteBrand(
   setBrands: (data: string[][]) => void
 ) {
   try {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/deletebrand",
       {
         method: "POST",
@@ -88,40 +88,40 @@ export default function Brands() {
   const dispatch = useDispatch();
   const brandData = useSelector((state: RootState) => state.data.brands);
 
-    useEffect(() => {
-      const fetchAndSetBrands = async () => {
-        try {
-          const cached = localStorage.getItem("brandData");
-          const now = Date.now();
-          const cacheExpiry = 5 * 60 * 1000; // 5 minutes
+  useEffect(() => {
+    const fetchAndSetBrands = async () => {
+      try {
+        const cached = localStorage.getItem("brandData");
+        const now = Date.now();
+        const cacheExpiry = 5 * 60 * 1000; // 5 minutes
 
-          if (cached) {
-            const parsed = JSON.parse(cached);
-            if (parsed.data?.length > 0 && now - parsed.time < cacheExpiry) {
-              dispatch(setBrandData(parsed.data));
-              setBrands(parsed.data);
-              return;
-            }
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          if (parsed.data?.length > 0 && now - parsed.time < cacheExpiry) {
+            dispatch(setBrandData(parsed.data));
+            setBrands(parsed.data);
+            return;
           }
-
-          const data = await fetchBrands();
-          if (Array.isArray(data)) {
-            dispatch(setBrandData(data));
-            setBrands(data);
-            localStorage.setItem(
-              "brandData",
-              JSON.stringify({ data, time: now })
-            );
-          } else {
-            console.error("Fetched brand data is invalid:", data);
-          }
-        } catch (error) {
-          console.error("Error fetching brands:", error);
         }
-      };
 
-      fetchAndSetBrands();
-    }, [dispatch, brandData]);
+        const data = await fetchBrands();
+        if (Array.isArray(data)) {
+          dispatch(setBrandData(data));
+          setBrands(data);
+          localStorage.setItem(
+            "brandData",
+            JSON.stringify({ data, time: now })
+          );
+        } else {
+          console.error("Fetched brand data is invalid:", data);
+        }
+      } catch (error) {
+        console.error("Error fetching brands:", error);
+      }
+    };
+
+    fetchAndSetBrands();
+  }, [dispatch, brandData]);
 
   // Filter brands based on search input
   const filteredBrands = brands.filter((brand) =>

@@ -1,6 +1,7 @@
 import React from "react";
 import { useDispatch } from "react-redux";
 import { setProjects } from "../Redux/dataSlice";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 interface DeadlineCardProps {
   projectName: string;
@@ -13,12 +14,15 @@ interface DeadlineCardProps {
   setAmount: (amount: number) => void;
   setProjectDiscount: (discount: number) => void;
   setFlag: (flag: boolean) => void;
-  clickFunction : any;
-  clickInverseFunction : any;
+  clickFunction: any;
+  clickInverseFunction: any;
 }
 
 // Optional ErrorBoundary component for single card error safety
-class CardErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+class CardErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
   constructor(props: any) {
     super(props);
     this.state = { hasError: false };
@@ -34,7 +38,11 @@ class CardErrorBoundary extends React.Component<{ children: React.ReactNode }, {
 
   render() {
     if (this.state.hasError) {
-      return <div className="p-2 text-sm text-red-500">Error rendering this card.</div>;
+      return (
+        <div className="p-2 text-sm text-red-500">
+          Error rendering this card.
+        </div>
+      );
     }
     return this.props.children;
   }
@@ -52,7 +60,7 @@ const DeadlineCard: React.FC<DeadlineCardProps> = ({
   setProjectDiscount,
   setFlag,
   clickFunction,
-  clickInverseFunction
+  clickInverseFunction,
 }) => {
   // Safely format date
   const formattedDate = date
@@ -75,8 +83,8 @@ const DeadlineCard: React.FC<DeadlineCardProps> = ({
 
   const dispatch = useDispatch();
 
-    const fetchProjectData = async () => {
-    const response = await fetch(
+  const fetchProjectData = async () => {
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
       {
         credentials: "include",
@@ -157,14 +165,17 @@ const DeadlineCard: React.FC<DeadlineCardProps> = ({
   };
 
   const markAsCompleted = async () => {
-    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/updateprojectdata", {
-      method : "POST",
-      headers : {
-        "content-type" : "application/json",
-      },
-      body : JSON.stringify({ projectName, status : "Completed" })
-    });
-    if(response.ok){
+    const response = await fetchWithLoading(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/updateprojectdata",
+      {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({ projectName, status: "Completed" }),
+      }
+    );
+    if (response.ok) {
       const updatedData = await fetchProjectData();
       dispatch(setProjects(updatedData));
       localStorage.setItem(
@@ -172,20 +183,27 @@ const DeadlineCard: React.FC<DeadlineCardProps> = ({
         JSON.stringify({ data: updatedData, time: Date.now() })
       );
       alert("Project marked as completed");
-    }else{
+    } else {
       alert("Error");
     }
-  }
+  };
 
   return (
     <CardErrorBoundary>
-      <div className={`bg-white h-[20vh] rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border overflow-y-scroll scrollbar-hide border-gray-100 ${project.status == "Completed" ? "hidden" : "" }`}>
+      <div
+        className={`bg-white h-[20vh] rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border overflow-y-scroll scrollbar-hide border-gray-100 ${
+          project.status == "Completed" ? "hidden" : ""
+        }`}
+      >
         {/* Top accent bar */}
         <div className="h-1 w-full" style={{ background: bgGradient }}></div>
 
         <div className="p-2">
           {/* Header */}
-          <div onClick={() => clickFunction()} className="flex justify-between items-center">
+          <div
+            onClick={() => clickFunction()}
+            className="flex justify-between items-center"
+          >
             <div>
               <p className="text-[1.3vw] font-semibold text-gray-900 line-clamp-1 hover:text-blue-600 transition-colors">
                 {projectName}
@@ -214,9 +232,12 @@ const DeadlineCard: React.FC<DeadlineCardProps> = ({
           </div>
 
           {/* Items Section */}
-          <div onClick={() => clickFunction()} className="flex flex-row justify-between">
-              <div className="flex flex-col">
-                <div className="flex gap-2 flex-row">
+          <div
+            onClick={() => clickFunction()}
+            className="flex flex-row justify-between"
+          >
+            <div className="flex flex-col">
+              <div className="flex gap-2 flex-row">
                 <p className="text-[1vw] font-medium text-gray-500 uppercase">
                   Items :
                 </p>
@@ -241,24 +262,22 @@ const DeadlineCard: React.FC<DeadlineCardProps> = ({
                   </span>
                 )}
               </div>
-              </div>
-          <div className=" border-t border-gray-100 space-x-2">
-            <button
-              onClick={(e) => {
-                e.stopPropagation(); // ⛔ Prevents click from reaching the card container
-                markAsCompleted();
-              }}
-              style={{ borderRadius: "6px" }}
-              className="px-2 py-1 text-[0.9vw] text-white rounded-md bg-blue-500 hover:bg-blue-600"
-            >
-              Mark as Completed
-            </button>
-
-          </div>
+            </div>
+            <div className=" border-t border-gray-100 space-x-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation(); // ⛔ Prevents click from reaching the card container
+                  markAsCompleted();
+                }}
+                style={{ borderRadius: "6px" }}
+                className="px-2 py-1 text-[0.9vw] text-white rounded-md bg-blue-500 hover:bg-blue-600"
+              >
+                Mark as Completed
+              </button>
+            </div>
           </div>
 
           {/* Action Buttons */}
-
         </div>
       </div>
     </CardErrorBoundary>

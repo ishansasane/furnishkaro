@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Link, useSearchParams } from 'react-router-dom';
-import { setProjects } from '../Redux/dataSlice';
-import { RootState } from '../Redux/store';
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useSearchParams } from "react-router-dom";
+import { setProjects } from "../Redux/dataSlice";
+import { RootState } from "../Redux/store";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 const InteriorPage = ({ interiorData, setInteriorOpen }) => {
   const dispatch = useDispatch();
@@ -11,7 +12,7 @@ const InteriorPage = ({ interiorData, setInteriorOpen }) => {
   const [totalProjects, setTotalProjects] = useState(0);
 
   const fetchProjectData = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
       {
         credentials: "include",
@@ -30,7 +31,9 @@ const InteriorPage = ({ interiorData, setInteriorOpen }) => {
 
     const parseSafely = (value, fallback) => {
       try {
-        return typeof value === "string" ? JSON.parse(value) : value || fallback;
+        return typeof value === "string"
+          ? JSON.parse(value)
+          : value || fallback;
       } catch (error) {
         console.warn("Invalid JSON:", value, error);
         return fallback;
@@ -96,7 +99,8 @@ const InteriorPage = ({ interiorData, setInteriorOpen }) => {
 
         if (cached) {
           const parsed = JSON.parse(cached);
-          const isCacheValid = parsed?.data?.length > 0 && (now - parsed.time) < cacheExpiry;
+          const isCacheValid =
+            parsed?.data?.length > 0 && now - parsed.time < cacheExpiry;
 
           if (isCacheValid) {
             finalData = parsed.data;
@@ -109,7 +113,10 @@ const InteriorPage = ({ interiorData, setInteriorOpen }) => {
           if (Array.isArray(freshData)) {
             finalData = freshData;
             dispatch(setProjects(finalData));
-            localStorage.setItem("projectData", JSON.stringify({ data: freshData, time: now }));
+            localStorage.setItem(
+              "projectData",
+              JSON.stringify({ data: freshData, time: now })
+            );
           } else {
             console.warn("Fetched project data is not an array:", freshData);
           }
@@ -179,7 +186,9 @@ const InteriorPage = ({ interiorData, setInteriorOpen }) => {
           <p className="text-gray-500 font-medium">Name</p>
           <p className="text-gray-800 break-words">{interiorData[0]}</p>
           <p className="text-gray-500 font-medium">Email</p>
-          <p className="text-gray-800 break-words overflow-hidden">{interiorData[1]}</p>
+          <p className="text-gray-800 break-words overflow-hidden">
+            {interiorData[1]}
+          </p>
           <p className="text-gray-500 font-medium">Phone no.</p>
           <p className="text-gray-800 break-words">{interiorData[2]}</p>
           <p className="text-gray-500 font-medium">Address</p>
@@ -195,10 +204,18 @@ const InteriorPage = ({ interiorData, setInteriorOpen }) => {
           <table className="w-full text-xs sm:text-sm md:text-base">
             <thead>
               <tr className="bg-gray-100 text-gray-700">
-                <th className="border-gray-300 px-3 py-2 text-left font-medium">Sr.No</th>
-                <th className="border-gray-300 px-3 py-2 text-left font-medium">Project Name</th>
-                <th className="border-gray-300 px-3 py-2 text-left font-medium">Amount</th>
-                <th className="border-gray-300 px-3 py-2 text-left font-medium">Date</th>
+                <th className="border-gray-300 px-3 py-2 text-left font-medium">
+                  Sr.No
+                </th>
+                <th className="border-gray-300 px-3 py-2 text-left font-medium">
+                  Project Name
+                </th>
+                <th className="border-gray-300 px-3 py-2 text-left font-medium">
+                  Amount
+                </th>
+                <th className="border-gray-300 px-3 py-2 text-left font-medium">
+                  Date
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -206,14 +223,23 @@ const InteriorPage = ({ interiorData, setInteriorOpen }) => {
                 interiorProjects.map((data, index) => (
                   <tr key={index} className="hover:bg-sky-50 transition-colors">
                     <td className="border-gray-300 px-3 py-2">{index + 1}</td>
-                    <td className="border-gray-300 px-3 py-2 break-words">{data.projectName}</td>
-                    <td className="border-gray-300 px-3 py-2">{data.totalAmount}</td>
-                    <td className="border-gray-300 px-3 py-2 break-words">{data.projectDate}</td>
+                    <td className="border-gray-300 px-3 py-2 break-words">
+                      {data.projectName}
+                    </td>
+                    <td className="border-gray-300 px-3 py-2">
+                      {data.totalAmount}
+                    </td>
+                    <td className="border-gray-300 px-3 py-2 break-words">
+                      {data.projectDate}
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan={4} className="text-center px-3 py-2 text-gray-600">
+                  <td
+                    colSpan={4}
+                    className="text-center px-3 py-2 text-gray-600"
+                  >
                     No projects found
                   </td>
                 </tr>

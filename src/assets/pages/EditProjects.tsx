@@ -32,6 +32,7 @@ import TailorsSection from "./TailorsSection";
 import { AnimatePresence, motion } from "framer-motion";
 import TaskDialog from "../compoonents/TaskDialog";
 import { useCallback } from "react";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 const EditProjects = ({
   Paid,
@@ -179,7 +180,7 @@ const EditProjects = ({
   const [projectAddress, setProjectAddress] = useState("");
 
   const fetchTaskData = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/gettasks"
     );
     const data = await response.json();
@@ -187,7 +188,7 @@ const EditProjects = ({
   };
 
   const getItemsData = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts"
     );
 
@@ -198,7 +199,7 @@ const EditProjects = ({
 
   const fetchCustomers = async () => {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getcustomerdata",
         { credentials: "include" }
       );
@@ -217,7 +218,7 @@ const EditProjects = ({
 
   async function fetchAllAreas() {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getAreas",
         {
           credentials: "include",
@@ -238,7 +239,7 @@ const EditProjects = ({
 
   async function fetchCatalogues() {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getcatalogues",
         {
           credentials: "include",
@@ -259,7 +260,7 @@ const EditProjects = ({
 
   async function fetchInteriors() {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getinteriordata",
         {
           credentials: "include",
@@ -280,7 +281,7 @@ const EditProjects = ({
 
   async function fetchSalesAssociates() {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getsalesassociatedata",
         {
           credentials: "include",
@@ -302,7 +303,7 @@ const EditProjects = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   async function fetchProductGroups(): Promise<ProductGroup[]> {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getallproductgroup",
         {
           credentials: "include",
@@ -321,14 +322,14 @@ const EditProjects = ({
     }
   }
   const fetchTermsData = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getTermsData"
     );
     const data = await response.json();
     return data.body || [];
   };
   const fetchBankData = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getBankData"
     );
     const data = await response.json();
@@ -464,7 +465,7 @@ const EditProjects = ({
 
       fetchAndSetData(
         async () => {
-          const response = await fetch(
+          const response = await fetchWithLoading(
             "https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts",
             { credentials: "include" }
           );
@@ -1370,7 +1371,7 @@ const EditProjects = ({
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchPaymentData = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getPayments"
     );
     const data = await response.json();
@@ -1378,7 +1379,7 @@ const EditProjects = ({
   };
 
   const fetchTailorData = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/gettailors"
     );
     const data = await response.json();
@@ -1457,7 +1458,7 @@ const EditProjects = ({
         }
 
         // If no valid cached data, fetch from the API
-        const response = await fetch(
+        const response = await fetchWithLoading(
           "https://sheeladecor.netlify.app/.netlify/functions/server/getAreas"
         );
         const data = await response.json();
@@ -1496,7 +1497,7 @@ const EditProjects = ({
     };
 
     try {
-      const response = await fetch(url, {
+      const response = await fetchWithLoading(url, {
         credentials: "include",
         method: "POST",
         headers: {
@@ -1533,7 +1534,7 @@ const EditProjects = ({
   };
 
   const deletePayment = async (p, pd, pm, re) => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/deletePayment",
       {
         credentials: "include",
@@ -1597,7 +1598,7 @@ const EditProjects = ({
   }, [dispatch, taskDialogOpen, added]);
 
   const deleteTask = async (name: string) => {
-    await fetch(
+    await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/deletetask",
       {
         method: "POST",
@@ -1747,7 +1748,7 @@ const EditProjects = ({
   };
 
   const fetchProjectData = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
       {
         credentials: "include",
@@ -1829,7 +1830,7 @@ const EditProjects = ({
 
   const sendProjectData = async () => {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/updateprojectdata",
         {
           method: "POST",
@@ -2430,7 +2431,7 @@ const EditProjects = ({
                     <option value="">Select Bank Details</option>
                     {bankData.map((data, index) => (
                       <option key={index} value={data}>
-                         Account Name : {data[0]}  -   Account Number : {data[1]}
+                        Account Name : {data[0]} - Account Number : {data[1]}
                       </option>
                     ))}
                   </select>

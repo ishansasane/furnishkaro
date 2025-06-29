@@ -8,6 +8,7 @@ import ProjectDetails from "../compoonents/ProjectDetails";
 import MaterialSelection from "../compoonents/MaterialSelection";
 import MeasurementSection from "../compoonents/MeasurementSection";
 import QuotationSection from "../compoonents/QuotationSection";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 const FormPage = () => {
   const dispatch = useDispatch();
@@ -15,8 +16,12 @@ const FormPage = () => {
 
   const [selectedCustomer, setSelectedCustomer] = useState<string | null>(null);
   const [customers, setCustomers] = useState([]);
-  const [materials, setMaterials] = useState<{ area: string; productGroups: string[] }[]>([]);
-  const [measurements, setMeasurements] = useState<{ area: string; size: string }[]>([]);
+  const [materials, setMaterials] = useState<
+    { area: string; productGroups: string[] }[]
+  >([]);
+  const [measurements, setMeasurements] = useState<
+    { area: string; size: string }[]
+  >([]);
   const [quotation, setQuotation] = useState<any[]>([]);
   const [editing, setEditing] = useState(null);
 
@@ -27,7 +32,7 @@ const FormPage = () => {
 
   const fetchCustomers = async () => {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getcustomerdata",
         { credentials: "include" }
       );
@@ -104,7 +109,11 @@ const FormPage = () => {
       {isCustomerSelected && isProjectDetailsFilled && (
         <>
           <MaterialSelection setMaterials={setMaterials} />
-          <QuotationSection materials={materials} measurements={measurements} setQuotation={setQuotation} />
+          <QuotationSection
+            materials={materials}
+            measurements={measurements}
+            setQuotation={setQuotation}
+          />
           {/* Submit Button */}
           <button
             onClick={handleSubmit}

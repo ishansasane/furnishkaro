@@ -1,25 +1,26 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface DataState {
-  products: any[];  // Change 'any' to the appropriate type
+  products: any[];
   brands: [];
   catalogs: any[];
   interiors: any[];
   tailors: [];
   salesAssociates: [];
-  tasks : any[];
-  projects : any[];
-  customers : [];
-  stores : any[];
-  items : [];
-  taskDialogOpen : boolean;
-  projectFlag : boolean;
-  paymentData : [];
-  companyData : any[];
-  designData : any[];
-  inquiry : any[];
-  bankData : any[];
-  termsData : any[];
+  tasks: any[];
+  projects: any[];
+  customers: [];
+  stores: any[];
+  items: [];
+  taskDialogOpen: boolean;
+  projectFlag: boolean;
+  paymentData: [];
+  companyData: any[];
+  designData: any[];
+  inquiry: any[];
+  bankData: any[];
+  termsData: any[];
+  loading: boolean; // <-- Added loading state
 }
 
 const initialState: DataState = {
@@ -29,19 +30,20 @@ const initialState: DataState = {
   interiors: [],
   tailors: [],
   salesAssociates: [],
-  tasks : [],
-  projects : [],
-  customers : [],
-  stores : [],
-  items : [],
-  taskDialogOpen : false,
-  projectFlag : false,
-  paymentData : [],
-  companyData : [],
-  designData : [],
-  inquiry : [],
-  bankData : [],
-  termsData : []
+  tasks: [],
+  projects: [],
+  customers: [],
+  stores: [],
+  items: [],
+  taskDialogOpen: false,
+  projectFlag: false,
+  paymentData: [],
+  companyData: [],
+  designData: [],
+  inquiry: [],
+  bankData: [],
+  termsData: [],
+  loading: false, // <-- Initialized loading state
 };
 
 const dataSlice = createSlice({
@@ -66,44 +68,47 @@ const dataSlice = createSlice({
     setSalesAssociateData: (state, action: PayloadAction<[]>) => {
       state.salesAssociates = action.payload;
     },
-    setTasks : (state, action : PayloadAction<any[]> ) => {
-        state.tasks = action.payload;
+    setTasks: (state, action: PayloadAction<any[]>) => {
+      state.tasks = action.payload;
     },
-    setProjects : (state, action : PayloadAction<any[]> ) => {
-        state.projects = action.payload;
+    setProjects: (state, action: PayloadAction<any[]>) => {
+      state.projects = action.payload;
     },
-    setCustomerData: (state, action : PayloadAction<[]> ) => {
-        state.customers = action.payload;
+    setCustomerData: (state, action: PayloadAction<[]>) => {
+      state.customers = action.payload;
     },
-    setStoreData: (state, action : PayloadAction<any[]> ) => {
-        state.stores = action.payload;
+    setStoreData: (state, action: PayloadAction<any[]>) => {
+      state.stores = action.payload;
     },
-    setItemData : (state, action : PayloadAction<[]> ) => {
-        state.items = action.payload;
+    setItemData: (state, action: PayloadAction<[]>) => {
+      state.items = action.payload;
     },
-    setTaskDialogOpen : (state, action : PayloadAction<false>) => {
+    setTaskDialogOpen: (state, action: PayloadAction<false>) => {
       state.taskDialogOpen = action.payload;
     },
-    setProjectFlag : (state, action : PayloadAction<false>) => {
+    setProjectFlag: (state, action: PayloadAction<false>) => {
       state.projectFlag = action.payload;
     },
-    setPaymentData : (state, action : PayloadAction<[]>) => {
+    setPaymentData: (state, action: PayloadAction<[]>) => {
       state.paymentData = action.payload;
     },
-    setCompanyData : (state, action : PayloadAction<any[]>) => {
+    setCompanyData: (state, action: PayloadAction<any[]>) => {
       state.companyData = action.payload;
     },
-    setDesignData : (state, action : PayloadAction<any[]>) => {
+    setDesignData: (state, action: PayloadAction<any[]>) => {
       state.designData = action.payload;
     },
-    setInquiryData : (state, action : PayloadAction<any[]>) => {
+    setInquiryData: (state, action: PayloadAction<any[]>) => {
       state.inquiry = action.payload;
     },
-    setBankData : (state, action : PayloadAction<any[]>) => {
+    setBankData: (state, action: PayloadAction<any[]>) => {
       state.bankData = action.payload;
     },
-    setTermsData : (state, action : PayloadAction<any[]>) => {
+    setTermsData: (state, action: PayloadAction<any[]>) => {
       state.termsData = action.payload;
+    },
+    setLoading: (state, action: PayloadAction<boolean>) => {
+      state.loading = action.payload;
     },
   },
 });
@@ -127,7 +132,8 @@ export const {
   setDesignData,
   setInquiryData,
   setBankData,
-  setTermsData
+  setTermsData,
+  setLoading, // <-- Export this too
 } = dataSlice.actions;
 
 export default dataSlice.reducer;

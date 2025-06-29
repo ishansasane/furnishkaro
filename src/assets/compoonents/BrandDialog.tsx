@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setBrandData } from "../Redux/dataSlice";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 interface BrandDialogProps {
   setDialogOpen: (state: boolean) => void;
@@ -13,7 +14,7 @@ interface BrandDialogProps {
 }
 async function fetchBrands() {
   try {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getbrands",
       {
         credentials: "include",
@@ -32,7 +33,13 @@ async function fetchBrands() {
   }
 }
 
-const BrandDialog: React.FC<BrandDialogProps> = ({ setDialogOpen, setRefresh, refresh, editingBrand, setEditingBrand }) => {
+const BrandDialog: React.FC<BrandDialogProps> = ({
+  setDialogOpen,
+  setRefresh,
+  refresh,
+  editingBrand,
+  setEditingBrand,
+}) => {
   const navigate = useNavigate();
 
   const data = editingBrand;
@@ -41,46 +48,52 @@ const BrandDialog: React.FC<BrandDialogProps> = ({ setDialogOpen, setRefresh, re
 
   const dispatch = useDispatch();
 
-const handleSubmit = async () => {
-  const url = editingBrand
-    ? "https://sheeladecor.netlify.app/.netlify/functions/server/updatebrand"
-    : "https://sheeladecor.netlify.app/.netlify/functions/server/addbrand";
+  const handleSubmit = async () => {
+    const url = editingBrand
+      ? "https://sheeladecor.netlify.app/.netlify/functions/server/updatebrand"
+      : "https://sheeladecor.netlify.app/.netlify/functions/server/addbrand";
 
-  try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ brandName, description }),
-    });
+    try {
+      const response = await fetchWithLoading(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ brandName, description }),
+      });
 
-    if (response.status === 200) {
-      alert(editingBrand ? "Brand updated successfully" : "Brand added successfully");
+      if (response.status === 200) {
+        alert(
+          editingBrand
+            ? "Brand updated successfully"
+            : "Brand added successfully"
+        );
 
-      // ✅ Fetch latest data and update Redux and localStorage
-      const updatedData = await fetchBrands();
-      const now = Date.now();
+        // ✅ Fetch latest data and update Redux and localStorage
+        const updatedData = await fetchBrands();
+        const now = Date.now();
 
-      if (Array.isArray(updatedData)) {
-        dispatch(setBrandData(updatedData));
-        localStorage.setItem("brandData", JSON.stringify({ data: updatedData, time: now }));
+        if (Array.isArray(updatedData)) {
+          dispatch(setBrandData(updatedData));
+          localStorage.setItem(
+            "brandData",
+            JSON.stringify({ data: updatedData, time: now })
+          );
+        } else {
+          console.error("Invalid brand data:", updatedData);
+        }
+
+        setDialogOpen(false); // Close dialog
+        setEditingBrand(null); // Reset editing state
+        setRefresh(!refresh); // Toggle refresh if needed by parent
+        navigate("/masters/brands"); // Go back
       } else {
-        console.error("Invalid brand data:", updatedData);
+        alert("Error saving brand");
       }
-
-      setDialogOpen(false); // Close dialog
-      setEditingBrand(null); // Reset editing state
-      setRefresh(!refresh); // Toggle refresh if needed by parent
-      navigate("/masters/brands"); // Go back
-    } else {
+    } catch (error) {
+      console.error("Error saving brand:", error);
       alert("Error saving brand");
     }
-  } catch (error) {
-    console.error("Error saving brand:", error);
-    alert("Error saving brand");
-  }
-};
-
+  };
 
   return (
     <div className="fixed inset-0 z-40 flex items-start justify-center">
@@ -89,7 +102,9 @@ const handleSubmit = async () => {
       {/* Dialog */}
       <div className="relative top-10 w-full max-w-md z-50">
         <div className="bg-white p-6 rounded shadow-md w-full border">
-          <h2 className="text-xl font-bold mb-4">{editingBrand ? "Edit Brand" : "Add Brand"}</h2>
+          <h2 className="text-xl font-bold mb-4">
+            {editingBrand ? "Edit Brand" : "Add Brand"}
+          </h2>
           <input
             className="border p-2 rounded w-full mb-2"
             placeholder="Brand Name"
@@ -113,7 +128,10 @@ const handleSubmit = async () => {
             >
               Cancel
             </button>
-            <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleSubmit}>
+            <button
+              className="bg-blue-500 text-white px-4 py-2 rounded"
+              onClick={handleSubmit}
+            >
               Save
             </button>
           </div>

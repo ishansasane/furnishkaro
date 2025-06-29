@@ -21,6 +21,7 @@ import MaterialSelectionComponent from "./MaterialSelectionComponent";
 import MeasurementSection from "./MeasurementSections";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 function AddProjectForm() {
   const dispatch = useDispatch();
@@ -149,7 +150,7 @@ function AddProjectForm() {
   const [availableAreas, setAvailableAreas] = useState([]);
 
   const getItemsData = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts"
     );
     const data = await response.json();
@@ -158,7 +159,7 @@ function AddProjectForm() {
 
   const fetchCustomers = async () => {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getcustomerdata",
         {
           credentials: "include",
@@ -177,7 +178,7 @@ function AddProjectForm() {
 
   async function fetchCatalogues() {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getcatalogues",
         {
           credentials: "include",
@@ -196,7 +197,7 @@ function AddProjectForm() {
 
   async function fetchInteriors() {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getinteriordata",
         {
           credentials: "include",
@@ -215,7 +216,7 @@ function AddProjectForm() {
 
   async function fetchSalesAssociates() {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getsalesassociatedata",
         {
           credentials: "include",
@@ -234,7 +235,7 @@ function AddProjectForm() {
 
   async function fetchProductGroups(): Promise<ProductGroup[]> {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getallproductgroup",
         {
           credentials: "include",
@@ -251,14 +252,14 @@ function AddProjectForm() {
     }
   }
   const fetchTermsData = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getTermsData"
     );
     const data = await response.json();
     return data.body || [];
   };
   const fetchBankData = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getBankData"
     );
     const data = await response.json();
@@ -1134,7 +1135,7 @@ function AddProjectForm() {
   >(null);
 
   const fetchProjectData = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
       {
         credentials: "include",
@@ -1371,7 +1372,7 @@ function AddProjectForm() {
 
       const newdate = day + "/" + month + "/" + year;
 
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/sendprojectdata",
         {
           method: "POST",
@@ -1520,7 +1521,7 @@ function AddProjectForm() {
           }
         }
 
-        const response = await fetch(
+        const response = await fetchWithLoading(
           "https://sheeladecor.netlify.app/.netlify/functions/server/getAreas"
         );
         const data = await response.json();
@@ -2400,7 +2401,7 @@ function AddProjectForm() {
                 <option value="">Select Bank Details</option>
                 {bankData.map((data, index) => (
                   <option key={index} value={data}>
-                      Account Name : {data[0]}   -    Account Number : {data[1]}
+                    Account Name : {data[0]} - Account Number : {data[1]}
                   </option>
                 ))}
               </select>
