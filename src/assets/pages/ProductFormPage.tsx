@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setItemData } from "../Redux/dataSlice";
 import { RootState } from "../Redux/store";
-import { useSelector } from "react-redux";
 import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 const getItemsData = async () => {
@@ -16,19 +15,10 @@ const getItemsData = async () => {
 
 const ProductFormPage: React.FC = () => {
   const navigate = useNavigate();
-
   const dispatch = useDispatch();
 
-  const initialFormState = {
-    productName: "",
-    description: "",
-    groupType: "",
-    sellingUnit: "",
-    mrp: "",
-    taxRate: "",
-    publish: false,
-    accessory: false,
-  };
+  const items = useSelector((state: RootState) => state.data.items);
+
   const groupTypes = [
     ["Fabric", ["Meter"], ["e.g. Curtains"]],
     ["Area Based", ["Sq.Feet"], ["e.g. Area Based"]],
@@ -38,70 +28,55 @@ const ProductFormPage: React.FC = () => {
     ["Fixed Area Items", ["Piece", "Roll"], ["e.g. 57 sq.ft. wallpaper"]],
     ["Tailoring", ["Parts", "Sq.Feet"], ["e.g. Stitching"]],
   ];
-  const [groupType, setGroupType] = useState([]);
-  const [showForm, setShowForm] = useState(true);
 
-  const [needsTailoring, setNeedsTailoring] = useState(false);
-
-  const items = useSelector((state: RootState) => state.data.items);
-
+  const [productName, setProductName] = useState("");
+  const [description, setDescription] = useState("");
   const [selectedGroupType, setSelectedGroupType] = useState("");
   const [sellingUnit, setSellingUnit] = useState("");
+  const [mrp, setMrp] = useState("");
+  const [taxRate, setTaxRate] = useState("");
+  const [needsTailoring, setNeedsTailoring] = useState(false);
 
   const selectedUnits =
     groupTypes.find((type) => type[0] === selectedGroupType)?.[1] || [];
 
-  const [productName, setProductName] = useState("");
-  const [description, setDescription] = useState("");
-  const [mrp, setMrp] = useState("");
-  const [taxRate, setTaxRate] = useState("");
-  const [publish, setPublish] = useState(false);
-  const [accessory, setAccessory] = useState(false);
-
-  const handleToggle = (field: "publish" | "accessory") => {
-    setFormData((prev) => ({ ...prev, [field]: !prev[field] }));
-  };
-
   const handleGroupTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selected = e.target.value;
-    const matchedGroup = groupTypes.find(([label]) => label == selected);
+    const matchedGroup = groupTypes.find(([label]) => label === selected);
     if (matchedGroup) {
       setSelectedGroupType(matchedGroup[0]);
-      console.log(matchedGroup[0]); // just the label
     } else {
-      setSelectedGroupType(""); // fallback
+      setSelectedGroupType("");
     }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    let d = new Date();
-
-    let day = d.getDate(); // 1 to 31
-    let month = d.getMonth() + 1; // 0 to 11 → add 1
-    let year = d.getFullYear();
-
-    const date = day + "/" + month + "/" + year;
-
-    // ✅ Step 1: Get current items (either from Redux or localStorage or by fetching)
-    let currentItems = items; // from Redux
+    let currentItems = items;
     if (!currentItems || currentItems.length === 0) {
-      currentItems = await getItemsData(); // fallback to fetch
+      currentItems = await getItemsData();
     }
 
-    // ✅ Step 2: Check for duplicate product name (case-insensitive)
-    const productExists = currentItems.some(
+    // ✅ Duplicate check
+    const duplicate = currentItems.some(
       (item: any) =>
         item[0]?.trim().toLowerCase() === productName.trim().toLowerCase()
     );
 
-    if (productExists) {
+    if (duplicate) {
       alert("Product with this name already exists.");
+      navigate(-1); // ✅ Go back after clicking OK
       return;
     }
 
     try {
+      const d = new Date();
+      const day = d.getDate();
+      const month = d.getMonth() + 1;
+      const year = d.getFullYear();
+      const date = `${day}/${month}/${year}`;
+
       const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct",
         {
@@ -145,25 +120,11 @@ const ProductFormPage: React.FC = () => {
   };
 
   const handleCancel = () => {
-    navigate(-1); // cancel and go back
+    navigate(-1);
   };
 
-  if (!showForm) {
-    return (
-      <div className="p-6 text-center text-gray-700">
-        <p>Form is closed.</p>
-        <button
-          onClick={() => setShowForm(true)}
-          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
-        >
-          Reopen Form
-        </button>
-      </div>
-    );
-  }
-
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="max-w-3xl mx-auto p-6 bg-white !rounded-lg shadow-md">
       <h2 className="text-2xl font-semibold mb-4">Product Details</h2>
       <form className="space-y-4" onSubmit={handleSubmit}>
         <div>
@@ -176,7 +137,7 @@ const ProductFormPage: React.FC = () => {
             value={productName}
             onChange={(e) => setProductName(e.target.value)}
             placeholder="Enter Product Name"
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border !rounded-md"
             required
           />
         </div>
@@ -188,7 +149,7 @@ const ProductFormPage: React.FC = () => {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Enter Description"
-            className="w-full p-2 border rounded-md"
+            className="w-full p-2 border !rounded-md"
           />
         </div>
 
@@ -201,7 +162,7 @@ const ProductFormPage: React.FC = () => {
               name="groupType"
               value={selectedGroupType}
               onChange={handleGroupTypeChange}
-              className="w-full p-2 border rounded-md"
+              className="w-full p-2 border !rounded-md"
               required
             >
               <option value="">Select Group Type</option>
@@ -221,7 +182,7 @@ const ProductFormPage: React.FC = () => {
               name="sellingUnit"
               value={sellingUnit}
               onChange={(e) => setSellingUnit(e.target.value)}
-              className="w-full p-2 border rounded-md"
+              className="w-full p-2 border !rounded-md"
               required
             >
               <option value="">Select Selling Unit</option>
@@ -243,7 +204,7 @@ const ProductFormPage: React.FC = () => {
               value={mrp}
               onChange={(e) => setMrp(e.target.value)}
               placeholder="Enter MRP"
-              className="w-full p-2 border rounded-md"
+              className="w-full p-2 border !rounded-md"
             />
           </div>
           <div>
@@ -254,29 +215,30 @@ const ProductFormPage: React.FC = () => {
               value={taxRate}
               onChange={(e) => setTaxRate(e.target.value)}
               placeholder="Enter Tax Rate"
-              className="w-full p-2 border rounded-md"
+              className="w-full p-2 border !rounded-md"
             />
           </div>
         </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700">
             Needs Tailoring
           </label>
           <div
-            className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer ${
+            className={`w-12 h-6 flex items-center !rounded-full p-1 cursor-pointer ${
               needsTailoring ? "bg-blue-500" : "bg-gray-300"
             }`}
             onClick={() => setNeedsTailoring(!needsTailoring)}
           >
             <div
-              className={`w-5 h-5 bg-white rounded-full shadow-md transform ${
+              className={`w-5 h-5 bg-white !rounded-full shadow-md transform ${
                 needsTailoring ? "translate-x-6" : "translate-x-0"
               } transition`}
             />
           </div>
         </div>
 
-        <div className="flex gap-2 justify-end space-x-4">
+        <div className="flex gap-2 justify-end">
           <button
             type="button"
             onClick={handleCancel}

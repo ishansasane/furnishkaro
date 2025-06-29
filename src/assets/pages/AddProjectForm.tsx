@@ -1819,16 +1819,21 @@ function AddProjectForm() {
     doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...secondaryColor);
-    const summaryItems = [
-      { label: "Sub Total", value: `INR ${(amount || 0).toFixed(2)}` },
-      { label: "Total Tax", value: `INR ${(tax || 0).toFixed(2)}` },
-      { label: "Total Amount", value: `INR ${(amount + tax || 0).toFixed(2)}` },
-      { label: "Discount", value: `INR ${(discount || 0).toFixed(2)}` },
-      {
-        label: "Grand Total",
-        value: `INR ${(amount + tax - discount || 0).toFixed(2)}`,
-      },
-    ];
+    const numericAmount = Number(amount) || 0;
+const numericTax = Number(tax) || 0;
+const numericDiscount = Number(discount) || 0;
+
+const summaryItems = [
+  { label: "Sub Total", value: `INR ${numericAmount.toFixed(2)}` },
+  { label: "Total Tax", value: `INR ${numericTax.toFixed(2)}` },
+  { label: "Total Amount", value: `INR ${(numericAmount + numericTax).toFixed(2)}` },
+  { label: "Discount", value: `INR ${numericDiscount.toFixed(2)}` },
+  {
+    label: "Grand Total",
+    value: `INR ${(numericAmount + numericTax - numericDiscount).toFixed(2)}`,
+  },
+];
+
 
     summaryItems.forEach((item) => {
       doc.setFont("helvetica", "bold");
@@ -1897,28 +1902,57 @@ function AddProjectForm() {
     );
   };
   const handleMRPChange = (
-    mainIndex,
-    collectionIndex,
-    value,
-    measurementQuantity,
-    taxRate,
-    qty
+    mainIndex: number,
+    collectionIndex: number,
+    value: string,
+    measurementQuantity: number,
+    taxRate: number,
+    qty: number
   ) => {
     const updatedSelections = [...selections];
-    const measurementQty = parseFloat(measurementQuantity || "0");
+    const measurementQty = parseFloat(measurementQuantity.toString() || "0");
     const newMRP = parseFloat(value) || 0;
+
     // Update item[4] to make item[4] * measurementQuantity equal the input MRP
     updatedSelections[mainIndex].areacollection[collectionIndex].items[0][4] =
       measurementQty > 0 ? newMRP / measurementQty : newMRP;
+
     // Recalculate Subtotal, Tax Amount, and Total
     const subtotal = newMRP * qty;
-    const taxAmount = subtotal * (parseFloat(taxRate || "0") / 100);
+    const taxAmount = subtotal * (parseFloat(taxRate.toString() || "0") / 100);
     updatedSelections[mainIndex].areacollection[collectionIndex].totalTax[0] =
       taxAmount;
-    updatedSelections[mainIndex].areacollection[
-      collectionIndex
-    ].totalAmount[0] = subtotal + taxAmount;
-    setSelections(updatedSelections); // Adjust based on your state management
+    updatedSelections[mainIndex].areacollection[collectionIndex].totalAmount[0] =
+      subtotal + taxAmount;
+
+    // Apply discount
+    let effectiveDiscountPercent = 0;
+    if (discountType === "percent") {
+      effectiveDiscountPercent = discount;
+    } else if (discountType === "cash") {
+      effectiveDiscountPercent = subtotal > 0 ? (discount / subtotal) * 100 : 0;
+    }
+
+    const discountAmount = (subtotal * effectiveDiscountPercent) / 100;
+    const discountedSubtotal = subtotal - discountAmount;
+    const discountedTaxAmount = (discountedSubtotal * parseFloat(taxRate.toString() || "0")) / 100;
+    const discountedTotal = discountedSubtotal + discountedTaxAmount;
+
+    updatedSelections[mainIndex].areacollection[collectionIndex].totalTax[0] =
+      parseFloat(discountedTaxAmount.toFixed(2));
+    updatedSelections[mainIndex].areacollection[collectionIndex].totalAmount[0] =
+      parseFloat(discountedTotal.toFixed(2));
+
+    setSelections(updatedSelections);
+
+    // Recalculate totals for summary
+    const { totalTax, totalAmount } = recalculateTotals(
+      updatedSelections,
+      additionalItems
+    );
+    setTax(totalTax);
+    setAmount(totalAmount);
+    setGrandTotal(parseFloat(totalAmount.toFixed(2)));
   };
 
   return (

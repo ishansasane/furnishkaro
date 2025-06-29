@@ -51,6 +51,7 @@ const statusFilters = [
   "Goods Complete",
   "Tailor Complete",
   "Tailor Pending",
+  "Completed",
 ] as const;
 
 export default function Projects() {

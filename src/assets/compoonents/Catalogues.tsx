@@ -51,7 +51,7 @@ async function deleteCatalogue(
 
     if (response.ok) {
       alert("Catalogue deleted");
-      setRefresh(true); // Trigger refresh to fetch updated data
+      setRefresh(true);
     } else {
       const errorText = await response.text();
       alert(`Error deleting catalogue: ${errorText || response.statusText}`);
@@ -63,7 +63,6 @@ async function deleteCatalogue(
 }
 
 export default function Catalogues() {
-  const navigate = useNavigate();
   const [catalogues, setCatalogues] = useState<Catalogue[]>([]);
   const [search, setSearch] = useState("");
   const [isDialogOpen, setDialogOpen] = useState(false);
@@ -87,7 +86,7 @@ export default function Catalogues() {
         if (cached) {
           const parsed = JSON.parse(cached);
           if (parsed.data?.length > 0 && now - parsed.time < cacheExpiry) {
-            dispatch(setCatalogues(parsed.data));
+            dispatch(setCatalogs(parsed.data));
             setCatalogues(parsed.data);
             return;
           }
@@ -95,7 +94,7 @@ export default function Catalogues() {
 
         const data = await fetchCatalogues();
         if (Array.isArray(data)) {
-          dispatch(setCatalogues(data));
+          dispatch(setCatalogs(data));
           setCatalogues(data);
           localStorage.setItem(
             "catalogueData",
@@ -111,9 +110,8 @@ export default function Catalogues() {
 
     fetchAndSetData();
     setRefresh(false);
-  }, [dispatch, refresh]); // Removed catalogueData from dependencies
+  }, [dispatch, refresh]);
 
-  // Filter catalogues based on search input
   const filteredCatalogues = catalogues.filter((catalogue) =>
     [catalogue[0], catalogue[1]]
       .map((field) => (field || "").toString().toLowerCase())
@@ -126,7 +124,10 @@ export default function Catalogues() {
         <h1 className="text-2xl font-bold">Catalogues</h1>
         <button
           className="flex !rounded-md items-center gap-2 bg-blue-600 text-white px-6 py-2 rounded-md"
-          onClick={() => navigate("/catalogue-dialog")}
+          onClick={() => {
+            setEditingCatalogue(null);
+            setDialogOpen(true);
+          }}
         >
           <Plus size={18} /> Add Catalogue
         </button>
@@ -193,6 +194,7 @@ export default function Catalogues() {
           </tbody>
         </table>
       </div>
+
       {isDialogOpen && (
         <CatalogueDialog
           setDialogOpen={setDialogOpen}
@@ -200,6 +202,7 @@ export default function Catalogues() {
           refresh={refresh}
           editingCatalogue={editingCatalogue}
           setEditingCatalogue={setEditingCatalogue}
+          catalogueData={catalogues} // ✅ Pass catalogue list
         />
       )}
     </div>

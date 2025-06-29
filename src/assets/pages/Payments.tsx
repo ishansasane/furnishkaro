@@ -8,7 +8,7 @@ import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 const Payments = () => {
   const fetchPaymentData = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getPayments"
     );
     const data = await response.json();
@@ -34,7 +34,7 @@ const Payments = () => {
   const [filteredPayments, setFilteredPayments] = useState([]);
 
   const fetchProjectData = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
       { credentials: "include" }
     );

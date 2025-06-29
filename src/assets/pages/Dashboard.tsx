@@ -704,7 +704,7 @@ const Dashboard: React.FC = () => {
           flag ? "hidden" : ""
         } grid grid-cols-1 lg:grid-cols-3 gap-2 mt-2`}
       >
-        <div className="bg-white shadow-md rounded-xl p-6">
+        <div className="bg-white shadow-md !rounded-xl p-6">
           <p
             style={{ fontFamily: "Poppins, sans-serif" }}
             className="md:text-[1.7vw] font-semibold mb-4 text-gray-800"
@@ -753,7 +753,7 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white shadow-md rounded-xl p-3 col-span-2  overflow-y-auto max-h-[650px] pr-2">
+        <div className="bg-white shadow-md !rounded-xl p-3 col-span-2  overflow-y-auto max-h-[650px] pr-2">
           <div className="flex flex-row w-full justify-between items-center mb-4">
             <Link to="/tasks" className="!no-underline">
               <p
@@ -765,7 +765,7 @@ const Dashboard: React.FC = () => {
             </Link>
             <button
               onClick={() => setTaskDialog(true)}
-              className="relative overflow-hidden group mb-2 px-4 py-2 text-sm font-medium text-white transition-all duration-300 ease-out rounded-lg shadow-sm bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 hover:shadow-md"
+              className="relative overflow-hidden group mb-2 px-4 py-2 text-sm font-medium text-white transition-all duration-300 ease-out !rounded-lg shadow-sm bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 hover:shadow-md"
             >
               {/* Animated background elements */}
               <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></span>
@@ -789,7 +789,7 @@ const Dashboard: React.FC = () => {
               </div>
 
               {/* Ripple effect (optional) */}
-              <span className="absolute inset-0 scale-0 rounded-full bg-white opacity-20 group-hover:scale-100 transition-transform duration-500"></span>
+              <span className="absolute inset-0 scale-0 !rounded-full bg-white opacity-20 group-hover:scale-100 transition-transform duration-500"></span>
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto max-h-[90vh] pr-2">
@@ -856,14 +856,14 @@ const Dashboard: React.FC = () => {
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-md relative border border-gray-200">
+              <div className="bg-white !rounded-lg shadow-md p-6 w-full max-w-md relative border border-gray-200">
                 <button
                   onClick={() => setInquiryFormOpen(false)}
                   className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 transition-colors"
                 >
                   ✕
                 </button>
-                <h2 className="relative text-2xl font-bold mb-6 text-gray-800 after:absolute after:bottom-[-8px] after:left-0 after:w-12 after:h-1 after:bg-blue-500 after:rounded-full">
+                <h2 className="relative text-2xl font-bold mb-6 text-gray-800 after:absolute after:bottom-[-8px] after:left-0 after:w-12 after:h-1 after:bg-blue-500 after:!rounded-full">
                   Add Inquiry
                 </h2>
                 <form onSubmit={handleInquirySubmit} className="space-y-4">
@@ -880,7 +880,7 @@ const Dashboard: React.FC = () => {
                           project: e.target.value,
                         })
                       }
-                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                      className="mt-1 block w-full border border-gray-300 !rounded-md px-3 py-2 text-sm"
                       placeholder="Enter project name"
                       required
                     />
@@ -898,7 +898,7 @@ const Dashboard: React.FC = () => {
                           customer: e.target.value,
                         })
                       }
-                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                      className="mt-1 block w-full border border-gray-300 !rounded-md px-3 py-2 text-sm"
                       placeholder="Enter customer name"
                       required
                     />
@@ -916,7 +916,7 @@ const Dashboard: React.FC = () => {
                           phonenumber: e.target.value,
                         })
                       }
-                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                      className="mt-1 block w-full border border-gray-300 !rounded-md px-3 py-2 text-sm"
                       placeholder="Enter Phone Number"
                       required
                     />
@@ -933,7 +933,7 @@ const Dashboard: React.FC = () => {
                           comments: e.target.value,
                         })
                       }
-                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                      className="mt-1 block w-full border border-gray-300 !rounded-md px-3 py-2 text-sm"
                       placeholder="Enter comments"
                       rows={4}
                     />
@@ -951,7 +951,7 @@ const Dashboard: React.FC = () => {
                           inquiryDate: e.target.value,
                         })
                       }
-                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                      className="mt-1 block w-full border border-gray-300 !rounded-md px-3 py-2 text-sm"
                       required
                     />
                   </div>
@@ -968,7 +968,7 @@ const Dashboard: React.FC = () => {
                           followUpDate: e.target.value,
                         })
                       }
-                      className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-sm"
+                      className="mt-1 block w-full border border-gray-300 !rounded-md px-3 py-2 text-sm"
                       required
                     />
                   </div>
@@ -986,13 +986,13 @@ const Dashboard: React.FC = () => {
                         });
                         setInquiryFormOpen(false);
                       }}
-                      className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+                      className="bg-gray-200 text-gray-700 px-4 py-2 !rounded-lg hover:bg-gray-300 transition-colors"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-700 transition-colors"
+                      className="bg-sky-600 text-white px-4 py-2 !rounded-lg hover:bg-sky-700 transition-colors"
                       onClick={(e) => {
                         e.preventDefault();
                         sendInquiry();
@@ -1008,7 +1008,7 @@ const Dashboard: React.FC = () => {
         )}
         {isInquiryDialogOpen && selectedInquiry && (
           <div className="fixed inset-0 backdrop-blur-sm bg-black/50 bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-md relative border border-gray-200">
+            <div className="bg-white !rounded-lg shadow-md p-6 w-full max-w-md relative border border-gray-200">
               <button
                 onClick={() => setInquiryDialogOpen(false)}
                 className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 transition-colors"
@@ -1023,7 +1023,7 @@ const Dashboard: React.FC = () => {
                 <p className="flex justify-between">
                   <strong>Status:</strong>
                   <span
-                    className={`inline-block px-2 py-1 rounded text-white ${
+                    className={`inline-block px-2 py-1 !rounded text-white ${
                       selectedInquiry[5] == "approved"
                         ? "bg-green-500"
                         : selectedInquiry[5] === "New Inquiry"
@@ -1089,7 +1089,7 @@ const Dashboard: React.FC = () => {
       </AnimatePresence>
 
       <div
-        className={`bg-white shadow-md rounded-xl p-6 mt-2 ${
+        className={`bg-white shadow-md !rounded-xl p-6 mt-2 ${
           flag ? "hidden" : ""
         }`}
       >
@@ -1132,7 +1132,7 @@ const Dashboard: React.FC = () => {
 
       {isTaskDialogOpen && selectedTask && (
         <div className="fixed inset-0 backdrop-blur-sm bg-black/50 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-md p-6 w-full max-w-md relative border border-gray-200">
+          <div className="bg-white !rounded-lg shadow-md p-6 w-full max-w-md relative border border-gray-200">
             <button
               onClick={() => setTaskDialogOpen(false)}
               className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 transition-colors"
@@ -1147,7 +1147,7 @@ const Dashboard: React.FC = () => {
               <p className="flex justify-between">
                 <strong>Priority :</strong>{" "}
                 <span
-                  className={`inline-block px-2 py-1 rounded text-white ${
+                  className={`inline-block px-2 py-1 !rounded text-white ${
                     selectedTask[6].toLowerCase() === "high"
                       ? "bg-red-500"
                       : selectedTask[6].toLowerCase() === "moderate"
@@ -1162,7 +1162,7 @@ const Dashboard: React.FC = () => {
               <p className="flex justify-between">
                 <strong>Status :</strong>{" "}
                 <span
-                  className={`inline-block px-2 py-1 rounded text-white ${
+                  className={`inline-block px-2 py-1 !rounded text-white ${
                     selectedTask[7].toLowerCase() === "completed"
                       ? "bg-green-500"
                       : "bg-gray-500"

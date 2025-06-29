@@ -39,6 +39,7 @@ const ProductGroupForm: React.FC = () => {
 
   const dispatch = useDispatch();
   const items = useSelector((state: RootState) => state.data.items);
+  const products = useSelector((state: RootState) => state.data.products);
 
   const handleAddAddon = useCallback(() => {
     if (
@@ -46,19 +47,30 @@ const ProductGroupForm: React.FC = () => {
       !addonProducts.includes(selectedAddon) &&
       selectedAddon !== mainProduct
     ) {
-      setAddonProducts((prev) => {
-        const updated = [...new Set([...prev, selectedAddon])];
-        console.log("Updated addonProducts:", updated); // Debug
-        return updated;
-      });
-      setSelectedAddon(""); // Reset the dropdown
+      setAddonProducts((prev) => [...new Set([...prev, selectedAddon])]);
+      setSelectedAddon("");
     }
   }, [selectedAddon, addonProducts, mainProduct]);
 
   const handleAddGroup = async () => {
-    // Validate required fields
     if (!groupName || !mainProduct) {
       alert("Please fill in all required fields: Group Name and Main Product.");
+      return;
+    }
+
+    // ✅ Duplicate Group Name Check
+    const isDuplicate = products.some((group: any) => {
+      const existingGroupName = Array.isArray(group)
+        ? group[0]
+        : group.groupName;
+      return (
+        existingGroupName?.toLowerCase() === groupName.trim().toLowerCase()
+      );
+    });
+
+    if (isDuplicate) {
+      alert("Group with this name already exists!");
+      navigate("/masters/product-groups"); // ✅ Redirect after alert
       return;
     }
 
@@ -97,48 +109,25 @@ const ProductGroupForm: React.FC = () => {
       const result = await response.json();
       console.log("Saved Group:", result);
 
-      // Re-fetch the updated product groups
       const data = await fetchProductGroups();
-
-      // Update Redux store
       dispatch(setProducts(data));
-
-      // Update localStorage
       localStorage.setItem(
         "productGroupData",
         JSON.stringify({ data, time: Date.now() })
       );
 
-      // Alert and navigate
       alert("Product Group saved successfully!");
       navigate("/masters/product-groups");
     } catch (error: any) {
-      console.error("Error saving product group:", {
-        message: error.message,
-        stack: error.stack,
-      });
-      if (error.message.includes("Failed to fetch")) {
-        alert(
-          "Failed to save product group: Unable to connect to the server (possible timeout or network issue). Please check your network connection and try again."
-        );
-      } else if (error.message.includes("Status: 400")) {
-        alert(
-          `Failed to save product group: Invalid data submitted. The server requires all fields to be filled correctly. Error: ${error.message}. Please check the console for details.`
-        );
-      } else {
-        alert(
-          `Failed to save product group: ${error.message}. Please check the console for details and try again.`
-        );
-      }
+      console.error("Error saving product group:", error);
+      alert(`Failed to save product group: ${error.message}`);
     }
   };
 
-  // Filter out selected addon products and main product to avoid duplicates
   const availableAddonProducts = items.filter(
     (item) => !addonProducts.includes(item[0]) && item[0] !== mainProduct
   );
 
-  // Options for react-select
   const mainProductOptions = items.map((item) => ({
     value: item[0],
     label: item[0],
@@ -151,7 +140,6 @@ const ProductGroupForm: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
-      {/* Header */}
       <h2 className="text-2xl font-semibold text-gray-800">
         New Product Group
       </h2>
@@ -167,9 +155,7 @@ const ProductGroupForm: React.FC = () => {
         New Product Group
       </p>
 
-      {/* Form */}
       <div className="space-y-4">
-        {/* Group Name */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
             Group Name <span className="text-red-500">*</span>
@@ -184,7 +170,6 @@ const ProductGroupForm: React.FC = () => {
           />
         </div>
 
-        {/* Main Product */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
             Main Product <span className="text-red-500">*</span>
@@ -213,7 +198,6 @@ const ProductGroupForm: React.FC = () => {
           </div>
         </div>
 
-        {/* Addon Products */}
         <div>
           <label className="block text-sm font-medium text-gray-700">
             Addon Products
@@ -248,7 +232,6 @@ const ProductGroupForm: React.FC = () => {
               Add
             </button>
           </div>
-          {/* Display selected addon products */}
           {addonProducts.length > 0 && (
             <div className="mt-2">
               <p className="text-sm font-medium text-gray-700">
@@ -265,13 +248,8 @@ const ProductGroupForm: React.FC = () => {
                           (p) => p !== product
                         );
                         setAddonProducts(updated);
-                        console.log(
-                          "Removed product, new addonProducts:",
-                          updated
-                        ); // Debug
                       }}
                     >
-                      <span></span>
                       <XCircle size={18} />
                     </button>
                   </li>
@@ -281,7 +259,6 @@ const ProductGroupForm: React.FC = () => {
           )}
         </div>
 
-        {/* Status Toggle */}
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700">
@@ -302,7 +279,6 @@ const ProductGroupForm: React.FC = () => {
           </div>
         </div>
 
-        {/* Buttons */}
         <div className="flex justify-end gap-3 mt-4">
           <button
             onClick={() => navigate("/masters/product-groups")}

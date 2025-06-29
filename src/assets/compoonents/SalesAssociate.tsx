@@ -7,12 +7,7 @@ import { setSalesAssociateData } from "../Redux/dataSlice";
 import { useNavigate } from "react-router-dom";
 import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
-interface SalesAssociate {
-  data: string[];
-}
-
-// Fetch Sales Associates
-async function fetchSalesAssociates(): Promise<SalesAssociate[]> {
+async function fetchSalesAssociates(): Promise<string[][]> {
   try {
     const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getsalesassociatedata",
@@ -33,7 +28,6 @@ async function fetchSalesAssociates(): Promise<SalesAssociate[]> {
   }
 }
 
-// Delete a Sales Associate
 async function deleteSalesAssociate(
   name: string,
   setRefresh: (state: boolean) => void,
@@ -53,13 +47,15 @@ async function deleteSalesAssociate(
 
     if (response.ok) {
       alert("Sales Associate deleted");
-      const updatedSalesAssociates = await fetchSalesAssociates();
-      dispatch(setSalesAssociateData(updatedSalesAssociates));
-      setSalesAssociates(updatedSalesAssociates);
+
+      const updatedData = await fetchSalesAssociates();
+      dispatch(setSalesAssociateData(updatedData));
+      setSalesAssociates(updatedData);
       localStorage.setItem(
         "salesAssociateData",
-        JSON.stringify({ data: updatedSalesAssociates, time: Date.now() })
+        JSON.stringify({ data: updatedData, time: Date.now() })
       );
+
       setRefresh(true);
     } else {
       const errorText = await response.text();
@@ -75,11 +71,12 @@ async function deleteSalesAssociate(
 
 export default function SalesAssociates() {
   const navigate = useNavigate();
-  const [salesAssociates, setSalesAssociates] = useState<SalesAssociate[]>([]);
+  const [salesAssociates, setSalesAssociates] = useState<string[][]>([]);
   const [search, setSearch] = useState("");
   const [isDialogOpen, setDialogOpen] = useState(false);
-  const [editingSalesAssociate, setEditingSalesAssociate] =
-    useState<SalesAssociate | null>(null);
+  const [editingSalesAssociate, setEditingSalesAssociate] = useState<
+    string[] | null
+  >(null);
   const [refresh, setRefresh] = useState(false);
 
   const dispatch = useDispatch();
@@ -92,7 +89,7 @@ export default function SalesAssociates() {
       try {
         const cached = localStorage.getItem("salesAssociateData");
         const now = Date.now();
-        const cacheExpiry = 5 * 60 * 1000; // 5 minutes
+        const cacheExpiry = 5 * 60 * 1000;
 
         if (cached) {
           const parsed = JSON.parse(cached);
@@ -111,8 +108,6 @@ export default function SalesAssociates() {
             "salesAssociateData",
             JSON.stringify({ data, time: now })
           );
-        } else {
-          console.error("Fetched sales associate data is invalid:", data);
         }
       } catch (error) {
         console.error("Error fetching sales associates:", error);
@@ -121,12 +116,11 @@ export default function SalesAssociates() {
 
     fetchAndSetData();
     setRefresh(false);
-  }, [dispatch, refresh]); // Removed salesAssociatesFromRedux from dependencies
+  }, [dispatch, refresh]);
 
-  // Filter sales associates based on search input
-  const filteredSalesAssociates = salesAssociates.filter((salesAssociate) =>
-    [salesAssociate[0], salesAssociate[1], salesAssociate[2], salesAssociate[3]]
-      .map((field) => (field || "").toString().toLowerCase())
+  const filteredSalesAssociates = salesAssociates.filter((sa) =>
+    [sa[0], sa[1], sa[2], sa[3]]
+      .map((field) => (field || "").toLowerCase())
       .some((field) => field.includes(search.toLowerCase()))
   );
 
@@ -136,11 +130,15 @@ export default function SalesAssociates() {
         <h1 className="text-2xl font-bold">Sales Associates</h1>
         <button
           className="flex !rounded-md items-center gap-2 bg-blue-600 text-white px-4 py-2"
-          onClick={() => navigate("/sales-associate-dialog")}
+          onClick={() => {
+            setEditingSalesAssociate(null);
+            setDialogOpen(true);
+          }}
         >
           <Plus size={18} /> Add Sales Associate
         </button>
       </div>
+
       <div className="bg-white overflow-x-auto shadow rounded-lg p-5">
         <div className="mb-4">
           <input
@@ -151,6 +149,7 @@ export default function SalesAssociates() {
             className="border px-3 py-2 rounded-md w-full"
           />
         </div>
+
         <table className="w-full">
           <thead className="bg-sky-50">
             <tr>
@@ -163,17 +162,17 @@ export default function SalesAssociates() {
           </thead>
           <tbody>
             {filteredSalesAssociates.length > 0 ? (
-              filteredSalesAssociates.map((salesAssociate, index) => (
+              filteredSalesAssociates.map((sa, index) => (
                 <tr key={index} className="hover:bg-sky-50">
-                  <td className="px-4 py-2">{salesAssociate[0]}</td>
-                  <td className="px-4 py-2">{salesAssociate[1]}</td>
-                  <td className="px-4 py-2">{salesAssociate[2]}</td>
-                  <td className="px-4 py-2">{salesAssociate[3]}</td>
+                  <td className="px-4 py-2">{sa[0]}</td>
+                  <td className="px-4 py-2">{sa[1]}</td>
+                  <td className="px-4 py-2">{sa[2]}</td>
+                  <td className="px-4 py-2">{sa[3]}</td>
                   <td className="px-4 py-2 flex gap-2">
                     <button
                       className="border px-2 py-1 rounded-md"
                       onClick={() => {
-                        setEditingSalesAssociate(salesAssociate);
+                        setEditingSalesAssociate(sa);
                         setDialogOpen(true);
                       }}
                     >
@@ -183,7 +182,7 @@ export default function SalesAssociates() {
                       className="border px-2 py-1 rounded-md"
                       onClick={() =>
                         deleteSalesAssociate(
-                          salesAssociate[0],
+                          sa[0],
                           setRefresh,
                           dispatch,
                           setSalesAssociates

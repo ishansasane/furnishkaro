@@ -5,7 +5,7 @@ import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 interface DeadlineCardProps {
   projectName: string;
-  project: any; // Ideally, define a proper type instead of any
+  project: any;
   date: string;
   setSendProject: (project: any) => void;
   setIndex: (index: number) => void;
@@ -18,7 +18,6 @@ interface DeadlineCardProps {
   clickInverseFunction: any;
 }
 
-// Optional ErrorBoundary component for single card error safety
 class CardErrorBoundary extends React.Component<
   { children: React.ReactNode },
   { hasError: boolean }
@@ -27,19 +26,16 @@ class CardErrorBoundary extends React.Component<
     super(props);
     this.state = { hasError: false };
   }
-
   static getDerivedStateFromError() {
     return { hasError: true };
   }
-
   componentDidCatch(error: any, info: any) {
     console.error("Error inside DeadlineCard:", error, info);
   }
-
   render() {
     if (this.state.hasError) {
       return (
-        <div className="p-2 text-sm text-red-500">
+        <div className="p-1 text-xs text-red-500">
           Error rendering this card.
         </div>
       );
@@ -62,7 +58,6 @@ const DeadlineCard: React.FC<DeadlineCardProps> = ({
   clickFunction,
   clickInverseFunction,
 }) => {
-  // Safely format date
   const formattedDate = date
     ? new Date(date).toLocaleDateString("en-US", {
         year: "numeric",
@@ -71,7 +66,6 @@ const DeadlineCard: React.FC<DeadlineCardProps> = ({
       })
     : "N/A";
 
-  // Background gradient
   const nameHash = projectName
     ?.split("")
     .reduce((acc, char) => char.charCodeAt(0) + acc, 0);
@@ -80,34 +74,26 @@ const DeadlineCard: React.FC<DeadlineCardProps> = ({
     hsl(${(nameHash + 30) % 360}, 80%, 85%) 100%)`;
 
   const goodsArray = project?.goodsArray ?? [];
-
   const dispatch = useDispatch();
 
   const fetchProjectData = async () => {
     const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
-      {
-        credentials: "include",
-      }
+      { credentials: "include" }
     );
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
     const data = await response.json();
-
-    if (!data.body || !Array.isArray(data.body)) {
-      throw new Error("Invalid data format: Expected an array in data.body");
-    }
+    if (!data.body || !Array.isArray(data.body))
+      throw new Error("Invalid data format");
 
     const parseSafely = (value: any, fallback: any) => {
       try {
         return typeof value === "string"
           ? JSON.parse(value)
           : value || fallback;
-      } catch (error) {
-        console.warn("Invalid JSON:", value, error);
+      } catch {
         return fallback;
       }
     };
@@ -117,22 +103,16 @@ const DeadlineCard: React.FC<DeadlineCardProps> = ({
     const fixBrokenArray = (input: any): string[] => {
       if (Array.isArray(input)) return input;
       if (typeof input !== "string") return [];
-
       try {
         const fixed = JSON.parse(input);
         if (Array.isArray(fixed)) return fixed;
-        return [];
       } catch {
-        try {
-          const cleaned = input
-            .replace(/^\[|\]$/g, "")
-            .split(",")
-            .map((item: string) => item.trim().replace(/^"+|"+$/g, ""));
-          return cleaned;
-        } catch {
-          return [];
-        }
+        return input
+          .replace(/^\[|\]$/g, "")
+          .split(",")
+          .map((item: string) => item.trim().replace(/^"+|"+$/g, ""));
       }
+      return [];
     };
 
     const projects = data.body.map((row: any[]) => ({
@@ -184,33 +164,33 @@ const DeadlineCard: React.FC<DeadlineCardProps> = ({
       );
       alert("Project marked as completed");
     } else {
-      alert("Error");
+      alert("Error updating project status");
     }
   };
 
   return (
     <CardErrorBoundary>
       <div
-        className={`bg-white h-[20vh] rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border overflow-y-scroll scrollbar-hide border-gray-100 ${
-          project.status == "Completed" ? "hidden" : ""
+        className={`bg-white rounded-md shadow-sm hover:shadow-md transition-all duration-150 border border-gray-100 ${
+          project.status === "Completed" ? "hidden" : ""
         }`}
       >
-        {/* Top accent bar */}
+        {/* Gradient Accent Bar */}
         <div className="h-1 w-full" style={{ background: bgGradient }}></div>
 
-        <div className="p-2">
+        <div className="p-1 space-y-1">
           {/* Header */}
           <div
             onClick={() => clickFunction()}
-            className="flex justify-between items-center"
+            className="flex flex-col sm:flex-row sm:justify-between sm:items-center cursor-pointer"
           >
             <div>
-              <p className="text-[1.3vw] font-semibold text-gray-900 line-clamp-1 hover:text-blue-600 transition-colors">
+              <p className="text-[1.1vw] font-semibold text-gray-900 line-clamp-1 hover:text-blue-600">
                 {projectName}
               </p>
-              <div className="flex flex-row gap-2">
+              <div className="flex items-center gap-1 text-gray-500 text-[0.9vw]">
                 <svg
-                  className="w-4 h-4 mt-1 text-gray-400"
+                  className="w-3 h-3"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -222,10 +202,11 @@ const DeadlineCard: React.FC<DeadlineCardProps> = ({
                     d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                   />
                 </svg>
-                <p className="text-[1vw] text-gray-500">{formattedDate}</p>
+                <span>{formattedDate}</span>
               </div>
             </div>
-            <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+
+            <span className="mt-1 sm:mt-0 inline-flex items-center px-1 py-0.5 rounded-full text-[0.6rem] font-medium bg-green-100 text-green-800">
               <span className="w-1.5 h-1.5 mr-1 rounded-full bg-green-500"></span>
               Active
             </span>
@@ -234,50 +215,49 @@ const DeadlineCard: React.FC<DeadlineCardProps> = ({
           {/* Items Section */}
           <div
             onClick={() => clickFunction()}
-            className="flex flex-row justify-between"
+            className="flex flex-col sm:flex-row sm:justify-between sm:items-center"
           >
-            <div className="flex flex-col">
-              <div className="flex gap-2 flex-row">
-                <p className="text-[1vw] font-medium text-gray-500 uppercase">
+            <div>
+              <div className="flex gap-1 items-center">
+                <p className="text-[0.9vw] font-medium text-gray-500 uppercase">
                   Items :
                 </p>
-                <span className="text-[1vw] text-gray-400 bg-gray-100 rounded-full">
+                <span className="text-[0.8vw] text-gray-400 bg-gray-100 rounded-full px-1">
                   {goodsArray.length}
                 </span>
               </div>
 
-              <div className="flex flex-wrap gap-1">
+              <div className="flex flex-wrap gap-0.5 mt-0.5">
                 {goodsArray.slice(0, 3).map((arr: any, idx: number) => (
                   <span
                     key={idx}
-                    className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-white text-gray-700 border border-gray-200"
+                    className="inline-flex items-center px-1.5 py-0.5 rounded-full text-[0.7rem] font-medium bg-white text-gray-700 border border-gray-200"
                   >
                     {arr?.item?.[0] || "Item"}
                   </span>
                 ))}
 
                 {goodsArray.length > 3 && (
-                  <span className=" inline-flex items-center px-2 rounded-full text-[0.7vw] font-medium bg-gray-50 text-gray-500">
+                  <span className="inline-flex items-center px-1.5 text-[0.7rem] font-medium bg-gray-50 text-gray-500 rounded-full">
                     +{goodsArray.length - 3}
                   </span>
                 )}
               </div>
             </div>
-            <div className=" border-t border-gray-100 space-x-2">
+
+            <div className="mt-1 sm:mt-0">
               <button
                 onClick={(e) => {
-                  e.stopPropagation(); // ⛔ Prevents click from reaching the card container
+                  e.stopPropagation();
                   markAsCompleted();
                 }}
-                style={{ borderRadius: "6px" }}
-                className="px-2 py-1 text-[0.9vw] text-white rounded-md bg-blue-500 hover:bg-blue-600"
+                style={{ borderRadius: "4px" }}
+                className="px-2 py-0.5 text-[0.75rem] text-white bg-blue-500 hover:bg-blue-600"
               >
                 Mark as Completed
               </button>
             </div>
           </div>
-
-          {/* Action Buttons */}
         </div>
       </div>
     </CardErrorBoundary>

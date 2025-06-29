@@ -67,7 +67,7 @@ export default function Sidebar() {
     <SidebarContext.Provider value={{ expanded, toggleSidebar }}>
       {/* Desktop Sidebar */}
       <nav
-        className={`h-full flex-col hidden md:flex transition-all duration-300 ease-in-out ${
+        className={`h-screen overflow-y-auto flex-col hidden md:flex transition-all duration-300 ease-in-out ${
           expanded ? "w-64" : "w-24"
         }`}
       >
@@ -219,14 +219,14 @@ function SidebarContent({
             />
           </button>
 
-          {/* Masters Dropdown Always Renders for Smooth Animation */}
+          {/* Masters Dropdown */}
           <div
             className={`transition-all duration-300 overflow-hidden ${
-              mastersOpen ? "max-h-96 opacity-100" : "max-h-0 opacity-0"
+              mastersOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
             } ${expanded ? "ml-8" : "ml-0"}`}
           >
             <ul
-              className={`mt-1 space-y-1 ${
+              className={`mt-1 space-y-1 mb-3 ${
                 expanded ? "" : "flex flex-col items-center"
               }`}
             >
@@ -319,7 +319,8 @@ function SidebarContent({
             <button
               onClick={() => {
                 localStorage.clear();
-                window.location.href = "https://sheeladecor.free.nf/logout.php";
+                window.location.href =
+                  "https://sheeladecor.free.nf/logout.php";
               }}
               className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
             >

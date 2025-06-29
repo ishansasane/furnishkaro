@@ -6,20 +6,15 @@ import { setBrandData } from "../Redux/dataSlice";
 import { RootState } from "../Redux/Store";
 import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
-// Fetch brands from the server
+// Fetch brands
 async function fetchBrands() {
   try {
     const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getbrands",
-      {
-        credentials: "include",
-      }
+      { credentials: "include" }
     );
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
-    }
-
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
     const data = await response.json();
     return Array.isArray(data.body) ? data.body : [];
   } catch (error) {
@@ -35,20 +30,16 @@ async function refreshBrands(
   try {
     const data = await fetchBrands();
     const now = Date.now();
-
     if (Array.isArray(data)) {
       dispatch(setBrandData(data));
       setBrands(data);
       localStorage.setItem("brandData", JSON.stringify({ data, time: now }));
-    } else {
-      console.error("Fetched brand data is invalid:", data);
     }
   } catch (error) {
     console.error("Error refreshing brand data:", error);
   }
 }
 
-// Delete a brand
 async function deleteBrand(
   brandName: string,
   dispatch: any,
@@ -67,22 +58,22 @@ async function deleteBrand(
 
     if (response.ok) {
       alert("Brand deleted");
-      await refreshBrands(dispatch, setBrands); // 🔄 Refresh Redux + LocalStorage
+      await refreshBrands(dispatch, setBrands);
     } else {
       const errorText = await response.text();
       alert(`Error deleting brand: ${errorText || response.statusText}`);
     }
   } catch (error) {
-    alert("Network or server error while deleting brand");
     console.error("Delete brand error:", error);
+    alert("Network or server error while deleting brand");
   }
 }
 
 export default function Brands() {
-  const [brands, setBrands] = useState([]);
+  const [brands, setBrands] = useState<string[][]>([]);
   const [search, setSearch] = useState("");
   const [isDialogOpen, setDialogOpen] = useState(false);
-  const [editingBrand, setEditingBrand] = useState(null);
+  const [editingBrand, setEditingBrand] = useState<string[] | null>(null);
   const [refresh, setRefresh] = useState(false);
 
   const dispatch = useDispatch();
@@ -93,7 +84,7 @@ export default function Brands() {
       try {
         const cached = localStorage.getItem("brandData");
         const now = Date.now();
-        const cacheExpiry = 5 * 60 * 1000; // 5 minutes
+        const cacheExpiry = 5 * 60 * 1000;
 
         if (cached) {
           const parsed = JSON.parse(cached);
@@ -112,8 +103,6 @@ export default function Brands() {
             "brandData",
             JSON.stringify({ data, time: now })
           );
-        } else {
-          console.error("Fetched brand data is invalid:", data);
         }
       } catch (error) {
         console.error("Error fetching brands:", error);
@@ -121,12 +110,12 @@ export default function Brands() {
     };
 
     fetchAndSetBrands();
-  }, [dispatch, brandData]);
+    setRefresh(false);
+  }, [dispatch, refresh]);
 
-  // Filter brands based on search input
   const filteredBrands = brands.filter((brand) =>
     [brand[0], brand[1]]
-      .map((field) => (field || "").toString().toLowerCase())
+      .map((field) => (field || "").toLowerCase())
       .some((field) => field.includes(search.toLowerCase()))
   );
 
@@ -137,13 +126,14 @@ export default function Brands() {
         <button
           className="flex !rounded-lg items-center gap-2 bg-blue-600 text-white px-4 py-2"
           onClick={() => {
-            setEditingBrand(null); // Ensure we're adding a new brand
-            setDialogOpen(true); // Open the dialog
+            setEditingBrand(null);
+            setDialogOpen(true);
           }}
         >
           <Plus size={18} /> Add Brand
         </button>
       </div>
+
       <div className="bg-white overflow-x-auto shadow rounded-lg p-5">
         <div className="mb-4">
           <input
@@ -205,6 +195,7 @@ export default function Brands() {
           </tbody>
         </table>
       </div>
+
       {isDialogOpen && (
         <BrandDialog
           setDialogOpen={setDialogOpen}
@@ -212,6 +203,7 @@ export default function Brands() {
           refresh={refresh}
           editingBrand={editingBrand}
           setEditingBrand={setEditingBrand}
+          brandData={brands} // ✅ Pass brand list for duplicate checking
         />
       )}
     </div>

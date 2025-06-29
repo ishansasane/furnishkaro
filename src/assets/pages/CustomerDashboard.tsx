@@ -55,7 +55,7 @@ const fetchProjectData = async () => {
     throw new Error("Invalid data format: Expected an array in data.body");
   }
 
-  const parseSafely = (value: any, fallback: any) => {
+  const parseSafely = (value, fallback) => {
     try {
       return typeof value === "string" ? JSON.parse(value) : value || fallback;
     } catch (error) {
@@ -64,9 +64,9 @@ const fetchProjectData = async () => {
     }
   };
 
-  const deepClone = (obj: any) => JSON.parse(JSON.stringify(obj));
+  const deepClone = (obj) => JSON.parse(JSON.stringify(obj));
 
-  const fixBrokenArray = (input: any): string[] => {
+  const fixBrokenArray = (input) => {
     if (Array.isArray(input)) return input;
     if (typeof input !== "string") return [];
 
@@ -79,7 +79,7 @@ const fetchProjectData = async () => {
         const cleaned = input
           .replace(/^\[|\]$/g, "")
           .split(",")
-          .map((item: string) => item.trim().replace(/^"+|"+$/g, ""));
+          .map((item) => item.trim().replace(/^"+|"+$/g, ""));
         return cleaned;
       } catch {
         return [];
@@ -87,7 +87,7 @@ const fetchProjectData = async () => {
     }
   };
 
-  const projects = data.body.map((row: any[]) => ({
+  const projects = data.body.map((row) => ({
     projectName: row[0],
     customerLink: parseSafely(row[1], []),
     projectReference: row[2] || "",
@@ -124,26 +124,19 @@ const CustomerDashboard = ({
   const [phoneNumber, setPhoneNumber] = useState("");
   const [alternateNumber, setAlternateNumber] = useState("");
   const [address, setAddress] = useState("");
-
-  const [totalProjectValue, setTotalProjectPayment] = useState(0);
-
   const [projectData, setProjectData] = useState([]);
-
   const [duePayment, setDuePayment] = useState(0);
   const [receivedPayment, setReceivedPayment] = useState(0);
   const [activeOrders, setActiveOrders] = useState(0);
   const [receivedProjectsPayment, setReceivedProjectsPayment] = useState(0);
   const [perProjectPayment, setPerProjectPayments] = useState([]);
-
-  const dispatch = useDispatch();
-
-  const paymentData = useSelector((state: RootState) => state.data.paymentData);
-  const projects = useSelector((state: RootState) => state.data.projects);
-
   const [companyName, setCompanyName] = useState("");
   const [GST, setGST] = useState("");
-
   const [payments, setPaymentsArray] = useState([]);
+
+  const dispatch = useDispatch();
+  const paymentData = useSelector((state) => state.data.paymentData);
+  const projects = useSelector((state) => state.data.projects);
 
   useEffect(() => {
     setEmail(customerDashboardData[2]);
@@ -151,13 +144,13 @@ const CustomerDashboard = ({
     setPhoneNumber(customerDashboardData[1]);
     setAlternateNumber(customerDashboardData[4]);
     setAddress(customerDashboardData[3]);
-  }, []);
+  }, [customerDashboardData]);
 
   useEffect(() => {
     const fetchAndCalculate = async () => {
       const now = Date.now();
 
-      // ---------- Fetch Project Data ----------
+      // Fetch Project Data
       let projectList = [];
       const cachedProjects = localStorage.getItem("projectData");
 
@@ -195,7 +188,7 @@ const CustomerDashboard = ({
         }
       }
 
-      // ---------- Filter & Calculate Project Stats ----------
+      // Filter & Calculate Project Stats
       let filteredProjects = [];
       if (customerDashboardData[0]) {
         filteredProjects = projectList.filter(
@@ -211,10 +204,10 @@ const CustomerDashboard = ({
           totalAmount += parseFloat(p.totalAmount) || 0;
         });
 
-        setDuePayment(totalAmount); // totalTax is optional based on your logic
+        setDuePayment(totalAmount);
       }
 
-      // ---------- Fetch Payment Data ----------
+      // Fetch Payment Data
       let paymentList = [];
       const cachedPayments = localStorage.getItem("paymentData");
 
@@ -252,7 +245,7 @@ const CustomerDashboard = ({
         }
       }
 
-      // ---------- Calculate Total & Per-Project Received Payments ----------
+      // Calculate Total & Per-Project Received Payments
       if (customerDashboardData[0] && filteredProjects.length) {
         let totalReceived = 0;
         const projectPayments = filteredProjects.map((project) => {
@@ -273,7 +266,7 @@ const CustomerDashboard = ({
 
         setReceivedPayment(totalReceived);
         setReceivedProjectsPayment(totalReceived);
-        setPerProjectPayments(projectPayments); // If you're using this in your component
+        setPerProjectPayments(projectPayments);
       }
     };
 
@@ -308,17 +301,11 @@ const CustomerDashboard = ({
 
     if (response.status === 200) {
       const data = await fetchCustomers();
-
-      // 1. Update Redux store
       dispatch(setCustomerData(data));
-
-      // 3. Update localStorage cache
       localStorage.setItem(
         "customerData",
         JSON.stringify({ data, time: Date.now() })
       );
-
-      // 5. Show success
       alert("Customer Updated Successfully");
     } else {
       alert("Error in updating customer");
@@ -326,55 +313,69 @@ const CustomerDashboard = ({
   }
 
   return (
-    <div className="flex flex-col gap-3 w-full p-6">
-      <div className="flex flex-row w-full justify-between items-center">
+    <div className="flex flex-col gap-4 p-4 sm:p-6 md:p-8 min-h-screen bg-gray-50">
+      {/* Header Section */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex flex-col gap-1">
-          <p className="text-[1.6vw] font-semibold">{customerName}</p>
-          <div className="text-[0.8vw] flex flex-row gap-2">
-            <Link to="/" className="!no-underline text-black">
+          <h1 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800">
+            {customerName}
+          </h1>
+          <div className="flex flex-row gap-2 text-xs sm:text-sm text-gray-600">
+            <Link
+              to="/"
+              className="text-blue-600 hover:text-blue-800 !no-underline"
+            >
               Dashboard
-            </Link>{" "}
-            •{" "}
+            </Link>
+            <span>•</span>
             <Link
               to="/customers"
               onClick={() => setCustomerDashboard(false)}
-              className="!no-underline text-black"
+              className="text-blue-600 hover:text-blue-800 !no-underline"
             >
               Customers
-            </Link>{" "}
-            • {customerName}
+            </Link>
+            <span>•</span>
+            <span>{customerName}</span>
           </div>
         </div>
         <button
-          style={{ borderRadius: "6px" }}
-          className="text-white px-2 py-1 bg-sky-600 hover:bg-sky-700"
+          className="px-3 py-1.5 sm:px-4 sm:py-2 bg-sky-600 text-white text-sm rounded-lg hover:bg-sky-700 transition-colors"
           onClick={() => setCustomerDashboard(false)}
         >
           Cancel
         </button>
       </div>
-      <div className="flex flex-row w-full justify-between gap-3">
-        <div className="flex flex-col border rounded-xl p-3 w-1/3">
-          <p className="text-[1.2vw] text-sky-700">Active Orders</p>
-          <p className="text-[1.1vw]">{activeOrders}</p>
+
+      {/* Stats Section */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="flex flex-col border rounded-lg p-4 bg-white shadow-sm">
+          <p className="text-sm sm:text-base text-sky-700 font-medium">
+            Active Orders
+          </p>
+          <p className="text-base sm:text-lg font-semibold">{activeOrders}</p>
         </div>
-        <div className="flex flex-col border rounded-xl p-3 w-1/3">
-          <p className="text-[1.2vw] text-purple-600">
+        <div className="flex flex-col border rounded-lg p-4 bg-white shadow-sm">
+          <p className="text-sm sm:text-base text-purple-600 font-medium">
             Total Value of Projects
           </p>
-          <p className="text-[1.1vw]">
+          <p className="text-base sm:text-lg font-semibold">
             ₹{Math.round(duePayment).toLocaleString("en-IN")}
           </p>
         </div>
-        <div className="flex flex-col border rounded-xl p-3 w-1/3">
-          <p className="text-[1.2vw] text-green-600">Payment Received</p>
-          <p className="text-[1.1vw]">
+        <div className="flex flex-col border rounded-lg p-4 bg-white shadow-sm">
+          <p className="text-sm sm:text-base text-green-600 font-medium">
+            Payment Received
+          </p>
+          <p className="text-base sm:text-lg font-semibold">
             ₹{Math.round(receivedProjectsPayment).toLocaleString("en-IN")}
           </p>
         </div>
-        <div className="flex flex-col border rounded-xl p-3 w-1/3">
-          <p className="text-[1.2vw] text-red-500">Payment Due</p>
-          <p className="text-[1.1vw]">
+        <div className="flex flex-col border rounded-lg p-4 bg-white shadow-sm">
+          <p className="text-sm sm:text-base text-red-500 font-medium">
+            Payment Due
+          </p>
+          <p className="text-base sm:text-lg font-semibold">
             ₹
             {Math.round(duePayment - receivedProjectsPayment).toLocaleString(
               "en-IN"
@@ -382,136 +383,178 @@ const CustomerDashboard = ({
           </p>
         </div>
       </div>
-      <div className="flex flex-col w-full border rounded-xl p-3">
-        <table>
-          <thead>
-            <tr className="text-gray-600">
-              <th>Project Name</th>
-              <th>Status</th>
-              <th>Amount</th>
-              <th>Received</th>
-              <th>Due</th>
-              <th>Date</th>
-              <th>Quote</th>
-            </tr>
-          </thead>
-          <tbody>
+
+      {/* Projects Table Section */}
+      <div className="bg-white border rounded-lg p-4 sm:p-6 shadow-sm">
+        <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800 mb-4">
+          Projects
+        </h2>
+        <div className="overflow-x-auto">
+          <table className="w-full hidden md:table border-collapse">
+            <thead>
+              <tr className="bg-gray-100 text-gray-600 text-sm">
+                <th className="py-3 px-4 text-left">Project Name</th>
+                <th className="py-3 px-4 text-left">Status</th>
+                <th className="py-3 px-4 text-left">Amount</th>
+                <th className="py-3 px-4 text-left">Received</th>
+                <th className="py-3 px-4 text-left">Due</th>
+                <th className="py-3 px-4 text-left">Date</th>
+                <th className="py-3 px-4 text-left">Quote</th>
+              </tr>
+            </thead>
+            <tbody>
+              {projectData &&
+                projectData.map((project, index) => (
+                  <tr key={index} className="border-b hover:bg-gray-50">
+                    <td className="py-3 px-4 text-sm">{project.projectName}</td>
+                    <td className="py-3 px-4 text-sm">{project.status}</td>
+                    <td className="py-3 px-4 text-sm">
+                      ₹{Math.round(project.totalAmount).toLocaleString("en-IN")}
+                    </td>
+                    <td className="py-3 px-4 text-sm">
+                      ₹
+                      {perProjectPayment != null &&
+                        Math.round(perProjectPayment[index]).toLocaleString(
+                          "en-IN"
+                        )}
+                    </td>
+                    <td className="py-3 px-4 text-sm">
+                      ₹
+                      {Math.round(
+                        project.totalAmount - perProjectPayment[index]
+                      ).toLocaleString("en-IN")}
+                    </td>
+                    <td className="py-3 px-4 text-sm">{project.projectDate}</td>
+                    <td className="py-3 px-4 text-sm">{project.quote}</td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+          {/* Mobile and Tablet View for Projects */}
+          <div className="md:hidden flex flex-col gap-4">
             {projectData &&
               projectData.map((project, index) => (
-                <tr key={index} className="">
-                  <td>{project.projectName}</td>
-                  <td>{project.status}</td>
-                  <td>
-                    ₹{Math.round(project.totalAmount).toLocaleString("en-IN")}
-                  </td>
-                  <td>
-                    ₹
-                    {perProjectPayment != null &&
-                      Math.round(perProjectPayment[index]).toLocaleString(
-                        "en-IN"
-                      )}
-                  </td>
-                  <td>
-                    ₹
-                    {Math.round(
-                      duePayment - perProjectPayment[index]
-                    ).toLocaleString("en-IN")}
-                  </td>
-                  <td className="py-2">{project.projectDate}</td>
-                  <td className="py-2">{project.quote}</td>
-                </tr>
+                <div
+                  key={index}
+                  className="border rounded-lg p-4 bg-white shadow-sm"
+                >
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    <span className="font-medium text-gray-600">
+                      Project Name
+                    </span>
+                    <span>{project.projectName}</span>
+                    <span className="font-medium text-gray-600">Status</span>
+                    <span>{project.status}</span>
+                    <span className="font-medium text-gray-600">Amount</span>
+                    <span>
+                      ₹{Math.round(project.totalAmount).toLocaleString("en-IN")}
+                    </span>
+                    <span className="font-medium text-gray-600">Received</span>
+                    <span>
+                      ₹
+                      {perProjectPayment != null &&
+                        Math.round(perProjectPayment[index]).toLocaleString(
+                          "en-IN"
+                        )}
+                    </span>
+                    <span className="font-medium text-gray-600">Due</span>
+                    <span>
+                      ₹
+                      {Math.round(
+                        project.totalAmount - perProjectPayment[index]
+                      ).toLocaleString("en-IN")}
+                    </span>
+                    <span className="font-medium text-gray-600">Date</span>
+                    <span>{project.projectDate}</span>
+                    <span className="font-medium text-gray-600">Quote</span>
+                    <span>{project.quote}</span>
+                  </div>
+                </div>
               ))}
-          </tbody>
-        </table>
+          </div>
+        </div>
       </div>
-      <div className="flex flex-col w-2/3 border rounded-xl p-3 gap-3">
-        <p className="text-[1.3vw] font-semibold">Customer Details</p>
-        <div className="flex flex-row w-full justify-between gap-2">
-          <div className="flex flex-col w-1/2">
-            <div className="flex flex-row gap-1 -mb-3">
-              <p className="text-[0.9vw] text-gray-600">Customer</p>
-              <p className="text-red-600">*</p>
-            </div>
+
+      {/* Customer Details Section */}
+      <div className="bg-white border rounded-lg p-4 sm:p-6 shadow-sm">
+        <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800 mb-4">
+          Customer Details
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="flex flex-col">
+            <label className="text-sm text-gray-600 mb-1">
+              Customer <span className="text-red-600">*</span>
+            </label>
             <input
               type="text"
-              className="border rounded-lg px-2 py-2 w-full"
+              className="border rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={customerName}
+              readOnly
             />
           </div>
-          <div className="flex flex-col w-1/2">
-            <div className="flex flex-row gap-1 -mb-2">
-              <p className="text-[0.9vw] text-gray-600">Email</p>
-            </div>
+          <div className="flex flex-col">
+            <label className="text-sm text-gray-600 mb-1">Email</label>
             <input
               type="text"
               onChange={(e) => setEmail(e.target.value)}
-              className="border rounded-lg px-2 py-2 w-full"
+              className="border rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={email}
             />
           </div>
-        </div>
-        <div className="flex flex-row w-full justify-between gap-2">
-          <div className="flex flex-col w-1/2">
-            <div className="flex flex-row gap-1 -mb-3 mt-1">
-              <p className="text-[0.9vw] text-gray-600">Phone Number</p>
-            </div>
+          <div className="flex flex-col">
+            <label className="text-sm text-gray-600 mb-1">Phone Number</label>
             <input
               type="text"
               onChange={(e) => setPhoneNumber(e.target.value)}
-              className="border rounded-lg px-2 py-2 w-full"
+              className="border rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={phoneNumber}
             />
           </div>
-          <div className="flex flex-col w-1/2">
-            <div className="flex flex-row gap-1 -mb-2">
-              <p className="text-[0.9vw] text-gray-600">
-                Alternate Phone Number
-              </p>
-            </div>
+          <div className="flex flex-col">
+            <label className="text-sm text-gray-600 mb-1">
+              Alternate Phone Number
+            </label>
             <input
               type="text"
               onChange={(e) => setAlternateNumber(e.target.value)}
-              className="border rounded-lg px-2 py-2 w-full"
+              className="border rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={alternateNumber}
             />
           </div>
-        </div>
-        <div className="flex flex-col w-full">
-          <p className="text-[0.9vw] text-gray-600">Address</p>
-          <input
-            type="text"
-            onChange={(e) => setAddress(e.target.value)}
-            className="border rounded-lg px-2 py-2"
-            value={address}
-          />
-        </div>
-        <div className="flex flex-row w-full justify-between gap-2">
-          <div className="flex flex-col w-full">
-            <p className="text-[0.9vw] text-gray-600">Company Name</p>
+          <div className="flex flex-col sm:col-span-2">
+            <label className="text-sm text-gray-600 mb-1">Address</label>
+            <input
+              type="text"
+              onChange={(e) => setAddress(e.target.value)}
+              className="border rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={address}
+            />
+          </div>
+          <div className="flex flex-col">
+            <label className="text-sm text-gray-600 mb-1">Company Name</label>
             <input
               type="text"
               placeholder="Company Name"
               onChange={(e) => setCompanyName(e.target.value)}
-              className="border rounded-lg px-2 py-2"
+              className="border rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={companyName}
             />
           </div>
-          <div className="flex flex-col w-full">
-            <p className="text-[0.9vw] text-gray-600">GST IN</p>
+          <div className="flex flex-col">
+            <label className="text-sm text-gray-600 mb-1">GST IN</label>
             <input
               type="text"
               placeholder="GST Number"
               onChange={(e) => setGST(e.target.value)}
-              className="border rounded-lg px-2 py-2"
+              className="border rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={GST}
             />
           </div>
         </div>
-        <div className="w-full flex flex-row justify-end">
+        <div className="flex justify-end mt-4">
           <button
             onClick={sendcustomerData}
-            style={{ borderRadius: "6px" }}
-            className="text-white bg-sky-600 hover:bg-sky-700 px-2 py-1 w-[6vw]"
+            className="px-4 py-2 bg-sky-600 text-white text-sm rounded-lg hover:bg-sky-700 transition-colors"
           >
             Update
           </button>

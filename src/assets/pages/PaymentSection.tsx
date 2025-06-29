@@ -111,19 +111,19 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
       <p className="text-base sm:text-lg font-semibold mb-2">Payments</p>
 
       <div className="flex flex-col sm:flex-row w-full justify-between gap-3">
-        <div className="border rounded-lg w-full sm:w-1/4 p-3">
+        <div className="border !rounded-lg w-full sm:w-1/4 p-3">
           <p className="text-gray-500 text-xs sm:text-sm">Total Amount</p>
           <p className="text-xs sm:text-sm">{Amount.toFixed(2)}</p>
         </div>
-        <div className="border rounded-lg w-full sm:w-1/4 p-3">
+        <div className="border !rounded-lg w-full sm:w-1/4 p-3">
           <p className="text-gray-500 text-xs sm:text-sm">Payment Received</p>
           <p className="text-xs sm:text-sm">{paymentReceived}</p>
         </div>
-        <div className="border rounded-lg w-full sm:w-1/4 p-3">
+        <div className="border !rounded-lg w-full sm:w-1/4 p-3">
           <p className="text-gray-500 text-xs sm:text-sm">Payment Due</p>
           <p className="text-xs sm:text-sm">{(Amount - paymentReceived).toFixed(2)}</p>
         </div>
-        <div className="border rounded-lg w-full sm:w-1/4 p-3">
+        <div className="border !rounded-lg w-full sm:w-1/4 p-3">
           <p className="text-gray-500 text-xs sm:text-sm">Discount</p>
           <p className="text-xs sm:text-sm">{Discount + ` in ${discountType}`}</p>
         </div>
@@ -134,7 +134,7 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
           <p className="text-base sm:text-lg font-semibold">Received Payments</p>
           <button
             onClick={() => setAddPayment(true)}
-            className="shadow-xl hover:bg-sky-700 bg-sky-600 text-white px-4 py-2 rounded-lg text-xs sm:text-sm"
+            className="shadow-xl hover:bg-sky-700 bg-sky-600 text-white px-4 py-2 !rounded-lg text-xs sm:text-sm"
           >
             Add Payment
           </button>
@@ -192,8 +192,8 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
       </div>
 
       <div className="flex flex-row justify-between">
-                <button  onClick={() => setNavState("Tailors")} style={{ borderRadius : "8px" }} className="rounded-lg border px-2 h-8 bg-white">Back</button>
-                <button onClick={() => setNavState("Tasks")} style={{ borderRadius : "8px" }} className="rounded-lg text-white border px-2 h-8 bg-sky-600">Next</button>
+                <button  onClick={() => setNavState("Tailors")} style={{ borderRadius : "8px" }} className="!rounded-lg border px-2 h-8 bg-white">Back</button>
+                <button onClick={() => setNavState("Tasks")} style={{ borderRadius : "8px" }} className="!rounded-lg text-white border px-2 h-8 bg-sky-600">Next</button>
               </div>
     </div>
   );
