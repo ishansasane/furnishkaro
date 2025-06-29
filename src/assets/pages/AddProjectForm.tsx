@@ -2434,16 +2434,13 @@ const summaryItems = [
                 <option value="">Select Bank Details</option>
                 {bankData.map((data, index) => (
                   <option key={index} value={data}>
-                    <div className="flex flex-row gap-3">
-                      <span className="">Name : {data[0]}||</span>
-                      <p>Account Number : {data[1]}</p>
-                    </div>
+                      Account Name : {data[0]}   -    Account Number : {data[1]}
                   </option>
                 ))}
               </select>
               <textarea
                 placeholder="Bank Details Description"
-                value={`Customer Name : ${
+                value={`Account Name : ${
                   bank == "NA" ? "" : bank[0]
                 } \nAccount Number : ${
                   bank == "NA" ? "" : bank[1]

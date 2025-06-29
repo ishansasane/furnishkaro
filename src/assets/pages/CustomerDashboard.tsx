@@ -127,6 +127,7 @@ const CustomerDashboard = ({ customerDashboardData, setCustomerDashboardData, se
   const paymentData = useSelector((state: RootState) => state.data.paymentData);
   const projects = useSelector((state: RootState) => state.data.projects);
 
+
   useEffect(() => {
     setEmail(customerDashboardData[2]);
     setCustomerName(customerDashboardData[0]);
@@ -134,6 +135,11 @@ const CustomerDashboard = ({ customerDashboardData, setCustomerDashboardData, se
     setAlternateNumber(customerDashboardData[4]);
     setAddress(customerDashboardData[3]);
   }, [customerDashboardData]);
+
+    const [totalProjectValue, setTotalProjectPayment] = useState(0);
+
+    
+
 
   useEffect(() => {
     const fetchAndCalculate = async () => {
@@ -323,11 +329,23 @@ const CustomerDashboard = ({ customerDashboardData, setCustomerDashboardData, se
           <p className="text-sm sm:text-base text-sky-700 font-medium">Active Orders</p>
           <p className="text-base sm:text-lg font-semibold">{activeOrders}</p>
         </div>
-        <div className="flex flex-col border !rounded-lg p-4 bg-white shadow-sm">
-          <p className="text-sm sm:text-base text-purple-600 font-medium">Total Payment by Customer</p>
-          <p className="text-base sm:text-lg font-semibold">
-            ₹{Math.round(receivedPayment).toLocaleString("en-IN")}
-          </p>
+        <div className='flex flex-row w-full justify-between gap-3'>
+            <div className='flex flex-col border rounded-xl p-3 w-1/3'>
+                <p className='text-[1.2vw] text-sky-700'>Active Orders</p>
+                <p className='text-[1.1vw]'>{activeOrders}</p>
+            </div>
+            <div className='flex flex-col border rounded-xl p-3 w-1/3'>
+                <p className='text-[1.2vw] text-purple-600'>Total Value of Projects</p>
+                <p className='text-[1.1vw]'>₹{Math.round(duePayment).toLocaleString("en-IN")}</p>
+            </div>
+            <div className='flex flex-col border rounded-xl p-3 w-1/3'>
+                <p className='text-[1.2vw] text-green-600'>Payment Received</p>
+                <p className='text-[1.1vw]'>₹{Math.round(receivedProjectsPayment).toLocaleString("en-IN")}</p>
+            </div>
+            <div className='flex flex-col border rounded-xl p-3 w-1/3'>
+                <p className='text-[1.2vw] text-red-500'>Payment Due</p>
+                <p className='text-[1.1vw]'>₹{Math.round(duePayment - receivedProjectsPayment).toLocaleString("en-IN")}</p>
+            </div>
         </div>
         <div className="flex flex-col border !rounded-lg p-4 bg-white shadow-sm">
           <p className="text-sm sm:text-base text-green-600 font-medium">Payment Received</p>

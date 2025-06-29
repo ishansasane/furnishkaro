@@ -22,6 +22,10 @@ import {
   UserCheck,
   Store,
   Building2,
+  LucideProjector,
+  User,
+  Settings2,
+  SettingsIcon,
 } from "lucide-react";
 import {
   createContext,
@@ -251,16 +255,17 @@ function SidebarContent({
           path="/reports"
           setMobileMenuOpen={setMobileMenuOpen}
         />
-        <SidebarItem
+
+        {/* <SidebarItem
           icon={<Building2 size={20} />}
           text="Banks"
           path="/bank"
           setMobileMenuOpen={setMobileMenuOpen}
-        />
+        /> */}
         <SidebarItem
-          icon={<FileText size={20} />}
-          text="T & C"
-          path="/terms"
+          icon={<SettingsIcon size={20} />}
+          text="Settings"
+          path="/settings"
           setMobileMenuOpen={setMobileMenuOpen}
         />
 
@@ -276,13 +281,13 @@ function SidebarContent({
             color: "inherit",
           }}
         >
-          <Settings size={20} style={{ marginRight: expanded ? "8px" : "0" }} />
+          <User size={20} style={{ marginRight: expanded ? "8px" : "0" }} />
           <span
             className={`transition-all ${
               expanded ? "ml-3 w-40" : "w-0 overflow-hidden"
             }`}
           >
-            {expanded && "Settings"}
+            {expanded && "Admin"}
           </span>
         </a>
       </ul>
