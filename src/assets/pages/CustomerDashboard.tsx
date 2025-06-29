@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import React from "react";
 import { useState, useEffect } from "react";
+=======
+import React from 'react';
+import { useState, useEffect } from 'react';
+>>>>>>> a83a89ee08bdeb1d1099d3766af0d5df8345e6fa
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store";
 import {
@@ -350,6 +355,7 @@ const CustomerDashboard = ({
       {/* Stats Section */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <div className="flex flex-col border rounded-lg p-4 bg-white shadow-sm">
+<<<<<<< HEAD
           <p className="text-sm sm:text-base text-sky-700 font-medium">
             Active Orders
           </p>
@@ -359,22 +365,37 @@ const CustomerDashboard = ({
           <p className="text-sm sm:text-base text-purple-600 font-medium">
             Total Value of Projects
           </p>
+=======
+          <p className="text-sm sm:text-base text-sky-700 font-medium">Active Orders</p>
+          <p className="text-base sm:text-lg font-semibold">{activeOrders}</p>
+        </div>
+        <div className="flex flex-col border rounded-lg p-4 bg-white shadow-sm">
+          <p className="text-sm sm:text-base text-purple-600 font-medium">Total Value of Projects</p>
+>>>>>>> a83a89ee08bdeb1d1099d3766af0d5df8345e6fa
           <p className="text-base sm:text-lg font-semibold">
             ₹{Math.round(duePayment).toLocaleString("en-IN")}
           </p>
         </div>
         <div className="flex flex-col border rounded-lg p-4 bg-white shadow-sm">
+<<<<<<< HEAD
           <p className="text-sm sm:text-base text-green-600 font-medium">
             Payment Received
           </p>
+=======
+          <p className="text-sm sm:text-base text-green-600 font-medium">Payment Received</p>
+>>>>>>> a83a89ee08bdeb1d1099d3766af0d5df8345e6fa
           <p className="text-base sm:text-lg font-semibold">
             ₹{Math.round(receivedProjectsPayment).toLocaleString("en-IN")}
           </p>
         </div>
         <div className="flex flex-col border rounded-lg p-4 bg-white shadow-sm">
+<<<<<<< HEAD
           <p className="text-sm sm:text-base text-red-500 font-medium">
             Payment Due
           </p>
+=======
+          <p className="text-sm sm:text-base text-red-500 font-medium">Payment Due</p>
+>>>>>>> a83a89ee08bdeb1d1099d3766af0d5df8345e6fa
           <p className="text-base sm:text-lg font-semibold">
             ₹
             {Math.round(duePayment - receivedProjectsPayment).toLocaleString(
@@ -386,9 +407,13 @@ const CustomerDashboard = ({
 
       {/* Projects Table Section */}
       <div className="bg-white border rounded-lg p-4 sm:p-6 shadow-sm">
+<<<<<<< HEAD
         <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800 mb-4">
           Projects
         </h2>
+=======
+        <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800 mb-4">Projects</h2>
+>>>>>>> a83a89ee08bdeb1d1099d3766af0d5df8345e6fa
         <div className="overflow-x-auto">
           <table className="w-full hidden md:table border-collapse">
             <thead>
@@ -432,6 +457,7 @@ const CustomerDashboard = ({
           </table>
           {/* Mobile and Tablet View for Projects */}
           <div className="md:hidden flex flex-col gap-4">
+<<<<<<< HEAD
             {projectData &&
               projectData.map((project, index) => (
                 <div
@@ -469,6 +495,29 @@ const CustomerDashboard = ({
                     <span className="font-medium text-gray-600">Quote</span>
                     <span>{project.quote}</span>
                   </div>
+=======
+            {projectData && projectData.map((project, index) => (
+              <div key={index} className="border rounded-lg p-4 bg-white shadow-sm">
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <span className="font-medium text-gray-600">Project Name</span>
+                  <span>{project.projectName}</span>
+                  <span className="font-medium text-gray-600">Status</span>
+                  <span>{project.status}</span>
+                  <span className="font-medium text-gray-600">Amount</span>
+                  <span>₹{Math.round(project.totalAmount).toLocaleString("en-IN")}</span>
+                  <span className="font-medium text-gray-600">Received</span>
+                  <span>
+                    ₹{perProjectPayment != null && Math.round(perProjectPayment[index]).toLocaleString("en-IN")}
+                  </span>
+                  <span className="font-medium text-gray-600">Due</span>
+                  <span>
+                    ₹{Math.round(project.totalAmount - perProjectPayment[index]).toLocaleString("en-IN")}
+                  </span>
+                  <span className="font-medium text-gray-600">Date</span>
+                  <span>{project.projectDate}</span>
+                  <span className="font-medium text-gray-600">Quote</span>
+                  <span>{project.quote}</span>
+>>>>>>> a83a89ee08bdeb1d1099d3766af0d5df8345e6fa
                 </div>
               ))}
           </div>
@@ -477,9 +526,13 @@ const CustomerDashboard = ({
 
       {/* Customer Details Section */}
       <div className="bg-white border rounded-lg p-4 sm:p-6 shadow-sm">
+<<<<<<< HEAD
         <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800 mb-4">
           Customer Details
         </h2>
+=======
+        <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800 mb-4">Customer Details</h2>
+>>>>>>> a83a89ee08bdeb1d1099d3766af0d5df8345e6fa
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex flex-col">
             <label className="text-sm text-gray-600 mb-1">
