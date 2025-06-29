@@ -250,9 +250,8 @@ export default function Projects() {
       }
     };
   
-    if (!added && projectData?.length) {
+    
       fetchPayments();
-    }
   }, [dispatch, added, projectData]);
   
   // --- API fetching functions ---

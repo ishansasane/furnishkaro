@@ -115,6 +115,8 @@ const CustomerDashboard = ({ customerDashboardData, setCustomerDashboardData, se
     const [alternateNumber, setAlternateNumber] = useState("");
     const [address, setAddress] = useState("");
 
+    const [totalProjectValue, setTotalProjectPayment] = useState(0);
+
     const [projectData, setProjectData] = useState([])
 
     const [duePayment, setDuePayment] = useState(0);
@@ -316,8 +318,8 @@ useEffect(() => {
                 <p className='text-[1.1vw]'>{activeOrders}</p>
             </div>
             <div className='flex flex-col border rounded-xl p-3 w-1/3'>
-                <p className='text-[1.2vw] text-purple-600'>Total Payment by Customer</p>
-                <p className='text-[1.1vw]'>₹{Math.round(receivedPayment).toLocaleString("en-IN")}</p>
+                <p className='text-[1.2vw] text-purple-600'>Total Value of Projects</p>
+                <p className='text-[1.1vw]'>₹{Math.round(duePayment).toLocaleString("en-IN")}</p>
             </div>
             <div className='flex flex-col border rounded-xl p-3 w-1/3'>
                 <p className='text-[1.2vw] text-green-600'>Payment Received</p>

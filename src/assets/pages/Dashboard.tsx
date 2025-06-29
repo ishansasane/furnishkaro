@@ -699,30 +699,40 @@ const sendInquiry = async () => {
       projects.map((project, index) => (
         <div
           key={index}
-          onClick={() => {
-            setSendProject(project);
-            setIndex(index);
-            setTax(project.totalTax);
-            setAmount(project.totalAmount);
-            setProjectDiscount(project.discount);
-            setDiscountType(project.discountType);
-            setFlag(true);
-          }}
         >
-          <DeadlineCard
-            setFlag={setFlag}
-            setTax={setTax}
-            setProjectDiscount={setProjectDiscount}
-            setAmount={setAmount}
-            setSendProject={setSendProject}
-            index={index}
-            setIndex={setIndex}
-            project={project}
-            projectName={project.projectName}
-            date={project.projectDate}
-            discountType={discountType}
-            setDiscountType={setDiscountType}
-          />
+<DeadlineCard
+  setFlag={setFlag}
+  setTax={setTax}
+  setProjectDiscount={setProjectDiscount}
+  setAmount={setAmount}
+  setSendProject={setSendProject}
+  index={index}
+  setIndex={setIndex}
+  project={project}
+  projectName={project.projectName}
+  date={project.projectDate}
+  discountType={discountType}
+  setDiscountType={setDiscountType}
+  clickFunction={() => {
+    setSendProject(project);
+    setIndex(index);
+    setTax(project.totalTax);
+    setAmount(project.totalAmount);
+    setProjectDiscount(project.discount);
+    setDiscountType(project.discountType);
+    setFlag(true);
+  }}
+  clickInverseFunction={() => {
+    setSendProject(project);
+    setIndex(index);
+    setTax(project.totalTax);
+    setAmount(project.totalAmount);
+    setProjectDiscount(project.discount);
+    setDiscountType(project.discountType);
+    setFlag(false);
+  }}
+/>
+
         </div>
       ))}
   </div>
