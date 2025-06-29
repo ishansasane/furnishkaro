@@ -1946,7 +1946,7 @@ function AddProjectForm() {
       {/* Main Content */}
       <div className="space-y-6">
         {/* Customer Details */}
-        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+        <div className="bg-white p-6 rounded-xl shadow-none border border-gray-200">
           <CustomerDetails
             customers={customers}
             selectedCustomer={selectedCustomer}
@@ -1957,7 +1957,7 @@ function AddProjectForm() {
         </div>
 
         {/* Project Details */}
-        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+        <div className="bg-white p-6 rounded-xl shadow-none border border-gray-200">
           <ProjectDetails
             selectedCustomer={selectedCustomer}
             interior={interior}
@@ -1984,7 +1984,7 @@ function AddProjectForm() {
         </div>
 
         {/* Material Selection */}
-        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+        <div className="bg-white p-6 rounded-xl shadow-none border border-gray-200">
           <MaterialSelectionComponent
             selections={selections}
             availableAreas={availableAreas}
@@ -2008,7 +2008,7 @@ function AddProjectForm() {
           />
         </div>
         {/* Measurement Section */}
-        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+        <div className="bg-white p-6 rounded-xl shadow-none border border-gray-200">
           <MeasurementSection
             selections={selections}
             units={units}
@@ -2279,7 +2279,7 @@ function AddProjectForm() {
               {additionalItems.map((item, i) => (
                 <div
                   key={i}
-                  className="bg-white p-4 rounded-lg shadow-sm border border-gray-200"
+                  className="bg-white p-4 rounded-lg shadow-none border border-gray-200"
                 >
                   <div className="flex justify-between items-center mb-3">
                     <span className="font-semibold text-sm">SR: {i + 1}</span>
@@ -2387,7 +2387,7 @@ function AddProjectForm() {
         {/* Summary and Bank Details */}
         <div className="flex flex-col md:flex-row gap-6">
           {/* Bank Details and Terms */}
-          <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 w-full md:w-1/2">
+          <div className="bg-white p-6 rounded-xl shadow-none border border-gray-200 w-full md:w-1/2">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">
               Bank Details & Terms
             </h3>

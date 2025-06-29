@@ -2304,125 +2304,118 @@ const EditProjects = ({
                       Add Item
                     </button>
                   </div>
-
-                  <table className="mt-3 w-full">
-                    <thead>
-                      <tr className="flex flex-col sm:flex-row w-full justify-between hidden sm:flex">
-                        <td className="w-full sm:w-[10%] py-1 text-xs sm:text-sm text-center">
-                          SR
-                        </td>
-                        <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm">
-                          Item Name
-                        </td>
-                        <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm">
-                          Quantity
-                        </td>
-                        <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm">
-                          Rate
-                        </td>
-                        <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm text-center">
-                          Net Rate
-                        </td>
-                        <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm">
-                          Tax (%)
-                        </td>
-                        <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm text-center">
-                          Tax Amount
-                        </td>
-                        <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm text-center">
-                          Total Amount
-                        </td>
-                        <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm">
-                          Remark
-                        </td>
-                        <td className="w-full sm:w-[10%] py-1 text-xs sm:text-sm text-center">
-                          Actions
-                        </td>
-                      </tr>
-                    </thead>
-
-                    <tbody className="flex flex-col w-full">
-                      {additionalItems.map((item, i) => (
-                        <tr
-                          key={i}
-                          className="w-full flex flex-col sm:flex-row justify-between mt-2 border-b sm:border-b-0"
-                        >
-                          <td className="w-full sm:w-[10%] py-1 text-xs sm:text-sm text-left sm:text-center before:content-['SR:_'] sm:before:content-none before:font-bold before:pr-2">
-                            {i + 1}
-                          </td>
-                          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Item_Name:_'] sm:before:content-none before:font-bold before:pr-2">
-                            <input
-                              onChange={(e) =>
-                                handleItemNameChange(i, e.target.value)
-                              }
-                              className="pl-2 w-full border rounded-lg text-xs sm:text-sm min-w-[80px]"
-                              value={item.name || ""}
-                              type="text"
-                            />
-                          </td>
-                          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Quantity:_'] sm:before:content-none before:font-bold before:pr-2">
-                            <input
-                              onChange={(e) =>
-                                handleItemQuantityChange(i, e.target.value)
-                              }
-                              className="pl-2 w-full border rounded-lg text-xs sm:text-sm min-w-[80px]"
-                              value={item.quantity || ""}
-                              type="text"
-                            />
-                          </td>
-                          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Rate:_'] sm:before:content-none before:font-bold before:pr-2">
-                            <input
-                              onChange={(e) =>
-                                handleItemRateChange(i, e.target.value)
-                              }
-                              className="pl-2 w-full border rounded-lg text-xs sm:text-sm min-w-[80px]"
-                              value={item.rate || ""}
-                              type="text"
-                            />
-                          </td>
-                          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm text-left sm:text-center before:content-['Net_Rate:_'] sm:before:content-none before:font-bold before:pr-2">
-                            {item.netRate}
-                          </td>
-                          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Tax_(%):_'] sm:before:content-none before:font-bold before:pr-2">
-                            <input
-                              onChange={(e) =>
-                                handleItemTaxChange(i, e.target.value)
-                              }
-                              className="pl-2 w-full border rounded-lg text-xs sm:text-sm min-w-[80px]"
-                              value={item.tax || ""}
-                              type="text"
-                            />
-                          </td>
-                          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm text-left sm:text-center before:content-['Tax_Amount:_'] sm:before:content-none before:font-bold before:pr-2">
-                            {item.taxAmount || 0}
-                          </td>
-                          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm text-left sm:text-center before:content-['Total_Amount:_'] sm:before:content-none before:font-bold before:pr-2">
-                            {item.totalAmount || 0}
-                          </td>
-                          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Remark:_'] sm:before:content-none before:font-bold before:pr-2">
-                            <input
-                              onChange={(e) =>
-                                handleItemRemarkChange(i, e.target.value)
-                              }
-                              className="pl-2 w-full border rounded-lg text-xs sm:text-sm min-w-[80px]"
-                              value={item.remark || ""}
-                              type="text"
-                            />
-                          </td>
-                          <td className="w-full sm:w-[10%] py-1 text-xs sm:text-sm text-left sm:text-center before:content-['Actions:_'] sm:before:content-none before:font-bold before:pr-2">
-                            <button onClick={() => handleDeleteMiscItem(i)}>
-                              <FaTrash className="text-red-500 hover:text-red-600" />
-                            </button>
-                          </td>
+                  <div className="w-full overflow-x-auto">
+                    <table className="mt-3 w-full bg-white">
+                      <thead className="hidden sm:table-header-group">
+                        <tr className="bg-gray-100 text-gray-700 text-sm font-semibold">
+                          <th className="py-3 px-4 text-center">SR</th>
+                          <th className="py-3 px-4">Item Name</th>
+                          <th className="py-3 px-4">Quantity</th>
+                          <th className="py-3 px-4">Rate</th>
+                          <th className="py-3 px-4">Net Rate</th>
+                          <th className="py-3 px-4">Tax (%)</th>
+                          <th className="py-3 px-4">Tax Amount</th>
+                          <th className="py-3 px-4">Total Amount</th>
+                          <th className="py-3 px-4">Remark</th>
+                          <th className="py-3 px-4 text-center">Actions</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+
+                      <tbody className="w-full">
+                        {additionalItems.map((item, i) => (
+                          <tr
+                            key={i}
+                            className="flex flex-col sm:table-row w-full border-b hover:bg-gray-50"
+                          >
+                            <td className="py-3 px-4 text-center text-sm before:content-['SR:_'] sm:before:content-none before:font-semibold sm:text-center">
+                              {i + 1}
+                            </td>
+
+                            <td className="py-3 px-4 before:content-['Item_Name:_'] sm:before:content-none before:font-semibold">
+                              <input
+                                onChange={(e) =>
+                                  handleItemNameChange(i, e.target.value)
+                                }
+                                className="w-[100px] border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                value={item.name || ""}
+                                type="text"
+                              />
+                            </td>
+
+                            <td className="py-3 px-4 before:content-['Quantity:_'] sm:before:content-none before:font-semibold">
+                              <input
+                                onChange={(e) =>
+                                  handleItemQuantityChange(i, e.target.value)
+                                }
+                                className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                value={item.quantity || ""}
+                                type="number"
+                                min="0"
+                              />
+                            </td>
+
+                            <td className="w-[130px] py-3 px-4 before:content-['Rate:_'] sm:before:content-none before:font-semibold">
+                              <input
+                                onChange={(e) =>
+                                  handleItemRateChange(i, e.target.value)
+                                }
+                                className="w-[130px] border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                value={item.rate || ""}
+                                type="number"
+                                min="0"
+                              />
+                            </td>
+
+                            <td className="w-[130px] py-3 px-4 text-sm text-left sm:text-center before:content-['Net_Rate:_'] sm:before:content-none before:font-semibold">
+                              INR {item.netRate?.toFixed(2) || "0.00"}
+                            </td>
+
+                            <td className="py-3 px-4 before:content-['Tax_(%):_'] sm:before:content-none before:font-semibold">
+                              <input
+                                onChange={(e) =>
+                                  handleItemTaxChange(i, e.target.value)
+                                }
+                                className="w-[70px] border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                value={item.tax || ""}
+                                type="number"
+                                min="0"
+                              />
+                            </td>
+
+                            <td className="py-3 px-4 text-sm text-left sm:text-center before:content-['Tax_Amount:_'] sm:before:content-none before:font-semibold">
+                              INR {item.taxAmount?.toFixed(2) || "0.00"}
+                            </td>
+
+                            <td className="py-3 px-4 text-sm text-left sm:text-center before:content-['Total_Amount:_'] sm:before:content-none before:font-semibold">
+                              INR {item.totalAmount?.toFixed(2) || "0.00"}
+                            </td>
+
+                            <td className="py-3 px-4 before:content-['Remark:_'] sm:before:content-none before:font-semibold">
+                              <input
+                                onChange={(e) =>
+                                  handleItemRemarkChange(i, e.target.value)
+                                }
+                                className="w-[100px] border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                value={item.remark || ""}
+                                type="text"
+                              />
+                            </td>
+
+                            <td className="py-3 px-4 text-left sm:text-center before:content-['Actions:_'] sm:before:content-none before:font-semibold">
+                              <button onClick={() => handleDeleteMiscItem(i)}>
+                                <FaTrash className="text-red-500 hover:text-red-600 w-4 h-4" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 justify-between w-full">
-              <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 w-full md:w-1/2">
+              <div className="bg-white p-6 rounded-xl shadow-none border border-gray-200 w-full md:w-1/2">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">
                   Bank Details & Terms
                 </h3>
