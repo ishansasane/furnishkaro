@@ -2022,156 +2022,7 @@ function AddProjectForm() {
             handleGroupDelete={handleGroupDelete}
           />
         </div>
-
-        {/* Quotation Section */}
-        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-          <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-4 pl-4 md:pl-4">
-            Quotation
-          </h2>
-          <div className="overflow-x-auto rounded-lg border border-gray-200">
-            <table className="w-full bg-white min-w-[800px]">
-              <thead>
-                <tr className="bg-gray-100 text-gray-700 text-xs sm:text-sm md:text-base font-semibold">
-                  <th className="py-2 px-4 text-center">SR</th>
-                  <th className="py-2 px-4">Area</th>
-                  <th className="py-2 px-4">Product Name</th>
-                  <th className="py-2 px-4">Size</th>
-                  <th className="py-2 px-4">MRP</th>
-                  <th className="py-2 px-4">Quantity</th>
-                  <th className="py-2 px-4">Subtotal</th>
-                  <th className="py-2 px-4">Tax Rate(%)</th>
-                  <th className="py-2 px-4">Tax Amount</th>
-                  <th className="py-2 px-4">Tax Amount</th>
-                  <th className="py-2 px-4">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                {selections.flatMap((selection, mainIndex) =>
-                  selection.areacollection?.map(
-                    (collection, collectionIndex) => {
-                      const item = collection.items?.[0];
-                      const qty = collection.quantities?.[0] || 0;
-                      if (!item) return null;
-
-                      const calculatedMRP = (
-                        item[4] *
-                        parseFloat(collection.measurement.quantity || "0")
-                      ).toFixed(2);
-                      const subtotal = (
-                        item[4] *
-                        parseFloat(collection.measurement.quantity || "0") *
-                        qty
-                      ).toFixed(2);
-                      const taxAmount =
-                        collection.totalTax?.[0]?.toFixed(2) || "0.00";
-                      const totalAmount =
-                        collection.totalAmount?.[0]?.toFixed(2) || "0.00";
-
-                      return (
-                        <tr
-                          key={`${mainIndex}-${collectionIndex}`}
-                          className="border-b border-gray-200 hover:bg-gray-50"
-                        >
-                          <td className="py-2 px-4 text-center text-sm">
-                            {collectionIndex + 1}
-                          </td>
-                          <td className="py-2 px-4 text-sm">
-                            {selection.area}
-                          </td>
-                          <td className="py-2 px-4 text-sm">
-                            {collection.productGroup?.[0] || "N/A"}
-                          </td>
-                          <td className="py-2 px-4 text-sm">
-                            {collection.measurement.width &&
-                            collection.measurement.height
-                              ? `${collection.measurement.width} x ${
-                                  collection.measurement.height
-                                } ${collection.measurement.unit || ""}`
-                              : "N/A"}
-                          </td>
-                          <td className="py-2 px-4 text-sm">
-                            <input
-                              type="number"
-                              className="w-[120px] border border-gray-300 rounded px-2 py-1 text-sm"
-                              value={calculatedMRP}
-                              onChange={(e) =>
-                                handleMRPChange(
-                                  mainIndex,
-                                  collectionIndex,
-                                  e.target.value,
-                                  collection.measurement.quantity,
-                                  item[5],
-                                  qty
-                                )
-                              }
-                            />
-                          </td>
-                          <td className="py-2 px-4 text-sm">
-                            <input
-                              type="number"
-                              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
-                              value={qty}
-                              onChange={(e) =>
-                                handleQuantityChange(
-                                  `${mainIndex}-${collectionIndex}`,
-                                  e.target.value,
-                                  mainIndex,
-                                  collectionIndex,
-                                  collection.measurement.quantity,
-                                  parseFloat(item[4]),
-                                  parseFloat(item[5]),
-                                  0
-                                )
-                              }
-                            />
-                          </td>
-                          <td className="py-2 px-4 text-sm">
-                            INR{" "}
-                            {(
-                              parseFloat(item[4]) *
-                              parseFloat(
-                                collection.measurement.quantity || "0"
-                              ) *
-                              parseFloat(qty || "0")
-                            ).toFixed(2)}
-                          </td>
-
-                          <td className="py-2 px-4 text-sm">
-                            <input
-                              type="number"
-                              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
-                              value={item[5]}
-                              onChange={(e) =>
-                                handleTaxChange(
-                                  mainIndex,
-                                  collectionIndex,
-                                  parseFloat(e.target.value),
-                                  item[4],
-                                  collection.measurement.quantity,
-                                  qty
-                                )
-                              }
-                            />
-                          </td>
-
-                          <td className="py-2 px-4 text-sm">
-                            {item[5] || "0"}%
-                          </td>
-                          <td className="py-2 px-4 text-sm">INR {taxAmount}</td>
-                          <td className="py-2 px-4 text-sm">
-                            INR {totalAmount}
-                          </td>
-                        </tr>
-                      );
-                    }
-                  )
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Miscellaneous Section */}
+                {/* Miscellaneous Section */}
         <div className="mt-6 p-6 bg-gray-50 rounded-lg border border-gray-200">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl md:text-2xl font-semibold text-gray-800">
@@ -2384,6 +2235,155 @@ function AddProjectForm() {
             </div>
           </div>
         </div>
+
+        {/* Quotation Section */}
+        <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+          <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-4 pl-4 md:pl-4">
+            Quotation
+          </h2>
+          <div className="overflow-x-auto rounded-lg border border-gray-200">
+            <table className="w-full bg-white min-w-[800px]">
+              <thead>
+                <tr className="bg-gray-100 text-gray-700 text-xs sm:text-sm md:text-base font-semibold">
+                  <th className="py-2 px-4 text-center">SR</th>
+                  <th className="py-2 px-4">Area</th>
+                  <th className="py-2 px-4">Product Name</th>
+                  <th className="py-2 px-4">Size</th>
+                  <th className="py-2 px-4">MRP</th>
+                  <th className="py-2 px-4">Quantity</th>
+                  <th className="py-2 px-4">Subtotal</th>
+                  <th className="py-2 px-4">Tax Rate(%)</th>
+                  <th className="py-2 px-4">Tax Amount</th>
+                  <th className="py-2 px-4">Tax Amount</th>
+                  <th className="py-2 px-4">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {selections.flatMap((selection, mainIndex) =>
+                  selection.areacollection?.map(
+                    (collection, collectionIndex) => {
+                      const item = collection.items?.[0];
+                      const qty = collection.quantities?.[0] || 0;
+                      if (!item) return null;
+
+                      const calculatedMRP = (
+                        item[4] *
+                        parseFloat(collection.measurement.quantity || "0")
+                      ).toFixed(2);
+                      const subtotal = (
+                        item[4] *
+                        parseFloat(collection.measurement.quantity || "0") *
+                        qty
+                      ).toFixed(2);
+                      const taxAmount =
+                        collection.totalTax?.[0]?.toFixed(2) || "0.00";
+                      const totalAmount =
+                        collection.totalAmount?.[0]?.toFixed(2) || "0.00";
+
+                      return (
+                        <tr
+                          key={`${mainIndex}-${collectionIndex}`}
+                          className="border-b border-gray-200 hover:bg-gray-50"
+                        >
+                          <td className="py-2 px-4 text-center text-sm">
+                            {collectionIndex + 1}
+                          </td>
+                          <td className="py-2 px-4 text-sm">
+                            {selection.area}
+                          </td>
+                          <td className="py-2 px-4 text-sm">
+                            {collection.productGroup?.[0] || "N/A"}
+                          </td>
+                          <td className="py-2 px-4 text-sm">
+                            {collection.measurement.width &&
+                            collection.measurement.height
+                              ? `${collection.measurement.width} x ${
+                                  collection.measurement.height
+                                } ${collection.measurement.unit || ""}`
+                              : "N/A"}
+                          </td>
+                          <td className="py-2 px-4 text-sm">
+                            <input
+                              type="number"
+                              className="w-[120px] border border-gray-300 rounded px-2 py-1 text-sm"
+                              value={calculatedMRP}
+                              onChange={(e) =>
+                                handleMRPChange(
+                                  mainIndex,
+                                  collectionIndex,
+                                  e.target.value,
+                                  collection.measurement.quantity,
+                                  item[5],
+                                  qty
+                                )
+                              }
+                            />
+                          </td>
+                          <td className="py-2 px-4 text-sm">
+                            <input
+                              type="number"
+                              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                              value={qty}
+                              onChange={(e) =>
+                                handleQuantityChange(
+                                  `${mainIndex}-${collectionIndex}`,
+                                  e.target.value,
+                                  mainIndex,
+                                  collectionIndex,
+                                  collection.measurement.quantity,
+                                  parseFloat(item[4]),
+                                  parseFloat(item[5]),
+                                  0
+                                )
+                              }
+                            />
+                          </td>
+                          <td className="py-2 px-4 text-sm">
+                            INR{" "}
+                            {(
+                              parseFloat(item[4]) *
+                              parseFloat(
+                                collection.measurement.quantity || "0"
+                              ) *
+                              parseFloat(qty || "0")
+                            ).toFixed(2)}
+                          </td>
+
+                          <td className="py-2 px-4 text-sm">
+                            <input
+                              type="number"
+                              className="w-full border border-gray-300 rounded px-2 py-1 text-sm"
+                              value={item[5]}
+                              onChange={(e) =>
+                                handleTaxChange(
+                                  mainIndex,
+                                  collectionIndex,
+                                  parseFloat(e.target.value),
+                                  item[4],
+                                  collection.measurement.quantity,
+                                  qty
+                                )
+                              }
+                            />
+                          </td>
+
+                          <td className="py-2 px-4 text-sm">
+                            {item[5] || "0"}%
+                          </td>
+                          <td className="py-2 px-4 text-sm">INR {taxAmount}</td>
+                          <td className="py-2 px-4 text-sm">
+                            INR {totalAmount}
+                          </td>
+                        </tr>
+                      );
+                    }
+                  )
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         {/* Summary and Bank Details */}
         <div className="flex flex-col md:flex-row gap-6">
           {/* Bank Details and Terms */}
