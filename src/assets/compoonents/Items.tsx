@@ -1,60 +1,20 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useEffect, useState, useRef } from "react";
+import { SetStateAction, useEffect, useState, useRef } from "react";
 import { ChevronFirst } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../Redux/Store";
-import { setItemData } from "../Redux/dataSlice";
+import { RootState } from "../Redux/Store.ts";
+import { setItemData } from "../Redux/dataSlice.ts";
 import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
 
 const getItemsData = async () => {
-  try {
-    const response = await fetch(
-      "https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts"
-    );
-    const data = await response.json();
-    return data.body || [];
-  } catch (error) {
-    console.error("Error fetching items:", error);
-    return [];
-  }
-};
-
-// Helper function to parse dates from different formats
-const parseDate = (dateString: any): Date | null => {
-  if (!dateString) return null;
-
-  // Handle ISO format (2025-05-22T10:41:58.299Z)
-  if (typeof dateString === "string" && dateString.includes("T")) {
-    return new Date(dateString);
-  }
-
-  // Handle UK format (dd/mm/yyyy)
-  if (typeof dateString === "string" && dateString.includes("/")) {
-    const parts = dateString.split("/");
-    if (parts.length === 3) {
-      const day = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10) - 1; // Months are 0-indexed
-      const year = parseInt(parts[2], 10);
-      return new Date(year, month, day);
-    }
-  }
-
-  // Handle invalid dates
-  return null;
-};
-
-// Helper function to format date consistently
-const formatDate = (date: Date | null): string => {
-  if (!date || isNaN(date.getTime())) return "";
-
-  const day = date.getDate().toString().padStart(2, "0");
-  const month = (date.getMonth() + 1).toString().padStart(2, "0");
-  const year = date.getFullYear();
-
-  return `${day}/${month}/${year}`;
+  const response = await fetch(
+    "https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts"
+  );
+  const data = await response.json();
+  return data.body;
 };
 
 const Items = () => {
@@ -67,32 +27,38 @@ const Items = () => {
     ["Fixed area items", ["Piece", "Roll"]],
     ["Tailoring", ["Parts", "Sq. Feet"]],
   ];
-
   const [search, setSearch] = useState("");
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState([]);
   const [deleted, setDeleted] = useState(false);
   const [editing, setEditing] = useState(false);
   const [productName, setProductName] = useState("");
+  const navigate = useNavigate();
+
   const [description, setDescription] = useState("");
-  const [selectedGroupType, setSelectedGroupType] = useState("");
+  const [groupType, setGroupType] = useState("");
   const [sellingUnit, setSellingUnit] = useState("");
   const [mrp, setMrp] = useState("");
   const [taxRate, setTaxRate] = useState("");
-  const [needsTailoring, setNeedsTailoring] = useState(false);
-  const [openMenu, setOpenMenu] = useState(-1);
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
-  const [fileError, setFileError] = useState<string | null>(null);
+  const [publish, setPublish] = useState(false);
+  const [accessory, setAccessory] = useState(false);
 
-  const navigate = useNavigate();
   const dispatch = useDispatch();
   const itemData = useSelector((state: RootState) => state.data.items);
+
+  const [needsTailoring, setNeedsTailoring] = useState(false);
+  const [selectedGroupType, setSelectedGroupType] = useState("");
+  const selectedUnits =
+    groupTypes.find((type) => type[0] === selectedGroupType)?.[1] || [];
+
+  const [openMenu, setOpenMenu] = useState(-1);
   const menuRefs = useRef<(HTMLDivElement | null)[]>([]);
   const tableRef = useRef<HTMLDivElement>(null);
 
-  const selectedUnits =
-    groupTypes.find((type) => type[0] === selectedGroupType)?.[1] || [];
+  // State for import modal and drag-and-drop
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+  const [fileError, setFileError] = useState<string | null>(null);
 
   const toggleMenu = (index: number) => {
     setOpenMenu(openMenu === index ? -1 : index);
@@ -147,29 +113,25 @@ const Items = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const cached = localStorage.getItem("itemData");
-        const oneHour = 60 * 60 * 1000;
+      const cached = localStorage.getItem("itemData");
+      const oneHour = 60 * 60 * 1000;
 
-        if (cached) {
-          const { data, time } = JSON.parse(cached);
-          if (Date.now() - time < oneHour && Array.isArray(data)) {
-            dispatch(setItemData(data));
-            setItems(data);
-            return;
-          }
+      if (cached) {
+        const { data, time } = JSON.parse(cached);
+        if (Date.now() - time < oneHour && Array.isArray(data)) {
+          dispatch(setItemData(data));
+          setItems(data);
+          return;
         }
-
-        const freshData = await getItemsData();
-        dispatch(setItemData(freshData));
-        setItems(freshData);
-        localStorage.setItem(
-          "itemData",
-          JSON.stringify({ data: freshData, time: Date.now() })
-        );
-      } catch (error) {
-        console.error("Error fetching data:", error);
       }
+
+      const freshData = await getItemsData();
+      dispatch(setItemData(freshData));
+      setItems(freshData);
+      localStorage.setItem(
+        "itemData",
+        JSON.stringify({ data: freshData, time: Date.now() })
+      );
     };
 
     fetchData();
@@ -222,13 +184,13 @@ const Items = () => {
           },
           credentials: "include",
           body: JSON.stringify({
-            productName: item[0] || "",
-            description: item[1] || "",
-            groupTypes: item[2] || "",
-            sellingUnit: item[3] || "",
-            mrp: item[4] || "",
-            taxRate: item[5] || "",
-            needsTailoring: item[7] === "TRUE" || item[7] === true,
+            productName: item[0],
+            description: item[1],
+            groupTypes: item[2],
+            sellingUnit: item[3],
+            mrp: item[4],
+            taxRate: item[5],
+            needsTailoring: item[7],
             date: formattedDate,
           }),
         }
@@ -375,13 +337,16 @@ const Items = () => {
       setIsFormOpen(false);
       setEditing(false);
       setOpenMenu(-1);
-      setProductName("");
-      setDescription("");
-      setSelectedGroupType("");
-      setSellingUnit("");
-      setMrp("");
-      setTaxRate("");
-      setNeedsTailoring(false);
+      setFormData({
+        productName: "",
+        productDetails: "",
+        groupType: "",
+        sellingUnit: "",
+        mrp: "",
+        taxRate: "",
+        additionalInputs: {},
+        sideDropdown: "",
+      });
     } catch (error) {
       console.error("Edit error:", error);
       alert("Something went wrong while updating the item.");
@@ -416,12 +381,12 @@ const Items = () => {
           },
           credentials: "include",
           body: JSON.stringify({
-            productName,
-            description,
-            groupTypes: selectedGroupType,
-            sellingUnit,
-            mrp,
-            taxRate,
+            productName: newItem.name,
+            description: newItem.description,
+            groupTypes: newItem.groupType,
+            sellingUnit: newItem.costingType,
+            mrp: newItem.mrp,
+            taxRate: newItem.taxrate,
             needsTailoring,
             date: formattedDate,
           }),
@@ -441,12 +406,16 @@ const Items = () => {
       );
       alert("Item Added");
       setIsFormOpen(false);
-      setProductName("");
-      setDescription("");
-      setSelectedGroupType("");
-      setSellingUnit("");
-      setMrp("");
-      setTaxRate("");
+      setFormData({
+        productName: "",
+        productDetails: "",
+        groupType: "",
+        sellingUnit: "",
+        mrp: "",
+        taxRate: "",
+        additionalInputs: {},
+        sideDropdown: "",
+      });
       setNeedsTailoring(false);
     } catch (error) {
       console.error("Error adding item:", error);
@@ -455,88 +424,115 @@ const Items = () => {
   };
 
   // Handle file import
-  const handleFileImport = async (file: File) => {
-    if (!file.name.endsWith(".xlsx") && !file.name.endsWith(".xls")) {
-      setFileError("Please upload a valid Excel file (.xlsx or .xls)");
-      return;
-    }
+ const handleFileImport = async (file: File) => {
+  if (!file.name.endsWith(".xlsx") && !file.name.endsWith(".xls")) {
+    setFileError("Please upload a valid Excel file (.xlsx or .xls)");
+    return;
+  }
 
-    try {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data, { type: "array" });
-      const sheetName = workbook.SheetNames[0];
-      const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+  try {
+    const data = await file.arrayBuffer();
+    const workbook = XLSX.read(data, { type: "array", cellDates: true });
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-      const importedItems = jsonData.map((row: any) => [
+    const importedItems = jsonData.map((row: any) => {
+      let addedDate = "";
+      if (row["Added Date"]) {
+        try {
+          const date = new Date(row["Added Date"]);
+          addedDate = isNaN(date.getTime())
+            ? new Date().toLocaleDateString("en-GB")
+            : date.toLocaleDateString("en-GB");
+        } catch {
+          addedDate = new Date().toLocaleDateString("en-GB");
+        }
+      } else {
+        addedDate = new Date().toLocaleDateString("en-GB");
+      }
+
+      const mrpValue = row["MRP"] != null ? String(row["MRP"]) : "";
+      const taxRateValue = row["Tax Rate"] != null ? String(row["Tax Rate"]) : "";
+
+      const needsTailoringValue =
+        row["Needs Tailoring"] === "Yes" ||
+        row["Needs Tailoring"] === true ||
+        row["Needs Tailoring"] === "TRUE" ||
+        row["Needs Tailoring"] === 1;
+
+      return [
         row["Product Name"] || "",
         row["Description"] || "",
         row["Group Type"] || "",
         row["Costing Type"] || "",
-        row["MRP"] || "",
-        row["Tax Rate"] || "",
-        row["Added Date"]
-          ? new Date(row["Added Date"]).toLocaleDateString("en-GB")
-          : new Date().toLocaleDateString("en-GB"),
-        row["Needs Tailoring"] === "Yes" || row["Needs Tailoring"] === true,
-      ]);
+        mrpValue,
+        taxRateValue,
+        addedDate,
+        needsTailoringValue,
+      ];
+    });
 
-      const groupOptions = groupTypes.map((type) => type[0]);
-      const validItems = importedItems.filter(
-        (item) =>
-          item[0] &&
-          groupOptions.includes(item[2]) &&
-          groupTypes.find((type) => type[0] === item[2])?.[1]?.includes(item[3])
+    // ✅ Improved Validation: Case-insensitive + trimmed matching
+    const validItems = importedItems.filter((item) => {
+      const productName = item[0]?.toString().trim();
+      const groupType = item[2]?.toString().trim().toLowerCase();
+      const costingType = item[3]?.toString().trim().toLowerCase();
+
+      const validGroup = groupOptions.some(
+        (group) => group.toLowerCase() === groupType
       );
 
-      if (validItems.length === 0) {
-        setFileError("No valid items found in the Excel file");
-        return;
-      }
+      const validSellingUnit =
+        validGroup &&
+        sellingUnits[
+          groupOptions.find((g) => g.toLowerCase() === groupType)!
+        ]?.some((unit) => unit.toLowerCase() === costingType);
 
-      for (const item of validItems) {
-        const response = await fetch(
-          "https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            credentials: "include",
-            body: JSON.stringify({
-              productName: item[0],
-              description: item[1],
-              groupTypes: item[2],
-              sellingUnit: item[3],
-              mrp: item[4],
-              taxRate: item[5],
-              needsTailoring: item[7],
-              date: item[6],
-            }),
-          }
-        );
+      return productName && validGroup && validSellingUnit;
+    });
 
-        if (!response.ok) {
-          throw new Error(`Failed to import item: ${item[0]}`);
-        }
-      }
-
-      const updatedData = await getItemsData();
-      dispatch(setItemData(updatedData));
-      setItems(updatedData);
-      localStorage.setItem(
-        "itemData",
-        JSON.stringify({ data: updatedData, time: Date.now() })
-      );
-      setIsImportModalOpen(false);
-      setFileError(null);
-      alert("Items imported successfully");
-    } catch (error) {
-      console.error("Error importing file:", error);
-      setFileError("Failed to import Excel file");
+    if (validItems.length === 0) {
+      setFileError("No valid items found in the Excel file. Please check data format.");
+      return;
     }
-  };
 
+    const response = await fetch(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/importproducts",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          items: validItems,
+        }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to import items");
+    }
+
+    const updatedData = await getItemsData();
+    dispatch(setItemData(updatedData));
+    setItems(updatedData);
+    localStorage.setItem(
+      "itemData",
+      JSON.stringify({ data: updatedData, time: Date.now() })
+    );
+    setIsImportModalOpen(false);
+    setFileError(null);
+    alert("Items imported successfully");
+  } catch (error) {
+    console.error("Error importing file:", error);
+    setFileError("Failed to import Excel file");
+  }
+};
+
+
+  // Handle drag and drop events
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragging(true);
@@ -555,6 +551,7 @@ const Items = () => {
     }
   };
 
+  // Handle file input change
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -562,40 +559,43 @@ const Items = () => {
     }
   };
 
-  const handleExportPDF = () => {
-    const doc = new jsPDF();
-    doc.text("Products List", 14, 20);
-    const columns = [
-      "Product Name",
-      "Description",
-      "Costing Type",
-      "Group Type",
-      "MRP",
-      "Tax Rate",
-      "Added Date",
-      "Needs Tailoring",
-    ];
-    const rows = items.map((item: any) => [
-      item[0] || "",
-      item[1] || "",
-      item[3] || "",
-      item[2] || "",
-      item[4] || "",
-      item[5] || "",
-      item[6] ? new Date(item[6]).toLocaleDateString("en-GB") : "",
-      item[7] ? "Yes" : "No",
-    ]);
-    autoTable(doc, {
-      head: [columns],
-      body: rows,
-      startY: 30,
-      theme: "striped",
-      styles: { fontSize: 10 },
-      headStyles: { fillColor: [50, 150, 150] },
-    });
-    doc.save("products-table.pdf");
-  };
+  // Export table data as PDF
+// Export table data as PDF
+const handleExportPDF = () => {
+  const doc = new jsPDF();
+  doc.text("Products List", 14, 20);
+  const columns = [
+    "Product Name",
+    "Description",
+    "Costing Type",
+    "Group Type",
+    "MRP",
+    "Tax Rate",
+    "Added Date",
+    "Needs Tailoring",
+  ];
+  const rows = items.map((item: any) => [
+    item[0] || "",
+    item[1] || "",
+    item[3] || "",
+    item[2] || "",
+    item[4] || "",
+    item[5] || "",
+    item[6] ? new Date(item[6]).toLocaleDateString("en-GB") : "",
+    item[7] ? "Yes" : "No",
+  ]);
+  autoTable(doc, {
+    head: [columns],
+    body: rows,
+    startY: 30,
+    theme: "striped",
+    styles: { fontSize: 10 },
+    headStyles: { fillColor: [50, 150, 150] },
+  });
+  doc.save("products-table.pdf");
+};
 
+  // Export table data as Excel
   const handleExportExcel = () => {
     if (!items || items.length === 0) {
       alert("No data available to export.");
@@ -618,11 +618,11 @@ const Items = () => {
         Description: item[1] || "",
         "Group Type": item[2] || "",
         "Costing Type": item[3] || "",
-        MRP: item[4] || "",
-        "Tax Rate": item[5] || "",
+        MRP: item[4] != null ? Number(item[4]) || "" : "",
+        "Tax Rate": item[5] != null ? Number(item[5]) || "" : "",
         "Added Date": item[6]
           ? new Date(item[6]).toLocaleDateString("en-GB")
-          : "",
+          : new Date().toLocaleDateString("en-GB"),
         "Needs Tailoring": item[7] ? "Yes" : "No",
       }));
       const worksheet = XLSX.utils.json_to_sheet(rows, { header: columns });
@@ -654,6 +654,7 @@ const Items = () => {
     }
   };
 
+  // Filter items based on search input
   const filteredItems = items.filter((item: any) =>
     [item[0], item[1], item[2], item[3]]
       .map((field) => (field || "").toString().toLowerCase())
@@ -711,13 +712,14 @@ const Items = () => {
             </div>
             <button
               className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-              onClick={() => setIsFormOpen(true)}
+              onClick={() => navigate("/add-product")}
             >
               <i className="fas fa-plus"></i> + Add Product
             </button>
           </div>
         </div>
 
+        {/* Import Modal */}
         {isImportModalOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-6 w-full max-w-md">
@@ -784,14 +786,11 @@ const Items = () => {
 
         {isFormOpen && (
           <div className="max-w-3xl mx-auto p-6 bg-white rounded-lg shadow-md">
-            <h2 className="text-2xl font-semibold mb-4">
-              {editing ? "Edit Product" : "Add New Product"}
-            </h2>
+            <h2 className="text-2xl font-semibold mb-4">Product Details</h2>
             <form
               className="space-y-4"
               onSubmit={(e) => {
                 e.preventDefault();
-                editing ? editItemData() : handleSubmit();
               }}
             >
               <div>
@@ -800,6 +799,7 @@ const Items = () => {
                 </label>
                 <input
                   type="text"
+                  name="productName"
                   value={productName}
                   placeholder="Enter Product Name"
                   onChange={(e) => setProductName(e.target.value)}
@@ -811,6 +811,7 @@ const Items = () => {
               <div>
                 <label className="block font-medium">Description</label>
                 <textarea
+                  name="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Enter Description"
@@ -824,11 +825,9 @@ const Items = () => {
                     Group Type <span className="text-red-500">*</span>
                   </label>
                   <select
+                    name="groupType"
                     value={selectedGroupType}
-                    onChange={(e) => {
-                      setSelectedGroupType(e.target.value);
-                      setSellingUnit("");
-                    }}
+                    onChange={(e) => setSelectedGroupType(e.target.value)}
                     className="w-full p-2 border rounded-md"
                     required
                   >
@@ -846,11 +845,11 @@ const Items = () => {
                     Selling Unit <span className="text-red-500">*</span>
                   </label>
                   <select
+                    name="sellingUnit"
                     value={sellingUnit}
                     onChange={(e) => setSellingUnit(e.target.value)}
                     className="w-full p-2 border rounded-md"
                     required
-                    disabled={!selectedGroupType}
                   >
                     <option value="">Select Selling Unit</option>
                     {selectedUnits.map((unit) => (
@@ -866,7 +865,8 @@ const Items = () => {
                 <div>
                   <label className="block font-medium">MRP</label>
                   <input
-                    type="number"
+                    type="text"
+                    name="mrp"
                     value={mrp}
                     onChange={(e) => setMrp(e.target.value)}
                     placeholder="Enter MRP"
@@ -876,14 +876,15 @@ const Items = () => {
                 <div>
                   <label className="block font-medium">Tax Rate</label>
                   <input
-                    type="number"
+                    type="text"
+                    name="taxRate"
                     value={taxRate}
                     onChange={(e) => setTaxRate(e.target.value)}
                     placeholder="Enter Tax Rate"
                     className="w-full p-2 border rounded-md"
                   />
                 </div>
-                <div className="flex items-center gap-2">
+                <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Needs Tailoring
                   </label>
@@ -910,11 +911,10 @@ const Items = () => {
                     setEditing(false);
                     setProductName("");
                     setDescription("");
-                    setSelectedGroupType("");
+                    setGroupType("");
                     setSellingUnit("");
                     setMrp("");
                     setTaxRate("");
-                    setNeedsTailoring(false);
                   }}
                   className="px-4 py-2 border !rounded-lg"
                 >
@@ -923,8 +923,9 @@ const Items = () => {
                 <button
                   type="submit"
                   className="px-4 py-2 bg-blue-600 text-white !rounded-lg"
+                  onClick={editItemData}
                 >
-                  {editing ? "Update" : "Save"}
+                  Save
                 </button>
               </div>
             </form>
@@ -944,86 +945,75 @@ const Items = () => {
             onChange={(e) => setSearch(e.target.value)}
             className="w-full px-4 py-2 border rounded-lg mb-4"
           />
-          {filteredItems.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              No products found
-            </div>
-          ) : (
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="text-gray-500 bg-sky-50">
-                  <th className="py-3 px-4">Product Name</th>
-                  <th className="py-3 px-4">Description</th>
-                  <th className="py-3 px-4">Costing Type</th>
-                  <th className="py-3 px-4">Group Type</th>
-                  <th className="py-3 px-4">Added Date</th>
-                  <th className="py-3 px-4">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredItems.map((item: any, index: number) => {
-                  const date = parseDate(item[6]);
-                  const formattedDate = formatDate(date);
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="text-gray-500 bg-sky-50">
+                <th className="py-3 px-4">Product Name</th>
+                <th className="py-3 px-4">Description</th>
+                <th className="py-3 px-4">Costing Type</th>
+                <th className="py-3 px-4">Group Type</th>
+                <th className="py-3 px-4">Added Date</th>
+                <th className="py-3 px-4">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredItems &&
+                filteredItems.map((item: any, index: number) => (
+                  <tr key={index} className="border-t relative hover:bg-sky-50">
+                    <td onClick={() => editMenu(item)} className="py-2 px-4">
+                      {item[0]}
+                    </td>
+                    <td className="py-2 px-4">{item[1]}</td>
+                    <td className="py-2 px-4">{item[3]}</td>
+                    <td className="py-2 px-4">{item[2]}</td>
+                    <td className="py-2 px-4">
+                      {item[6]
+                        ? new Date(item[6]).toLocaleDateString("en-GB")
+                        : ""}
+                    </td>
 
-                  return (
-                    <tr
-                      key={index}
-                      className="border-t relative hover:bg-sky-50"
-                    >
-                      <td
-                        onClick={() => editMenu(item)}
-                        className="py-2 px-4 cursor-pointer hover:text-blue-600"
+                    <td className="py-2 px-4 relative">
+                      <button
+                        onClick={() => toggleMenu(index)}
+                        className="p-2 rounded hover:bg-gray-200 text-gray-600 text-xl"
+                        aria-expanded={openMenu === index}
+                        aria-controls={`menu-${index}`}
                       >
-                        {item[0]}
-                      </td>
-                      <td className="py-2 px-4">{item[1]}</td>
-                      <td className="py-2 px-4">{item[3]}</td>
-                      <td className="py-2 px-4">{item[2]}</td>
-                      <td className="py-2 px-4">{formattedDate}</td>
-                      <td className="py-2 px-4 relative">
+                        ⋮
+                      </button>
+                      <div
+                        id={`menu-${index}`}
+                        className={`absolute right-4 top-10 w-32 bg-white shadow-md border rounded-md z-50 transition-all duration-200 ease-in-out ${
+                          openMenu === index
+                            ? "opacity-100 scale-100"
+                            : "opacity-0 scale-95 pointer-events-none"
+                        }`}
+                        ref={(el) => (menuRefs.current[index] = el)}
+                      >
                         <button
-                          onClick={() => toggleMenu(index)}
-                          className="p-2 rounded hover:bg-gray-200 text-gray-600 text-xl"
-                          aria-expanded={openMenu === index}
-                          aria-controls={`menu-${index}`}
+                          className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                          onClick={() => editMenu(item)}
                         >
-                          ⋮
+                          Edit
                         </button>
-                        <div
-                          id={`menu-${index}`}
-                          className={`absolute right-4 top-10 w-32 bg-white shadow-md border rounded-md z-50 transition-all duration-200 ease-in-out ${
-                            openMenu === index
-                              ? "opacity-100 scale-100"
-                              : "opacity-0 scale-95 pointer-events-none"
-                          }`}
-                          ref={(el) => (menuRefs.current[index] = el)}
+                        <button
+                          className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
+                          onClick={() => duplicateItem(item, index)}
                         >
-                          <button
-                            className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                            onClick={() => editMenu(item)}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="block w-full text-left px-4 py-2 text-sm hover:bg-gray-100"
-                            onClick={() => duplicateItem(item, index)}
-                          >
-                            Duplicate
-                          </button>
-                          <button
-                            className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-100"
-                            onClick={() => deleteItem(item[0])}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
+                          Duplicate
+                        </button>
+                        <button
+                          className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-100"
+                          onClick={() => deleteItem(item[0])}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

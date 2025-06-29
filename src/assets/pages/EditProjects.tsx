@@ -1888,12 +1888,12 @@ const EditProjects = ({
           <p className=" font-semibold">Order Overview</p>
           <button
             onClick={goBack}
-            className="mb-4 px-3 py-1 text-white bg-red-500 rounded"
+            className="mb-4 px-3 py-1 text-white bg-red-500 !rounded"
           >
             ← Back
           </button>
         </div>
-        <div className="flex flex-col sm:flex-row w-full max-w-full justify-between mb-2 sm:mb-3 bg-sky-50 px-1 sm:!px-4 py-1 sm:!py-4  rounded-lg">
+        <div className="flex flex-col sm:flex-row w-full max-w-full justify-between mb-2 sm:mb-3 bg-sky-50 px-1 sm:!px-4 py-1 sm:!py-4  !rounded-lg">
           <button
             className={`w-full sm:w-auto text-sm sm:text-base ${
               navState === "Overview" ? "text-sky-700 font-semibold" : ""
@@ -1996,14 +1996,14 @@ const EditProjects = ({
               <button
                 onClick={() => setNavState("Tasks")}
                 style={{ borderRadius: "8px" }}
-                className="rounded-lg border px-2 h-8 bg-white"
+                className="!rounded-lg border px-2 h-8 bg-white"
               >
                 Back
               </button>
               <button
                 onClick={() => setNavState("Customer & Project Details")}
                 style={{ borderRadius: "8px" }}
-                className="rounded-lg text-white border px-2 h-8 bg-sky-600"
+                className="!rounded-lg text-white border px-2 h-8 bg-sky-600"
               >
                 Next
               </button>
@@ -2044,14 +2044,14 @@ const EditProjects = ({
               <button
                 onClick={() => setNavState("Overview")}
                 style={{ borderRadius: "8px" }}
-                className="rounded-lg border px-2 h-8 bg-white"
+                className="!rounded-lg border px-2 h-8 bg-white"
               >
                 Back
               </button>
               <button
                 onClick={() => setNavState("Material Selection")}
                 style={{ borderRadius: "8px" }}
-                className="rounded-lg text-white border px-2 h-8 bg-sky-600"
+                className="!rounded-lg text-white border px-2 h-8 bg-sky-600"
               >
                 Next
               </button>
@@ -2085,14 +2085,14 @@ const EditProjects = ({
               <button
                 onClick={() => setNavState("Customer & Project Details")}
                 style={{ borderRadius: "8px" }}
-                className="rounded-lg border px-2 h-8 bg-white"
+                className="!rounded-lg border px-2 h-8 bg-white"
               >
                 Back
               </button>
               <button
                 onClick={() => setNavState("Measurement")}
                 style={{ borderRadius: "8px" }}
-                className="rounded-lg text-white border px-2 h-8 bg-sky-600"
+                className="!rounded-lg text-white border px-2 h-8 bg-sky-600"
               >
                 Next
               </button>
@@ -2115,14 +2115,14 @@ const EditProjects = ({
               <button
                 onClick={() => setNavState("Material Selection")}
                 style={{ borderRadius: "8px" }}
-                className="rounded-lg border px-2 h-8 bg-white"
+                className="!rounded-lg border px-2 h-8 bg-white"
               >
                 Back
               </button>
               <button
                 onClick={() => setNavState("Quotation")}
                 style={{ borderRadius: "8px" }}
-                className="rounded-lg text-white border px-2 h-8 bg-sky-600"
+                className="!rounded-lg text-white border px-2 h-8 bg-sky-600"
               >
                 Next
               </button>
@@ -2131,7 +2131,7 @@ const EditProjects = ({
         )}
         {navState == "Quotation" && (
           <div className="flex flex-col gap-3">
-            <div className="flex flex-col p-6 border rounded-lg w-full shadow-2xl">
+            <div className="flex flex-col p-6 border !rounded-lg w-full shadow-2xl">
               <p className="">Quotation</p>
               <div className="flex flex-col gap-3 w-full">
                 {selections.map((selection, mainindex) => (
@@ -2235,7 +2235,7 @@ const EditProjects = ({
                                                   itemIndex
                                                 )
                                               }
-                                              className="border w-max sm:w-4/5 px-2 py-1 rounded text-xs sm:text-sm min-w-[80px]"
+                                              className="border w-max sm:w-4/5 px-2 py-1 !rounded text-xs sm:text-sm min-w-[80px]"
                                             />
                                             <p className="text-[10px] sm:text-xs text-gray-600 mt-1">
                                               {item[3]}
@@ -2290,14 +2290,14 @@ const EditProjects = ({
                   </div>
                 ))}
               </div>
-              <div className="border p-4 sm:p-6 rounded-lg w-full flex flex-col">
+              <div className="border p-4 sm:p-6 !rounded-lg w-full flex flex-col">
                 <p className="text-base sm:text-lg font-semibold">
                   Miscellaneous
                 </p>
                 <div className="flex w-full flex-col">
                   <div className="flex flex-row justify-between items-center mt-4">
                     <button
-                      className="flex flex-row gap-2 rounded-xl bg-sky-50 hover:bg-sky-100 items-center px-2 py-1 text-sm"
+                      className="flex flex-row gap-2 !rounded-xl bg-sky-50 hover:bg-sky-100 items-center px-2 py-1 text-sm"
                       onClick={handleAddMiscItem}
                     >
                       <FaPlus className="text-sky-500" />
@@ -2355,7 +2355,7 @@ const EditProjects = ({
                               onChange={(e) =>
                                 handleItemNameChange(i, e.target.value)
                               }
-                              className="pl-2 w-full border rounded-lg text-xs sm:text-sm min-w-[80px]"
+                              className="pl-2 w-full border !rounded-lg text-xs sm:text-sm min-w-[80px]"
                               value={item.name || ""}
                               type="text"
                             />
@@ -2365,7 +2365,7 @@ const EditProjects = ({
                               onChange={(e) =>
                                 handleItemQuantityChange(i, e.target.value)
                               }
-                              className="pl-2 w-full border rounded-lg text-xs sm:text-sm min-w-[80px]"
+                              className="pl-2 w-full border !rounded-lg text-xs sm:text-sm min-w-[80px]"
                               value={item.quantity || ""}
                               type="text"
                             />
@@ -2375,7 +2375,7 @@ const EditProjects = ({
                               onChange={(e) =>
                                 handleItemRateChange(i, e.target.value)
                               }
-                              className="pl-2 w-full border rounded-lg text-xs sm:text-sm min-w-[80px]"
+                              className="pl-2 w-full border !rounded-lg text-xs sm:text-sm min-w-[80px]"
                               value={item.rate || ""}
                               type="text"
                             />
@@ -2388,7 +2388,7 @@ const EditProjects = ({
                               onChange={(e) =>
                                 handleItemTaxChange(i, e.target.value)
                               }
-                              className="pl-2 w-full border rounded-lg text-xs sm:text-sm min-w-[80px]"
+                              className="pl-2 w-full border !rounded-lg text-xs sm:text-sm min-w-[80px]"
                               value={item.tax || ""}
                               type="text"
                             />
@@ -2404,7 +2404,7 @@ const EditProjects = ({
                               onChange={(e) =>
                                 handleItemRemarkChange(i, e.target.value)
                               }
-                              className="pl-2 w-full border rounded-lg text-xs sm:text-sm min-w-[80px]"
+                              className="pl-2 w-full border !rounded-lg text-xs sm:text-sm min-w-[80px]"
                               value={item.remark || ""}
                               type="text"
                             />
@@ -2422,7 +2422,7 @@ const EditProjects = ({
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 justify-between w-full">
-              <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 w-full md:w-1/2">
+              <div className="bg-white p-6 !rounded-xl shadow-md border border-gray-200 w-full md:w-1/2">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">
                   Bank Details & Terms
                 </h3>
@@ -2430,7 +2430,7 @@ const EditProjects = ({
                   <select
                     value={bank}
                     onChange={(e) => setBank(e.target.value.split(","))}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full border border-gray-300 !rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">Select Bank Details</option>
                     {bankData.map((data, index) => (
@@ -2449,13 +2449,13 @@ const EditProjects = ({
                     } \nAccount Number : ${
                       bank == "NA" ? "" : bank[1]
                     }\nIFSC code : ${bank == "NA" ? "" : bank[2]}`}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full border border-gray-300 !rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     rows={3}
                   ></textarea>
                   <select
                     value={terms}
                     onChange={(e) => setTerms(e.target.value.split(","))}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full border border-gray-300 !rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   >
                     <option value="">Select Terms & Conditions</option>
                     {termData.map((data, index) => (
@@ -2466,7 +2466,7 @@ const EditProjects = ({
                   </select>
                   <textarea
                     placeholder="Terms & Conditions Description"
-                    className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full border border-gray-300 !rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     rows={3}
                     value={`Terms & Conditions : ${
                       terms == "NA" ? "" : terms[0]
@@ -2474,7 +2474,7 @@ const EditProjects = ({
                   ></textarea>
                 </div>
               </div>
-              <div className="shadow-xl p-4 sm:p-6 flex flex-col gap-2 border w-full sm:w-1/2 rounded-lg">
+              <div className="shadow-xl p-4 sm:p-6 flex flex-col gap-2 border w-full sm:w-1/2 !rounded-lg">
                 <p className="text-base sm:text-lg font-semibold">Summary</p>
                 <div className="flex flex-row justify-between w-full text-xs sm:text-sm">
                   <p>Sub Total</p>
@@ -2497,7 +2497,7 @@ const EditProjects = ({
                       onChange={(e) =>
                         handleDiscountChange(Discount, e.target.value)
                       }
-                      className="border border-gray-300 rounded-md px-2 py-1 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="border border-gray-300 !rounded-md px-2 py-1 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                       {discountType === "cash" ? (
                         <>
@@ -2513,7 +2513,7 @@ const EditProjects = ({
                     </select>
 
                     <input
-                      className="w-20 sm:w-24 border border-gray-300 rounded-md px-3 py-1 text-xs sm:text-sm text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-20 sm:w-24 border border-gray-300 !rounded-md px-3 py-1 text-xs sm:text-sm text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       value={Discount}
                       onChange={(e) =>
                         handleDiscountChange(e.target.value, discountType)
@@ -2530,7 +2530,7 @@ const EditProjects = ({
                 </div>
                 <button
                   onClick={sendProjectData}
-                  className="rounded-lg bg-sky-700 hover:bg-sky-800 text-white px-4 py-2 text-xs sm:text-sm mt-2"
+                  className="!rounded-lg bg-sky-700 hover:bg-sky-800 text-white px-4 py-2 text-xs sm:text-sm mt-2"
                 >
                   Edit Project & Generate Quote
                 </button>
@@ -2541,14 +2541,14 @@ const EditProjects = ({
               <button
                 onClick={() => setNavState("Measurement")}
                 style={{ borderRadius: "8px" }}
-                className="rounded-lg border px-2 h-8 bg-white"
+                className="!rounded-lg border px-2 h-8 bg-white"
               >
                 Back
               </button>
               <button
                 onClick={() => setNavState("Goods")}
                 style={{ borderRadius: "8px" }}
-                className="rounded-lg text-white border px-2 h-8 bg-sky-600"
+                className="!rounded-lg text-white border px-2 h-8 bg-sky-600"
               >
                 Next
               </button>
@@ -2626,7 +2626,7 @@ const EditProjects = ({
                           <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Date:_'] sm:before:content-none before:font-bold before:pr-2">
                             <input
                               type="date"
-                              className="border rounded-lg w-full px-2 py-1 text-xs sm:text-sm text-center sm:min-w-[100px]"
+                              className="border !rounded-lg w-full px-2 py-1 text-xs sm:text-sm text-center sm:min-w-[100px]"
                               value={goods?.date || ""}
                               onChange={(e) =>
                                 setGoodsDate(index, e.target.value)
@@ -2635,7 +2635,7 @@ const EditProjects = ({
                           </td>
                           <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Status:_'] sm:before:content-none before:font-bold before:pr-2">
                             <select
-                              className="border rounded-lg w-full px-2 py-1 text-xs sm:text-sm sm:min-w-[100px]"
+                              className="border !rounded-lg w-full px-2 py-1 text-xs sm:text-sm sm:min-w-[100px]"
                               value={goods?.status || ""}
                               onChange={(e) =>
                                 setGoodsStatus(index, e.target.value)
@@ -2652,7 +2652,7 @@ const EditProjects = ({
                           <td className="w-full sm:w-[10%] py-1 text-xs sm:text-sm before:content-['Order_ID:_'] sm:before:content-none before:font-bold before:pr-2">
                             <input
                               type="text"
-                              className="border rounded-lg w-full px-2 py-1 text-xs sm:text-sm text-center sm:min-w-[80px]"
+                              className="border !rounded-lg w-full px-2 py-1 text-xs sm:text-sm text-center sm:min-w-[80px]"
                               value={goods?.orderID || ""}
                               onChange={(e) =>
                                 setGoodsOrderID(index, e.target.value)
@@ -2662,7 +2662,7 @@ const EditProjects = ({
                           <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Remark:_'] sm:before:content-none before:font-bold before:pr-2">
                             <input
                               type="text"
-                              className="border rounded-lg w-full px-2 py-1 text-xs sm:text-sm sm:min-w-[100px]"
+                              className="border !rounded-lg w-full px-2 py-1 text-xs sm:text-sm sm:min-w-[100px]"
                               value={goods?.remark || ""}
                               onChange={(e) =>
                                 setGoodsRemark(index, e.target.value)
@@ -2679,14 +2679,14 @@ const EditProjects = ({
               <button
                 onClick={() => setNavState("Quotation")}
                 style={{ borderRadius: "8px" }}
-                className="rounded-lg border px-2 h-8 bg-white"
+                className="!rounded-lg border px-2 h-8 bg-white"
               >
                 Back
               </button>
               <button
                 onClick={() => setNavState("Tailors")}
                 style={{ borderRadius: "8px" }}
-                className="rounded-lg text-white border px-2 h-8 bg-sky-600"
+                className="!rounded-lg text-white border px-2 h-8 bg-sky-600"
               >
                 Next
               </button>
@@ -2728,7 +2728,7 @@ const EditProjects = ({
           />
         )}
         {addPayment && (
-          <div className="flex flex-col z-50 justify-between gap-3 w-[50vw] border rounded-xl p-3">
+          <div className="flex flex-col z-50 justify-between gap-3 w-[50vw] border !rounded-xl p-3">
             <div className="flex flex-col">
               <div className="flex flex-row gap-1">
                 <p className=" ">Amount Received</p>
@@ -2737,7 +2737,7 @@ const EditProjects = ({
               <input
                 type="text"
                 value={payment}
-                className="border-1 rounded-lg pl-2 h-8"
+                className="border-1 !rounded-lg pl-2 h-8"
                 onChange={(e) =>
                   setPayment(
                     e.target.value == "" ? 0 : parseFloat(e.target.value)
@@ -2753,7 +2753,7 @@ const EditProjects = ({
               <input
                 type="date"
                 value={paymentDate}
-                className="border-1 rounded-lg pl-2 h-8 pr-2"
+                className="border-1 !rounded-lg pl-2 h-8 pr-2"
                 onChange={(e) => setPaymentDate(e.target.value)}
               />
             </div>
@@ -2765,7 +2765,7 @@ const EditProjects = ({
               <input
                 type="text"
                 value={paymentMode}
-                className="border-1 rounded-lg pl-2 h-8"
+                className="border-1 !rounded-lg pl-2 h-8"
                 onChange={(e) => setPaymentMode(e.target.value)}
               />
             </div>
@@ -2777,7 +2777,7 @@ const EditProjects = ({
               <input
                 type="text"
                 value={paymentRemarks}
-                className="border-1 rounded-lg pl-2 h-8"
+                className="border-1 !rounded-lg pl-2 h-8"
                 onChange={(e) => setPaymentRemarks(e.target.value)}
               />
             </div>
@@ -2821,7 +2821,7 @@ const EditProjects = ({
               <p className="font-semibold">Tasks</p>
               <button
                 onClick={() => setTaskDialogOpen(true)}
-                className="bg-sky-600 text-white hover:bg-sky-700 px-2 h-8 rounded-lg"
+                className="bg-sky-600 text-white hover:bg-sky-700 px-2 h-8 !rounded-lg"
               >
                 Add Task
               </button>
@@ -2841,7 +2841,7 @@ const EditProjects = ({
                     <div
                       className={`${
                         taskFilter !== label ? "bg-white" : "bg-sky-500"
-                      } w-full h-[2px] rounded-full`}
+                      } w-full h-[2px] !rounded-full`}
                     ></div>
                   </div>
                 )
@@ -2927,14 +2927,14 @@ const EditProjects = ({
               <button
                 onClick={() => setNavState("Payments")}
                 style={{ borderRadius: "8px" }}
-                className="rounded-lg border px-2 h-8 bg-white"
+                className="!rounded-lg border px-2 h-8 bg-white"
               >
                 Back
               </button>
               <button
                 onClick={() => setNavState("Overview")}
                 style={{ borderRadius: "8px" }}
-                className="rounded-lg text-white border px-2 h-8 bg-sky-600"
+                className="!rounded-lg text-white border px-2 h-8 bg-sky-600"
               >
                 Next
               </button>

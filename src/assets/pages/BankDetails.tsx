@@ -165,8 +165,8 @@ const BankDetails = () => {
   }, [dispatch]);
 
   return (
-    <div className="w-full p-4 sm:p-6 md:p-8 bg-gray-50 min-h-screen">
-      <div className="max-w-6xl mx-auto">
+    <div className="w-full  p-4 sm:p-6 md:p-8 bg-gray-50 min-h-screen">
+      <div className="max-w-6xl mt-5 md:!mt-2 mx-auto">
         {/* Header Section */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div>
@@ -179,7 +179,7 @@ const BankDetails = () => {
           {!bankDialog && (
             <button
               onClick={() => setBankDialog(true)}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg shadow transition-colors"
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 !rounded-lg shadow transition-colors"
               disabled={isLoading}
             >
               <PlusCircle size={18} />
@@ -190,7 +190,7 @@ const BankDetails = () => {
 
         {/* Main Content */}
         {bankDialog ? (
-          <div className="bg-white rounded-xl shadow-md p-6 max-w-2xl mx-auto">
+          <div className="bg-white !rounded-xl shadow-md p-6 max-w-2xl mx-auto">
             <div className="flex items-center mb-6">
               <button
                 onClick={resetForm}
@@ -214,7 +214,7 @@ const BankDetails = () => {
                   placeholder="Enter customer name"
                   value={formData.customerName}
                   onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 !rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
@@ -228,7 +228,7 @@ const BankDetails = () => {
                   placeholder="Enter account number"
                   value={formData.accountNumber}
                   onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 !rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
 
@@ -242,7 +242,7 @@ const BankDetails = () => {
                   placeholder="Enter IFSC code"
                   value={formData.ifscCode}
                   onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full border border-gray-300 !rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -250,14 +250,14 @@ const BankDetails = () => {
             <div className="flex justify-end gap-3 mt-6">
               <button
                 onClick={resetForm}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
+                className="px-4 py-2 border border-gray-300 !rounded-lg text-gray-700 hover:bg-gray-100 transition-colors"
                 disabled={isLoading}
               >
                 Cancel
               </button>
               <button
                 onClick={sendBankDetails}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                className="px-4 py-2 bg-blue-600 text-white !rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -269,10 +269,10 @@ const BankDetails = () => {
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-xl shadow-md overflow-hidden">
+          <div className="bg-white !rounded-xl shadow-md overflow-hidden">
             {isLoading ? (
               <div className="p-8 text-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+                <div className="animate-spin !rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
                 <p className="mt-4 text-gray-600">Loading bank details...</p>
               </div>
             ) : bankData.length > 0 ? (
@@ -368,7 +368,7 @@ const BankDetails = () => {
                 <div className="mt-6">
                   <button
                     onClick={() => setBankDialog(true)}
-                    className="flex items-center gap-1 bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 !rounded-xl shadow"
+                    className="flex items-center gap-1 bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 !!rounded-xl shadow"
                   >
                     <PlusCircle className="-ml-1 mr-2 h-5 w-5" />
                     Add Bank Account

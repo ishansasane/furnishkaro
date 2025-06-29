@@ -252,7 +252,7 @@ const Payments = () => {
                 </button>
             </div>
 
-            <div className="w-full overflow-x-auto border rounded-xl p-3 max-h-[70vh]">
+            <div className="w-full overflow-x-auto border !rounded-xl p-3 max-h-[70vh]">
                 <table className="w-full text-sm sm:text-base">
                     <thead>
                         <tr className="font-semibold text-gray-700">
@@ -303,7 +303,7 @@ const Payments = () => {
 
             {addPayment && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div className="w-full max-w-md sm:max-w-lg bg-white rounded-xl p-4 sm:p-6">
+                    <div className="w-full max-w-md sm:max-w-lg bg-white !rounded-xl p-4 sm:p-6">
                         <div className="flex flex-col gap-4">
                             <div className="flex flex-col">
                                 <div className="flex flex-row gap-1 items-center">
@@ -313,7 +313,7 @@ const Payments = () => {
                                 <input 
                                     type="number" 
                                     value={payment} 
-                                    className="border rounded-lg p-2 h-10 w-full"
+                                    className="border !rounded-lg p-2 h-10 w-full"
                                     onChange={(e) => setPayment(e.target.value === "" ? 0 : parseFloat(e.target.value))}
                                 />
                             </div>
@@ -325,7 +325,7 @@ const Payments = () => {
                                 <input 
                                     type="date" 
                                     value={paymentDate} 
-                                    className="border rounded-lg p-2 h-10 w-full"
+                                    className="border !rounded-lg p-2 h-10 w-full"
                                     onChange={(e) => setPaymentDate(e.target.value)}
                                 />
                             </div>
@@ -337,7 +337,7 @@ const Payments = () => {
                                 <input 
                                     type="text" 
                                     value={paymentMode} 
-                                    className="border rounded-lg p-2 h-10 w-full"
+                                    className="border !rounded-lg p-2 h-10 w-full"
                                     onChange={(e) => setPaymentMode(e.target.value)}
                                 />
                             </div>
@@ -349,26 +349,26 @@ const Payments = () => {
                                 <input 
                                     type="text" 
                                     value={paymentRemarks} 
-                                    className="border rounded-lg p-2 h-10 w-full"
+                                    className="border !rounded-lg p-2 h-10 w-full"
                                     onChange={(e) => setPaymentRemarks(e.target.value)}
                                 />
                             </div>
                             <div className="flex flex-row justify-end gap-3">
                                 <button 
                                     onClick={setCancelPayment} 
-                                    className="border-2 border-sky-700 text-sky-600 bg-white px-3 py-2 rounded-lg hover:bg-sky-50 text-sm sm:text-base"
+                                    className="border-2 border-sky-700 text-sky-600 bg-white px-3 py-2 !rounded-lg hover:bg-sky-50 text-sm sm:text-base"
                                 >
                                     Close
                                 </button>
                                 <button 
                                     onClick={addPaymentFunction} 
-                                    className={`text-white bg-sky-600 hover:bg-sky-700 px-3 py-2 rounded-lg text-sm sm:text-base ${editPayments === undefined ? "" : "hidden"}`}
+                                    className={`text-white bg-sky-600 hover:bg-sky-700 px-3 py-2 !rounded-lg text-sm sm:text-base ${editPayments === undefined ? "" : "hidden"}`}
                                 >
                                     Add Payment
                                 </button>
                                 <button 
                                     onClick={addPaymentFunction} 
-                                    className={`text-white bg-sky-600 hover:bg-sky-700 px-3 py-2 rounded-lg text-sm sm:text-base ${editPayments !== undefined ? "" : "hidden"}`}
+                                    className={`text-white bg-sky-600 hover:bg-sky-700 px-3 py-2 !rounded-lg text-sm sm:text-base ${editPayments !== undefined ? "" : "hidden"}`}
                                 >
                                     Edit Payment
                                 </button>

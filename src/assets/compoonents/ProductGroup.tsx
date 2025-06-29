@@ -153,14 +153,14 @@ export default function ProductGroups() {
           <Plus size={18} /> Add Product Group
         </button>
       </div>
-      <div className="bg-white shadow rounded-lg overflow-x-auto p-5">
+      <div className="bg-white shadow !rounded-lg overflow-x-auto p-5">
         <div className="mb-4">
           <input
             type="text"
             placeholder="Search product groups..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="border px-3 py-2 rounded-md w-full"
+            className="border px-3 py-2 !rounded-md w-full"
           />
         </div>
 
@@ -193,7 +193,7 @@ export default function ProductGroups() {
                   <td className="px-4 py-2">{group[3] === "TRUE" ? "Available" : "Not Available"}</td>
                   <td className="px-4 py-2 flex gap-2">
                     <button
-                      className="border px-2 py-1 rounded-md"
+                      className="border px-2 py-1 !rounded-md"
                       onClick={() => {
                         setEditingGroup(group);
                         setStatus(group[3] === "TRUE");
@@ -213,7 +213,7 @@ export default function ProductGroups() {
                       <Pencil size={16} />
                     </button>
                     <button
-                      className="border px-2 py-1 rounded-md"
+                      className="border px-2 py-1 !rounded-md"
                       onClick={() => deleteProductGroup(group[0])}
                     >
                       <XCircle size={16} />
@@ -231,7 +231,7 @@ export default function ProductGroups() {
       </div>
       {isDialogOpen && (
         <div className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-black/30 z-50">
-          <div className="max-w-4xl w-full mx-4 bg-white p-6 rounded-lg shadow-md">
+          <div className="max-w-4xl w-full mx-4 bg-white p-6 !rounded-lg shadow-md">
             <h2 className="text-2xl font-semibold text-gray-800">Edit Product Group</h2>
             <div className="space-y-4">
               <div>
@@ -243,7 +243,7 @@ export default function ProductGroups() {
                   value={groupName}
                   onChange={(e) => setGroupName(e.target.value)}
                   placeholder="Enter Product Name"
-                  className="mt-1 block w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full px-4 py-2 border !rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                   required
                 />
               </div>
@@ -252,13 +252,13 @@ export default function ProductGroups() {
                   Main Products <span className="text-red-500">*</span>
                 </label>
                 <div className="flex items-center gap-2 mt-1">
-                  <button onClick={() => navigate("/add-product")} className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
+                  <button onClick={() => navigate("/add-product")} className="bg-blue-500 text-white px-3 py-1 !rounded hover:bg-blue-600">
                     + Product
                   </button>
                   <select
                     value={mainProduct}
                     onChange={(e) => setMainProduct(e.target.value)}
-                    className="w-full px-4 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-4 py-2 border !rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     required
                   >
                     <option value="">Select Main Product</option>
@@ -277,12 +277,12 @@ export default function ProductGroups() {
                 <div className="flex items-center gap-2 mb-2">
                   <button
                     onClick={() => navigate("/add-product")}
-                    className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                    className="bg-blue-500 text-white px-3 py-1 !rounded hover:bg-blue-600"
                   >
                     + Product
                   </button>
                 </div>
-                <div className="border rounded-md p-3 max-h-40 overflow-y-auto space-y-1">
+                <div className="border !rounded-md p-3 max-h-40 overflow-y-auto space-y-1">
                   {items.map((item, index) => {
                     const isSelected = addonProduct.includes(item[0]);
                     return (
@@ -303,7 +303,7 @@ export default function ProductGroups() {
                         />
                         <label
                           htmlFor={`addon-${index}`}
-                          className={`cursor-pointer block px-3 py-1 rounded-md border ${
+                          className={`cursor-pointer block px-3 py-1 !rounded-md border ${
                             isSelected
                               ? "bg-blue-100 text-blue-800 border-blue-400"
                               : "bg-gray-50 hover:bg-gray-100 border-gray-300"
@@ -342,13 +342,13 @@ export default function ProductGroups() {
                     Status
                   </label>
                   <div
-                    className={`w-12 h-6 flex items-center rounded-full p-1 cursor-pointer ${
+                    className={`w-12 h-6 flex items-center !rounded-full p-1 cursor-pointer ${
                       status ? "bg-blue-500" : "bg-gray-300"
                     }`}
                     onClick={() => setStatus(!status)}
                   >
                     <div
-                      className={`w-5 h-5 bg-white rounded-full shadow-md transform ${
+                      className={`w-5 h-5 bg-white !rounded-full shadow-md transform ${
                         status ? "translate-x-6" : "translate-x-0"
                       } transition`}
                     />
@@ -364,13 +364,13 @@ export default function ProductGroups() {
                     setStatus(true);
                     setDialogOpen(false);
                   }}
-                  className="border px-4 py-2 rounded text-gray-700 hover:bg-gray-100"
+                  className="border px-4 py-2 !rounded text-gray-700 hover:bg-gray-100"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleEditGroup}
-                  className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                  className="bg-blue-600 text-white px-4 py-2 !rounded hover:bg-blue-700"
                 >
                   Edit Group
                 </button>

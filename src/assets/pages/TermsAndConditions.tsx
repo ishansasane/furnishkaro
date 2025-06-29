@@ -96,8 +96,8 @@ const TermsAndConditions = () => {
   }, [dispatch]);
 
   return (
-    <div className="w-full p-4 sm:p-6 md:p-8">
-      <div className="flex justify-between items-center mb-6">
+    <div className="w-full mt-5 md:!mt-2 p-4 sm:p-6 md:p-8">
+      <div className="flex flex-wrap justify-between items-center mb-6">
         <h2 className="text-xl md:text-2xl font-semibold text-gray-800">
           Terms & Conditions
         </h2>

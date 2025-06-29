@@ -128,7 +128,7 @@ const OverviewPage = ({
         <div className="flex items-center gap-1 sm:gap-2">
           <label className="text-sm sm:text-base">Delivery Date:</label>
           <input
-            className="border border-gray-300 rounded-lg px-2 sm:px-3 py-1 sm:py-2 text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
+            className="border border-gray-300 !rounded-lg px-2 sm:px-3 py-1 sm:py-2 text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
             type="date"
             value={projectDate}
             onChange={(e) => setPRojectDate(e.target.value)}
@@ -139,7 +139,7 @@ const OverviewPage = ({
       {/* Upper Section */}
       <div className="flex flex-col lg:flex-row gap-2 sm:gap-4">
         {/* Client Info */}
-        <div className="flex flex-col border rounded-lg p-2 sm:p-4 w-full lg:w-1/3">
+        <div className="flex flex-col border !rounded-lg p-2 sm:p-4 w-full lg:w-1/3">
           <p className="text-base sm:text-lg md:text-xl font-medium mb-1 sm:mb-2">Client Information</p>
           <div className="flex flex-col gap-1 sm:gap-2 text-sm sm:text-base">
             <div className="flex justify-between">
@@ -170,14 +170,14 @@ const OverviewPage = ({
         </div>
 
         {/* Status */}
-        <div className="flex flex-col w-full lg:w-1/3 p-2 sm:p-4 border rounded-lg">
+        <div className="flex flex-col w-full lg:w-1/3 p-2 sm:p-4 border !rounded-lg">
           <p className="text-base sm:text-lg md:text-xl font-medium mb-1 sm:mb-2">Current Status</p>
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 mb-2 sm:mb-4">
             <p className="text-sm sm:text-base text-gray-500">Delivery & Installation</p>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="border border-gray-300 px-2 sm:px-4 py-1 sm:py-2 rounded-md text-sm sm:text-base focus:ring-2 focus:ring-blue-400 w-full sm:w-auto"
+              className="border border-gray-300 px-2 sm:px-4 py-1 sm:py-2 !rounded-md text-sm sm:text-base focus:ring-2 focus:ring-blue-400 w-full sm:w-auto"
             >
               <option value="Approved">Approved</option>
               <option value="Goods Pending">Goods Pending</option>
@@ -192,14 +192,14 @@ const OverviewPage = ({
               <p className="text-sm sm:text-base font-semibold">Goods Ordered</p>
               <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
                 <div className="flex flex-wrap gap-1 sm:gap-2">
-                  <p className="text-xs sm:text-sm rounded-xl text-yellow-500 font-semibold bg-yellow-100 py-1 px-1 sm:px-2">Pending-{pending}</p>
-                  <p className="text-xs sm:text-sm rounded-xl text-sky-600 font-semibold bg-sky-100 py-1 px-1 sm:px-2">Ordered-{ordered}</p>
-                  <p className="text-xs sm:text-sm rounded-xl text-green-600 font-semibold bg-green-100 py-1 px-1 sm:px-2">Received-{received}</p>
-                  <p className="text-xs sm:text-sm rounded-xl text-green-600 font-semibold bg-green-100 py-1 px-1 sm:px-2">In Stock-{instock}</p>
+                  <p className="text-xs sm:text-sm !rounded-xl text-yellow-500 font-semibold bg-yellow-100 py-1 px-1 sm:px-2">Pending-{pending}</p>
+                  <p className="text-xs sm:text-sm !rounded-xl text-sky-600 font-semibold bg-sky-100 py-1 px-1 sm:px-2">Ordered-{ordered}</p>
+                  <p className="text-xs sm:text-sm !rounded-xl text-green-600 font-semibold bg-green-100 py-1 px-1 sm:px-2">Received-{received}</p>
+                  <p className="text-xs sm:text-sm !rounded-xl text-green-600 font-semibold bg-green-100 py-1 px-1 sm:px-2">In Stock-{instock}</p>
                 </div>
                 <button
                   onClick={() => setNavState("Goods")}
-                  className="text-sky-600 border border-sky-600 bg-white rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-base hover:bg-sky-50 w-full sm:w-auto"
+                  className="text-sky-600 border border-sky-600 bg-white !rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-base hover:bg-sky-50 w-full sm:w-auto"
                 >
                   View
                 </button>
@@ -209,13 +209,13 @@ const OverviewPage = ({
               <p className="text-sm sm:text-base font-semibold">Goods Sent to Tailor</p>
               <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
                 <div className="flex flex-wrap gap-1 sm:gap-2">
-                  <p className="text-xs sm:text-sm rounded-xl text-yellow-500 font-semibold bg-yellow-100 py-1 px-1 sm:px-2">Pending-{tailorpending}</p>
-                  <p className="text-xs sm:text-sm rounded-xl text-sky-600 font-semibold bg-sky-100 py-1 px-1 sm:px-2">Ordered-{tailorordered}</p>
-                  <p className="text-xs sm:text-sm rounded-xl text-green-600 font-semibold bg-green-100 py-1 px-1 sm:px-2">Received-{tailorreceived}</p>
+                  <p className="text-xs sm:text-sm !rounded-xl text-yellow-500 font-semibold bg-yellow-100 py-1 px-1 sm:px-2">Pending-{tailorpending}</p>
+                  <p className="text-xs sm:text-sm !rounded-xl text-sky-600 font-semibold bg-sky-100 py-1 px-1 sm:px-2">Ordered-{tailorordered}</p>
+                  <p className="text-xs sm:text-sm !rounded-xl text-green-600 font-semibold bg-green-100 py-1 px-1 sm:px-2">Received-{tailorreceived}</p>
                 </div>
                 <button
                   onClick={() => setNavState("Tailors")}
-                  className="text-sky-600 border border-sky-600 bg-white rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-base hover:bg-sky-50 w-full sm:w-auto"
+                  className="text-sky-600 border border-sky-600 bg-white !rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-base hover:bg-sky-50 w-full sm:w-auto"
                 >
                   View
                 </button>
@@ -225,36 +225,36 @@ const OverviewPage = ({
         </div>
 
         {/* Payments */}
-        <div className="flex flex-col w-full lg:w-1/3 p-2 sm:p-4 rounded-lg border">
+        <div className="flex flex-col w-full lg:w-1/3 p-2 sm:p-4 !rounded-lg border">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 sm:mb-4">
             <p className="text-base sm:text-lg md:text-xl font-medium">Payments</p>
             <div className="flex flex-row gap-1 sm:gap-2 mt-1 sm:mt-0">
               <button
                 onClick={() => { setNavState("Payments"); setAddPayment(true)}}
-                className="text-white bg-sky-600 rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-base hover:bg-sky-700 w-full sm:w-auto"
+                className="text-white bg-sky-600 !rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-base hover:bg-sky-700 w-full sm:w-auto"
               >
                 Add
               </button>
               <button
                 onClick={() => setNavState("Payments")}
-                className="text-white bg-sky-600 rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-base hover:bg-sky-700 w-full sm:w-auto"
+                className="text-white bg-sky-600 !rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-base hover:bg-sky-700 w-full sm:w-auto"
               >
                 View
               </button>
             </div>
           </div>
           <div className="flex flex-col gap-1 sm:gap-2">
-            <div className="flex flex-row justify-between items-center border rounded-lg p-1 sm:p-2">
+            <div className="flex flex-row justify-between items-center border !rounded-lg p-1 sm:p-2">
               <div className="w-1 bg-gray-500 !h-7 sm:h-4"></div>
               <p className="text-sm sm:text-base">Total Payment</p>
               <p className="text-sm sm:text-base">{(projectData.totalAmount).toFixed(2)}</p>
             </div>
-            <div className="flex flex-row justify-between items-center border rounded-lg p-1 sm:p-2">
+            <div className="flex flex-row justify-between items-center border !rounded-lg p-1 sm:p-2">
               <div className="w-1 bg-green-500 !h-7 sm:h-4"></div>
               <p className="text-sm sm:text-base">Payment Received</p>
               <p className="text-sm sm:text-base">{paymentReceived}</p>
             </div>
-            <div className="flex flex-row justify-between items-center border rounded-lg p-1 sm:p-2">
+            <div className="flex flex-row justify-between items-center border !rounded-lg p-1 sm:p-2">
               <div className="w-1 bg-yellow-500 !h-7 sm:h-4"></div>
               <p className="text-sm sm:text-base">Due</p>
               <p className="text-sm sm:text-base">{(projectData.totalAmount - paymentReceived).toFixed(2)}</p>
@@ -266,19 +266,19 @@ const OverviewPage = ({
       {/* Lower Section */}
       <div className="flex flex-col lg:flex-row gap-2 sm:gap-4">
         {/* Tailor Info */}
-        <div className="flex flex-col w-full lg:w-1/3 border rounded-lg p-2 sm:p-4">
+        <div className="flex flex-col w-full lg:w-1/3 border !rounded-lg p-2 sm:p-4">
           <div className="flex flex-row justify-between items-center mb-2 sm:mb-4">
             <p className="text-base sm:text-lg md:text-xl font-medium">Tailor Information</p>
             <button
               onClick={() => setNavState("Tailors")}
-              className="text-white bg-sky-600 rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-base hover:bg-sky-700"
+              className="text-white bg-sky-600 !rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-base hover:bg-sky-700"
             >
               Assign
             </button>
           </div>
           <div className="flex flex-col gap-1 sm:gap-2 max-h-32 sm:max-h-48 overflow-y-auto">
             {tailorsArray && tailorsArray.map((tailor, index) => (
-              <div key={index} className="flex flex-col border rounded-lg p-1 sm:p-2">
+              <div key={index} className="flex flex-col border !rounded-lg p-1 sm:p-2">
                 <p className="text-sm sm:text-base text-sky-600 font-semibold">{tailor.tailorData[0]}</p>
                 <p className="text-sm sm:text-base">{tailor.tailorData[1]}</p>
               </div>
@@ -295,12 +295,12 @@ const OverviewPage = ({
             title: "Sales Associate Information",
             data: salesAssociateArray
           }].map((section, idx) => (
-            <div key={idx} className="flex flex-col p-2 sm:p-4 border rounded-lg">
+            <div key={idx} className="flex flex-col p-2 sm:p-4 border !rounded-lg">
               <div className="flex flex-row justify-between items-center mb-1 sm:mb-2">
                 <p className="text-base sm:text-lg md:text-xl font-medium">{section.title}</p>
                 <button
                   onClick={() => setNavState("Customer & Project Details")}
-                  className="text-white bg-sky-600 rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-base hover:bg-sky-700"
+                  className="text-white bg-sky-600 !rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-base hover:bg-sky-700"
                 >
                   View
                 </button>
@@ -314,26 +314,26 @@ const OverviewPage = ({
         </div>
 
         {/* Tasks */}
-        <div className="flex flex-col p-2 sm:p-4 border rounded-lg w-full lg:w-1/3">
+        <div className="flex flex-col p-2 sm:p-4 border !rounded-lg w-full lg:w-1/3">
           <div className="flex flex-row justify-between items-center mb-2 sm:mb-4">
             <p className="text-base sm:text-lg md:text-xl font-medium">Tasks</p>
             <button
               onClick={addNewTask}
-              className="text-white bg-sky-600 rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-base hover:bg-sky-700"
+              className="text-white bg-sky-600 !rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-base hover:bg-sky-700"
             >
               Create Task
             </button>
           </div>
           <div className="flex flex-col gap-1 sm:gap-2 max-h-32 sm:max-h-48 overflow-y-auto">
             {tasks && tasks.filter(task => task[5] === projectData.projectName).map((task, index) => (
-              <div key={index} className="border rounded-lg p-1 sm:p-2 flex flex-col gap-1 sm:gap-2">
+              <div key={index} className="border !rounded-lg p-1 sm:p-2 flex flex-col gap-1 sm:gap-2">
                 <div className="flex flex-row justify-between gap-1 sm:gap-2">
-                  <p className={`text-xs sm:text-sm text-white rounded-lg px-1 sm:px-2 py-1 ${
+                  <p className={`text-xs sm:text-sm text-white !rounded-lg px-1 sm:px-2 py-1 ${
                     task[6] === "High" ? "bg-red-500" :
                     task[6] === "Low" ? "bg-green-500" :
                     task[6] === "Moderate" ? "bg-yellow-500" : ""
                   }`}>{task[6]}</p>
-                  <p className={`text-xs sm:text-sm text-white rounded-lg px-1 sm:px-2 py-1 ${
+                  <p className={`text-xs sm:text-sm text-white !rounded-lg px-1 sm:px-2 py-1 ${
                     task[7] === "To Do" ? "bg-red-500" :
                     task[7] === "Completed" ? "bg-green-500" :
                     task[7] === "In Progress" ? "bg-yellow-500" : ""
@@ -344,7 +344,7 @@ const OverviewPage = ({
                 <p className="text-xs sm:text-sm">Description: {task[1]}</p>
                 <button
                   onClick={() => { setediting(task); setDialogOpen(true); }}
-                  className="border px-2 sm:px-3 py-1 w-full sm:w-24 text-white bg-sky-600 rounded-lg text-xs sm:text-base hover:bg-sky-700"
+                  className="border px-2 sm:px-3 py-1 w-full sm:w-24 text-white bg-sky-600 !rounded-lg text-xs sm:text-base hover:bg-sky-700"
                 >
                   Edit Task
                 </button>
