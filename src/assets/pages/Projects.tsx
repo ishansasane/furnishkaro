@@ -556,22 +556,28 @@ const generatePDF = (project: any) => {
       7: { cellWidth: 12, halign: "right" },
       8: { cellWidth: 22, halign: "right" },
     },
+    willDrawCell: (data) => {
+      if (data.section === "body" && (data.column.index === 1 || data.column.index === 2)) {
+        const text = data.cell.text.join(" ");
+        if (text.length > 25) {
+          data.cell.text = doc.splitTextToSize(text, data.cell.width - 3);
+        }
+      }
+    },
   });
 
-  const tableEndY = (doc as any).lastAutoTable.finalY;
+  // === Smart Summary Placement ===
   const summaryBoxHeight = 60;
-  const footerHeight = 25;
-  const bottomSafeMargin = footerHeight + 10;
+  const tableEndY = (doc as any).lastAutoTable.finalY;
+  const remainingSpace = pageHeight - tableEndY - 20;
 
-  // === Smart Summary Placement (no unnecessary page) ===
-  if ((pageHeight - tableEndY - bottomSafeMargin) < summaryBoxHeight) {
+  if (remainingSpace < summaryBoxHeight) {
     doc.addPage();
     yOffset = 20;
   } else {
     yOffset = tableEndY + 10;
   }
 
-  // Summary Box
   doc.setFillColor(...lightGray);
   doc.roundedRect(pageWidth - 90, yOffset - 5, 75, 50, 2, 2, "F");
   doc.setFontSize(10);
@@ -597,10 +603,9 @@ const generatePDF = (project: any) => {
     yOffset += 8;
   });
 
-  // Terms & Conditions (if available)
+  // Terms & Conditions (Skip any standalone date lines)
   if (typeof project.additionalRequests === "string" && project.additionalRequests.trim()) {
-    const termsHeightEstimate = 30;
-    if ((pageHeight - yOffset - bottomSafeMargin) < termsHeightEstimate) {
+    if (yOffset + 30 > pageHeight - 50) {
       doc.addPage();
       yOffset = 20;
     }
@@ -615,8 +620,11 @@ const generatePDF = (project: any) => {
     doc.setTextColor(...secondaryColor);
 
     const terms = doc.splitTextToSize(project.additionalRequests, pageWidth - 30);
+    const datePattern = /^\s*\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}\s*$/;
+
     terms.forEach((term: string) => {
-      if (yOffset + 5 > pageHeight - footerHeight - 10) {
+      if (datePattern.test(term.trim())) return;
+      if (yOffset + 5 > pageHeight - 50) {
         doc.addPage();
         yOffset = 20;
       }
@@ -625,16 +633,19 @@ const generatePDF = (project: any) => {
     });
   }
 
-  // Footer (always on last page only)
-  const footerY = pageHeight - footerHeight;
+  // Footer
+  if (yOffset + 20 > pageHeight - 50) {
+    doc.addPage();
+    yOffset = 20;
+  }
   doc.setFillColor(...accentColor);
-  doc.rect(0, footerY, pageWidth, 1, "F");
+  doc.rect(0, pageHeight - 25, pageWidth, 1, "F");
   doc.setFontSize(9);
   doc.setTextColor(100, 100, 100);
   doc.setFont("helvetica", "italic");
-  doc.text("Thank you for choosing Sheela Decor!", pageWidth / 2, footerY + 10, { align: "center" });
+  doc.text("Thank you for choosing Sheela Decor!", pageWidth / 2, pageHeight - 15, { align: "center" });
   doc.setFont("helvetica", "normal");
-  doc.text("Sheela Decor - All Rights Reserved", pageWidth / 2, footerY + 17, { align: "center" });
+  doc.text("Sheela Decor - All Rights Reserved", pageWidth / 2, pageHeight - 8, { align: "center" });
 
   const safeProjectName = (project.projectName || "Project").replace(/[^a-zA-Z0-9]/g, "_");
   const safeDate = (project.projectDate || new Date().toLocaleDateString()).replace(/[^a-zA-Z0-9]/g, "_");
@@ -770,3 +781,4 @@ const generatePDF = (project: any) => {
     </div>
   );
 }
+

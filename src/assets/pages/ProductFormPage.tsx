@@ -3,9 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setItemData } from "../Redux/dataSlice";
 import { RootState } from "../Redux/store";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 const getItemsData = async () => {
-  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts");
+  const response = await fetchWithLoading(
+    "https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts"
+  );
   const data = await response.json();
   return data.body;
 };
@@ -34,7 +37,8 @@ const ProductFormPage: React.FC = () => {
   const [taxRate, setTaxRate] = useState("");
   const [needsTailoring, setNeedsTailoring] = useState(false);
 
-  const selectedUnits = groupTypes.find((type) => type[0] === selectedGroupType)?.[1] || [];
+  const selectedUnits =
+    groupTypes.find((type) => type[0] === selectedGroupType)?.[1] || [];
 
   const handleGroupTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selected = e.target.value;
@@ -73,7 +77,7 @@ const ProductFormPage: React.FC = () => {
       const year = d.getFullYear();
       const date = `${day}/${month}/${year}`;
 
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct",
         {
           method: "POST",
@@ -102,7 +106,10 @@ const ProductFormPage: React.FC = () => {
 
       const data = await getItemsData();
       dispatch(setItemData(data));
-      localStorage.setItem("itemData", JSON.stringify({ data, time: Date.now() }));
+      localStorage.setItem(
+        "itemData",
+        JSON.stringify({ data, time: Date.now() })
+      );
 
       alert("Product saved successfully!");
       navigate("/masters/items");

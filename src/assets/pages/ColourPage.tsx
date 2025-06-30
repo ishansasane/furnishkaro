@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 function ColourPage() {
   const [open, setOpen] = useState(false);
@@ -7,7 +8,7 @@ function ColourPage() {
   const [form, setForm] = useState({ site: "", shadeName: "", shadeCode: "" });
 
   useEffect(() => {
-    fetch(
+    fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata"
     )
       .then((res) => res.json())

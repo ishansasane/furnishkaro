@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store";
 import { setCustomerData } from "../Redux/dataSlice";
 import { useNavigate } from "react-router-dom";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 interface Customer {
   name: string;
@@ -20,7 +21,7 @@ interface AddCustomerDialogProps {
 
 async function fetchCustomers() {
   try {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getcustomerdata",
       { credentials: "include" }
     );
@@ -41,13 +42,15 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
   setDialogOpen,
   setCustomers,
   editing,
-  setEditing
+  setEditing,
 }) => {
   const navigate = useNavigate();
   const [name, setName] = useState(editing ? editing[0] : "");
   const [mobile, setMobile] = useState(editing ? editing[1] : "");
   const [address, setAddress] = useState(editing ? editing[3] : "");
-  const [alternateNumber, setAlternateNumber] = useState(editing ? editing[4] : "");
+  const [alternateNumber, setAlternateNumber] = useState(
+    editing ? editing[4] : ""
+  );
   const [email, setEmail] = useState(editing ? editing[2] : "");
 
   const dispatch = useDispatch();
@@ -70,10 +73,10 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
       ? "https://sheeladecor.netlify.app/.netlify/functions/server/updatecustomerdata"
       : "https://sheeladecor.netlify.app/.netlify/functions/server/sendcustomerdata";
 
-    const response = await fetch(api, {
+    const response = await fetchWithLoading(api, {
       method: "POST",
       headers: {
-        "content-type": "application/json"
+        "content-type": "application/json",
       },
       credentials: "include",
       body: JSON.stringify({
@@ -82,8 +85,8 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
         email,
         address,
         alternatenumber: alternateNumber,
-        addedDate: date
-      })
+        addedDate: date,
+      }),
     });
 
     if (response.status === 200) {
@@ -91,25 +94,34 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
 
       // 1. Update Redux store
       dispatch(setCustomerData(data));
-    
+
       // 3. Update localStorage cache
-      localStorage.setItem("customerData", JSON.stringify({ data, time: Date.now() }));
-    
+      localStorage.setItem(
+        "customerData",
+        JSON.stringify({ data, time: Date.now() })
+      );
+
       // 4. Clear form
       setName("");
       setAddress("");
       setMobile("");
       setEmail("");
       setAlternateNumber("");
-    
+
       // 5. Show success
-      alert(editing ? "Customer Updated Successfully" : "Customer added successfully");
+      alert(
+        editing
+          ? "Customer Updated Successfully"
+          : "Customer added successfully"
+      );
     } else {
-      alert(editing ? "Error in updating customer" : "Error in adding customer");
+      alert(
+        editing ? "Error in updating customer" : "Error in adding customer"
+      );
     }
 
-    if(!editing){
-      navigate("/customers");   
+    if (!editing) {
+      navigate("/customers");
     }
     setEditing(null);
     setDialogOpen(false);
@@ -122,7 +134,9 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
           {editing ? "Edit Customer" : "Add Customer"}
         </h2>
         <input
-          className={`${editing ? "hidden" : ""} border p-2 rounded w-full mb-2`}
+          className={`${
+            editing ? "hidden" : ""
+          } border p-2 rounded w-full mb-2`}
           placeholder="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -155,7 +169,7 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
           <button
             className="bg-gray-500 text-white px-4 py-2 rounded"
             onClick={() => {
-              if(!editing){
+              if (!editing) {
                 navigate("/customers");
               }
               setEditing(null);

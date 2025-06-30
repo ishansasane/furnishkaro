@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setBrandData } from "../Redux/dataSlice";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 interface BrandDialogProps {
   setDialogOpen: (state: boolean) => void;
@@ -14,7 +15,7 @@ interface BrandDialogProps {
 
 async function fetchBrands() {
   try {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getbrands",
       { credentials: "include" }
     );
@@ -64,7 +65,7 @@ const BrandDialog: React.FC<BrandDialogProps> = ({
       : "https://sheeladecor.netlify.app/.netlify/functions/server/addbrand";
 
     try {
-      const response = await fetch(url, {
+      const response = await fetchWithLoading(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -72,14 +73,21 @@ const BrandDialog: React.FC<BrandDialogProps> = ({
       });
 
       if (response.status === 200) {
-        alert(editingBrand ? "Brand updated successfully" : "Brand added successfully");
+        alert(
+          editingBrand
+            ? "Brand updated successfully"
+            : "Brand added successfully"
+        );
 
         const updatedData = await fetchBrands();
         const now = Date.now();
 
         if (Array.isArray(updatedData)) {
           dispatch(setBrandData(updatedData));
-          localStorage.setItem("brandData", JSON.stringify({ data: updatedData, time: now }));
+          localStorage.setItem(
+            "brandData",
+            JSON.stringify({ data: updatedData, time: now })
+          );
         }
 
         setDialogOpen(false);
@@ -103,7 +111,9 @@ const BrandDialog: React.FC<BrandDialogProps> = ({
       {/* ✅ Dialog Box */}
       <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md">
         <div className="bg-white p-6 rounded shadow-md w-full border">
-          <h2 className="text-xl font-bold mb-4">{editingBrand ? "Edit Brand" : "Add Brand"}</h2>
+          <h2 className="text-xl font-bold mb-4">
+            {editingBrand ? "Edit Brand" : "Add Brand"}
+          </h2>
           <input
             className="border p-2 rounded w-full mb-2"
             placeholder="Brand Name"
@@ -127,7 +137,10 @@ const BrandDialog: React.FC<BrandDialogProps> = ({
             >
               Cancel
             </button>
-            <button className="bg-blue-500 text-white px-4 py-2 rounded" onClick={handleSubmit}>
+            <button
+              className="bg-blue-500 text-white px-4 py-2 rounded"
+              onClick={handleSubmit}
+            >
               Save
             </button>
           </div>

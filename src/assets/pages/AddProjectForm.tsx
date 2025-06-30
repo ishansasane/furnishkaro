@@ -21,6 +21,7 @@ import MaterialSelectionComponent from "./MaterialSelectionComponent";
 import MeasurementSection from "./MeasurementSections";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 function AddProjectForm() {
   const dispatch = useDispatch();
@@ -149,7 +150,7 @@ function AddProjectForm() {
   const [availableAreas, setAvailableAreas] = useState([]);
 
   const getItemsData = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts"
     );
     const data = await response.json();
@@ -158,7 +159,7 @@ function AddProjectForm() {
 
   const fetchCustomers = async () => {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getcustomerdata",
         {
           credentials: "include",
@@ -177,7 +178,7 @@ function AddProjectForm() {
 
   async function fetchCatalogues() {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getcatalogues",
         {
           credentials: "include",
@@ -196,7 +197,7 @@ function AddProjectForm() {
 
   async function fetchInteriors() {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getinteriordata",
         {
           credentials: "include",
@@ -215,7 +216,7 @@ function AddProjectForm() {
 
   async function fetchSalesAssociates() {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getsalesassociatedata",
         {
           credentials: "include",
@@ -234,7 +235,7 @@ function AddProjectForm() {
 
   async function fetchProductGroups(): Promise<ProductGroup[]> {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getallproductgroup",
         {
           credentials: "include",
@@ -251,14 +252,14 @@ function AddProjectForm() {
     }
   }
   const fetchTermsData = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getTermsData"
     );
     const data = await response.json();
     return data.body || [];
   };
   const fetchBankData = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getBankData"
     );
     const data = await response.json();
@@ -1134,7 +1135,7 @@ function AddProjectForm() {
   >(null);
 
   const fetchProjectData = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
       {
         credentials: "include",
@@ -1371,7 +1372,7 @@ function AddProjectForm() {
 
       const newdate = day + "/" + month + "/" + year;
 
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/sendprojectdata",
         {
           method: "POST",
@@ -1520,7 +1521,7 @@ function AddProjectForm() {
           }
         }
 
-        const response = await fetch(
+        const response = await fetchWithLoading(
           "https://sheeladecor.netlify.app/.netlify/functions/server/getAreas"
         );
         const data = await response.json();
@@ -1897,7 +1898,7 @@ const generatePDF = () => {
       {/* Main Content */}
       <div className="space-y-6">
         {/* Customer Details */}
-        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+        <div className="bg-white p-6 rounded-xl shadow-none border border-gray-200">
           <CustomerDetails
             customers={customers}
             selectedCustomer={selectedCustomer}
@@ -1908,7 +1909,7 @@ const generatePDF = () => {
         </div>
 
         {/* Project Details */}
-        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+        <div className="bg-white p-6 rounded-xl shadow-none border border-gray-200">
           <ProjectDetails
             selectedCustomer={selectedCustomer}
             interior={interior}
@@ -1935,7 +1936,7 @@ const generatePDF = () => {
         </div>
 
         {/* Material Selection */}
-        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+        <div className="bg-white p-6 rounded-xl shadow-none border border-gray-200">
           <MaterialSelectionComponent
             selections={selections}
             availableAreas={availableAreas}
@@ -1959,7 +1960,7 @@ const generatePDF = () => {
           />
         </div>
         {/* Measurement Section */}
-        <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+        <div className="bg-white p-6 rounded-xl shadow-none border border-gray-200">
           <MeasurementSection
             selections={selections}
             units={units}
@@ -1972,6 +1973,219 @@ const generatePDF = () => {
             setSelections={setSelections}
             handleGroupDelete={handleGroupDelete}
           />
+        </div>
+                {/* Miscellaneous Section */}
+        <div className="mt-6 p-6 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl md:text-2xl font-semibold text-gray-800">
+              Miscellaneous
+            </h2>
+            <button
+              className="flex items-center gap-1 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white text-xs sm:text-sm font-medium !rounded-xl hover:bg-blue-700 transition-colors"
+              onClick={handleAddMiscItem}
+            >
+              <FaPlus className="w-3 h-3 sm:w-4 sm:h-4" />
+              Add Item
+            </button>
+          </div>
+          <div className="overflow-x-auto rounded-lg border border-gray-200">
+            <table className="w-full bg-white hidden sm:table">
+              <thead>
+                <tr className="bg-gray-100 text-gray-700 text-sm font-semibold">
+                  <th className="py-3 px-4 text-center">SR</th>
+                  <th className="py-3 px-4">Item Name</th>
+                  <th className="py-3 px-4">Quantity</th>
+                  <th className="py-3 px-4">Rate</th>
+                  <th className="py-3 px-4">Net Rate</th>
+                  <th className="py-3 px-4">Tax (%)</th>
+                  <th className="py-3 px-4">Tax Amount</th>
+                  <th className="py-3 px-4">Total Amount</th>
+                  <th className="py-3 px-4">Remark</th>
+                  <th className="py-3 px-4 text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {additionalItems.map((item, i) => (
+                  <tr key={i} className="border-b hover:bg-gray-50">
+                    <td className="py-3 px-4 text-center text-sm">{i + 1}</td>
+                    <td className="py-3 px-4">
+                      <input
+                        onChange={(e) =>
+                          handleItemNameChange(i, e.target.value)
+                        }
+                        className="w-[120px] border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        value={item.name || ""}
+                        type="text"
+                      />
+                    </td>
+                    <td className="py-3 px-4">
+                      <input
+                        onChange={(e) =>
+                          handleItemQuantityChange(i, e.target.value)
+                        }
+                        className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        value={item.quantity || ""}
+                        type="number"
+                        min="0"
+                      />
+                    </td>
+                    <td className="py-3 px-4">
+                      <input
+                        onChange={(e) =>
+                          handleItemRateChange(i, e.target.value)
+                        }
+                        className="w-[70px] border border-gray-300 rounded px-2 py-1 text-sm"
+                        value={item.rate || ""}
+                        type="number"
+                        min="0"
+                      />
+                    </td>
+                    <td className="py-3 px-4 text-sm text-center">
+                      INR {item.netRate.toFixed(2)}
+                    </td>
+                    <td className="py-3 px-4">
+                      <input
+                        onChange={(e) => handleItemTaxChange(i, e.target.value)}
+                        className="w-[70px] border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        value={item.tax || ""}
+                        type="number"
+                        min="0"
+                      />
+                    </td>
+                    <td className="py-3 px-4 text-sm text-center">
+                      INR {item.taxAmount.toFixed(2)}
+                    </td>
+                    <td className="py-3 px-4 text-sm text-center">
+                      INR {item.totalAmount.toFixed(2)}
+                    </td>
+                    <td className="py-3 px-4">
+                      <input
+                        onChange={(e) =>
+                          handleItemRemarkChange(i, e.target.value)
+                        }
+                        className="w-[120px] border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        value={item.remark || ""}
+                        type="text"
+                      />
+                    </td>
+                    <td className="py-3 px-4 text-center">
+                      <button onClick={() => handleDeleteMiscItem(i)}>
+                        <FaTrash className="text-red-500 hover:text-red-600 w-4 h-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {/* Mobile View for Miscellaneous */}
+            <div className="sm:hidden flex flex-col gap-4 mt-4">
+              {additionalItems.map((item, i) => (
+                <div
+                  key={i}
+                  className="bg-white p-4 rounded-lg shadow-none border border-gray-200"
+                >
+                  <div className="flex justify-between items-center mb-3">
+                    <span className="font-semibold text-sm">SR: {i + 1}</span>
+                    <button onClick={() => handleDeleteMiscItem(i)}>
+                      <FaTrash className="text-red-500 hover:text-red-600 w-4 h-4" />
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Item Name
+                      </label>
+                      <input
+                        onChange={(e) =>
+                          handleItemNameChange(i, e.target.value)
+                        }
+                        className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        value={item.name || ""}
+                        type="text"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Quantity
+                      </label>
+                      <input
+                        onChange={(e) =>
+                          handleItemQuantityChange(i, e.target.value)
+                        }
+                        className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        value={item.quantity || ""}
+                        type="number"
+                        min="0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Rate
+                      </label>
+                      <input
+                        onChange={(e) =>
+                          handleItemRateChange(i, e.target.value)
+                        }
+                        className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        value={item.rate || ""}
+                        type="number"
+                        min="0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Net Rate
+                      </label>
+                      <span className="text-sm">
+                        INR {item.netRate.toFixed(2)}
+                      </span>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Tax (%)
+                      </label>
+                      <input
+                        onChange={(e) => handleItemTaxChange(i, e.target.value)}
+                        className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        value={item.tax || ""}
+                        type="number"
+                        min="0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Tax Amount
+                      </label>
+                      <span className="text-sm">
+                        INR {item.taxAmount.toFixed(2)}
+                      </span>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Total Amount
+                      </label>
+                      <span className="text-sm">
+                        INR {item.totalAmount.toFixed(2)}
+                      </span>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Remark
+                      </label>
+                      <input
+                        onChange={(e) =>
+                          handleItemRemarkChange(i, e.target.value)
+                        }
+                        className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        value={item.remark || ""}
+                        type="text"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Quotation Section */}
@@ -2122,223 +2336,10 @@ const generatePDF = () => {
           </div>
         </div>
 
-        {/* Miscellaneous Section */}
-        <div className="mt-6 p-6 bg-gray-50 rounded-lg border border-gray-200">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl md:text-2xl font-semibold text-gray-800">
-              Miscellaneous
-            </h2>
-            <button
-              className="flex items-center gap-1 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-blue-600 text-white text-xs sm:text-sm font-medium !rounded-xl hover:bg-blue-700 transition-colors"
-              onClick={handleAddMiscItem}
-            >
-              <FaPlus className="w-3 h-3 sm:w-4 sm:h-4" />
-              Add Item
-            </button>
-          </div>
-          <div className="overflow-x-auto rounded-lg border border-gray-200">
-            <table className="w-full bg-white hidden sm:table">
-              <thead>
-                <tr className="bg-gray-100 text-gray-700 text-sm font-semibold">
-                  <th className="py-3 px-4 text-center">SR</th>
-                  <th className="py-3 px-4">Item Name</th>
-                  <th className="py-3 px-4">Quantity</th>
-                  <th className="py-3 px-4">Rate</th>
-                  <th className="py-3 px-4">Net Rate</th>
-                  <th className="py-3 px-4">Tax (%)</th>
-                  <th className="py-3 px-4">Tax Amount</th>
-                  <th className="py-3 px-4">Total Amount</th>
-                  <th className="py-3 px-4">Remark</th>
-                  <th className="py-3 px-4 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {additionalItems.map((item, i) => (
-                  <tr key={i} className="border-b hover:bg-gray-50">
-                    <td className="py-3 px-4 text-center text-sm">{i + 1}</td>
-                    <td className="py-3 px-4">
-                      <input
-                        onChange={(e) =>
-                          handleItemNameChange(i, e.target.value)
-                        }
-                        className="w-[120px] border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        value={item.name || ""}
-                        type="text"
-                      />
-                    </td>
-                    <td className="py-3 px-4">
-                      <input
-                        onChange={(e) =>
-                          handleItemQuantityChange(i, e.target.value)
-                        }
-                        className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        value={item.quantity || ""}
-                        type="number"
-                        min="0"
-                      />
-                    </td>
-                    <td className="py-3 px-4">
-                      <input
-                        onChange={(e) =>
-                          handleItemRateChange(i, e.target.value)
-                        }
-                        className="w-[70px] border border-gray-300 rounded px-2 py-1 text-sm"
-                        value={item.rate || ""}
-                        type="number"
-                        min="0"
-                      />
-                    </td>
-                    <td className="py-3 px-4 text-sm text-center">
-                      INR {item.netRate.toFixed(2)}
-                    </td>
-                    <td className="py-3 px-4">
-                      <input
-                        onChange={(e) => handleItemTaxChange(i, e.target.value)}
-                        className="w-[70px] border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        value={item.tax || ""}
-                        type="number"
-                        min="0"
-                      />
-                    </td>
-                    <td className="py-3 px-4 text-sm text-center">
-                      INR {item.taxAmount.toFixed(2)}
-                    </td>
-                    <td className="py-3 px-4 text-sm text-center">
-                      INR {item.totalAmount.toFixed(2)}
-                    </td>
-                    <td className="py-3 px-4">
-                      <input
-                        onChange={(e) =>
-                          handleItemRemarkChange(i, e.target.value)
-                        }
-                        className="w-[120px] border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        value={item.remark || ""}
-                        type="text"
-                      />
-                    </td>
-                    <td className="py-3 px-4 text-center">
-                      <button onClick={() => handleDeleteMiscItem(i)}>
-                        <FaTrash className="text-red-500 hover:text-red-600 w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {/* Mobile View for Miscellaneous */}
-            <div className="sm:hidden flex flex-col gap-4 mt-4">
-              {additionalItems.map((item, i) => (
-                <div
-                  key={i}
-                  className="bg-white p-4 rounded-lg shadow-sm border border-gray-200"
-                >
-                  <div className="flex justify-between items-center mb-3">
-                    <span className="font-semibold text-sm">SR: {i + 1}</span>
-                    <button onClick={() => handleDeleteMiscItem(i)}>
-                      <FaTrash className="text-red-500 hover:text-red-600 w-4 h-4" />
-                    </button>
-                  </div>
-                  <div className="grid grid-cols-1 gap-3">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Item Name
-                      </label>
-                      <input
-                        onChange={(e) =>
-                          handleItemNameChange(i, e.target.value)
-                        }
-                        className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        value={item.name || ""}
-                        type="text"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Quantity
-                      </label>
-                      <input
-                        onChange={(e) =>
-                          handleItemQuantityChange(i, e.target.value)
-                        }
-                        className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        value={item.quantity || ""}
-                        type="number"
-                        min="0"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Rate
-                      </label>
-                      <input
-                        onChange={(e) =>
-                          handleItemRateChange(i, e.target.value)
-                        }
-                        className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        value={item.rate || ""}
-                        type="number"
-                        min="0"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Net Rate
-                      </label>
-                      <span className="text-sm">
-                        INR {item.netRate.toFixed(2)}
-                      </span>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Tax (%)
-                      </label>
-                      <input
-                        onChange={(e) => handleItemTaxChange(i, e.target.value)}
-                        className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        value={item.tax || ""}
-                        type="number"
-                        min="0"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Tax Amount
-                      </label>
-                      <span className="text-sm">
-                        INR {item.taxAmount.toFixed(2)}
-                      </span>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Total Amount
-                      </label>
-                      <span className="text-sm">
-                        INR {item.totalAmount.toFixed(2)}
-                      </span>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700">
-                        Remark
-                      </label>
-                      <input
-                        onChange={(e) =>
-                          handleItemRemarkChange(i, e.target.value)
-                        }
-                        className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        value={item.remark || ""}
-                        type="text"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
         {/* Summary and Bank Details */}
         <div className="flex flex-col md:flex-row gap-6">
           {/* Bank Details and Terms */}
-          <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 w-full md:w-1/2">
+          <div className="bg-white p-6 rounded-xl shadow-none border border-gray-200 w-full md:w-1/2">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">
               Bank Details & Terms
             </h3>
@@ -2351,7 +2352,7 @@ const generatePDF = () => {
                 <option value="">Select Bank Details</option>
                 {bankData.map((data, index) => (
                   <option key={index} value={data}>
-                      Account Name : {data[0]}   -    Account Number : {data[1]}
+                    Account Name : {data[0]} - Account Number : {data[1]}
                   </option>
                 ))}
               </select>

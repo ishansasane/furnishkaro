@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setInteriorData } from "../Redux/dataSlice";
 import { useNavigate } from "react-router-dom";
 import InteriorPage from "./InteriorPage";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 interface Interior {
   data: string[];
@@ -13,10 +14,16 @@ interface Interior {
 
 async function fetchInteriors(): Promise<string[][]> {
   try {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getinteriordata",
-      { credentials: "include" }
+      {
+        credentials: "include",
+      }
     );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
 
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
     const data = await response.json();
@@ -38,11 +45,13 @@ export default function Interiors() {
   const [interiorPageData, setInteriorPageData] = useState(null);
 
   const dispatch = useDispatch();
-  const interiorsFromRedux = useSelector((state: RootState) => state.data.interiors);
+  const interiorsFromRedux = useSelector(
+    (state: RootState) => state.data.interiors
+  );
 
   async function deleteInterior(name: string) {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/deleteinteriordata",
         {
           method: "POST",
@@ -96,7 +105,10 @@ export default function Interiors() {
           finalData = freshData;
           dispatch(setInteriorData(finalData));
           setInteriors(finalData);
-          localStorage.setItem("interiorData", JSON.stringify({ data: finalData, time: now }));
+          localStorage.setItem(
+            "interiorData",
+            JSON.stringify({ data: finalData, time: now })
+          );
         }
       } catch (error) {
         console.error("Error fetching interiors:", error);
@@ -115,7 +127,11 @@ export default function Interiors() {
 
   return (
     <div className="md:p-6 pt-20 h-full bg-gray-50">
-      <div className={`flex flex-wrap justify-between items-center mb-4 ${interiorOpen ? "hidden" : ""}`}>
+      <div
+        className={`flex flex-wrap justify-between items-center mb-4 ${
+          interiorOpen ? "hidden" : ""
+        }`}
+      >
         <h1 className="text-2xl font-bold">Interiors</h1>
         <button
           className="flex !rounded-md items-center gap-2 bg-blue-600 text-white px-4 py-2"
@@ -128,7 +144,11 @@ export default function Interiors() {
         </button>
       </div>
 
-      <div className={`bg-white shadow rounded-lg overflow-x-auto p-5 ${interiorOpen ? "hidden" : ""}`}>
+      <div
+        className={`bg-white shadow rounded-lg overflow-x-auto p-5 ${
+          interiorOpen ? "hidden" : ""
+        }`}
+      >
         <div className="mb-4">
           <input
             type="text"
@@ -199,7 +219,10 @@ export default function Interiors() {
       </div>
 
       {interiorOpen && (
-        <InteriorPage interiorData={interiorPageData} setInteriorOpen={setInteriorOpen} />
+        <InteriorPage
+          interiorData={interiorPageData}
+          setInteriorOpen={setInteriorOpen}
+        />
       )}
 
       {isDialogOpen && (

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Plus, Pencil, XCircle } from "lucide-react";
 import TailorDialog from "../compoonents/TailorDialog";
@@ -6,6 +5,7 @@ import { RootState } from "../Redux/store";
 import { useDispatch, useSelector } from "react-redux";
 import { setTailorData } from "../Redux/dataSlice";
 import { useNavigate } from "react-router-dom";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 interface Tailor {
   data: string[];
@@ -14,9 +14,12 @@ interface Tailor {
 // Fetch Tailors
 async function fetchTailors(): Promise<Tailor[]> {
   try {
-    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettailors", {
-      credentials: "include",
-    });
+    const response = await fetchWithLoading(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/gettailors",
+      {
+        credentials: "include",
+      }
+    );
 
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
@@ -31,21 +34,32 @@ async function fetchTailors(): Promise<Tailor[]> {
 }
 
 // Delete a Tailor
-async function deleteTailor(tailorName: string, setRefresh: (state: boolean) => void, dispatch: any, setTailors: (tailors: Tailor[]) => void) {
+async function deleteTailor(
+  tailorName: string,
+  setRefresh: (state: boolean) => void,
+  dispatch: any,
+  setTailors: (tailors: Tailor[]) => void
+) {
   try {
-    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deletetailor", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ tailorName }),
-    });
+    const response = await fetchWithLoading(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/deletetailor",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ tailorName }),
+      }
+    );
 
     if (response.ok) {
       alert("Tailor deleted");
       const updatedTailors = await fetchTailors();
       dispatch(setTailorData(updatedTailors));
       setTailors(updatedTailors);
-      localStorage.setItem("tailorData", JSON.stringify({ data: updatedTailors, time: Date.now() }));
+      localStorage.setItem(
+        "tailorData",
+        JSON.stringify({ data: updatedTailors, time: Date.now() })
+      );
       setRefresh(true);
     } else {
       const errorText = await response.text();
@@ -66,7 +80,9 @@ export default function Tailors() {
   const [refresh, setRefresh] = useState(false);
 
   const dispatch = useDispatch();
-  const tailorsFromRedux = useSelector((state: RootState) => state.data.tailors);
+  const tailorsFromRedux = useSelector(
+    (state: RootState) => state.data.tailors
+  );
 
   useEffect(() => {
     const fetchAndSetData = async () => {
@@ -88,7 +104,10 @@ export default function Tailors() {
         if (Array.isArray(data)) {
           dispatch(setTailorData(data));
           setTailors(data);
-          localStorage.setItem("tailorData", JSON.stringify({ data, time: now }));
+          localStorage.setItem(
+            "tailorData",
+            JSON.stringify({ data, time: now })
+          );
         } else {
           console.error("Fetched tailor data is invalid:", data);
         }
@@ -159,7 +178,14 @@ export default function Tailors() {
                     </button>
                     <button
                       className="border px-2 py-1 rounded-md"
-                      onClick={() => deleteTailor(tailor[0], setRefresh, dispatch, setTailors)}
+                      onClick={() =>
+                        deleteTailor(
+                          tailor[0],
+                          setRefresh,
+                          dispatch,
+                          setTailors
+                        )
+                      }
                     >
                       <XCircle size={16} />
                     </button>
@@ -168,13 +194,23 @@ export default function Tailors() {
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="text-center py-4">No tailors found.</td>
+                <td colSpan={5} className="text-center py-4">
+                  No tailors found.
+                </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
-      {isDialogOpen && <TailorDialog setDialogOpen={setDialogOpen} setRefresh={setRefresh} refresh={refresh} editingTailor={editingTailor} setEditingTailor={setEditingTailor} />}
+      {isDialogOpen && (
+        <TailorDialog
+          setDialogOpen={setDialogOpen}
+          setRefresh={setRefresh}
+          refresh={refresh}
+          editingTailor={editingTailor}
+          setEditingTailor={setEditingTailor}
+        />
+      )}
     </div>
   );
 }

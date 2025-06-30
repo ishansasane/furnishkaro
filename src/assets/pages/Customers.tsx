@@ -7,6 +7,7 @@ import { setCustomerData } from "../Redux/dataSlice";
 import AddCustomerDialog from "../compoonents/AddCustomerDialog";
 import { useNavigate } from "react-router-dom";
 import CustomerDashboard from "./CustomerDashboard";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 interface Customer {
   name: string;
@@ -19,7 +20,7 @@ interface Customer {
 
 async function fetchCustomers(): Promise<Customer[]> {
   try {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getcustomerdata",
       { credentials: "include" }
     );
@@ -52,7 +53,7 @@ export default function Customers() {
   const customerData = useSelector((state: RootState) => state.data.customers);
 
   async function deleteCustomer(name: string) {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/deletecustomerdata",
       {
         method: "POST",
@@ -74,51 +75,53 @@ export default function Customers() {
     }
   }
 
-  
   const [customerDashboard, setCustomerDashboard] = useState(false);
 
-  const [customerDashboardData, setCustomerDashboardData] = useState<Customer>(null);
+  const [customerDashboardData, setCustomerDashboardData] =
+    useState<Customer>(null);
 
-useEffect(() => {
-  const fetchData = async () => {
-    // Check localStorage first
-    const cached = localStorage.getItem("customerData");
-    const now = Date.now();
+  useEffect(() => {
+    const fetchData = async () => {
+      // Check localStorage first
+      const cached = localStorage.getItem("customerData");
+      const now = Date.now();
 
-    if (cached && !reset) {
-      const parsed = JSON.parse(cached);
-      const timeDiff = now - parsed.time;
+      if (cached && !reset) {
+        const parsed = JSON.parse(cached);
+        const timeDiff = now - parsed.time;
 
-      // Use cached data if it's fresh (e.g., within 5 minutes)
-      if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
-        dispatch(setCustomerData(parsed.data));
-        setCustomers(parsed.data);
-        return;
+        // Use cached data if it's fresh (e.g., within 5 minutes)
+        if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
+          dispatch(setCustomerData(parsed.data));
+          setCustomers(parsed.data);
+          return;
+        }
       }
-    }
 
-    // If no cached data or reset triggered, fetch from server
-    const data = await fetchCustomers();
-    dispatch(setCustomerData(data));
-    setCustomers(data);
-    localStorage.setItem("customerData", JSON.stringify({ data, time: now }));
+      // If no cached data or reset triggered, fetch from server
+      const data = await fetchCustomers();
+      dispatch(setCustomerData(data));
+      setCustomers(data);
+      localStorage.setItem("customerData", JSON.stringify({ data, time: now }));
 
-    if (reset) {
-      setDialogOpen(false);
-      setreset(false);
-    }
-  };
+      if (reset) {
+        setDialogOpen(false);
+        setreset(false);
+      }
+    };
 
-  fetchData();
-}, [reset, dispatch, customerDashboard]);
-
+    fetchData();
+  }, [reset, dispatch, customerDashboard]);
 
   // Close dropdown on any click
 
-
   return (
     <div className={`p-6 bg-gray-50 md:mt-0 mt-20 h-screen`}>
-      <div className={`flex flex-wrap justify-between items-center p-2 mb-4 ${customerDashboard ? "hidden" : ""}`}>
+      <div
+        className={`flex flex-wrap justify-between items-center p-2 mb-4 ${
+          customerDashboard ? "hidden" : ""
+        }`}
+      >
         <h1 className="text-[1.5vw] font-semibold">Customers</h1>
         <button
           className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2"
@@ -129,10 +132,15 @@ useEffect(() => {
         </button>
       </div>
 
-      <div className={`bg-white p-5 rounded-md shadow overflow-x-auto ${customerDashboard ? "hidden" : ""}`} onClick={(e) => {
-                        e.stopPropagation();
-                        setOpenDropdown(null);
-                      }}>
+      <div
+        className={`bg-white p-5 rounded-md shadow overflow-x-auto ${
+          customerDashboard ? "hidden" : ""
+        }`}
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpenDropdown(null);
+        }}
+      >
         <div className="mb-4">
           <input
             type="text"
@@ -143,10 +151,13 @@ useEffect(() => {
           />
         </div>
 
-        <table className="w-full border-collapse border border-gray-300" onClick={(e) => {
-                        e.stopPropagation();
-                        setOpenDropdown(null);
-                      }}>
+        <table
+          className="w-full border-collapse border border-gray-300"
+          onClick={(e) => {
+            e.stopPropagation();
+            setOpenDropdown(null);
+          }}
+        >
           <thead className="bg-sky-50">
             <tr className="text-gray-600">
               <th className="px-4 py-2">Customer Name</th>
@@ -160,7 +171,14 @@ useEffect(() => {
           <tbody>
             {customers.length > 0 ? (
               customers.map((customer, index) => (
-                <tr key={index} className="hover:bg-sky-50" onClick={() => {setCustomerDashboard(true); setCustomerDashboardData(customer);}}>
+                <tr
+                  key={index}
+                  className="hover:bg-sky-50"
+                  onClick={() => {
+                    setCustomerDashboard(true);
+                    setCustomerDashboardData(customer);
+                  }}
+                >
                   <td className="px-4 py-2">{customer[0]}</td>
                   <td className="px-4 py-2">{customer[1]}</td>
                   <td className="px-6 py-2">{customer[4]}</td>
@@ -221,15 +239,13 @@ useEffect(() => {
           setReset={setreset}
         />
       )}
-      {
-        customerDashboard && (
-          <CustomerDashboard
-            setCustomerDashboardData={setCustomerDashboardData}
-            customerDashboardData={customerDashboardData}
-            setCustomerDashboard={setCustomerDashboard}
-          />
-        )
-      }
+      {customerDashboard && (
+        <CustomerDashboard
+          setCustomerDashboardData={setCustomerDashboardData}
+          customerDashboardData={customerDashboardData}
+          setCustomerDashboard={setCustomerDashboard}
+        />
+      )}
     </div>
   );
 }

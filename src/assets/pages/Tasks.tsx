@@ -11,6 +11,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store";
 import { motion, AnimatePresence } from "framer-motion";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 interface Task {
   task: string;
@@ -54,7 +55,7 @@ export default function Tasks() {
   );
 
   const deleteTask = async (name: string) => {
-    await fetch(
+    await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/deletetask",
       {
         method: "POST",
@@ -72,7 +73,7 @@ export default function Tasks() {
 
   const fetchProjectData = async () => {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
         {
           credentials: "include",

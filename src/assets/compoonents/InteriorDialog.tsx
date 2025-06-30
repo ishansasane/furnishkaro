@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { setInteriorData } from "../Redux/dataSlice";
-import { RootState } from "../Redux/Store";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 interface InteriorDialogProps {
   setDialogOpen: (open: boolean) => void;
@@ -14,7 +12,7 @@ interface InteriorDialogProps {
 
 async function fetchInteriors() {
   try {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getinteriordata",
       { credentials: "include" }
     );
@@ -40,14 +38,19 @@ const InteriorDialog: React.FC<InteriorDialogProps> = ({
 
   const [name, setName] = useState(editingInterior ? editingInterior[0] : "");
   const [email, setEmail] = useState(editingInterior ? editingInterior[1] : "");
-  const [phonenumber, setPhoneNumber] = useState(editingInterior ? editingInterior[2] : "");
-  const [address, setAddress] = useState(editingInterior ? editingInterior[3] : "");
+  const [phonenumber, setPhoneNumber] = useState(
+    editingInterior ? editingInterior[2] : ""
+  );
+  const [address, setAddress] = useState(
+    editingInterior ? editingInterior[3] : ""
+  );
 
   const handleSubmit = async () => {
     // ✅ Duplicate check for Add
     if (!editingInterior) {
       const duplicate = interiors.find(
-        (interior) => interior[0].toLowerCase().trim() === name.toLowerCase().trim()
+        (interior) =>
+          interior[0].toLowerCase().trim() === name.toLowerCase().trim()
       );
 
       if (duplicate) {
@@ -64,7 +67,7 @@ const InteriorDialog: React.FC<InteriorDialogProps> = ({
       : "https://sheeladecor.netlify.app/.netlify/functions/server/sendinteriordata";
 
     try {
-      const response = await fetch(url, {
+      const response = await fetchWithLoading(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -72,14 +75,21 @@ const InteriorDialog: React.FC<InteriorDialogProps> = ({
       });
 
       if (response.status === 200) {
-        alert(editingInterior ? "Interior updated successfully" : "Interior added successfully");
+        alert(
+          editingInterior
+            ? "Interior updated successfully"
+            : "Interior added successfully"
+        );
 
         const updatedInteriors = await fetchInteriors();
         const now = Date.now();
 
         if (Array.isArray(updatedInteriors)) {
           dispatch(setInteriorData(updatedInteriors));
-          localStorage.setItem("interiorData", JSON.stringify({ data: updatedInteriors, time: now }));
+          localStorage.setItem(
+            "interiorData",
+            JSON.stringify({ data: updatedInteriors, time: now })
+          );
         }
 
         setDialogOpen(false);
@@ -103,11 +113,15 @@ const InteriorDialog: React.FC<InteriorDialogProps> = ({
       {/* ✅ Dialog */}
       <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md">
         <div className="bg-white p-6 rounded shadow-md w-full border">
-          <h2 className="text-xl font-bold mb-4">{editingInterior ? "Edit Interior" : "Add Interior"}</h2>
+          <h2 className="text-xl font-bold mb-4">
+            {editingInterior ? "Edit Interior" : "Add Interior"}
+          </h2>
 
           {/* ✅ Name Field (hide during edit if needed) */}
           <input
-            className={`${editingInterior ? "hidden" : ""} border p-2 rounded w-full mb-2`}
+            className={`${
+              editingInterior ? "hidden" : ""
+            } border p-2 rounded w-full mb-2`}
             placeholder="Name"
             value={name}
             onChange={(e) => setName(e.target.value)}

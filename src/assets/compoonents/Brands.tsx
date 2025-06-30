@@ -4,11 +4,12 @@ import BrandDialog from "../compoonents/BrandDialog";
 import { useDispatch, useSelector } from "react-redux";
 import { setBrandData } from "../Redux/dataSlice";
 import { RootState } from "../Redux/Store";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 // Fetch brands
 async function fetchBrands() {
   try {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getbrands",
       { credentials: "include" }
     );
@@ -22,7 +23,10 @@ async function fetchBrands() {
   }
 }
 
-async function refreshBrands(dispatch: any, setBrands: (data: string[][]) => void) {
+async function refreshBrands(
+  dispatch: any,
+  setBrands: (data: string[][]) => void
+) {
   try {
     const data = await fetchBrands();
     const now = Date.now();
@@ -42,7 +46,7 @@ async function deleteBrand(
   setBrands: (data: string[][]) => void
 ) {
   try {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/deletebrand",
       {
         method: "POST",
@@ -95,7 +99,10 @@ export default function Brands() {
         if (Array.isArray(data)) {
           dispatch(setBrandData(data));
           setBrands(data);
-          localStorage.setItem("brandData", JSON.stringify({ data, time: now }));
+          localStorage.setItem(
+            "brandData",
+            JSON.stringify({ data, time: now })
+          );
         }
       } catch (error) {
         console.error("Error fetching brands:", error);

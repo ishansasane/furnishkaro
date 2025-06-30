@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { setTaskDialogOpen, setTasks } from "../Redux/dataSlice";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 interface TaskDialogProps {
   onClose: () => void;
@@ -18,7 +19,9 @@ interface TaskDialogProps {
 }
 
 const fetchTaskData = async () => {
-  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks");
+  const response = await fetchWithLoading(
+    "https://sheeladecor.netlify.app/.netlify/functions/server/gettasks"
+  );
   const data = await response.json();
   return data.body || [];
 };
@@ -67,7 +70,9 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
 
     try {
       const existingTasks = await fetchTaskData();
-      const isDuplicate = existingTasks.some(task => task[0]?.toLowerCase() === taskName.toLowerCase());
+      const isDuplicate = existingTasks.some(
+        (task) => task[0]?.toLowerCase() === taskName.toLowerCase()
+      );
 
       if (isDuplicate) {
         alert("Task name already exists.");
@@ -76,29 +81,37 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
 
       const date = new Date().toISOString().slice(0, 16);
 
-      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/addtask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          title: taskName,
-          description,
-          dateTime,
-          date,
-          assigneeLink: assignee,
-          projectLink: project,
-          priority,
-          status,
-        }),
-      });
+      const response = await fetchWithLoading(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/addtask",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            title: taskName,
+            description,
+            dateTime,
+            date,
+            assigneeLink: assignee,
+            projectLink: project,
+            priority,
+            status,
+          }),
+        }
+      );
 
       if (response.status === 200) {
         alert("Task Added");
         const updatedTasks = await fetchTaskData();
-        const sortedTasks = updatedTasks.sort((a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime());
+        const sortedTasks = updatedTasks.sort(
+          (a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime()
+        );
 
         dispatch(setTasks(sortedTasks));
-        localStorage.setItem("taskData", JSON.stringify({ data: sortedTasks, time: Date.now() }));
+        localStorage.setItem(
+          "taskData",
+          JSON.stringify({ data: sortedTasks, time: Date.now() })
+        );
 
         setediting(null);
         setrefresh(!refresh);
@@ -116,30 +129,38 @@ const TaskDialog: React.FC<TaskDialogProps> = ({
     try {
       const date = isEditing[3];
 
-      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/updatetask", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          title: taskName,
-          description,
-          dateTime,
-          date,
-          assigneeLink: assignee,
-          projectLink: project,
-          priority,
-          status,
-        }),
-      });
+      const response = await fetchWithLoading(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/updatetask",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            title: taskName,
+            description,
+            dateTime,
+            date,
+            assigneeLink: assignee,
+            projectLink: project,
+            priority,
+            status,
+          }),
+        }
+      );
 
       if (response.status === 200) {
         alert("Task updated");
 
         const updatedTasks = await fetchTaskData();
-        const sortedTasks = updatedTasks.sort((a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime());
+        const sortedTasks = updatedTasks.sort(
+          (a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime()
+        );
 
         dispatch(setTasks(sortedTasks));
-        localStorage.setItem("taskData", JSON.stringify({ data: sortedTasks, time: Date.now() }));
+        localStorage.setItem(
+          "taskData",
+          JSON.stringify({ data: sortedTasks, time: Date.now() })
+        );
 
         setediting(null);
         setrefresh(true);

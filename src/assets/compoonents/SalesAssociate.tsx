@@ -5,14 +5,21 @@ import { RootState } from "../Redux/Store";
 import { useSelector, useDispatch } from "react-redux";
 import { setSalesAssociateData } from "../Redux/dataSlice";
 import { useNavigate } from "react-router-dom";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 async function fetchSalesAssociates(): Promise<string[][]> {
   try {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getsalesassociatedata",
-      { credentials: "include" }
+      {
+        credentials: "include",
+      }
     );
-    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
     const data = await response.json();
     return Array.isArray(data.body) ? data.body : [];
   } catch (error) {
@@ -25,10 +32,10 @@ async function deleteSalesAssociate(
   name: string,
   setRefresh: (state: boolean) => void,
   dispatch: any,
-  setSalesAssociates: (salesAssociates: string[][]) => void
+  setSalesAssociates: (salesAssociates: SalesAssociate[]) => void
 ) {
   try {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/deletesalesassociatedata",
       {
         method: "POST",
@@ -52,7 +59,9 @@ async function deleteSalesAssociate(
       setRefresh(true);
     } else {
       const errorText = await response.text();
-      alert(`Error deleting sales associate: ${errorText || response.statusText}`);
+      alert(
+        `Error deleting sales associate: ${errorText || response.statusText}`
+      );
     }
   } catch (error) {
     console.error("Error deleting sales associate:", error);
@@ -65,11 +74,15 @@ export default function SalesAssociates() {
   const [salesAssociates, setSalesAssociates] = useState<string[][]>([]);
   const [search, setSearch] = useState("");
   const [isDialogOpen, setDialogOpen] = useState(false);
-  const [editingSalesAssociate, setEditingSalesAssociate] = useState<string[] | null>(null);
+  const [editingSalesAssociate, setEditingSalesAssociate] = useState<
+    string[] | null
+  >(null);
   const [refresh, setRefresh] = useState(false);
 
   const dispatch = useDispatch();
-  const salesAssociatesFromRedux = useSelector((state: RootState) => state.data.salesAssociates);
+  const salesAssociatesFromRedux = useSelector(
+    (state: RootState) => state.data.salesAssociates
+  );
 
   useEffect(() => {
     const fetchAndSetData = async () => {
@@ -91,7 +104,10 @@ export default function SalesAssociates() {
         if (Array.isArray(data)) {
           dispatch(setSalesAssociateData(data));
           setSalesAssociates(data);
-          localStorage.setItem("salesAssociateData", JSON.stringify({ data, time: now }));
+          localStorage.setItem(
+            "salesAssociateData",
+            JSON.stringify({ data, time: now })
+          );
         }
       } catch (error) {
         console.error("Error fetching sales associates:", error);
@@ -164,7 +180,14 @@ export default function SalesAssociates() {
                     </button>
                     <button
                       className="border px-2 py-1 rounded-md"
-                      onClick={() => deleteSalesAssociate(sa[0], setRefresh, dispatch, setSalesAssociates)}
+                      onClick={() =>
+                        deleteSalesAssociate(
+                          sa[0],
+                          setRefresh,
+                          dispatch,
+                          setSalesAssociates
+                        )
+                      }
                     >
                       <XCircle size={16} />
                     </button>
@@ -173,13 +196,14 @@ export default function SalesAssociates() {
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="text-center py-4">No sales associates found.</td>
+                <td colSpan={5} className="text-center py-4">
+                  No sales associates found.
+                </td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
-
       {isDialogOpen && (
         <SalesAssociateDialog
           setDialogOpen={setDialogOpen}

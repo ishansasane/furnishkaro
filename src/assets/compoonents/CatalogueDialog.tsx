@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 interface CatalogueDialogProps {
   setDialogOpen: (open: boolean) => void;
@@ -18,22 +20,27 @@ const CatalogueDialog: React.FC<CatalogueDialogProps> = ({
   catalogueData,
 }) => {
   const data = editingCatalogue;
-  const [catalogueName, setCatalogueName] = useState(editingCatalogue ? data[0] : "");
-  const [description, setDescription] = useState(editingCatalogue ? data[1] : "");
+  const [catalogueName, setCatalogueName] = useState(
+    editingCatalogue ? data[0] : ""
+  );
+  const [description, setDescription] = useState(
+    editingCatalogue ? data[1] : ""
+  );
 
   const handleSubmit = async () => {
     // ✅ Duplicate check for Add mode
     if (!editingCatalogue) {
       const duplicate = catalogueData.find(
         (catalogue) =>
-          catalogue[0].toLowerCase().trim() === catalogueName.toLowerCase().trim()
+          catalogue[0].toLowerCase().trim() ===
+          catalogueName.toLowerCase().trim()
       );
 
       if (duplicate) {
         alert("Already data present");
-        setRefresh(!refresh);              // ✅ Trigger refresh
+        setRefresh(!refresh); // ✅ Trigger refresh
         setEditingCatalogue(null);
-        setDialogOpen(false);              // ✅ Close the dialog
+        setDialogOpen(false); // ✅ Close the dialog
         return;
       }
     }
@@ -42,7 +49,7 @@ const CatalogueDialog: React.FC<CatalogueDialogProps> = ({
       ? "https://sheeladecor.netlify.app/.netlify/functions/server/updatecatalogue"
       : "https://sheeladecor.netlify.app/.netlify/functions/server/addcatalogue";
 
-    const response = await fetch(url, {
+    const response = await fetchWithLoading(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",
@@ -50,7 +57,11 @@ const CatalogueDialog: React.FC<CatalogueDialogProps> = ({
     });
 
     if (response.status === 200) {
-      alert(editingCatalogue ? "Catalogue updated successfully" : "Catalogue added successfully");
+      alert(
+        editingCatalogue
+          ? "Catalogue updated successfully"
+          : "Catalogue added successfully"
+      );
       setRefresh(!refresh);
       setEditingCatalogue(null);
       setDialogOpen(false);
@@ -67,9 +78,13 @@ const CatalogueDialog: React.FC<CatalogueDialogProps> = ({
       {/* ✅ Modal Box */}
       <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md">
         <div className="bg-white p-6 rounded shadow-md w-full border">
-          <h2 className="text-xl font-bold mb-4">{editingCatalogue ? "Edit Catalogue" : "Add Catalogue"}</h2>
+          <h2 className="text-xl font-bold mb-4">
+            {editingCatalogue ? "Edit Catalogue" : "Add Catalogue"}
+          </h2>
           <input
-            className={`${editingCatalogue ? "hidden" : "border"} p-2 rounded w-full mb-2`}
+            className={`${
+              editingCatalogue ? "hidden" : "border"
+            } p-2 rounded w-full mb-2`}
             placeholder="Catalogue Name"
             value={catalogueName}
             onChange={(e) => setCatalogueName(e.target.value)}

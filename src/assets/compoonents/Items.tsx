@@ -8,9 +8,10 @@ import { useNavigate } from "react-router-dom";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import * as XLSX from "xlsx";
+import { fetchWithLoading } from "../Redux/fetchWithLoading.ts";
 
 const getItemsData = async () => {
-  const response = await fetch(
+  const response = await fetchWithLoading(
     "https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts"
   );
   const data = await response.json();
@@ -139,7 +140,7 @@ const Items = () => {
 
   const deleteItem = async (name: string) => {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/deletesingleproduct",
         {
           method: "POST",
@@ -175,7 +176,7 @@ const Items = () => {
     const formattedDate = new Date().toLocaleDateString("en-GB");
 
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct",
         {
           method: "POST",
@@ -302,7 +303,7 @@ const Items = () => {
 
   const editItemData = async () => {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/updatesingleproduct",
         {
           method: "POST",
@@ -372,7 +373,7 @@ const Items = () => {
     };
 
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/addnewproduct",
         {
           method: "POST",
@@ -424,113 +425,115 @@ const Items = () => {
   };
 
   // Handle file import
- const handleFileImport = async (file: File) => {
-  if (!file.name.endsWith(".xlsx") && !file.name.endsWith(".xls")) {
-    setFileError("Please upload a valid Excel file (.xlsx or .xls)");
-    return;
-  }
-
-  try {
-    const data = await file.arrayBuffer();
-    const workbook = XLSX.read(data, { type: "array", cellDates: true });
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
-    const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-    const importedItems = jsonData.map((row: any) => {
-      let addedDate = "";
-      if (row["Added Date"]) {
-        try {
-          const date = new Date(row["Added Date"]);
-          addedDate = isNaN(date.getTime())
-            ? new Date().toLocaleDateString("en-GB")
-            : date.toLocaleDateString("en-GB");
-        } catch {
-          addedDate = new Date().toLocaleDateString("en-GB");
-        }
-      } else {
-        addedDate = new Date().toLocaleDateString("en-GB");
-      }
-
-      const mrpValue = row["MRP"] != null ? String(row["MRP"]) : "";
-      const taxRateValue = row["Tax Rate"] != null ? String(row["Tax Rate"]) : "";
-
-      const needsTailoringValue =
-        row["Needs Tailoring"] === "Yes" ||
-        row["Needs Tailoring"] === true ||
-        row["Needs Tailoring"] === "TRUE" ||
-        row["Needs Tailoring"] === 1;
-
-      return [
-        row["Product Name"] || "",
-        row["Description"] || "",
-        row["Group Type"] || "",
-        row["Costing Type"] || "",
-        mrpValue,
-        taxRateValue,
-        addedDate,
-        needsTailoringValue,
-      ];
-    });
-
-    // ✅ Improved Validation: Case-insensitive + trimmed matching
-    const validItems = importedItems.filter((item) => {
-      const productName = item[0]?.toString().trim();
-      const groupType = item[2]?.toString().trim().toLowerCase();
-      const costingType = item[3]?.toString().trim().toLowerCase();
-
-      const validGroup = groupOptions.some(
-        (group) => group.toLowerCase() === groupType
-      );
-
-      const validSellingUnit =
-        validGroup &&
-        sellingUnits[
-          groupOptions.find((g) => g.toLowerCase() === groupType)!
-        ]?.some((unit) => unit.toLowerCase() === costingType);
-
-      return productName && validGroup && validSellingUnit;
-    });
-
-    if (validItems.length === 0) {
-      setFileError("No valid items found in the Excel file. Please check data format.");
+  const handleFileImport = async (file: File) => {
+    if (!file.name.endsWith(".xlsx") && !file.name.endsWith(".xls")) {
+      setFileError("Please upload a valid Excel file (.xlsx or .xls)");
       return;
     }
 
-    const response = await fetch(
-      "https://sheeladecor.netlify.app/.netlify/functions/server/importproducts",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          items: validItems,
-        }),
+    try {
+      const data = await file.arrayBuffer();
+      const workbook = XLSX.read(data, { type: "array", cellDates: true });
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+      const importedItems = jsonData.map((row: any) => {
+        let addedDate = "";
+        if (row["Added Date"]) {
+          try {
+            const date = new Date(row["Added Date"]);
+            addedDate = isNaN(date.getTime())
+              ? new Date().toLocaleDateString("en-GB")
+              : date.toLocaleDateString("en-GB");
+          } catch {
+            addedDate = new Date().toLocaleDateString("en-GB");
+          }
+        } else {
+          addedDate = new Date().toLocaleDateString("en-GB");
+        }
+
+        const mrpValue = row["MRP"] != null ? String(row["MRP"]) : "";
+        const taxRateValue =
+          row["Tax Rate"] != null ? String(row["Tax Rate"]) : "";
+
+        const needsTailoringValue =
+          row["Needs Tailoring"] === "Yes" ||
+          row["Needs Tailoring"] === true ||
+          row["Needs Tailoring"] === "TRUE" ||
+          row["Needs Tailoring"] === 1;
+
+        return [
+          row["Product Name"] || "",
+          row["Description"] || "",
+          row["Group Type"] || "",
+          row["Costing Type"] || "",
+          mrpValue,
+          taxRateValue,
+          addedDate,
+          needsTailoringValue,
+        ];
+      });
+
+      // ✅ Improved Validation: Case-insensitive + trimmed matching
+      const validItems = importedItems.filter((item) => {
+        const productName = item[0]?.toString().trim();
+        const groupType = item[2]?.toString().trim().toLowerCase();
+        const costingType = item[3]?.toString().trim().toLowerCase();
+
+        const validGroup = groupOptions.some(
+          (group) => group.toLowerCase() === groupType
+        );
+
+        const validSellingUnit =
+          validGroup &&
+          sellingUnits[
+            groupOptions.find((g) => g.toLowerCase() === groupType)!
+          ]?.some((unit) => unit.toLowerCase() === costingType);
+
+        return productName && validGroup && validSellingUnit;
+      });
+
+      if (validItems.length === 0) {
+        setFileError(
+          "No valid items found in the Excel file. Please check data format."
+        );
+        return;
       }
-    );
 
-    if (!response.ok) {
-      throw new Error("Failed to import items");
+      const response = await fetchWithLoading(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/importproducts",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            items: validItems,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to import items");
+      }
+
+      const updatedData = await getItemsData();
+      dispatch(setItemData(updatedData));
+      setItems(updatedData);
+      localStorage.setItem(
+        "itemData",
+        JSON.stringify({ data: updatedData, time: Date.now() })
+      );
+      setIsImportModalOpen(false);
+      setFileError(null);
+      alert("Items imported successfully");
+    } catch (error) {
+      console.error("Error importing file:", error);
+      setFileError("Failed to import Excel file");
     }
-
-    const updatedData = await getItemsData();
-    dispatch(setItemData(updatedData));
-    setItems(updatedData);
-    localStorage.setItem(
-      "itemData",
-      JSON.stringify({ data: updatedData, time: Date.now() })
-    );
-    setIsImportModalOpen(false);
-    setFileError(null);
-    alert("Items imported successfully");
-  } catch (error) {
-    console.error("Error importing file:", error);
-    setFileError("Failed to import Excel file");
-  }
-};
-
+  };
 
   // Handle drag and drop events
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
@@ -560,40 +563,40 @@ const Items = () => {
   };
 
   // Export table data as PDF
-// Export table data as PDF
-const handleExportPDF = () => {
-  const doc = new jsPDF();
-  doc.text("Products List", 14, 20);
-  const columns = [
-    "Product Name",
-    "Description",
-    "Costing Type",
-    "Group Type",
-    "MRP",
-    "Tax Rate",
-    "Added Date",
-    "Needs Tailoring",
-  ];
-  const rows = items.map((item: any) => [
-    item[0] || "",
-    item[1] || "",
-    item[3] || "",
-    item[2] || "",
-    item[4] || "",
-    item[5] || "",
-    item[6] ? new Date(item[6]).toLocaleDateString("en-GB") : "",
-    item[7] ? "Yes" : "No",
-  ]);
-  autoTable(doc, {
-    head: [columns],
-    body: rows,
-    startY: 30,
-    theme: "striped",
-    styles: { fontSize: 10 },
-    headStyles: { fillColor: [50, 150, 150] },
-  });
-  doc.save("products-table.pdf");
-};
+  // Export table data as PDF
+  const handleExportPDF = () => {
+    const doc = new jsPDF();
+    doc.text("Products List", 14, 20);
+    const columns = [
+      "Product Name",
+      "Description",
+      "Costing Type",
+      "Group Type",
+      "MRP",
+      "Tax Rate",
+      "Added Date",
+      "Needs Tailoring",
+    ];
+    const rows = items.map((item: any) => [
+      item[0] || "",
+      item[1] || "",
+      item[3] || "",
+      item[2] || "",
+      item[4] || "",
+      item[5] || "",
+      item[6] ? new Date(item[6]).toLocaleDateString("en-GB") : "",
+      item[7] ? "Yes" : "No",
+    ]);
+    autoTable(doc, {
+      head: [columns],
+      body: rows,
+      startY: 30,
+      theme: "striped",
+      styles: { fontSize: 10 },
+      headStyles: { fillColor: [50, 150, 150] },
+    });
+    doc.save("products-table.pdf");
+  };
 
   // Export table data as Excel
   const handleExportExcel = () => {

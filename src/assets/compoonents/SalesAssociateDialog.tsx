@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../Redux/Store";
-import { setSalesAssociateData } from "../Redux/dataSlice";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 interface SalesAssociateDialogProps {
   setDialogOpen: (open: boolean) => void;
@@ -14,7 +12,7 @@ interface SalesAssociateDialogProps {
 
 async function fetchSalesAssociates(): Promise<string[][]> {
   try {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getsalesassociatedata",
       { credentials: "include" }
     );
@@ -36,12 +34,22 @@ const SalesAssociateDialog: React.FC<SalesAssociateDialogProps> = ({
 }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const salesAssociates = useSelector((state: RootState) => state.data.salesAssociates);
+  const salesAssociates = useSelector(
+    (state: RootState) => state.data.salesAssociates
+  );
 
-  const [name, setName] = useState(editingSalesAssociate ? editingSalesAssociate[0] : "");
-  const [email, setEmail] = useState(editingSalesAssociate ? editingSalesAssociate[1] : "");
-  const [phonenumber, setPhoneNumber] = useState(editingSalesAssociate ? editingSalesAssociate[2] : "");
-  const [address, setAddress] = useState(editingSalesAssociate ? editingSalesAssociate[3] : "");
+  const [name, setName] = useState(
+    editingSalesAssociate ? editingSalesAssociate[0] : ""
+  );
+  const [email, setEmail] = useState(
+    editingSalesAssociate ? editingSalesAssociate[1] : ""
+  );
+  const [phonenumber, setPhoneNumber] = useState(
+    editingSalesAssociate ? editingSalesAssociate[2] : ""
+  );
+  const [address, setAddress] = useState(
+    editingSalesAssociate ? editingSalesAssociate[3] : ""
+  );
 
   const handleSubmit = async () => {
     // ✅ Duplicate check (only for Add mode)
@@ -63,7 +71,7 @@ const SalesAssociateDialog: React.FC<SalesAssociateDialogProps> = ({
       : "https://sheeladecor.netlify.app/.netlify/functions/server/sendsalesassociatedata";
 
     try {
-      const response = await fetch(url, {
+      const response = await fetchWithLoading(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -71,14 +79,21 @@ const SalesAssociateDialog: React.FC<SalesAssociateDialogProps> = ({
       });
 
       if (response.status === 200) {
-        alert(editingSalesAssociate ? "Sales Associate updated successfully" : "Sales Associate added successfully");
+        alert(
+          editingSalesAssociate
+            ? "Sales Associate updated successfully"
+            : "Sales Associate added successfully"
+        );
 
         const updatedData = await fetchSalesAssociates();
         const now = Date.now();
 
         if (Array.isArray(updatedData)) {
           dispatch(setSalesAssociateData(updatedData));
-          localStorage.setItem("salesAssociateData", JSON.stringify({ data: updatedData, time: now }));
+          localStorage.setItem(
+            "salesAssociateData",
+            JSON.stringify({ data: updatedData, time: now })
+          );
         }
 
         setDialogOpen(false);
@@ -103,11 +118,15 @@ const SalesAssociateDialog: React.FC<SalesAssociateDialogProps> = ({
       <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md">
         <div className="bg-white p-6 rounded shadow-md w-full border">
           <h2 className="text-xl font-bold mb-4">
-            {editingSalesAssociate ? "Edit Sales Associate" : "Add Sales Associate"}
+            {editingSalesAssociate
+              ? "Edit Sales Associate"
+              : "Add Sales Associate"}
           </h2>
 
           <input
-            className={`${editingSalesAssociate ? "hidden" : ""} border p-2 rounded w-full mb-2`}
+            className={`${
+              editingSalesAssociate ? "hidden" : ""
+            } border p-2 rounded w-full mb-2`}
             placeholder="Name"
             value={name}
             onChange={(e) => setName(e.target.value)}

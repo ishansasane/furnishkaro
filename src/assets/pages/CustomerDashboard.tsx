@@ -4,13 +4,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store";
 import { setCustomerData, setPaymentData, setProjects } from "../Redux/dataSlice";
 import { Link } from 'react-router-dom';
+
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import { Download } from "lucide-react";
 
+import { fetchWithLoading } from '../Redux/fetchWithLoading';
+
+
 async function fetchCustomers() {
   try {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getcustomerdata",
       { credentials: "include" }
     );
@@ -28,13 +32,13 @@ async function fetchCustomers() {
 }
 
 const fetchPaymentData = async () => {
-  const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getPayments");
+  const response = await fetchWithLoading("https://sheeladecor.netlify.app/.netlify/functions/server/getPayments");
   const data = await response.json();
   return data.message;
 };
 
 const fetchProjectData = async () => {
-  const response = await fetch(
+  const response = await fetchWithLoading(
     "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
     {
       credentials: "include",
@@ -474,7 +478,7 @@ const CustomerDashboard = ({ customerDashboardData, setCustomerDashboardData, se
 
     const api = "https://sheeladecor.netlify.app/.netlify/functions/server/updatecustomerdata";
 
-    const response = await fetch(api, {
+    const response = await fetchWithLoading(api, {
       method: "POST",
       headers: {
         "content-type": "application/json"

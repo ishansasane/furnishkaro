@@ -2,17 +2,22 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import dayjs from "dayjs";
 import { RootState } from "../Redux/store";
-import { setPaymentData, setProjects, setProjectFlag, setTasks } from "../Redux/dataSlice";
+import {
+  setPaymentData,
+  setProjects,
+  setProjectFlag,
+  setTasks,
+} from "../Redux/dataSlice";
 import { useDispatch, useSelector } from "react-redux";
 import EditProjects from "./EditProjects";
 import BankDetails from "./BankDetails";
 import TermsAndConditions from "./TermsAndConditions";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 function Reports() {
-
   const dispatch = useDispatch();
 
-    const fetchProjectData = async () => {
+  const fetchProjectData = async () => {
     const response = await fetch(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
       {
@@ -32,7 +37,9 @@ function Reports() {
 
     const parseSafely = (value: any, fallback: any) => {
       try {
-        return typeof value === "string" ? JSON.parse(value) : value || fallback;
+        return typeof value === "string"
+          ? JSON.parse(value)
+          : value || fallback;
       } catch (error) {
         console.warn("Invalid JSON:", value, error);
         return fallback;
@@ -82,8 +89,8 @@ function Reports() {
       tailorsArray: deepClone(parseSafely(row[16], [])),
       projectAddress: row[17],
       date: row[18],
-      grandTotal : row[19],
-      discountType : row[20]
+      grandTotal: row[19],
+      discountType: row[20],
     }));
 
     return projects;
@@ -98,14 +105,16 @@ function Reports() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
-  const projectData = useSelector(( state : RootState ) => state.data.projects);
-  const paymentsData = useSelector(( state : RootState ) => state.data.paymentData);
-  const taskData = useSelector(( state : RootState ) => state.data.tasks);
+  const projectData = useSelector((state: RootState) => state.data.projects);
+  const paymentsData = useSelector(
+    (state: RootState) => state.data.paymentData
+  );
+  const taskData = useSelector((state: RootState) => state.data.tasks);
 
   const [projectPayments, setProjectPayments] = useState<number[]>([]);
 
   const fetchTaskData = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/gettasks"
     );
     const data = await response.json();
@@ -125,44 +134,43 @@ function Reports() {
   const [Discount, setDiscount] = useState(0);
   const [grandTotal, setGrandTotal] = useState(0);
 
+  useEffect(() => {
+    const fetchAndSetTasks = async () => {
+      try {
+        const cached = localStorage.getItem("taskData");
+        const now = Date.now();
 
-    useEffect(() => {
-      const fetchAndSetTasks = async () => {
-        try {
-          const cached = localStorage.getItem("taskData");
-          const now = Date.now();
-  
-          if (cached) {
-            const parsed = JSON.parse(cached);
-            const timeDiff = now - parsed.time;
-  
-            if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
-              const sortedTasks = parsed.data.sort(
-                (a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime()
-              );
-              dispatch(setTasks(sortedTasks));
-              return;
-            }
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          const timeDiff = now - parsed.time;
+
+          if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
+            const sortedTasks = parsed.data.sort(
+              (a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime()
+            );
+            dispatch(setTasks(sortedTasks));
+            return;
           }
-  
-          const data = await fetchTaskData();
-          const sorted = data.sort(
-            (a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime()
-          );
-          dispatch(setTasks(sorted));
-          localStorage.setItem(
-            "taskData",
-            JSON.stringify({ data: sorted, time: now })
-          );
-        } catch (error) {
-          console.error("Failed to fetch tasks:", error);
         }
-      };
-  
-      fetchAndSetTasks();
-    }, [dispatch]);
 
-    const [refresh, setrefresh] = useState(false);
+        const data = await fetchTaskData();
+        const sorted = data.sort(
+          (a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime()
+        );
+        dispatch(setTasks(sorted));
+        localStorage.setItem(
+          "taskData",
+          JSON.stringify({ data: sorted, time: now })
+        );
+      } catch (error) {
+        console.error("Failed to fetch tasks:", error);
+      }
+    };
+
+    fetchAndSetTasks();
+  }, [dispatch]);
+
+  const [refresh, setrefresh] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -184,18 +192,24 @@ function Reports() {
           projects = await fetchProjectData();
           dispatch(setProjects(projects));
           setProjectsData(projects);
-          localStorage.setItem("projectData", JSON.stringify({ data: projects, time: now }));
+          localStorage.setItem(
+            "projectData",
+            JSON.stringify({ data: projects, time: now })
+          );
         }
       } else {
         projects = await fetchProjectData();
         dispatch(setProjects(projects));
         setProjectsData(projects);
-        localStorage.setItem("projectData", JSON.stringify({ data: projects, time: now }));
+        localStorage.setItem(
+          "projectData",
+          JSON.stringify({ data: projects, time: now })
+        );
       }
 
       // ---------- Handle Payments ----------
       try {
-        const paymentRes = await fetch(
+        const paymentRes = await fetchWithLoading(
           "https://sheeladecor.netlify.app/.netlify/functions/server/getPayments",
           {
             credentials: "include",
@@ -212,7 +226,11 @@ function Reports() {
             const paymentSums = projects.map((project) => {
               const totalPaid = paymentData.message
                 .filter((payment: any[]) => payment[1] == project.projectName)
-                .reduce((acc: number, payment: any[]) => acc + (parseFloat(payment[2]) || 0), 0);
+                .reduce(
+                  (acc: number, payment: any[]) =>
+                    acc + (parseFloat(payment[2]) || 0),
+                  0
+                );
               return totalPaid;
             });
 
@@ -232,43 +250,45 @@ function Reports() {
     fetchData();
   }, [dispatch, flag]);
 
+  const filteredPayments = (payments ?? []).filter(([customer, , , date]) => {
+    const matchCustomer = customer
+      .toLowerCase()
+      .includes(searchCustomer.toLowerCase());
 
-const filteredPayments = (payments ?? []).filter(([customer, , , date]) => {
-  const matchCustomer = customer
-    .toLowerCase()
-    .includes(searchCustomer.toLowerCase());
+    const matchDate =
+      (!dateFrom || dayjs(date).isAfter(dayjs(dateFrom).subtract(1, "day"))) &&
+      (!dateTo || dayjs(date).isBefore(dayjs(dateTo).add(1, "day")));
 
-  const matchDate =
-    (!dateFrom || dayjs(date).isAfter(dayjs(dateFrom).subtract(1, "day"))) &&
-    (!dateTo || dayjs(date).isBefore(dayjs(dateTo).add(1, "day")));
-
-  return matchCustomer && matchDate;
-});
+    return matchCustomer && matchDate;
+  });
 
   const totalPaymentAmount = filteredPayments.reduce(
     (acc, curr) => acc + parseFloat(curr[2] || 0),
     0
   );
-// 1. Correct total project value
-const totalProjectValue = projects.reduce((acc, proj) => {
-  const projectValue = parseFloat(proj.grandTotal) || 0;
-  return acc + projectValue;
-}, 0);
+  // 1. Correct total project value
+  const totalProjectValue = projects.reduce((acc, proj) => {
+    const projectValue = parseFloat(proj.grandTotal) || 0;
+    return acc + projectValue;
+  }, 0);
 
-// 2. Correct total advance from payments matching project names
-const totalAdvance = payments.reduce((acc, payment) => {
-  const [ , projectName, amount ] = payment;
-  const isInProjectList = projects.some(proj => proj.projectName === projectName);
-  return isInProjectList ? acc + (parseFloat(amount) || 0) : acc;
-}, 0);
+  // 2. Correct total advance from payments matching project names
+  const totalAdvance = payments.reduce((acc, payment) => {
+    const [, projectName, amount] = payment;
+    const isInProjectList = projects.some(
+      (proj) => proj.projectName === projectName
+    );
+    return isInProjectList ? acc + (parseFloat(amount) || 0) : acc;
+  }, 0);
 
-  
   const [discountType, setDiscountType] = useState("cash");
   const [paidAmount, setPaidAmount] = useState(0);
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
-      <h1 className={`text-2xl font-bold mb-6 ${flag ? "hidden" : ""}`}>Reports Dashboard</h1>
+      <h1 className={`text-2xl font-bold mb-6 ${flag ? "hidden" : ""}`}>
+        Reports Dashboard
+      </h1>
 
       {/* Tabs */}
       <div className={`${flag ? "hidden" : ""} flex gap-4 mb-6 mt-10`}>
@@ -380,11 +400,28 @@ const totalAdvance = payments.reduce((acc, payment) => {
                   <tbody>
                     {projects.map((proj, idx) => (
                       <tr key={idx} className="border-t">
-                        <td onClick={() => { setPaidAmount(projectPayments[idx]); setDiscountType(proj.discountType); setTax(proj.totalTax); setAmount(proj.totalAmount); setDiscount(proj.discount); setGrandTotal(proj.grandTotal); setSendProject(proj); setIndex(idx); setFlag(true); }} className="px-4 py-2">{proj.projectName}</td>
+                        <td
+                          onClick={() => {
+                            setPaidAmount(projectPayments[idx]);
+                            setDiscountType(proj.discountType);
+                            setTax(proj.totalTax);
+                            setAmount(proj.totalAmount);
+                            setDiscount(proj.discount);
+                            setGrandTotal(proj.grandTotal);
+                            setSendProject(proj);
+                            setIndex(idx);
+                            setFlag(true);
+                          }}
+                          className="px-4 py-2"
+                        >
+                          {proj.projectName}
+                        </td>
                         <td className="px-4 py-2">{proj.customerLink[0]}</td>
                         <td className="px-4 py-2">₹{proj.grandTotal}</td>
                         <td className="px-4 py-2">₹{projectPayments[idx]}</td>
-                        <td className="px-4 py-2">{proj.grandTotal - projectPayments[idx]}</td>
+                        <td className="px-4 py-2">
+                          {proj.grandTotal - projectPayments[idx]}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -395,29 +432,29 @@ const totalAdvance = payments.reduce((acc, payment) => {
         </>
       )}
       {flag && (
-          <EditProjects
-            projectData={sendProject}
-            index={index}
-            goBack={() => {
-              setFlag(false);
-              dispatch(setProjectFlag(false));
-            }}
-            tasks={taskData}
-            projects={projectData}
-            Tax={Tax}
-            setTax={setTax}
-            Amount={Amount}
-            setAmount={setAmount}
-            Discount={Discount}
-            setDiscount={setDiscount}
-            grandTotal={grandTotal}
-            setGrandTotal={setGrandTotal}
-            discountType={discountType}
-            setDiscountType={setDiscountType}
-            Paid={paidAmount}
-            setPaid={setPaidAmount}
-          />
-        )}
+        <EditProjects
+          projectData={sendProject}
+          index={index}
+          goBack={() => {
+            setFlag(false);
+            dispatch(setProjectFlag(false));
+          }}
+          tasks={taskData}
+          projects={projectData}
+          Tax={Tax}
+          setTax={setTax}
+          Amount={Amount}
+          setAmount={setAmount}
+          Discount={Discount}
+          setDiscount={setDiscount}
+          grandTotal={grandTotal}
+          setGrandTotal={setGrandTotal}
+          discountType={discountType}
+          setDiscountType={setDiscountType}
+          Paid={paidAmount}
+          setPaid={setPaidAmount}
+        />
+      )}
     </div>
   );
 }
