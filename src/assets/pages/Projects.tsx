@@ -370,309 +370,282 @@ useEffect(() => {
   };
 
   // PDF Generation Function
-  const generatePDF = (project: any) => {
-    console.log("Generating PDF for project:", project); // Debugging log
-    console.log("Project additionalItems:", project.additionalItems); // Debugging log
+const generatePDF = (project: any) => {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  let yOffset = 20;
 
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    let yOffset = 20;
+  const primaryColor = [0, 51, 102];
+  const secondaryColor = [33, 33, 33];
+  const accentColor = [0, 102, 204];
+  const lightGray = [245, 245, 245];
 
-    // Setting up fonts and colors
-    const primaryColor = [0, 51, 102];
-    const secondaryColor = [33, 33, 33];
-    const accentColor = [0, 102, 204];
-    const lightGray = [245, 245, 245];
+  // Header
+  doc.setFillColor(...primaryColor);
+  doc.rect(0, 0, pageWidth, 30, "F");
+  doc.setFillColor(...accentColor);
+  doc.rect(0, 30, pageWidth, 1, "F");
+  doc.setFontSize(14);
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.text("Quotation", pageWidth / 2, 18, { align: "center" });
 
-    // Header Section
-    doc.setFillColor(...primaryColor);
-    doc.rect(0, 0, pageWidth, 30, "F");
-    doc.setFillColor(...accentColor);
-    doc.rect(0, 30, pageWidth, 1, "F");
-    doc.setFontSize(20);
-    doc.setTextColor(255, 255, 255);
-    doc.setFont("helvetica", "bold");
-    doc.text("Quotation", pageWidth / 2, 18, { align: "center" });
+  // Company Details
+  yOffset += 15;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(...secondaryColor);
+  doc.text("Sheela Decor", 15, yOffset);
+  yOffset += 5;
+  doc.text("123 Business Street, City, Country", 15, yOffset);
+  yOffset += 5;
+  doc.text("Email: contact@sheeladecor.com | Phone: +123 456 7890", 15, yOffset);
+  yOffset += 8;
 
-    // Company Details
-    yOffset += 15;
-    doc.setFontSize(10);
-    doc.setTextColor(...secondaryColor);
-    doc.setFont("helvetica", "normal");
-    doc.text("Sheela Decor", 15, yOffset);
+  // Divider
+  doc.setDrawColor(...accentColor);
+  doc.setLineWidth(0.4);
+  doc.line(15, yOffset, pageWidth - 15, yOffset);
+  yOffset += 8;
+
+  // Project and Customer Details
+  const cleanAddress = typeof project.projectAddress === "string"
+    ? project.projectAddress.replace(/^"(.*)"$/, '$1')
+    : "N/A";
+  const addressLines = doc.splitTextToSize(`Address: ${cleanAddress}`, (pageWidth / 2 - 20));
+
+  const detailBoxHeight = Math.max(25, 12 + addressLines.length * 5);
+  doc.setFillColor(...lightGray);
+  doc.roundedRect(15, yOffset, pageWidth - 30, detailBoxHeight, 2, 2, "F");
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...primaryColor);
+  doc.text("Project Details", 20, yOffset + 6);
+  doc.text("Customer Details", pageWidth / 2 + 5, yOffset + 6);
+
+  yOffset += 12;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(...secondaryColor);
+
+  doc.text(`Project Name: ${project.projectName || "N/A"}`, 20, yOffset);
+  doc.text(
+    `Customer: ${Array.isArray(project.customerLink) && project.customerLink.length > 0 ? project.customerLink[0] : "N/A"}`,
+    pageWidth / 2 + 5,
+    yOffset
+  );
+  yOffset += 5;
+
+  addressLines.forEach((line: string) => {
+    doc.text(line, pageWidth / 2 + 5, yOffset);
     yOffset += 5;
-    doc.text("123 Business Street, City, Country", 15, yOffset);
-    yOffset += 5;
-    doc.text("Email: contact@sheeladecor.com | Phone: +123 456 7890", 15, yOffset);
-    yOffset += 8;
+  });
 
-    // Divider Line
-    doc.setDrawColor(...accentColor);
-    doc.setLineWidth(0.4);
-    doc.line(15, yOffset, pageWidth - 15, yOffset);
-    yOffset += 8;
+  doc.text(`Date: ${project.projectDate || new Date().toLocaleDateString()}`, 20, yOffset);
+  yOffset += 10;
 
-    // Project and Customer Details
-    doc.setFillColor(...lightGray);
-    doc.roundedRect(15, yOffset, pageWidth - 30, 25, 2, 2, "F");
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(...primaryColor);
-    doc.text("Project Details", 20, yOffset + 6);
-    doc.text("Customer Details", pageWidth / 2 + 5, yOffset + 6);
-    yOffset += 12;
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(...secondaryColor);
-    doc.text(`Project Name: ${project.projectName || "N/A"}`, 20, yOffset);
-    doc.text(
-      `Customer: ${Array.isArray(project.customerLink) && project.customerLink.length > 0 ? project.customerLink[0] : "N/A"}`,
-      pageWidth / 2 + 5,
-      yOffset
-    );
-    yOffset += 5;
-    doc.text(`Address: ${project.projectAddress || "N/A"}`, pageWidth / 2 + 5, yOffset);
-    yOffset += 5;
-    doc.text(`Date: ${project.projectDate || new Date().toLocaleDateString()}`, 20, yOffset);
-    yOffset += 10;
+  // Quotation Items Table
+  const tableData: any[] = [];
+  let srNo = 1;
 
-    // Table Data Preparation
-    const tableData: any[] = [];
-    let srNo = 1;
-
-    // Process allData (selections)
-    if (Array.isArray(project.allData) && project.allData.length > 0) {
-      project.allData.forEach((selection: any) => {
-        if (
-          selection.areacollection &&
-          Array.isArray(selection.areacollection) &&
-          selection.areacollection.length > 0
-        ) {
-          tableData.push([
-            {
-              content: selection.area || "Unknown Area",
-              colSpan: 9,
-              styles: { fontStyle: "bold", fontSize: 9, fillColor: accentColor, textColor: [255, 255, 255] },
-            },
-          ]);
-
-          selection.areacollection.forEach((collection: any) => {
-            if (!Array.isArray(collection.items) || !collection.items.length) return;
-
-            const item = collection.items[0];
-            const qty = parseFloat(collection.quantities?.[0]) || 0;
-            const measurementQty = parseFloat(collection.measurement?.quantity || "0");
-            const calculatedMRP = (item[4] * measurementQty).toFixed(2);
-
-            tableData.push([
-              srNo++,
-              `${collection.productGroup?.[0] || "N/A"} * ${collection.measurement?.quantity || 0}`,
-              collection.measurement?.width && collection.measurement?.height
-                ? `${collection.measurement.width}x${collection.measurement.height} ${collection.measurement.unit || ""}`
-                : "N/A",
-              `INR ${calculatedMRP}`,
-              qty.toString(),
-              `INR ${(item[4] * measurementQty * qty).toFixed(2)}`,
-              `${item[5] || "0"}%`,
-              `INR ${collection.taxAmount?.[0]?.toFixed(2) || "0.00"}`,
-              `INR ${collection.totalAmount?.[0]?.toFixed(2) || "0.00"}`,
-            ]);
-          });
-        }
-      });
-    }
-
-    // Process additionalItems (Miscellaneous)
-    if (Array.isArray(project.additionalItems) && project.additionalItems.length > 0) {
-      console.log("Processing additionalItems for PDF:", project.additionalItems); // Debugging log
-      tableData.push([
-        {
-          content: "Miscellaneous Items",
-          colSpan: 9,
-          styles: { fontStyle: "bold", fillColor: accentColor, textColor: [255, 255, 255], fontSize: 9 },
-        },
-      ]);
-
-      project.additionalItems.forEach((item: any, index: number) => {
-        console.log(`Processing item ${index}:`, item); // Debugging log
-        const qty = parseFloat(item.quantity?.toString() || "0") || 0;
-        const rate = parseFloat(item.rate?.toString() || "0") || 0;
-        const netRate = parseFloat(item.netRate?.toString() || "0") || 0;
-        const tax = parseFloat(item.tax?.toString() || "0") || 0;
-        const taxAmount = parseFloat(item.taxAmount?.toString() || "0") || 0;
-        const totalAmount = parseFloat(item.totalAmount?.toString() || "0") || 0;
-
+  if (Array.isArray(project.allData)) {
+    project.allData.forEach((selection: any) => {
+      if (Array.isArray(selection.areacollection)) {
         tableData.push([
-          srNo++,
-          item.name || `Miscellaneous Item ${index + 1}`,
-          item.description || item.remark || "N/A",
-          `INR ${rate.toFixed(2)}`,
-          qty.toString(),
-          `INR ${netRate.toFixed(2)}`,
-          `${tax.toFixed(0)}%`,
-          `INR ${taxAmount.toFixed(2)}`,
-          `INR ${totalAmount.toFixed(2)}`,
+          {
+            content: selection.area || "Unknown Area",
+            colSpan: 9,
+            styles: { fontStyle: "bold", fontSize: 9, fillColor: accentColor, textColor: [255, 255, 255] },
+          },
         ]);
-      });
-    } else {
-      console.log("No additionalItems available:", project.additionalItems); // Debugging log
-      tableData.push([
-        {
-          content: "No Miscellaneous Items Available",
-          colSpan: 9,
-          styles: { halign: "center", fontSize: 8, textColor: secondaryColor },
-        },
-      ]);
-    }
-
-    // Draw Quotation Table
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(...primaryColor);
-    doc.text("Quotation Items", 15, yOffset);
-    yOffset += 8;
-
-    autoTable(doc, {
-      startY: yOffset,
-      head: [["Sr. No.", "Item Name", "Description", "Rate", "Qty", "Net Rate", "Tax Rate", "Tax Amount", "Total"]],
-      body: tableData.length > 0 ? tableData : [[{ content: "No product data available.", colSpan: 9, styles: { halign: "center" } }]],
-      theme: "grid",
-      styles: {
-        font: "helvetica",
-        fontSize: 6.5,
-        cellPadding: 1.5,
-        textColor: secondaryColor,
-        lineColor: [200, 200, 200],
-        lineWidth: 0.1,
-        overflow: "linebreak",
-        minCellHeight: 0,
-      },
-      headStyles: {
-        fillColor: primaryColor,
-        textColor: [255, 255, 255],
-        fontStyle: "bold",
-        fontSize: 7,
-        halign: "center",
-        cellPadding: 1.5,
-      },
-      alternateRowStyles: {
-        fillColor: lightGray,
-      },
-      columnStyles: {
-        0: { cellWidth: 7, halign: "center" },
-        1: { cellWidth: 35, overflow: "linebreak" },
-        2: { cellWidth: 20, overflow: "linebreak" },
-        3: { cellWidth: 15, halign: "right" },
-        4: { cellWidth: 8, halign: "center" },
-        5: { cellWidth: 15, halign: "right" },
-        6: { cellWidth: 10, halign: "center" },
-        7: { cellWidth: 15, halign: "right" },
-        8: { cellWidth: 15, halign: "right" },
-      },
-      margin: { top: yOffset, left: 15, right: 15, bottom: 50 },
-      pageBreak: "auto",
-      rowPageBreak: "avoid",
-      didDrawPage: (data) => {
-        yOffset = data.cursor.y + 10;
-        doc.setFontSize(8);
-        doc.setTextColor(100, 100, 100);
-        doc.text(`Page ${data.pageNumber}`, pageWidth - 15, pageHeight - 10, { align: "right" });
-      },
-      willDrawCell: (data) => {
-        if (data.section === "body" && (data.column.index === 1 || data.column.index === 2)) {
-          const text = data.cell.text.join(" ");
-          if (text.length > 25) {
-            data.cell.text = doc.splitTextToSize(text, data.cell.width - 3);
-          }
-        }
-      },
-      didParseCell: (data) => {
-        if (data.section === "body" && [3, 5, 7, 8].includes(data.column.index)) {
-          data.cell.text = data.cell.text.map((text) => text.replace(/^1\s*/, ""));
-        }
-      },
-    });
-
-    yOffset = (doc as any).lastAutoTable.finalY + 10;
-
-    // Summary Section
-    if (yOffset + 60 > pageHeight - 50) {
-      doc.addPage();
-      yOffset = 15;
-    }
-    doc.setFillColor(...lightGray);
-    doc.roundedRect(pageWidth - 90, yOffset - 5, 75, 50, 2, 2, "F");
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(...primaryColor);
-    doc.text("Summary", pageWidth - 85, yOffset);
-    yOffset += 8;
-
-    doc.setFontSize(8);
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(...secondaryColor);
-    const summaryItems = [
-      { label: "Total Tax", value: `INR ${(project.totalTax || 0).toFixed(2)}` },
-      { label: "Total Amount", value: `INR ${((project.totalAmount || 0)).toFixed(2)}` },
-      { label: "Discount", value: `INR ${(project.discount || 0).toFixed(2)}` },
-      { label: "Grand Total", value: `INR ${(project.totalAmount || 0).toFixed(2)}` },
-    ];
-
-    summaryItems.forEach((item) => {
-      doc.setFont("helvetica", "bold");
-      doc.text(item.label, pageWidth - 85, yOffset);
-      doc.setFont("helvetica", "normal");
-      doc.text(item.value.replace(/^1\s*/, ""), pageWidth - 20, yOffset, { align: "right" });
-      yOffset += 8;
-    });
-
-    // Terms and Conditions (from additionalRequests)
-    if (typeof project.additionalRequests === "string" && project.additionalRequests.trim()) {
-      console.log("Terms and Conditions from additionalRequests:", project.additionalRequests); // Debugging log
-      if (yOffset + 30 > pageHeight - 50) {
-        doc.addPage();
-        yOffset = 15;
+        selection.areacollection.forEach((collection: any) => {
+          if (!Array.isArray(collection.items) || !collection.items.length) return;
+          const item = collection.items[0];
+          const qty = parseFloat(collection.quantities?.[0]) || 0;
+          const measurementQty = parseFloat(collection.measurement?.quantity || "0");
+          const calculatedMRP = (item[4] * measurementQty).toFixed(2);
+          tableData.push([
+            srNo++,
+            `${collection.productGroup?.[0] || "N/A"} * ${collection.measurement?.quantity || 0}`,
+            collection.measurement?.width && collection.measurement?.height
+              ? `${collection.measurement.width}x${collection.measurement.height} ${collection.measurement.unit || ""}`
+              : "N/A",
+            `INR ${calculatedMRP}`,
+            qty.toString(),
+            `INR ${(item[4] * measurementQty * qty).toFixed(2)}`,
+            `${item[5] || "0"}%`,
+            `INR ${collection.taxAmount?.[0]?.toFixed(2) || "0.00"}`,
+            `INR ${collection.totalAmount?.[0]?.toFixed(2) || "0.00"}`,
+          ]);
+        });
       }
-      yOffset += 5;
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(...primaryColor);
-      doc.text("Terms & Conditions", 15, yOffset);
-      yOffset += 5;
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(...secondaryColor);
-      const terms = doc.splitTextToSize(project.additionalRequests, pageWidth - 30);
-      terms.forEach((term: string) => {
-        if (yOffset + 5 > pageHeight - 50) {
-          doc.addPage();
-          yOffset = 15;
-        }
-        doc.text(`• ${term}`, 15, yOffset);
-        yOffset += 5;
-      });
-    } else {
-      console.log("No Terms and Conditions available in additionalRequests"); // Debugging log
-    }
+    });
+  }
 
-    // Footer
-    if (yOffset + 20 > pageHeight - 50) {
-      doc.addPage();
-      yOffset = 15;
-    }
-    doc.setFillColor(...accentColor);
-    doc.rect(0, pageHeight - 25, pageWidth, 1, "F");
-    doc.setFontSize(8);
-    doc.setTextColor(100, 100, 100);
-    doc.setFont("helvetica", "italic");
-    doc.text("Thank you for choosing Sheela Decor!", pageWidth / 2, pageHeight - 15, { align: "center" });
+  if (Array.isArray(project.additionalItems) && project.additionalItems.length > 0) {
+    tableData.push([
+      {
+        content: "Miscellaneous Items",
+        colSpan: 9,
+        styles: { fontStyle: "bold", fillColor: accentColor, textColor: [255, 255, 255], fontSize: 9 },
+      },
+    ]);
+    project.additionalItems.forEach((item: any, index: number) => {
+      const qty = parseFloat(item.quantity?.toString() || "0");
+      const rate = parseFloat(item.rate?.toString() || "0");
+      const netRate = parseFloat(item.netRate?.toString() || "0");
+      const tax = parseFloat(item.tax?.toString() || "0");
+      const taxAmount = parseFloat(item.taxAmount?.toString() || "0");
+      const totalAmount = parseFloat(item.totalAmount?.toString() || "0");
+
+      tableData.push([
+        srNo++,
+        item.name || `Miscellaneous Item ${index + 1}`,
+        item.description || item.remark || "N/A",
+        `INR ${rate.toFixed(2)}`,
+        qty.toString(),
+        `INR ${netRate.toFixed(2)}`,
+        `${tax.toFixed(0)}%`,
+        `INR ${taxAmount.toFixed(2)}`,
+        `INR ${totalAmount.toFixed(2)}`,
+      ]);
+    });
+  }
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...primaryColor);
+  doc.text("Quotation Items", 15, yOffset);
+  yOffset += 8;
+
+  autoTable(doc, {
+    startY: yOffset,
+    head: [["Sr. No.", "Item Name", "Description", "Rate", "Qty", "Net Rate", "Tax Rate", "Tax Amount", "Total"]],
+    body: tableData.length > 0 ? tableData : [[{ content: "No product data available.", colSpan: 9, styles: { halign: "center" } }]],
+    theme: "grid",
+    styles: {
+      font: "helvetica",
+      fontSize: 9,
+      cellPadding: 1.5,
+      textColor: secondaryColor,
+      lineColor: [200, 200, 200],
+      lineWidth: 0.1,
+      overflow: "linebreak",
+    },
+    headStyles: {
+      fillColor: primaryColor,
+      textColor: [255, 255, 255],
+      fontStyle: "bold",
+      fontSize: 9,
+      halign: "center",
+      cellPadding: 1.5,
+    },
+    alternateRowStyles: {
+      fillColor: lightGray,
+    },
+    columnStyles: {
+      0: { cellWidth: 10, halign: "center" },
+      1: { cellWidth: 38 },
+      2: { cellWidth: 32 },
+      3: { cellWidth: 22, halign: "right" },
+      4: { cellWidth: 12, halign: "center" },
+      5: { cellWidth: 22, halign: "right" },
+      6: { cellWidth: 12, halign: "center" },
+      7: { cellWidth: 12, halign: "right" },
+      8: { cellWidth: 22, halign: "right" },
+    },
+  });
+
+  const tableEndY = (doc as any).lastAutoTable.finalY;
+  const summaryBoxHeight = 60;
+  const footerHeight = 25;
+  const bottomSafeMargin = footerHeight + 10;
+
+  // === Smart Summary Placement (no unnecessary page) ===
+  if ((pageHeight - tableEndY - bottomSafeMargin) < summaryBoxHeight) {
+    doc.addPage();
+    yOffset = 20;
+  } else {
+    yOffset = tableEndY + 10;
+  }
+
+  // Summary Box
+  doc.setFillColor(...lightGray);
+  doc.roundedRect(pageWidth - 90, yOffset - 5, 75, 50, 2, 2, "F");
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...primaryColor);
+  doc.text("Summary", pageWidth - 85, yOffset);
+  yOffset += 8;
+
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...secondaryColor);
+  const summaryItems = [
+    { label: "Total Amount", value: `INR ${(project.totalAmount || 0).toFixed(2)}` },
+    { label: "Discount", value: `INR ${(project.discount || 0).toFixed(2)}` },
+    { label: "Total Tax", value: `INR ${(project.totalTax || 0).toFixed(2)}` },
+    { label: "Grand Total", value: `INR ${(project.totalAmount || 0).toFixed(2)}` },
+  ];
+  summaryItems.forEach((item) => {
+    doc.setFont("helvetica", "bold");
+    doc.text(item.label, pageWidth - 85, yOffset);
     doc.setFont("helvetica", "normal");
-    doc.text("Sheela Decor - All Rights Reserved", pageWidth / 2, pageHeight - 8, { align: "center" });
+    doc.text(item.value, pageWidth - 20, yOffset, { align: "right" });
+    yOffset += 8;
+  });
 
-    // Save PDF
-    const safeProjectName = (project.projectName || "Project").replace(/[^a-zA-Z0-9]/g, "_");
-    const safeDate = (project.projectDate || new Date().toLocaleDateString()).replace(/[^a-zA-Z0-9]/g, "_");
-    doc.save(`Quotation_${safeProjectName}_${safeDate}.pdf`);
-  };
+  // Terms & Conditions (if available)
+  if (typeof project.additionalRequests === "string" && project.additionalRequests.trim()) {
+    const termsHeightEstimate = 30;
+    if ((pageHeight - yOffset - bottomSafeMargin) < termsHeightEstimate) {
+      doc.addPage();
+      yOffset = 20;
+    }
+    yOffset += 5;
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(10);
+    doc.setTextColor(...primaryColor);
+    doc.text("Terms & Conditions", 15, yOffset);
+    yOffset += 5;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(...secondaryColor);
+
+    const terms = doc.splitTextToSize(project.additionalRequests, pageWidth - 30);
+    terms.forEach((term: string) => {
+      if (yOffset + 5 > pageHeight - footerHeight - 10) {
+        doc.addPage();
+        yOffset = 20;
+      }
+      doc.text(`• ${term}`, 15, yOffset);
+      yOffset += 5;
+    });
+  }
+
+  // Footer (always on last page only)
+  const footerY = pageHeight - footerHeight;
+  doc.setFillColor(...accentColor);
+  doc.rect(0, footerY, pageWidth, 1, "F");
+  doc.setFontSize(9);
+  doc.setTextColor(100, 100, 100);
+  doc.setFont("helvetica", "italic");
+  doc.text("Thank you for choosing Sheela Decor!", pageWidth / 2, footerY + 10, { align: "center" });
+  doc.setFont("helvetica", "normal");
+  doc.text("Sheela Decor - All Rights Reserved", pageWidth / 2, footerY + 17, { align: "center" });
+
+  const safeProjectName = (project.projectName || "Project").replace(/[^a-zA-Z0-9]/g, "_");
+  const safeDate = (project.projectDate || new Date().toLocaleDateString()).replace(/[^a-zA-Z0-9]/g, "_");
+  doc.save(`Quotation_${safeProjectName}_${safeDate}.pdf`);
+};
+
+
+
+
+
+
 
   const [paidAmount, setPaidAmount] = useState(0);
 

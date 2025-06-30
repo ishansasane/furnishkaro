@@ -1543,363 +1543,280 @@ function AddProjectForm() {
   const bankDetails = ["123213", "!23123213", "123132"];
   const termsConditions = ["sadsdsad", "Adasdad"];
 
-  const generatePDF = () => {
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    let yOffset = 20;
+const generatePDF = () => {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  let yOffset = 20;
 
-    // Setting up fonts and colors
-    doc.setFont("helvetica", "normal");
-    const primaryColor = [0, 51, 102];
-    const secondaryColor = [33, 33, 33];
-    const accentColor = [0, 102, 204];
-    const lightGray = [245, 245, 245];
+  // Colors and fonts
+  doc.setFont("helvetica", "normal");
+  const primaryColor = [0, 51, 102];
+  const secondaryColor = [33, 33, 33];
+  const accentColor = [0, 102, 204];
+  const lightGray = [245, 245, 245];
 
-    // Header Section
-    doc.setFillColor(...primaryColor);
-    doc.rect(0, 0, pageWidth, 30, "F");
-    doc.setFillColor(...accentColor);
-    doc.rect(0, 30, pageWidth, 1, "F");
-    doc.setFontSize(20);
-    doc.setTextColor(255, 255, 255);
-    doc.setFont("helvetica", "bold");
-    doc.text("Quotation", pageWidth / 2, 18, { align: "center" });
+  // Header
+  doc.setFillColor(...primaryColor);
+  doc.rect(0, 0, pageWidth, 30, "F");
+  doc.setFillColor(...accentColor);
+  doc.rect(0, 30, pageWidth, 1, "F");
+  doc.setFontSize(20);
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.text("Quotation", pageWidth / 2, 18, { align: "center" });
 
-    // Company Details
-    yOffset += 15;
-    doc.setFontSize(10);
-    doc.setTextColor(...secondaryColor);
-    doc.setFont("helvetica", "normal");
-    doc.text("Sheela Decor", 15, yOffset);
-    yOffset += 5;
-    doc.text("123 Business Street, City, Country", 15, yOffset);
-    yOffset += 5;
-    doc.text(
-      "Email: contact@sheeladecor.com | Phone: +123 456 7890",
-      15,
-      yOffset
-    );
-    yOffset += 8;
+  // Company Details
+  yOffset += 15;
+  doc.setFontSize(10);
+  doc.setTextColor(...secondaryColor);
+  doc.setFont("helvetica", "normal");
+  doc.text("Sheela Decor", 15, yOffset);
+  yOffset += 5;
+  doc.text("123 Business Street, City, Country", 15, yOffset);
+  yOffset += 5;
+  doc.text("Email: contact@sheeladecor.com | Phone: +123 456 7890", 15, yOffset);
+  yOffset += 8;
 
-    // Divider Line
-    doc.setDrawColor(...accentColor);
-    doc.setLineWidth(0.4);
-    doc.line(15, yOffset, pageWidth - 15, yOffset);
-    yOffset += 8;
+  // Divider
+  doc.setDrawColor(...accentColor);
+  doc.setLineWidth(0.4);
+  doc.line(15, yOffset, pageWidth - 15, yOffset);
+  yOffset += 8;
 
-    // Project and Customer Details
-    doc.setFillColor(...lightGray);
-    doc.roundedRect(15, yOffset, pageWidth - 30, 25, 2, 2, "F");
-    doc.setFontSize(10);
-    doc.setFont("helvetica", "bold");
-    doc.setTextColor(...primaryColor);
-    doc.text("Project Details", 20, yOffset + 6);
-    doc.text("Customer Details", pageWidth / 2 + 5, yOffset + 6);
-    yOffset += 12;
-    doc.setFont("helvetica", "normal");
-    doc.setTextColor(...secondaryColor);
-    doc.text(`Project Name: ${projectName || "N/A"}`, 20, yOffset);
-    doc.text(
-      `Customer: ${selectedCustomer?.name || "N/A"}`,
-      pageWidth / 2 + 5,
-      yOffset
-    );
-    yOffset += 5;
-    doc.text(`Address: ${projectAddress || "N/A"}`, pageWidth / 2 + 5, yOffset);
-    yOffset += 5;
-    doc.text(
-      `Date: ${projectDate || new Date().toLocaleDateString()}`,
-      20,
-      yOffset
-    );
-    yOffset += 10;
+  // Project and Customer Details Box
+  doc.setFillColor(...lightGray);
+  doc.roundedRect(15, yOffset, pageWidth - 30, 25, 2, 2, "F");
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...primaryColor);
+  doc.text("Project Details", 20, yOffset + 6);
+  doc.text("Customer Details", pageWidth / 2 + 5, yOffset + 6);
 
-    // Table Data Preparation
-    const tableData = [];
-    let srNo = 1;
+  yOffset += 12;
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...secondaryColor);
+  doc.text(`Project Name: ${projectName || "N/A"}`, 20, yOffset);
+  doc.text(`Customer: ${selectedCustomer?.name || "N/A"}`, pageWidth / 2 + 5, yOffset);
+  yOffset += 5;
+  doc.text(`Address: ${projectAddress || "N/A"}`, pageWidth / 2 + 5, yOffset);
+  yOffset += 5;
+  doc.text(`Date: ${projectDate || new Date().toLocaleDateString()}`, 20, yOffset);
+  yOffset += 10;
 
-    selections.forEach((selection, mainIndex) => {
-      if (selection.areacollection && selection.areacollection.length > 0) {
-        tableData.push([
-          {
-            content: selection.area,
-            colSpan: 9,
-            styles: {
-              fontStyle: "bold",
-              fontSize: 9,
-              fillColor: accentColor,
-              textColor: [255, 255, 255],
-            },
-          },
-        ]);
+  // Table Data
+  const tableData: any[] = [];
+  let srNo = 1;
 
-        selection.areacollection.forEach((collection, collectionIndex) => {
-          const pg = collection.productGroup;
-          if (!Array.isArray(pg) || pg.length < 2) return;
-          const relevantPG = pg.length > 2 ? pg.slice(1, -2) : null;
-          const matchedItems = relevantPG.map((pgItem) => {
-            const matched = items.find((item) => item[0] === pgItem);
-            return matched || null;
-          });
-          const validMatchedItems = matchedItems.filter((item) =>
-            Array.isArray(item)
-          );
-          validMatchedItems.forEach((item, itemIndex) => {
-            const qty = parseFloat(collection.quantities?.[itemIndex]) || 0;
-            const productName = item[0]
-              ? `${item[0]} * ${collection.measurement.quantity || 0}`
-              : "N/A";
-            const size =
-              collection.measurement?.width && collection.measurement?.height
-                ? `${collection.measurement.width} x ${
-                    collection.measurement.height
-                  } ${collection.measurement.unit || ""}`
-                : "N/A";
-            const mrp =
-              parseFloat(item[4]) *
-                parseFloat(collection.measurement.quantity || "0") || 0;
-            const subtotal = mrp * qty || 0;
-            const taxRate = parseFloat(item[5]) || 0;
-            const taxAmount =
-              parseFloat(collection.totalTax[itemIndex]?.toString()) || 0;
-            const total =
-              parseFloat(collection.totalAmount[itemIndex]?.toString()) || 0;
-            tableData.push([
-              srNo++,
-              productName,
-              size,
-              `INR ${mrp.toFixed(2)}`,
-              qty.toString(),
-              `INR ${subtotal.toFixed(2)}`,
-              `${taxRate.toFixed(2)}%`,
-              `INR ${taxAmount.toFixed(2)}`,
-              `INR ${total.toFixed(2)}`,
-            ]);
-          });
-        });
-      }
-    });
-
-    if (additionalItems.length > 0) {
+  selections.forEach((selection) => {
+    if (selection.areacollection?.length > 0) {
       tableData.push([
         {
-          content: "Miscellaneous Items",
+          content: selection.area,
           colSpan: 9,
-          styles: {
-            fontStyle: "bold",
-            fillColor: accentColor,
-            textColor: [255, 255, 255],
-            fontSize: 9,
-          },
+          styles: { fontStyle: "bold", fontSize: 9, fillColor: accentColor, textColor: [255, 255, 255] },
         },
       ]);
 
-      additionalItems.forEach((item) => {
-        const qty = parseFloat(item.quantity?.toString()) || 0;
-        const rate = parseFloat(item.rate?.toString()) || 0;
-        const netRate = parseFloat(item.netRate?.toString()) || 0;
-        const tax = parseFloat(item.tax?.toString()) || 0;
-        const taxAmount = parseFloat(item.taxAmount?.toString()) || 0;
-        const totalAmount = parseFloat(item.totalAmount?.toString()) || 0;
-        tableData.push([
-          srNo++,
-          item.name || "N/A",
-          "N/A",
-          `INR ${rate.toFixed(2)}`,
-          qty.toString(),
-          `INR ${netRate.toFixed(2)}`,
-          `${tax.toFixed(2)}%`,
-          `INR ${taxAmount.toFixed(2)}`,
-          `INR ${totalAmount.toFixed(2)}`,
-        ]);
+      selection.areacollection.forEach((collection) => {
+        const pg = collection.productGroup;
+        if (!Array.isArray(pg) || pg.length < 2) return;
+
+        const relevantPG = pg.slice(1, -2);
+        relevantPG.forEach((pgItem, index) => {
+          const item = items.find((it) => it[0] === pgItem);
+          if (!item) return;
+
+          const qty = parseFloat(collection.quantities?.[index]) || 0;
+          const measurementQty = parseFloat(collection.measurement?.quantity || "0");
+          const size = (collection.measurement.width && collection.measurement.height)
+            ? `${collection.measurement.width} x ${collection.measurement.height} ${collection.measurement.unit || ""}`
+            : "N/A";
+          const mrp = parseFloat(item[4]) * measurementQty;
+          const subtotal = mrp * qty;
+          const taxRate = parseFloat(item[5]) || 0;
+          const taxAmount = parseFloat(collection.totalTax?.[index]?.toString()) || 0;
+          const total = parseFloat(collection.totalAmount?.[index]?.toString()) || 0;
+
+          tableData.push([
+            srNo++,
+            `${item[0]} * ${measurementQty}`,
+            size,
+            `INR ${mrp.toFixed(2)}`,
+            qty.toString(),
+            `INR ${subtotal.toFixed(2)}`,
+            `${taxRate.toFixed(2)}%`,
+            `INR ${taxAmount.toFixed(2)}`,
+            `INR ${total.toFixed(2)}`,
+          ]);
+        });
       });
     }
+  });
 
-    // Table Rendering
-    autoTable(doc, {
-      startY: yOffset,
-      head: [
-        [
-          "Sr. No.",
-          "Product Name",
-          "Size",
-          "MRP",
-          "Qty",
-          "Subtotal",
-          "Tax Rate",
-          "Tax Amount",
-          "Total",
-        ],
-      ],
-      body: tableData,
-      theme: "grid",
-      styles: {
-        font: "helvetica",
-        fontSize: 6.5,
-        cellPadding: 1.5,
-        textColor: secondaryColor,
-        lineColor: [200, 200, 200],
-        lineWidth: 0.1,
-        overflow: "linebreak",
-        minCellHeight: 0,
+  if (additionalItems.length > 0) {
+    tableData.push([
+      {
+        content: "Miscellaneous Items",
+        colSpan: 9,
+        styles: { fontStyle: "bold", fillColor: accentColor, textColor: [255, 255, 255], fontSize: 9 },
       },
-      headStyles: {
-        fillColor: primaryColor,
-        textColor: [255, 255, 255],
-        fontStyle: "bold",
-        fontSize: 7,
-        halign: "center",
-        cellPadding: 1.5,
-      },
-      alternateRowStyles: {
-        fillColor: lightGray,
-      },
-      columnStyles: {
-        "0": { cellWidth: 7, halign: "center" },
-        "1": { cellWidth: 35, overflow: "linebreak" },
-        "2": { cellWidth: 20, overflow: "linebreak" },
-        "3": { cellWidth: 15, halign: "right" },
-        "4": { cellWidth: 8, halign: "center" },
-        "5": { cellWidth: 15, halign: "right" },
-        "6": { cellWidth: 10, halign: "center" },
-        "7": { cellWidth: 15, halign: "right" },
-        "8": { cellWidth: 15, halign: "right" },
-      },
-      margin: { top: yOffset, left: 15, right: 15, bottom: 50 },
-      pageBreak: "auto",
-      rowPageBreak: "avoid",
-      didDrawPage: (data) => {
-        yOffset = data.cursor.y + 10;
-        doc.setFontSize(8);
-        doc.setTextColor(100, 100, 100);
-        doc.text(`Page ${data.pageNumber}`, pageWidth - 15, pageHeight - 10, {
-          align: "right",
-        });
-      },
-      willDrawCell: (data) => {
-        if (
-          data.section === "body" &&
-          (data.column.index === 1 || data.column.index === 2)
-        ) {
-          const text = data.cell.text.join(" ");
-          if (text.length > 25) {
-            data.cell.text = doc.splitTextToSize(text, data.cell.width - 3);
-          }
-        }
-      },
-      didParseCell: (data) => {
-        if (
-          data.section === "body" &&
-          [3, 5, 7, 8].includes(data.column.index)
-        ) {
-          data.cell.text = data.cell.text.map((text) =>
-            text.replace(/^1\s*/, "")
-          ); // Remove leading "1"
-        }
-      },
+    ]);
+
+    additionalItems.forEach((item, idx) => {
+      const qty = parseFloat(item.quantity?.toString()) || 0;
+      const rate = parseFloat(item.rate?.toString()) || 0;
+      const netRate = parseFloat(item.netRate?.toString()) || 0;
+      const tax = parseFloat(item.tax?.toString()) || 0;
+      const taxAmount = parseFloat(item.taxAmount?.toString()) || 0;
+      const totalAmount = parseFloat(item.totalAmount?.toString()) || 0;
+
+      tableData.push([
+        srNo++,
+        item.name || `Misc Item ${idx + 1}`,
+        item.description || item.remark || "N/A",
+        `INR ${rate.toFixed(2)}`,
+        qty.toString(),
+        `INR ${netRate.toFixed(2)}`,
+        `${tax.toFixed(0)}%`,
+        `INR ${taxAmount.toFixed(2)}`,
+        `INR ${totalAmount.toFixed(2)}`,
+      ]);
     });
+  }
 
-    yOffset = doc.lastAutoTable.finalY + 10;
+  // Improved wider table layout
+  autoTable(doc, {
+    startY: yOffset,
+    head: [["Sr. No.", "Item Name", "Description", "Rate", "Qty", "Net Rate", "Tax Rate", "Tax Amount", "Total"]],
+    body: tableData.length > 0
+      ? tableData
+      : [[{ content: "No product data available.", colSpan: 9, styles: { halign: "center" } }]],
+    theme: "grid",
+    styles: {
+      font: "helvetica",
+      fontSize: 7.5,
+      cellPadding: 1.5,
+      textColor: secondaryColor,
+      lineColor: [200, 200, 200],
+      lineWidth: 0.1,
+      overflow: "linebreak",
+    },
+    headStyles: {
+      fillColor: primaryColor,
+      textColor: [255, 255, 255],
+      fontStyle: "bold",
+      fontSize: 8,
+      halign: "center",
+      cellPadding: 1.5,
+    },
+    alternateRowStyles: {
+      fillColor: lightGray,
+    },
+    columnStyles: {
+      0: { cellWidth: 10, halign: "center" },
+      1: { cellWidth: 35 },
+      2: { cellWidth: 28 },
+      3: { cellWidth: 22, halign: "right" },
+      4: { cellWidth: 12, halign: "center" },
+      5: { cellWidth: 22, halign: "right" },
+      6: { cellWidth: 12, halign: "center" },
+      7: { cellWidth: 15, halign: "right" },
+      8: { cellWidth: 22, halign: "right" },
+    },
+    willDrawCell: (data) => {
+      if (data.section === "body" && (data.column.index === 1 || data.column.index === 2)) {
+        const text = data.cell.text.join(" ");
+        if (text.length > 25) {
+          data.cell.text = doc.splitTextToSize(text, data.cell.width - 3);
+        }
+      }
+    },
+  });
 
-    // Summary Section
-    if (yOffset + 60 > pageHeight - 50) {
+  const tableEndY = (doc as any).lastAutoTable.finalY;
+  const summaryBoxHeight = 50;
+  const footerHeight = 25;
+  const bottomMargin = footerHeight + 10;
+
+  // Smart placement for Summary Box
+  if (tableEndY + summaryBoxHeight + bottomMargin > pageHeight) {
+    doc.addPage();
+    yOffset = 15;
+  } else {
+    yOffset = tableEndY + 10;
+  }
+
+  doc.setFillColor(...lightGray);
+  doc.roundedRect(pageWidth - 90, yOffset - 5, 75, 50, 2, 2, "F");
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...primaryColor);
+  doc.text("Summary", pageWidth - 85, yOffset);
+  yOffset += 8;
+
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...secondaryColor);
+
+  const numericAmount = Number(amount) || 0;
+  const numericTax = Number(tax) || 0;
+  const numericDiscount = Number(discount) || 0;
+  const summaryItems = [
+    { label: "Total Amount", value: `INR ${numericAmount.toFixed(2)}` },
+    { label: "Discount", value: `INR ${numericDiscount.toFixed(2)}` },
+    { label: "Total Tax", value: `INR ${numericTax.toFixed(2)}` },
+    { label: "Grand Total", value: `INR ${(numericAmount + numericTax - numericDiscount).toFixed(2)}` },
+  ];
+  summaryItems.forEach((item) => {
+    doc.setFont("helvetica", "bold");
+    doc.text(item.label, pageWidth - 85, yOffset);
+    doc.setFont("helvetica", "normal");
+    doc.text(item.value, pageWidth - 20, yOffset, { align: "right" });
+    yOffset += 8;
+  });
+
+  // Terms & Conditions
+  if (termsAndConditions.trim()) {
+    if (yOffset + 30 > pageHeight - footerHeight - 10) {
       doc.addPage();
       yOffset = 15;
     }
-    doc.setFillColor(...lightGray);
-    doc.roundedRect(pageWidth - 90, yOffset - 5, 75, 50, 2, 2, "F");
+    yOffset += 5;
     doc.setFontSize(10);
     doc.setFont("helvetica", "bold");
     doc.setTextColor(...primaryColor);
-    doc.text("Summary", pageWidth - 85, yOffset);
-    yOffset += 8;
-
-    doc.setFontSize(8);
+    doc.text("Terms & Conditions", 15, yOffset);
+    yOffset += 5;
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...secondaryColor);
-    const numericAmount = Number(amount) || 0;
-const numericTax = Number(tax) || 0;
-const numericDiscount = Number(discount) || 0;
 
-const summaryItems = [
-  { label: "Sub Total", value: `INR ${numericAmount.toFixed(2)}` },
-  { label: "Total Tax", value: `INR ${numericTax.toFixed(2)}` },
-  { label: "Total Amount", value: `INR ${(numericAmount + numericTax).toFixed(2)}` },
-  { label: "Discount", value: `INR ${numericDiscount.toFixed(2)}` },
-  {
-    label: "Grand Total",
-    value: `INR ${(numericAmount + numericTax - numericDiscount).toFixed(2)}`,
-  },
-];
-
-
-    summaryItems.forEach((item) => {
-      doc.setFont("helvetica", "bold");
-      doc.text(item.label, pageWidth - 85, yOffset);
-      doc.setFont("helvetica", "normal");
-      doc.text(item.value.replace(/^1\s*/, ""), pageWidth - 20, yOffset, {
-        align: "right",
-      });
-      yOffset += 8;
-    });
-
-    // Terms and Conditions
-    if (termsAndConditions.trim()) {
-      if (yOffset + 30 > pageHeight - 50) {
+    const terms = doc.splitTextToSize(termsAndConditions, pageWidth - 30);
+    terms.forEach((term: string) => {
+      if (yOffset + 5 > pageHeight - footerHeight - 10) {
         doc.addPage();
         yOffset = 15;
       }
+      doc.text(`• ${term}`, 15, yOffset);
       yOffset += 5;
-      doc.setFontSize(10);
-      doc.setFont("helvetica", "bold");
-      doc.setTextColor(...primaryColor);
-      doc.text("Terms & Conditions", 15, yOffset);
-      yOffset += 5;
-      doc.setFont("helvetica", "normal");
-      doc.setTextColor(...secondaryColor);
-      const terms = doc.splitTextToSize(termsAndConditions, pageWidth - 30);
-      terms.forEach((term: string) => {
-        if (yOffset + 5 > pageHeight - 50) {
-          doc.addPage();
-          yOffset = 15;
-        }
-        doc.text(`• ${term}`, 15, yOffset);
-        yOffset += 5;
-      });
-    }
+    });
+  }
 
-    // Footer
-    if (yOffset + 20 > pageHeight - 50) {
-      doc.addPage();
-      yOffset = 15;
-    }
-    doc.setFillColor(...accentColor);
-    doc.rect(0, pageHeight - 25, pageWidth, 1, "F");
-    doc.setFontSize(8);
-    doc.setTextColor(100, 100, 100);
-    doc.setFont("helvetica", "italic");
-    doc.text(
-      "Thank you for choosing Sheela Decor!",
-      pageWidth / 2,
-      pageHeight - 15,
-      { align: "center" }
-    );
-    doc.setFont("helvetica", "normal");
-    doc.text(
-      "Sheela Decor - All Rights Reserved",
-      pageWidth / 2,
-      pageHeight - 8,
-      { align: "center" }
-    );
+  // Footer only on last page
+  const footerY = pageHeight - footerHeight;
+  doc.setFillColor(...accentColor);
+  doc.rect(0, footerY, pageWidth, 1, "F");
+  doc.setFontSize(8);
+  doc.setTextColor(100, 100, 100);
+  doc.setFont("helvetica", "italic");
+  doc.text("Thank you for choosing Sheela Decor!", pageWidth / 2, footerY + 10, { align: "center" });
+  doc.setFont("helvetica", "normal");
+  doc.text("Sheela Decor - All Rights Reserved", pageWidth / 2, footerY + 17, { align: "center" });
 
-    // Save PDF
-    doc.save(
-      `Quotation_${projectName || "Project"}_${
-        projectDate || new Date().toLocaleDateString()
-      }.pdf`
-    );
-  };
+  doc.save(`Quotation_${projectName || "Project"}_${projectDate || new Date().toLocaleDateString()}.pdf`);
+};
+
+
   const handleMRPChange = (
     mainIndex: number,
     collectionIndex: number,

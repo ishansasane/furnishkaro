@@ -217,7 +217,7 @@ const DeadlineCard: React.FC<DeadlineCardProps> = ({
                   markAsCompleted();
                 }}
                 style={{ borderRadius: "4px" }}
-                className="px-2 py-0.5 text-[0.75rem] text-white bg-blue-500 hover:bg-blue-600"
+                className="px-1 py-0.5 !text-sm w-22 text-white bg-blue-500 hover:bg-blue-600"
               >
                 Mark as Completed
               </button>

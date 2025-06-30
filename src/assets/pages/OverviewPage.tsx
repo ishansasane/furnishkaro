@@ -45,10 +45,9 @@ const OverviewPage = ({
   const [tailorordered, setTailorOrdered] = useState(0);
   const [tailorreceived, setTailorReceived] = useState(0);
 
-  
-    useEffect(() => {
-      console.log(status)
-    })
+  useEffect(() => {
+    console.log(status)
+  })
 
   useEffect(() => {
     let pendingCount = 0;
@@ -118,17 +117,15 @@ const OverviewPage = ({
     setPaymentReceived(total);
   }, [projectData.projectName, paymentData]);
 
-
-
   return (
-    <div className="flex flex-col gap-2 sm:gap-4 p-2 sm:p-4 md:p-6">
+    <div className="flex flex-col gap-6 p-4 sm:p-6 md:p-8 bg-gray-50 min-h-screen">
       {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-4">
-        <p className="text-lg sm:text-xl md:text-2xl font-semibold">Project Name: {projectData.projectName}</p>
-        <div className="flex items-center gap-1 sm:gap-2">
-          <label className="text-sm sm:text-base">Delivery Date:</label>
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 bg-white p-4 !rounded-xl shadow-sm">
+        <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">Project: {projectData.projectName}</p>
+        <div className="flex items-center gap-3">
+          <label className="text-sm font-medium text-gray-600">Delivery Date:</label>
           <input
-            className="border border-gray-300 !rounded-lg px-2 sm:px-3 py-1 sm:py-2 text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
+            className="border border-gray-300 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
             type="date"
             value={projectDate}
             onChange={(e) => setPRojectDate(e.target.value)}
@@ -137,47 +134,47 @@ const OverviewPage = ({
       </div>
 
       {/* Upper Section */}
-      <div className="flex flex-col lg:flex-row gap-2 sm:gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Client Info */}
-        <div className="flex flex-col border !rounded-lg p-2 sm:p-4 w-full lg:w-1/3">
-          <p className="text-base sm:text-lg md:text-xl font-medium mb-1 sm:mb-2">Client Information</p>
-          <div className="flex flex-col gap-1 sm:gap-2 text-sm sm:text-base">
-            <div className="flex justify-between">
-              <p className="text-gray-500">Name</p>
-              <p className="max-w-[50%] break-words">{projectData.customerLink[0]}</p>
+        <div className="flex flex-col bg-white p-6 !rounded-xl shadow-sm">
+          <p className="text-lg md:text-xl font-semibold text-gray-800 mb-4">Client Information</p>
+          <div className="flex flex-col gap-3 text-sm">
+            <div className="flex justify-between items-center">
+              <p className="text-gray-500 font-medium">Name</p>
+              <p className="max-w-[60%] text-gray-800 break-words">{projectData.customerLink[0]}</p>
             </div>
-            <div className="flex justify-between">
-              <p className="text-gray-500">Phone</p>
-              <p className="max-w-[50%] break-words">{projectData.customerLink[1]}</p>
+            <div className="flex justify-between items-center">
+              <p className="text-gray-500 font-medium">Phone</p>
+              <p className="max-w-[60%] text-gray-800 break-words">{projectData.customerLink[1]}</p>
             </div>
-            <div className="flex justify-between">
-              <p className="text-gray-500">Alternate Phone</p>
-              <p className="max-w-[50%] break-words">{projectData.customerLink[4]}</p>
+            <div className="flex justify-between items-center">
+              <p className="text-gray-500 font-medium">Alternate Phone</p>
+              <p className="max-w-[60%] text-gray-800 break-words">{projectData.customerLink[4]}</p>
             </div>
-            <div className="flex justify-between">
-              <p className="text-gray-500">Email</p>
-              <p className="max-w-[50%] break-words">{projectData.customerLink[2]}</p>
+            <div className="flex justify-between items-center">
+              <p className="text-gray-500 font-medium">Email</p>
+              <p className="max-w-[60%] text-gray-800 break-words">{projectData.customerLink[2]}</p>
             </div>
-            <div className="flex justify-between">
-              <p className="text-gray-500">Address</p>
-              <p className="max-w-[50%] break-words">{projectData.customerLink[3]}</p>
+            <div className="flex justify-between items-center">
+              <p className="text-gray-500 font-medium">Address</p>
+              <p className="max-w-[60%] text-gray-800 break-words">{projectData.customerLink[3]}</p>
             </div>
-            <div className="flex justify-between">
-              <p className="text-gray-500">Additional Requests</p>
-              <p className="max-w-[50%] break-words">{projectData.additionalRequests}</p>
+            <div className="flex justify-between items-center">
+              <p className="text-gray-500 font-medium">Additional Requests</p>
+              <p className="max-w-[60%] text-gray-800 break-words">{projectData.additionalRequests}</p>
             </div>
           </div>
         </div>
 
         {/* Status */}
-        <div className="flex flex-col w-full lg:w-1/3 p-2 sm:p-4 border !rounded-lg">
-          <p className="text-base sm:text-lg md:text-xl font-medium mb-1 sm:mb-2">Current Status</p>
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 mb-2 sm:mb-4">
-            <p className="text-sm sm:text-base text-gray-500">Delivery & Installation</p>
+        <div className="flex flex-col bg-white p-6 !rounded-xl shadow-sm">
+          <p className="text-lg md:text-xl font-semibold text-gray-800 mb-4">Current Status</p>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
+            <p className="text-sm font-medium text-gray-600">Delivery & Installation</p>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="border border-gray-300 px-2 sm:px-4 py-1 sm:py-2 !rounded-md text-sm sm:text-base focus:ring-2 focus:ring-blue-400 w-full sm:w-auto"
+              className="border border-gray-300 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition w-full sm:w-48"
             >
               <option value="Approved">Approved</option>
               <option value="Goods Pending">Goods Pending</option>
@@ -187,35 +184,35 @@ const OverviewPage = ({
               <option value="Completed">Completed</option>
             </select>
           </div>
-          <div className="flex flex-col gap-2 sm:gap-4">
-            <div className="flex flex-col gap-1 sm:gap-2">
-              <p className="text-sm sm:text-base font-semibold">Goods Ordered</p>
-              <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
-                <div className="flex flex-wrap gap-1 sm:gap-2">
-                  <p className="text-xs sm:text-sm !rounded-xl text-yellow-500 font-semibold bg-yellow-100 py-1 px-1 sm:px-2">Pending-{pending}</p>
-                  <p className="text-xs sm:text-sm !rounded-xl text-sky-600 font-semibold bg-sky-100 py-1 px-1 sm:px-2">Ordered-{ordered}</p>
-                  <p className="text-xs sm:text-sm !rounded-xl text-green-600 font-semibold bg-green-100 py-1 px-1 sm:px-2">Received-{received}</p>
-                  <p className="text-xs sm:text-sm !rounded-xl text-green-600 font-semibold bg-green-100 py-1 px-1 sm:px-2">In Stock-{instock}</p>
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-3">
+              <p className="text-sm font-semibold text-gray-800">Goods Ordered</p>
+              <div className="flex flex-col sm:flex-row sm:justify-between gap-3">
+                <div className="flex flex-wrap gap-2">
+                  <p className="text-xs font-medium text-yellow-700 bg-yellow-100 !rounded-full px-3 py-1">Pending: {pending}</p>
+                  <p className="text-xs font-medium text-blue-700 bg-blue-100 !rounded-full px-3 py-1">Ordered: {ordered}</p>
+                  <p className="text-xs font-medium text-green-700 bg-green-100 !rounded-full px-3 py-1">Received: {received}</p>
+                  <p className="text-xs font-medium text-green-700 bg-green-100 !rounded-full px-3 py-1">In Stock: {instock}</p>
                 </div>
                 <button
                   onClick={() => setNavState("Goods")}
-                  className="text-sky-600 border border-sky-600 bg-white !rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-base hover:bg-sky-50 w-full sm:w-auto"
+                  className="text-blue-600 border border-blue-600 !rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-50 transition w-full sm:w-auto"
                 >
                   View
                 </button>
               </div>
             </div>
-            <div className="flex flex-col gap-1 sm:gap-2">
-              <p className="text-sm sm:text-base font-semibold">Goods Sent to Tailor</p>
-              <div className="flex flex-col sm:flex-row sm:justify-between gap-1 sm:gap-2">
-                <div className="flex flex-wrap gap-1 sm:gap-2">
-                  <p className="text-xs sm:text-sm !rounded-xl text-yellow-500 font-semibold bg-yellow-100 py-1 px-1 sm:px-2">Pending-{tailorpending}</p>
-                  <p className="text-xs sm:text-sm !rounded-xl text-sky-600 font-semibold bg-sky-100 py-1 px-1 sm:px-2">Ordered-{tailorordered}</p>
-                  <p className="text-xs sm:text-sm !rounded-xl text-green-600 font-semibold bg-green-100 py-1 px-1 sm:px-2">Received-{tailorreceived}</p>
+            <div className="flex flex-col gap-3">
+              <p className="text-sm font-semibold text-gray-800">Goods Sent to Tailor</p>
+              <div className="flex flex-col sm:flex-row sm:justify-between gap-3">
+                <div className="flex flex-wrap gap-2">
+                  <p className="text-xs font-medium text-yellow-700 bg-yellow-100 !rounded-full px-3 py-1">Pending: {tailorpending}</p>
+                  <p className="text-xs font-medium text-blue-700 bg-blue-100 !rounded-full px-3 py-1">Ordered: {tailorordered}</p>
+                  <p className="text-xs font-medium text-green-700 bg-green-100 !rounded-full px-3 py-1">Received: {tailorreceived}</p>
                 </div>
                 <button
                   onClick={() => setNavState("Tailors")}
-                  className="text-sky-600 border border-sky-600 bg-white !rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-base hover:bg-sky-50 w-full sm:w-auto"
+                  className="text-blue-600 border border-blue-600 !rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-50 transition w-full sm:w-auto"
                 >
                   View
                 </button>
@@ -225,69 +222,69 @@ const OverviewPage = ({
         </div>
 
         {/* Payments */}
-        <div className="flex flex-col w-full lg:w-1/3 p-2 sm:p-4 !rounded-lg border">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-2 sm:mb-4">
-            <p className="text-base sm:text-lg md:text-xl font-medium">Payments</p>
-            <div className="flex flex-row gap-1 sm:gap-2 mt-1 sm:mt-0">
+        <div className="flex flex-col bg-white p-6 !rounded-xl shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6">
+            <p className="text-lg md:text-xl font-semibold text-gray-800">Payments</p>
+            <div className="flex flex-row gap-3 mt-3 sm:mt-0">
               <button
                 onClick={() => { setNavState("Payments"); setAddPayment(true)}}
-                className="text-white bg-sky-600 !rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-base hover:bg-sky-700 w-full sm:w-auto"
-              >
+                className="text-white bg-blue-600 !rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700 transition"
+                >
                 Add
               </button>
               <button
                 onClick={() => setNavState("Payments")}
-                className="text-white bg-sky-600 !rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-base hover:bg-sky-700 w-full sm:w-auto"
-              >
+                className="text-white bg-blue-600 !rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700 transition"
+                >
                 View
               </button>
             </div>
           </div>
-          <div className="flex flex-col gap-1 sm:gap-2">
-            <div className="flex flex-row justify-between items-center border !rounded-lg p-1 sm:p-2">
-              <div className="w-1 bg-gray-500 !h-7 sm:h-4"></div>
-              <p className="text-sm sm:text-base">Total Payment</p>
-              <p className="text-sm sm:text-base">{(projectData.totalAmount).toFixed(2)}</p>
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-row justify-between items-center border border-gray-200 !rounded-lg p-3 bg-gray-50">
+              <div className="w-1 bg-gray-500 h-6 !rounded"></div>
+              <p className="text-sm font-medium text-gray-800">Total Payment</p>
+              <p className="text-sm font-semibold text-gray-800">{(projectData.totalAmount).toFixed(2)}</p>
             </div>
-            <div className="flex flex-row justify-between items-center border !rounded-lg p-1 sm:p-2">
-              <div className="w-1 bg-green-500 !h-7 sm:h-4"></div>
-              <p className="text-sm sm:text-base">Payment Received</p>
-              <p className="text-sm sm:text-base">{paymentReceived}</p>
+            <div className="flex flex-row justify-between items-center border border-gray-200 !rounded-lg p-3 bg-gray-50">
+              <div className="w-1 bg-green-500 h-6 !rounded"></div>
+              <p className="text-sm font-medium text-gray-800">Payment Received</p>
+              <p className="text-sm font-semibold text-gray-800">{paymentReceived}</p>
             </div>
-            <div className="flex flex-row justify-between items-center border !rounded-lg p-1 sm:p-2">
-              <div className="w-1 bg-yellow-500 !h-7 sm:h-4"></div>
-              <p className="text-sm sm:text-base">Due</p>
-              <p className="text-sm sm:text-base">{(projectData.totalAmount - paymentReceived).toFixed(2)}</p>
+            <div className="flex flex-row justify-between items-center border border-gray-200 !rounded-lg p-3 bg-gray-50">
+              <div className="w-1 bg-yellow-500 h-6 !rounded"></div>
+              <p className="text-sm font-medium text-gray-800">Due</p>
+              <p className="text-sm font-semibold text-gray-800">{(projectData.totalAmount - paymentReceived).toFixed(2)}</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Lower Section */}
-      <div className="flex flex-col lg:flex-row gap-2 sm:gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Tailor Info */}
-        <div className="flex flex-col w-full lg:w-1/3 border !rounded-lg p-2 sm:p-4">
-          <div className="flex flex-row justify-between items-center mb-2 sm:mb-4">
-            <p className="text-base sm:text-lg md:text-xl font-medium">Tailor Information</p>
+        <div className="flex flex-col bg-white p-6 !rounded-xl shadow-sm">
+          <div className="flex flex-row justify-between items-center mb-6">
+            <p className="text-lg md:text-xl font-semibold text-gray-800">Tailor Information</p>
             <button
               onClick={() => setNavState("Tailors")}
-              className="text-white bg-sky-600 !rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-base hover:bg-sky-700"
+              className="text-white bg-blue-600 !rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700 transition"
             >
               Assign
             </button>
           </div>
-          <div className="flex flex-col gap-1 sm:gap-2 max-h-32 sm:max-h-48 overflow-y-auto">
+          <div className="flex flex-col gap-3 max-h-48 overflow-y-auto">
             {tailorsArray && tailorsArray.map((tailor, index) => (
-              <div key={index} className="flex flex-col border !rounded-lg p-1 sm:p-2">
-                <p className="text-sm sm:text-base text-sky-600 font-semibold">{tailor.tailorData[0]}</p>
-                <p className="text-sm sm:text-base">{tailor.tailorData[1]}</p>
+              <div key={index} className="flex flex-col border border-gray-200 !rounded-lg p-3 bg-gray-50">
+                <p className="text-sm font-semibold text-blue-600">{tailor.tailorData[0]}</p>
+                <p className="text-sm text-gray-600">{tailor.tailorData[1]}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* Interior & Sales */}
-        <div className="flex flex-col w-full lg:w-1/3 gap-2 sm:gap-4">
+        <div className="flex flex-col gap-6">
           {[{
             title: "Interior Information",
             data: interiorArray
@@ -295,56 +292,56 @@ const OverviewPage = ({
             title: "Sales Associate Information",
             data: salesAssociateArray
           }].map((section, idx) => (
-            <div key={idx} className="flex flex-col p-2 sm:p-4 border !rounded-lg">
-              <div className="flex flex-row justify-between items-center mb-1 sm:mb-2">
-                <p className="text-base sm:text-lg md:text-xl font-medium">{section.title}</p>
+            <div key={idx} className="flex flex-col bg-white p-6 !rounded-xl shadow-sm">
+              <div className="flex flex-row justify-between items-center mb-4">
+                <p className="text-lg md:text-xl font-semibold text-gray-800">{section.title}</p>
                 <button
                   onClick={() => setNavState("Customer & Project Details")}
-                  className="text-white bg-sky-600 !rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-base hover:bg-sky-700"
+                  className="text-white bg-blue-600 !rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700 transition"
                 >
                   View
                 </button>
               </div>
-              <div className="flex flex-col sm:flex-row justify-between">
-                <p className="text-sm sm:text-base max-w-[50%] break-words">{section.data[0]}</p>
-                <p className="text-sm sm:text-base max-w-[50%] break-words">{section.data[2]}</p>
+              <div className="flex flex-col sm:flex-row justify-between gap-3">
+                <p className="text-sm text-gray-800 max-w-[50%] break-words">{section.data[0]}</p>
+                <p className="text-sm text-gray-800 max-w-[50%] break-words">{section.data[2]}</p>
               </div>
             </div>
           ))}
         </div>
 
         {/* Tasks */}
-        <div className="flex flex-col p-2 sm:p-4 border !rounded-lg w-full lg:w-1/3">
-          <div className="flex flex-row justify-between items-center mb-2 sm:mb-4">
-            <p className="text-base sm:text-lg md:text-xl font-medium">Tasks</p>
+        <div className="flex flex-col bg-white p-6 !rounded-xl shadow-sm">
+          <div className="flex flex-row justify-between items-center mb-6">
+            <p className="text-lg md:text-xl font-semibold text-gray-800">Tasks</p>
             <button
               onClick={addNewTask}
-              className="text-white bg-sky-600 !rounded-lg px-2 sm:px-3 py-1 text-xs sm:text-base hover:bg-sky-700"
+              className="text-white bg-blue-600 !rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700 transition"
             >
               Create Task
             </button>
           </div>
-          <div className="flex flex-col gap-1 sm:gap-2 max-h-32 sm:max-h-48 overflow-y-auto">
+          <div className="flex flex-col gap-3 max-h-48 overflow-y-auto">
             {tasks && tasks.filter(task => task[5] === projectData.projectName).map((task, index) => (
-              <div key={index} className="border !rounded-lg p-1 sm:p-2 flex flex-col gap-1 sm:gap-2">
-                <div className="flex flex-row justify-between gap-1 sm:gap-2">
-                  <p className={`text-xs sm:text-sm text-white !rounded-lg px-1 sm:px-2 py-1 ${
+              <div key={index} className="border border-gray-200 !rounded-lg p-3 bg-gray-50 flex flex-col gap-3">
+                <div className="flex flex-row justify-between gap-2">
+                  <p className={`text-xs font-medium text-white !rounded-full px-3 py-1 ${
                     task[6] === "High" ? "bg-red-500" :
                     task[6] === "Low" ? "bg-green-500" :
                     task[6] === "Moderate" ? "bg-yellow-500" : ""
                   }`}>{task[6]}</p>
-                  <p className={`text-xs sm:text-sm text-white !rounded-lg px-1 sm:px-2 py-1 ${
+                  <p className={`text-xs font-medium text-white !rounded-full px-3 py-1 ${
                     task[7] === "To Do" ? "bg-red-500" :
                     task[7] === "Completed" ? "bg-green-500" :
                     task[7] === "In Progress" ? "bg-yellow-500" : ""
                   }`}>{task[7]}</p>
                 </div>
-                <p className="text-sm sm:text-base font-semibold">{task[0]}</p>
-                <p className="text-xs sm:text-sm">Created At: {task[3]}</p>
-                <p className="text-xs sm:text-sm">Description: {task[1]}</p>
+                <p className="text-sm font-semibold text-gray-800">{task[0]}</p>
+                <p className="text-xs text-gray-600">Created At: {task[3]}</p>
+                <p className="text-xs text-gray-600">Description: {task[1]}</p>
                 <button
                   onClick={() => { setediting(task); setDialogOpen(true); }}
-                  className="border px-2 sm:px-3 py-1 w-full sm:w-24 text-white bg-sky-600 !rounded-lg text-xs sm:text-base hover:bg-sky-700"
+                  className="border border-blue-600 text-blue-600 !rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-50 transition w-full sm:w-32"
                 >
                   Edit Task
                 </button>
@@ -359,20 +356,20 @@ const OverviewPage = ({
         {dialogOpen && (
           <>
             <motion.div
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => dispatch(setTaskDialogOpen(false))}
             />
             <motion.div
-              className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4"
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="w-full max-w-xs sm:max-w-md">
+              <div className="w-full max-w-sm sm:max-w-lg bg-white !rounded-xl shadow-lg p-6">
                 <TaskDialog
                   onClose={() => setDialogOpen(false)}
                   isEditing={editing}

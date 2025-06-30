@@ -4,6 +4,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store";
 import { setCustomerData, setPaymentData, setProjects } from "../Redux/dataSlice";
 import { Link } from 'react-router-dom';
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+import { Download } from "lucide-react";
 
 async function fetchCustomers() {
   try {
@@ -106,6 +109,220 @@ const fetchProjectData = async () => {
 
   return projects;
 };
+
+// PDF Generation Function
+const generatePDF = (project: any) => {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  let yOffset = 20;
+
+  const primaryColor = [0, 51, 102];
+  const secondaryColor = [33, 33, 33];
+  const accentColor = [0, 102, 204];
+  const lightGray = [245, 245, 245];
+
+  // Header
+  doc.setFillColor(...primaryColor);
+  doc.rect(0, 0, pageWidth, 30, "F");
+  doc.setFontSize(14);
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.text("Quotation", pageWidth / 2, 18, { align: "center" });
+
+  // Company Details
+  yOffset += 15;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(...secondaryColor);
+  doc.text("Sheela Decor", 15, yOffset);
+  yOffset += 5;
+  doc.text("123 Business Street, City, Country", 15, yOffset);
+  yOffset += 5;
+  doc.text("Email: contact@sheeladecor.com | Phone: +123 456 7890", 15, yOffset);
+  yOffset += 8;
+
+  // Divider
+  doc.setDrawColor(...accentColor);
+  doc.setLineWidth(0.4);
+  doc.line(15, yOffset, pageWidth - 15, yOffset);
+  yOffset += 8;
+
+  // Project & Customer Details Box
+  const cleanAddress =
+    typeof project.projectAddress === "string"
+      ? project.projectAddress.replace(/^"(.*)"$/, "$1")
+      : "N/A";
+  const addressLines = doc.splitTextToSize(`Address: ${cleanAddress}`, pageWidth / 2 - 20);
+  const detailBoxHeight = Math.max(25, 12 + addressLines.length * 5);
+  doc.setFillColor(...lightGray);
+  doc.roundedRect(15, yOffset, pageWidth - 30, detailBoxHeight, 2, 2, "F");
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...primaryColor);
+  doc.text("Project Details", 20, yOffset + 6);
+  doc.text("Customer Details", pageWidth / 2 + 5, yOffset + 6);
+
+  yOffset += 12;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(9);
+  doc.setTextColor(...secondaryColor);
+  doc.text(`Project Name: ${project.projectName || "N/A"}`, 20, yOffset);
+  doc.text(
+    `Customer: ${Array.isArray(project.customerLink) && project.customerLink.length > 0 ? project.customerLink[0] : "N/A"}`,
+    pageWidth / 2 + 5,
+    yOffset
+  );
+  yOffset += addressLines.length * 5;
+  addressLines.forEach((line, i) => {
+    doc.text(line, pageWidth / 2 + 5, yOffset + i * 5);
+  });
+  yOffset += 5;
+  doc.text(`Date: ${project.projectDate || new Date().toLocaleDateString()}`, 20, yOffset);
+  yOffset += 10;
+
+  // Table Data
+  const tableData: any[] = [];
+  let srNo = 1;
+
+  if (Array.isArray(project.allData)) {
+    project.allData.forEach((selection: any) => {
+      if (Array.isArray(selection.areacollection)) {
+        tableData.push([
+          {
+            content: selection.area || "Unknown Area",
+            colSpan: 9,
+            styles: { fontStyle: "bold", fillColor: accentColor, textColor: [255, 255, 255], fontSize: 9 },
+          },
+        ]);
+        selection.areacollection.forEach((collection: any) => {
+          if (!Array.isArray(collection.items) || !collection.items.length) return;
+          const item = collection.items[0];
+          const qty = parseFloat(collection.quantities?.[0]) || 0;
+          const measurementQty = parseFloat(collection.measurement?.quantity || "0");
+          const calculatedMRP = (item[4] * measurementQty).toFixed(2);
+          tableData.push([
+            srNo++,
+            `${collection.productGroup?.[0] || "N/A"} * ${collection.measurement?.quantity || 0}`,
+            collection.measurement?.width && collection.measurement?.height
+              ? `${collection.measurement.width}x${collection.measurement.height} ${collection.measurement.unit || ""}`
+              : "N/A",
+            `INR ${calculatedMRP}`,
+            qty.toString(),
+            `INR ${(item[4] * measurementQty * qty).toFixed(2)}`,
+            `${item[5] || "0"}%`,
+            `INR ${collection.taxAmount?.[0]?.toFixed(2) || "0.00"}`,
+            `INR ${collection.totalAmount?.[0]?.toFixed(2) || "0.00"}`,
+          ]);
+        });
+      }
+    });
+  }
+
+  if (Array.isArray(project.additionalItems) && project.additionalItems.length > 0) {
+    tableData.push([
+      {
+        content: "Miscellaneous Items",
+        colSpan: 9,
+        styles: { fontStyle: "bold", fillColor: accentColor, textColor: [255, 255, 255], fontSize: 9 },
+      },
+    ]);
+    project.additionalItems.forEach((item: any, index: number) => {
+      const qty = parseFloat(item.quantity?.toString() || "0");
+      const rate = parseFloat(item.rate?.toString() || "0");
+      const netRate = parseFloat(item.netRate?.toString() || "0");
+      const tax = parseFloat(item.tax?.toString() || "0");
+      const taxAmount = parseFloat(item.taxAmount?.toString() || "0");
+      const totalAmount = parseFloat(item.totalAmount?.toString() || "0");
+
+      tableData.push([
+        srNo++,
+        item.name || `Miscellaneous Item ${index + 1}`,
+        item.description || item.remark || "N/A",
+        `INR ${rate.toFixed(2)}`,
+        qty.toString(),
+        `INR ${netRate.toFixed(2)}`,
+        `${tax.toFixed(0)}%`,
+        `INR ${taxAmount.toFixed(2)}`,
+        `INR ${totalAmount.toFixed(2)}`,
+      ]);
+    });
+  }
+
+  // Table
+  autoTable(doc, {
+    startY: yOffset,
+    head: [["Sr. No.", "Item Name", "Description", "Rate", "Qty", "Net Rate", "Tax Rate", "Tax Amount", "Total"]],
+    body: tableData.length > 0 ? tableData : [[{ content: "No product data available.", colSpan: 9, styles: { halign: "center" } }]],
+    theme: "grid",
+    styles: { font: "helvetica", fontSize: 9, cellPadding: 1.5, textColor: secondaryColor, overflow: "linebreak" },
+    headStyles: { fillColor: primaryColor, textColor: [255, 255, 255], fontStyle: "bold", fontSize: 9, halign: "center" },
+    alternateRowStyles: { fillColor: lightGray },
+    columnStyles: {
+      0: { cellWidth: 10, halign: "center" },
+      1: { cellWidth: 38 },
+      2: { cellWidth: 32 },
+      3: { cellWidth: 22, halign: "right" },
+      4: { cellWidth: 12, halign: "center" },
+      5: { cellWidth: 22, halign: "right" },
+      6: { cellWidth: 12, halign: "center" },
+      7: { cellWidth: 12, halign: "right" },
+      8: { cellWidth: 22, halign: "right" },
+    },
+  });
+
+  yOffset = doc.lastAutoTable.finalY + 10;
+
+  // ---- 👇👇👇 Space Check Before Summary Box 👇👇👇 ----
+  const summaryBoxHeight = 50;
+  if (yOffset + summaryBoxHeight > pageHeight - 20) {
+    doc.addPage();
+    yOffset = 15;
+  }
+
+  // Summary Box
+  doc.setFillColor(...lightGray);
+  doc.roundedRect(pageWidth - 90, yOffset - 5, 75, 50, 2, 2, "F");
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(...primaryColor);
+  doc.text("Summary", pageWidth - 85, yOffset);
+  yOffset += 8;
+
+  doc.setFontSize(9);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(...secondaryColor);
+  const summaryItems = [
+    { label: "Total Amount", value: `INR ${(project.totalAmount || 0).toFixed(2)}` },
+    { label: "Discount", value: `INR ${(project.discount || 0).toFixed(2)}` },
+    { label: "Total Tax", value: `INR ${(project.totalTax || 0).toFixed(2)}` },
+    { label: "Grand Total", value: `INR ${(project.totalAmount || 0).toFixed(2)}` },
+  ];
+  summaryItems.forEach((item) => {
+    doc.setFont("helvetica", "bold");
+    doc.text(item.label, pageWidth - 85, yOffset);
+    doc.setFont("helvetica", "normal");
+    doc.text(item.value, pageWidth - 20, yOffset, { align: "right" });
+    yOffset += 8;
+  });
+
+  // Footer
+  doc.setFillColor(...accentColor);
+  doc.rect(0, pageHeight - 25, pageWidth, 1, "F");
+  doc.setFontSize(9);
+  doc.setTextColor(100, 100, 100);
+  doc.setFont("helvetica", "italic");
+  doc.text("Thank you for choosing Sheela Decor!", pageWidth / 2, pageHeight - 15, { align: "center" });
+  doc.setFont("helvetica", "normal");
+  doc.text("Sheela Decor - All Rights Reserved", pageWidth / 2, pageHeight - 8, { align: "center" });
+
+  // Save
+  const safeProjectName = (project.projectName || "Project").replace(/[^a-zA-Z0-9]/g, "_");
+  const safeDate = (project.projectDate || new Date().toLocaleDateString()).replace(/[^a-zA-Z0-9]/g, "_");
+  doc.save(`Quotation_${safeProjectName}_${safeDate}.pdf`);
+};
+
 
 const CustomerDashboard = ({ customerDashboardData, setCustomerDashboardData, setCustomerDashboard }) => {
   const [customerName, setCustomerName] = useState("");
@@ -310,7 +527,7 @@ const CustomerDashboard = ({ customerDashboardData, setCustomerDashboardData, se
           </div>
         </div>
         <button
-          className="px-3 py-1.5 sm:px-4 sm:py-2 bg-sky-600 text-white text-sm rounded-lg hover:bg-sky-700 transition-colors"
+          className="px-3 py-1.5 sm:px-4 sm:py-2 bg-sky-600 text-white text-sm !rounded-lg hover:bg-sky-700 transition-colors"
           onClick={() => setCustomerDashboard(false)}
         >
           Cancel
@@ -319,23 +536,23 @@ const CustomerDashboard = ({ customerDashboardData, setCustomerDashboardData, se
 
       {/* Stats Section */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <div className="flex flex-col border rounded-lg p-4 bg-white shadow-sm">
+        <div className="flex flex-col border !rounded-lg p-4 bg-white shadow-sm">
           <p className="text-sm sm:text-base text-sky-700 font-medium">Active Orders</p>
           <p className="text-base sm:text-lg font-semibold">{activeOrders}</p>
         </div>
-        <div className="flex flex-col border rounded-lg p-4 bg-white shadow-sm">
+        <div className="flex flex-col border !rounded-lg p-4 bg-white shadow-sm">
           <p className="text-sm sm:text-base text-purple-600 font-medium">Total Value of Projects</p>
           <p className="text-base sm:text-lg font-semibold">
             ₹{Math.round(duePayment).toLocaleString("en-IN")}
           </p>
         </div>
-        <div className="flex flex-col border rounded-lg p-4 bg-white shadow-sm">
+        <div className="flex flex-col border !rounded-lg p-4 bg-white shadow-sm">
           <p className="text-sm sm:text-base text-green-600 font-medium">Payment Received</p>
           <p className="text-base sm:text-lg font-semibold">
             ₹{Math.round(receivedProjectsPayment).toLocaleString("en-IN")}
           </p>
         </div>
-        <div className="flex flex-col border rounded-lg p-4 bg-white shadow-sm">
+        <div className="flex flex-col border !rounded-lg p-4 bg-white shadow-sm">
           <p className="text-sm sm:text-base text-red-500 font-medium">Payment Due</p>
           <p className="text-base sm:text-lg font-semibold">
             ₹{Math.round(duePayment - receivedProjectsPayment).toLocaleString("en-IN")}
@@ -374,7 +591,14 @@ const CustomerDashboard = ({ customerDashboardData, setCustomerDashboardData, se
                     ₹{Math.round(project.totalAmount - perProjectPayment[index]).toLocaleString("en-IN")}
                   </td>
                   <td className="py-3 px-4 text-sm">{project.projectDate}</td>
-                  <td className="py-3 px-4 text-sm">{project.quote}</td>
+                  <td className="py-3 px-4 text-sm">
+                    <button
+                      onClick={() => generatePDF(project)}
+                      className="border px-2 py-1 !rounded-md"
+                    >
+                      <Download size={16} />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -382,7 +606,7 @@ const CustomerDashboard = ({ customerDashboardData, setCustomerDashboardData, se
           {/* Mobile and Tablet View for Projects */}
           <div className="md:hidden flex flex-col gap-4">
             {projectData && projectData.map((project, index) => (
-              <div key={index} className="border rounded-lg p-4 bg-white shadow-sm">
+              <div key={index} className="border !rounded-lg p-4 bg-white shadow-sm">
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <span className="font-medium text-gray-600">Project Name</span>
                   <span>{project.projectName}</span>
@@ -401,7 +625,14 @@ const CustomerDashboard = ({ customerDashboardData, setCustomerDashboardData, se
                   <span className="font-medium text-gray-600">Date</span>
                   <span>{project.projectDate}</span>
                   <span className="font-medium text-gray-600">Quote</span>
-                  <span>{project.quote}</span>
+                  <span>
+                    <button
+                      onClick={() => generatePDF(project)}
+                      className="border px-2 py-1 !rounded-md"
+                    >
+                      <Download size={16} />
+                    </button>
+                  </span>
                 </div>
               </div>
             ))}
@@ -410,7 +641,7 @@ const CustomerDashboard = ({ customerDashboardData, setCustomerDashboardData, se
       </div>
 
       {/* Customer Details Section */}
-      <div className="bg-white border rounded-lg p-4 sm:p-6 shadow-sm">
+      <div className="bg-white border !rounded-lg p-4 sm:p-6 shadow-sm">
         <h2 className="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800 mb-4">Customer Details</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="flex flex-col">
@@ -419,7 +650,7 @@ const CustomerDashboard = ({ customerDashboardData, setCustomerDashboardData, se
             </label>
             <input
               type="text"
-              className="border rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="border !rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={customerName}
               readOnly
             />
@@ -429,7 +660,7 @@ const CustomerDashboard = ({ customerDashboardData, setCustomerDashboardData, se
             <input
               type="text"
               onChange={(e) => setEmail(e.target.value)}
-              className="border rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="border !rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={email}
             />
           </div>
@@ -438,7 +669,7 @@ const CustomerDashboard = ({ customerDashboardData, setCustomerDashboardData, se
             <input
               type="text"
               onChange={(e) => setPhoneNumber(e.target.value)}
-              className="border rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="border !rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={phoneNumber}
             />
           </div>
@@ -447,7 +678,7 @@ const CustomerDashboard = ({ customerDashboardData, setCustomerDashboardData, se
             <input
               type="text"
               onChange={(e) => setAlternateNumber(e.target.value)}
-              className="border rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="border !rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={alternateNumber}
             />
           </div>
@@ -456,7 +687,7 @@ const CustomerDashboard = ({ customerDashboardData, setCustomerDashboardData, se
             <input
               type="text"
               onChange={(e) => setAddress(e.target.value)}
-              className="border rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="border !rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={address}
             />
           </div>
@@ -466,7 +697,7 @@ const CustomerDashboard = ({ customerDashboardData, setCustomerDashboardData, se
               type="text"
               placeholder="Company Name"
               onChange={(e) => setCompanyName(e.target.value)}
-              className="border rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="border !rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={companyName}
             />
           </div>
@@ -476,7 +707,7 @@ const CustomerDashboard = ({ customerDashboardData, setCustomerDashboardData, se
               type="text"
               placeholder="GST Number"
               onChange={(e) => setGST(e.target.value)}
-              className="border rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              className="border !rounded-lg px-3 py-2 text-sm w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={GST}
             />
           </div>
@@ -484,7 +715,7 @@ const CustomerDashboard = ({ customerDashboardData, setCustomerDashboardData, se
         <div className="flex justify-end mt-4">
           <button
             onClick={sendcustomerData}
-            className="px-4 py-2 bg-sky-600 text-white text-sm rounded-lg hover:bg-sky-700 transition-colors"
+            className="px-4 py-2 bg-sky-600 text-white text-sm !rounded-lg hover:bg-sky-700 transition-colors"
           >
             Update
           </button>
