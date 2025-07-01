@@ -51,6 +51,7 @@ import ProtectedRoute from "./auth/ProtectedRoute.tsx";
 import TokenHandler from "./auth/TokenHandler.tsx";
 import BankDetails from "./assets/pages/BankDetails.tsx";
 import TermsAndConditions from "./assets/pages/TermsAndConditions.tsx";
+import AddSitePage from "./assets/pages/AddSitePage.tsx";
 
 // 🔽 NEW: Redux for loading state
 import { useSelector } from "react-redux";
@@ -136,6 +137,7 @@ function App() {
                       <Route path="/paymentsPage" element={<Payments />} />
                       <Route path="/duePage" element={<DuePage />} />
                       <Route path="/areas" element={<Areas />} />
+                      <Route path="/add-site" element={<AddSitePage />} />
 
                       {/* Masters Subroutes */}
                       <Route path="/masters/colors" element={<ColourPage />} />
@@ -159,7 +161,7 @@ function App() {
                         path="/masters/sales-associate"
                         element={<SalesAssociate />}
                       />
-
+                      
                       <Route path="*" element={<Navigate to="/" />} />
                     </Routes>
                   </div>

@@ -1372,6 +1372,22 @@ function AddProjectForm() {
 
       const newdate = day + "/" + month + "/" + year;
 
+      const finalAmount =
+  typeof amount !== "undefined" && !isNaN(amount)
+    ? amount
+    : parseFloat(paymentData?.totalValue || "0");
+
+const finalPaid =
+  typeof paid !== "undefined" && !isNaN(paid)
+    ? paid
+    : parseFloat(paymentData?.paid || "0");
+
+const finalGrandTotal =
+  typeof grandTotal !== "undefined" && !isNaN(grandTotal)
+    ? grandTotal
+    : finalAmount;
+
+
       const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/sendprojectdata",
         {
@@ -1385,7 +1401,7 @@ function AddProjectForm() {
             customerLink: JSON.stringify(selectedCustomer),
             projectReference,
             status,
-            totalAmount: amount,
+            totalAmount: finalAmount,
             totalTax: tax,
             paid,
             discount,
