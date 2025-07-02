@@ -122,10 +122,10 @@ const OverviewPage = ({
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 bg-white p-4 !rounded-xl shadow-sm">
         <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">Project: {projectData.projectName}</p>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <label className="text-sm font-medium text-gray-600">Delivery Date:</label>
           <input
-            className="border border-gray-300 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+            className="border w-38 border-gray-300 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
             type="date"
             value={projectDate}
             onChange={(e) => setPRojectDate(e.target.value)}
