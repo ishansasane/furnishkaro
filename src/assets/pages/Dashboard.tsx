@@ -22,7 +22,7 @@ import BankDetails from "./BankDetails.tsx";
 import { fetchWithLoading } from "../Redux/fetchWithLoading.ts";
 
 const fetchTaskData = async () => {
-  const response = await fetchWithLoading(
+  const response = await fetch(
     "https://sheeladecor.netlify.app/.netlify/functions/server/gettasks"
   );
   const data = await response.json();
@@ -34,7 +34,7 @@ const fetchTaskData = async () => {
 };
 
 const fetchInquiryData = async () => {
-  const response = await fetchWithLoading(
+  const response = await fetch(
     "https://sheeladecor.netlify.app/.netlify/functions/server/getInquiry"
   );
   const data = await response.json();
@@ -86,7 +86,7 @@ const Dashboard: React.FC = () => {
     }
 
     // ✅ Proceed to send the inquiry
-    const response = await fetchWithLoading(
+    const response = await fetch(
       "https://sheeladecor.netlify.app/.netlify/functions/server/sendInquiry",
       {
         method: "POST",
@@ -150,7 +150,7 @@ const Dashboard: React.FC = () => {
 
   const deleteTask = async (name: string) => {
     try {
-      const response = await fetchWithLoading(
+      const response = await fetch(
         "https://sheeladecor.netlify.app/.netlify/functions/server/deletetask",
         {
           method: "POST",
@@ -191,7 +191,6 @@ const Dashboard: React.FC = () => {
   };
 
   useEffect(() => {
-    if (inquiries.length == 0) {
       const fetchData = async () => {
         try {
           const data = await fetchInquiryData();
@@ -199,12 +198,10 @@ const Dashboard: React.FC = () => {
         } catch (err) {
           console.error("Fetch failed:", err);
         }
-      };
+      }
       fetchData();
-    }
   }, [inquiries, dispatch]);
 
-  useEffect(() => {});
 
   useEffect(() => {
     let isMounted = true;
@@ -230,7 +227,7 @@ const Dashboard: React.FC = () => {
           }
         }
 
-        const taskRes = await fetchWithLoading(
+        const taskRes = await fetch(
           "https://sheeladecor.netlify.app/.netlify/functions/server/gettasks",
           {
             credentials: "include",
@@ -267,7 +264,7 @@ const Dashboard: React.FC = () => {
 
   const fetchProjectData = async () => {
     try {
-      const response = await fetchWithLoading(
+      const response = await fetch(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
         {
           credentials: "include",
@@ -372,7 +369,7 @@ const Dashboard: React.FC = () => {
 
   const fetchPaymentData = async () => {
     try {
-      const response = await fetchWithLoading(
+      const response = await fetch(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getPayments"
       );
       if (!response.ok) {
@@ -467,7 +464,7 @@ const Dashboard: React.FC = () => {
 
   const handleMarkAsCompleted = async (status, name) => {
     try {
-      const response = await fetchWithLoading(
+      const response = await fetch(
         "https://sheeladecor.netlify.app/.netlify/functions/server/updatetask",
         {
           method: "POST",

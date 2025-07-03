@@ -290,12 +290,6 @@ const filteredProjects = projectData.filter((proj) => {
   return statusMatch && searchMatch;
 });
 
-
-useEffect(() => {
-  console.log(filteredProjects);
-})
-
-
   const deleteProject = async (name) => {
     try {
       const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deleteprojectdata", {
