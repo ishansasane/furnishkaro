@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" />
+
 import { Divide } from "lucide-react";
 import React, { useEffect, useState, useRef } from "react";
 import { FaEdit, FaPlus, FaTrash } from "react-icons/fa";
@@ -51,15 +53,15 @@ const SearchableSelect = ({
         onChange={(e) => setSearchTerm(e.target.value)}
         onFocus={() => setIsOpen(true)}
         placeholder={placeholder}
-        className="border p-2 sm:p-3 rounded w-full text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
+        className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
       />
       {isOpen && (
-        <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-100 !rounded-lg shadow-lg max-h-60 overflow-y-auto">
           {filteredOptions.length > 0 ? (
             filteredOptions.map((option, index) => (
               <div
                 key={index}
-                className="p-2 hover:bg-gray-100 cursor-pointer"
+                className="px-4 py-2 hover:bg-indigo-50/50 cursor-pointer text-sm font-inter transition-colors duration-200"
                 onClick={() => {
                   handleProductGroupChange(mainindex, i, option);
                   setIsOpen(false);
@@ -70,7 +72,7 @@ const SearchableSelect = ({
               </div>
             ))
           ) : (
-            <div className="p-2 text-gray-500">No results found</div>
+            <div className="px-4 py-2 text-gray-500 text-sm font-inter">No results found</div>
           )}
         </div>
       )}
@@ -306,11 +308,11 @@ const MaterialSelectionComponent = ({
   };
 
   return (
-    <div className="flex flex-col bg-white p-4 sm:p-6 rounded-lg shadow-lg">
-      <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-4">
+    <div className="flex flex-col gap-6 p-6 bg-white !rounded-2xl shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-xl font-inter">
+      <h2 className="text-2xl md:text-3xl font-poppins font-semibold text-gray-900 tracking-tight mb-4">
         Material Selection
       </h2>
-      <div className="flex flex-col sm:flex-row gap-4 sm:gap-5">
+      <div className="flex flex-col lg:flex-row gap-6">
         {/* Left Column: Area Selection */}
 <div className="w-full sm:w-1/4">
   <p className="text-sm sm:text-base">Area</p>
@@ -372,21 +374,21 @@ const MaterialSelectionComponent = ({
 
 
         {/* Right Column: Product Group Selection */}
-        <div className="w-full sm:w-3/4">
-          <div className="flex flex-row items-center justify-between">
-            <p className="text-sm sm:text-base">Select Product Groups</p>
+        <div className="w-full lg:w-3/4">
+          <div className="flex flex-row items-center justify-between mb-4">
+            <p className="text-sm font-poppins font-medium text-gray-700">Select Product Groups</p>
           </div>
           {selections.map((selection, mainindex) => (
             <div
               key={mainindex}
-              className="mb-4 border p-3 rounded-lg shadow-sm bg-gray-50"
+              className="mb-4 border border-gray-100 p-4 !rounded-lg shadow-sm bg-gray-50 transition-all duration-300 hover:shadow-md"
             >
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-                <p className="text-base sm:text-lg font-medium">
-                  {selection.area}
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-3">
+                <p className="text-base font-poppins font-medium text-gray-900">
+                  {selection.area || "Unnamed Area"}
                 </p>
                 <button
-                  className="mt-2 sm:mt-0 !rounded-md px-3 py-2 text-sm sm:text-base text-white bg-sky-600 hover:bg-sky-700"
+                  className="mt-2 lg:mt-0 px-4 py-2 bg-indigo-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-indigo-700 transition-colors duration-200"
                   onClick={() => handleAddNewGroup(mainindex)}
                 >
                   Add New Group
@@ -396,12 +398,12 @@ const MaterialSelectionComponent = ({
                 selection.areacollection.map((element, i) => (
                   <div
                     key={i}
-                    className="mt-3 border p-3 rounded-lg shadow-sm bg-gray-50"
+                    className="mt-3 border border-gray-100 p-4 !rounded-lg shadow-sm bg-white transition-all duration-300 hover:shadow-md"
                   >
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4">
+                    <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                       {/* Product Group */}
-                      <div className="flex flex-col w-full sm:w-1/5">
-                        <p className="text-sm sm:text-base">
+                      <div className="flex flex-col w-full lg:w-1/5">
+                        <p className="text-sm font-poppins font-medium text-gray-700 mb-1">
                           Product Group / Items
                         </p>
                         <SearchableSelect
@@ -416,16 +418,14 @@ const MaterialSelectionComponent = ({
                       </div>
 
                       {/* Company */}
-                      <div>
-                        <div className="flex flex-row gap-3">
-                          <p className="">Company</p>
+                      <div className="flex flex-col w-full lg:w-1/5">
+                        <div className="flex flex-row items-center gap-3 mb-2">
+                          <p className="text-sm font-poppins font-medium text-gray-700">Company</p>
                           <button
-                            className="mb-3"
+                            className="text-indigo-600 hover:text-indigo-700 transition-colors duration-200"
                             onClick={() => setIsCompantyOpen(true)}
                           >
-                            <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">
-                              +
-                            </span>
+                            <FaPlus className="w-4 h-4" />
                           </button>
                         </div>
                         <SearchableSelect
@@ -440,16 +440,14 @@ const MaterialSelectionComponent = ({
                       </div>
 
                       {/* Catalogue */}
-                      <div>
-                        <div className="flex flex-row gap-3">
-                          <p className="">Catalogue</p>
+                      <div className="flex flex-col w-full lg:w-1/5">
+                        <div className="flex flex-row items-center gap-3 mb-2">
+                          <p className="text-sm font-poppins font-medium text-gray-700">Catalogue</p>
                           <button
-                            className="mb-3"
+                            className="text-indigo-600 hover:text-indigo-700 transition-colors duration-200"
                             onClick={() => setIsCatalogueOpen(true)}
                           >
-                            <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">
-                              +
-                            </span>
+                            <FaPlus className="w-4 h-4" />
                           </button>
                         </div>
                         <SearchableSelect
@@ -464,10 +462,8 @@ const MaterialSelectionComponent = ({
                       </div>
 
                       {/* Design No */}
-                      <div>
-                        <div className="flex flex-row gap-3">
-                          <p className="">Design No.</p>
-                        </div>
+                      <div className="flex flex-col w-full lg:w-1/6">
+                        <p className="text-sm font-poppins font-medium text-gray-700 mb-1">Design No.</p>
                         <input
                           type="text"
                           placeholder="Design No"
@@ -476,13 +472,13 @@ const MaterialSelectionComponent = ({
                             handleDesignNoChange(mainindex, i, e.target.value);
                             setDesign(e.target.value);
                           }}
-                          className="border rounded-lg pl-2 py-2 w-24"
+                          className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
                         />
                       </div>
 
                       {/* Reference */}
-                      <div className="flex flex-col w-full sm:w-1/5">
-                        <p className="text-sm sm:text-base">Reference/Notes</p>
+                      <div className="flex flex-col w-full lg:w-1/4">
+                        <p className="text-sm font-poppins font-medium text-gray-700 mb-1">Reference/Notes</p>
                         <input
                           type="text"
                           value={element.reference}
@@ -490,120 +486,126 @@ const MaterialSelectionComponent = ({
                           onChange={(e) =>
                             handleReferenceChange(mainindex, i, e.target.value)
                           }
-                          className="border p-2 sm:p-3 rounded w-full text-sm sm:text-base"
+                          className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
                         />
                       </div>
 
                       {/* Delete Button */}
-                      <div className="flex flex-col w-full sm:w-auto">
-                        <p className="text-sm sm:text-base sm:block hidden"></p>
+                      <div className="flex flex-col w-full lg:w-auto">
+                        <p className="text-sm font-popp traumfreiheit.de
+oppins font-medium text-gray-700 mb-1 hidden lg:block"></p>
                         <button
                           onClick={(e) => handleGroupDelete(mainindex, i)}
-                          className="text-red-600 hover:text-red-800 p-1"
+                          className="text-red-500 hover:text-red-600 transition-colors duration-200 mt-2 lg:mt-0"
                         >
-                          <FaTrash size={16} />
+                          <FaTrash className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
                   </div>
                 ))
               ) : (
-                <div></div>
+                <div className="text-sm text-gray-500 font-inter">Select an area to add product groups</div>
               )}
             </div>
           ))}
         </div>
       </div>
+
+      {/* Add Company Modal */}
       {isCompanyOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/50">
-          <div className="w-[300px] p-6 rounded-xl shadow-xl text-center bg-white">
-            <p className="text-[1.3vw]">Add Company</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/60">
+          <div className="bg-white p-8 !rounded-2xl shadow-2xl border border-gray-100 w-[90%] sm:w-[400px] transition-all duration-300">
+            <h3 className="text-xl font-poppins font-semibold text-gray-900 mb-4 tracking-tight">Add Company</h3>
             <input
               type="text"
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
               onKeyPress={handleCompanyKeyPress}
-              className="w-full rounded-lg border p-2 pl-2 mb-3"
+              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50 mb-4"
+              placeholder="Company Name"
             />
-            <div className="w-full flex flex-row justify-between">
-              <button
-                style={{ borderRadius: "6px" }}
-                onClick={addCompany}
-                className="px-2 py-1 text-white bg-sky-600 hover:bg-sky-700"
-              >
-                Add
-              </button>
+            <div className="flex justify-end gap-3">
               <button
                 onClick={() => setIsCompantyOpen(false)}
-                className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                className="px-5 py-2.5 bg-gray-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-gray-700 transition-colors duration-200"
               >
-                Close
+                Cancel
+              </button>
+              <button
+                onClick={addCompany}
+                className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-indigo-700 transition-colors duration-200"
+              >
+                Add
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Add Catalogue Modal */}
       {isCatalogueOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/50">
-          <div className="w-[300px] p-6 rounded-xl shadow-xl text-center bg-white">
-            <p className="text-[1.3vw]">Add Catalogue</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/60">
+          <div className="bg-white p-8 !rounded-2xl shadow-2xl border border-gray-100 w-[90%] sm:w-[400px] transition-all duration-300">
+            <h3 className="text-xl font-poppins font-semibold text-gray-900 mb-4 tracking-tight">Add Catalogue</h3>
             <input
               type="text"
               value={catalogueName}
               onChange={(e) => setCatalogueName(e.target.value)}
               onKeyPress={handleCatalogueKeyPress}
-              className="w-full rounded-lg border p-2 pl-2 mb-3"
-              placeholder="Name"
+              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50 mb-4"
+              placeholder="Catalogue Name"
             />
             <input
               type="text"
               value={catalogueDescription}
               onChange={(e) => setCatalogueDescription(e.target.value)}
               onKeyPress={handleCatalogueKeyPress}
-              className="w-full rounded-lg border p-2 pl-2 mb-3"
+              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50 mb-4"
               placeholder="Description"
             />
-            <div className="w-full flex flex-row justify-between">
-              <button
-                onClick={addCatalogue}
-                style={{ borderRadius: "6px" }}
-                className="px-2 py-1 text-white bg-sky-600 hover:bg-sky-700"
-              >
-                Add
-              </button>
+            <div className="flex justify-end gap-3">
               <button
                 onClick={() => setIsCatalogueOpen(false)}
-                className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                className="px-5 py-2.5 bg-gray-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-gray-700 transition-colors duration-200"
               >
-                Close
+                Cancel
+              </button>
+              <button
+                onClick={addCatalogue}
+                className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-indigo-700 transition-colors duration-200"
+              >
+                Add
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Add Design No Modal */}
       {isDesignNoOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/50">
-          <div className="w-[300px] p-6 rounded-xl shadow-xl text-center bg-white">
-            <p className="text-[1.3vw]">Add Design No</p>
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/60">
+          <div className="bg-white p-8 !rounded-2xl shadow-2xl border border-gray-100 w-[90%] sm:w-[400px] transition-all duration-300">
+            <h3 className="text-xl font-poppins font-semibold text-gray-900 mb-4 tracking-tight">Add Design No</h3>
             <input
               type="text"
               value={designName}
               onChange={(e) => setDesignName(e.target.value)}
-              className="w-full rounded-lg border p-2 pl-2 mb-3"
+              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50 mb-4"
+              placeholder="Design No"
             />
-            <div className="w-full flex flex-row justify-between">
-              <button
-                style={{ borderRadius: "6px" }}
-                onClick={addDesign}
-                className="px-2 py-1 text-white bg-sky-600 hover:bg-sky-700"
-              >
-                Add
-              </button>
+            <div className="flex justify-end gap-3">
               <button
                 onClick={() => setIsDesignNoOpen(false)}
-                className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                className="px-5 py-2.5 bg-gray-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-gray-700 transition-colors duration-200"
               >
-                Close
+                Cancel
+              </button>
+              <button
+                onClick={addDesign}
+                className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-indigo-700 transition-colors duration-200"
+              >
+                Add
               </button>
             </div>
           </div>

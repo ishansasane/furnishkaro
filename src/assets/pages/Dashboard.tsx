@@ -190,17 +190,38 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-      const fetchData = async () => {
-        try {
-          const data = await fetchInquiryData();
-          dispatch(setInquiryData(data));
-        } catch (err) {
-          console.error("Fetch failed:", err);
+useEffect(() => {
+  const fetchAndCacheInquiries = async () => {
+    const now = Date.now();
+    const cacheExpiry = 5 * 60 * 1000; // 5 minutes
+    const cached = localStorage.getItem("inquiryData");
+
+    try {
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        const timeDiff = now - parsed.time;
+
+        if (Array.isArray(parsed.data) && timeDiff < cacheExpiry) {
+          dispatch(setInquiryData(parsed.data));
+          return;
         }
       }
-      fetchData();
-  }, [inquiries, dispatch]);
+
+      const data = await fetchInquiryData();
+      if (Array.isArray(data)) {
+        dispatch(setInquiryData(data));
+        localStorage.setItem("inquiryData", JSON.stringify({ data, time: now }));
+      } else {
+        console.error("Invalid inquiry data format:", data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch inquiries:", err);
+    }
+  };
+
+  fetchAndCacheInquiries();
+}, [dispatch, refresh]);  // ✅ No need to use inquiries as dependency
+
 
 
   useEffect(() => {

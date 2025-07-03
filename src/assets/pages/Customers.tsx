@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" />
+
 import { useState, useEffect, useRef } from "react";
 import { Plus, Edit, Trash2, MoreVertical } from "lucide-react";
 
@@ -113,7 +115,10 @@ export default function Customers() {
     fetchData();
   }, [reset, dispatch, customerDashboard]);
 
-  // Close dropdown on any click
+  // Filter customers based on search term
+  const filteredCustomers = customers.filter((customer) =>
+    customer[0].toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className={`p-6 bg-gray-50 md:mt-0 mt-20 h-screen`}>
@@ -169,8 +174,8 @@ export default function Customers() {
             </tr>
           </thead>
           <tbody>
-            {customers.length > 0 ? (
-              customers.map((customer, index) => (
+            {filteredCustomers.length > 0 ? (
+              filteredCustomers.map((customer, index) => (
                 <tr
                   key={index}
                   className="hover:bg-sky-50"

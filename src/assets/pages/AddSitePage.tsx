@@ -1,29 +1,31 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" />
+
 import React, { useState, useEffect } from "react";
 import CustomerDetails from "./CustomerDetails";
 import ProjectDetails from "./ProjectDetails";
 import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 function AddSitePage() {
-  const [customers, setCustomers] = useState<any[]>([]);
-  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
-  const [projectData, setProjectData] = useState<any>({});
-  const [interior, setInterior] = useState<string>("");
-  const [interiorArray, setInteriorArray] = useState<any[]>([]);
-  const [salesAssociateArray, setSalesAssociateArray] = useState<any[]>([]);
-  const [projectName, setProjectName] = useState<string>("");
-  const [projectReference, setProjectReference] = useState<string>("");
-  const [user, setUser] = useState<any>(null);
-  const [projectDate, setProjectDate] = useState<string>("");
-  const [additionalRequests, setAdditionalRequests] = useState<string>("");
-  const [projectAddress, setProjectAddress] = useState<string>("");
-  const [salesData, setSalesData] = useState<any>([]);
-  const [paymentData, setPaymentData] = useState<any>({
+  const [customers, setCustomers] = useState([]);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [projectData, setProjectData] = useState({});
+  const [interior, setInterior] = useState("");
+  const [interiorArray, setInteriorArray] = useState([]);
+  const [salesAssociateArray, setSalesAssociateArray] = useState([]);
+  const [projectName, setProjectName] = useState("");
+  const [projectReference, setProjectReference] = useState("");
+  const [user, setUser] = useState(null);
+  const [projectDate, setProjectDate] = useState("");
+  const [additionalRequests, setAdditionalRequests] = useState("");
+  const [projectAddress, setProjectAddress] = useState("");
+  const [salesData, setSalesData] = useState([]);
+  const [paymentData, setPaymentData] = useState({
     totalValue: "",
     paid: "",
     due: 0,
   });
 
-  // ✅ NEW: Fetch dropdown data on first load
+  // Fetch dropdown data on first load
   useEffect(() => {
     async function fetchInitialData() {
       try {
@@ -69,15 +71,15 @@ function AddSitePage() {
     const paid = parseFloat(paymentData.paid) || 0;
     const due = total - paid;
 
-    setPaymentData((prev: any) => ({
+    setPaymentData((prev) => ({
       ...prev,
       due: due > 0 ? due : 0,
     }));
   }, [paymentData.totalValue, paymentData.paid]);
 
-  const handlePaymentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePaymentChange = (e) => {
     const { name, value } = e.target;
-    setPaymentData((prev: any) => ({
+    setPaymentData((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -175,116 +177,130 @@ function AddSitePage() {
   };
 
   return (
-    <div className="space-y-6 p-4">
-      {/* Customer Details */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200">
-        <CustomerDetails
-          customers={customers}
-          selectedCustomer={selectedCustomer}
-          setSelectedCustomer={setSelectedCustomer}
-          projectData={projectData}
-          setCustomers={setCustomers}
-        />
+    <div className="flex flex-col gap-8 p-8 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen w-full font-inter">
+      {/* Header Section */}
+      <div className="flex flex-col gap-3">
+        <h1 className="text-4xl md:text-5xl font-poppins font-bold text-gray-900 tracking-tight">
+          Add New Site
+        </h1>
       </div>
 
-      {/* Project Details */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200">
-        <ProjectDetails
-          selectedCustomer={selectedCustomer}
-          interior={interior}
-          setInterior={setInterior}
-          salesdata={salesData}
-          interiorArray={interiorArray}
-          setInteriorArray={setInteriorArray}
-          salesAssociateArray={salesAssociateArray}
-          setSalesAssociateArray={setSalesAssociateArray}
-          projectName={projectName}
-          setProjectName={setProjectName}
-          projectReference={projectReference}
-          setProjectReference={setProjectReference}
-          user={user}
-          setUser={setUser}
-          projectDate={projectDate}
-          setProjectDate={setProjectDate}
-          setAdditionalRequests={setAdditionalRequests}
-          additionalRequests={additionalRequests}
-          projectAddress={projectAddress}
-          setProjectAddress={setProjectAddress}
-          setSalesData={setSalesData}
-        />
-      </div>
+      {/* Main Content */}
+      <div className="space-y-8">
+        {/* Customer Details */}
+        <div className="bg-white p-8 !rounded-2xl shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-xl">
+          <CustomerDetails
+            customers={customers}
+            selectedCustomer={selectedCustomer}
+            setSelectedCustomer={setSelectedCustomer}
+            projectData={projectData}
+            setCustomers={setCustomers}
+          />
+        </div>
 
-      {/* Payment Section */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200">
-        <h3 className="text-lg font-medium mb-4">Payment Information</h3>
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="bg-gray-50">
-              <th className="p-3 text-left text-sm font-medium text-gray-500">Total Value</th>
-              <th className="p-3 text-left text-sm font-medium text-gray-500">Paid</th>
-              <th className="p-3 text-left text-sm font-medium text-gray-500">Due</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-b border-gray-200">
-              <td className="p-3">
-                <input
-                  type="number"
-                  name="totalValue"
-                  value={paymentData.totalValue}
-                  onChange={handlePaymentChange}
-                  className="w-full p-2 border border-gray-300 rounded"
-                  placeholder="Enter total amount"
-                />
-              </td>
-              <td className="p-3">
-                <input
-                  type="number"
-                  name="paid"
-                  value={paymentData.paid}
-                  onChange={handlePaymentChange}
-                  className="w-full p-2 border border-gray-300 rounded"
-                  placeholder="Enter paid amount"
-                />
-              </td>
-              <td className="p-3">
-                <div className={`p-2 ${paymentData.due > 0 ? "text-red-500" : "text-green-500"}`}>
-                  {paymentData.due.toFixed(2)}
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        {/* Project Details */}
+        <div className="bg-white p-8 !rounded-2xl shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-xl">
+          <ProjectDetails
+            selectedCustomer={selectedCustomer}
+            interior={interior}
+            setInterior={setInterior}
+            salesdata={salesData}
+            interiorArray={interiorArray}
+            setInteriorArray={setInteriorArray}
+            salesAssociateArray={salesAssociateArray}
+            setSalesAssociateArray={setSalesAssociateArray}
+            projectName={projectName}
+            setProjectName={setProjectName}
+            projectReference={projectReference}
+            setProjectReference={setProjectReference}
+            user={user}
+            setUser={setUser}
+            projectDate={projectDate}
+            setProjectDate={setProjectDate}
+            setAdditionalRequests={setAdditionalRequests}
+            additionalRequests={additionalRequests}
+            projectAddress={projectAddress}
+            setProjectAddress={setProjectAddress}
+            setSalesData={setSalesData}
+          />
+        </div>
 
-        {/* Summary */}
-        <div className="mt-4 flex justify-end">
-          <div className="bg-gray-50 p-4 rounded-lg w-64">
-            <div className="flex justify-between mb-2">
-              <span className="font-medium">Total:</span>
-              <span>₹{parseFloat(paymentData.totalValue || "0").toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between mb-2">
-              <span className="font-medium">Paid:</span>
-              <span>₹{parseFloat(paymentData.paid || "0").toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between font-bold text-lg">
-              <span>Balance Due:</span>
-              <span className={paymentData.due > 0 ? "text-red-500" : "text-green-500"}>
-                ₹{paymentData.due.toFixed(2)}
-              </span>
+        {/* Payment Section */}
+        <div className="bg-white p-8 !rounded-2xl shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-xl">
+          <h3 className="text-2xl md:text-3xl font-poppins font-semibold text-gray-900 mb-6 tracking-tight">
+            Payment Information
+          </h3>
+          <div className="overflow-x-auto !rounded-lg border border-gray-100">
+            <table className="w-full bg-white">
+              <thead>
+                <tr className="bg-indigo-50 text-gray-800 text-sm font-poppins font-semibold">
+                  <th className="py-4 px-6 text-left">Total Value</th>
+                  <th className="py-4 px-6 text-left">Received</th>
+                  <th className="py-4 px-6 text-left">Due</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-gray-100 hover:bg-indigo-50/50 transition-colors duration-200">
+                  <td className="py-4 px-6">
+                    <input
+                      type="number"
+                      name="totalValue"
+                      value={paymentData.totalValue}
+                      onChange={handlePaymentChange}
+                      className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+                      placeholder="Enter total amount"
+                    />
+                  </td>
+                  <td className="py-4 px-6">
+                    <input
+                      type="number"
+                      name="paid"
+                      value={paymentData.paid}
+                      onChange={handlePaymentChange}
+                      className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+                      placeholder="Enter received amount"
+                    />
+                  </td>
+                  <td className="py-4 px-6">
+                    <div className={`text-sm font-inter ${paymentData.due > 0 ? "text-red-500" : "text-green-500"}`}>
+                      ₹{paymentData.due.toFixed(2)}
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* Summary */}
+          <div className="mt-6 flex justify-end">
+            <div className="bg-gray-50 p-6 !rounded-lg w-full md:w-80 border border-gray-100">
+              <div className="flex justify-between mb-3 text-sm">
+                <span className="text-gray-700 font-poppins font-medium">Total:</span>
+                <span className="font-inter">₹{parseFloat(paymentData.totalValue || "0").toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between mb-3 text-sm">
+                <span className="text-gray-700 font-poppins font-medium">Paid:</span>
+                <span className="font-inter">₹{parseFloat(paymentData.paid || "0").toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between font-bold text-lg">
+                <span className="text-gray-700 font-poppins">Balance Due:</span>
+                <span className={`font-poppins ${paymentData.due > 0 ? "text-red-500" : "text-green-500"}`}>
+                  ₹{paymentData.due.toFixed(2)}
+                </span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Save Button */}
-      <div className="flex justify-end">
-        <button
-          onClick={handleSaveProjectAndPayment}
-          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-        >
-          Save Project & Create Payment
-        </button>
+        {/* Save Button */}
+        <div className="flex justify-end">
+          <button
+            onClick={handleSaveProjectAndPayment}
+            className="px-6 py-3 bg-indigo-600 text-white text-sm font-poppins font-semibold !rounded-lg hover:bg-indigo-700 transition-colors duration-300"
+          >
+            Save Project & Create Payment
+          </button>
+        </div>
       </div>
     </div>
   );

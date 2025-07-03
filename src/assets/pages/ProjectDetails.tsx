@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" />
+
 import { Target } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { FaPlus } from "react-icons/fa";
@@ -179,34 +181,32 @@ const ProjectDetails = ({
   }, [interiorArray]);
 
   return (
-    <div className="flex flex-col gap-3 w-full rounded-xl shadow-2xl border-2 border-gray-200 px-3 py-3 sm:px-4 md:px-6 lg:px-8">
-      <h2 className="text-xl md:text-2xl font-semibold text-gray-800 mb-4">
+    <div className="flex flex-col gap-4 p-6 bg-white !rounded-2xl shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-xl font-inter">
+      <h2 className="text-2xl md:text-3xl font-poppins font-semibold text-gray-900 tracking-tight mb-4">
         Project Details
       </h2>
 
       {/* Reference & Project Name */}
-      <div className="flex flex-col sm:flex-row w-full gap-2">
+      <div className="flex flex-col sm:flex-row w-full gap-4">
         <div className="flex flex-col w-full sm:w-1/2">
-          <p className="text-sm sm:text-base">
-            Project Name{" "}
-            <span className="text-gray-500">(type a unique name)</span>
-          </p>
+          <label className="text-sm font-poppins font-medium text-gray-700 mb-1">
+            Project Name <span className="text-gray-500 text-xs">(unique name)</span>
+          </label>
           <input
             type="text"
-            className="border p-2 rounded w-full text-sm sm:text-base"
+            className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
             value={projectName || ""}
             onChange={(e) => setProjectName(e.target.value)}
             placeholder="Project Name"
           />
         </div>
         <div className="flex flex-col w-full sm:w-1/2">
-          <p className="text-sm sm:text-base">
-            Reference <span className="text-gray-500">(optional)</span>
-          </p>
-
+          <label className="text-sm font-poppins font-medium text-gray-700 mb-1">
+            Reference <span className="text-gray-500 text-xs">(optional)</span>
+          </label>
           <input
             type="text"
-            className="border p-2 rounded w-full text-sm sm:text-base"
+            className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
             value={projectReference || ""}
             onChange={(e) => setProjectReference(e.target.value)}
             placeholder="Reference"
@@ -218,10 +218,10 @@ const ProjectDetails = ({
       {selectedCustomer && (
         <div className="flex flex-col w-full gap-2">
           <div className="flex flex-col w-full">
-            <p className="text-sm sm:text-base">Address</p>
+            <label className="text-sm font-poppins font-medium text-gray-700 mb-1">Address</label>
             <input
               type="text"
-              className="border p-2 rounded w-full text-sm sm:text-base"
+              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
               value={projectAddress || ""}
               onChange={(e) => setProjectAddress(e.target.value)}
               placeholder="Address"
@@ -234,46 +234,43 @@ const ProjectDetails = ({
       {selectedCustomer && (
         <div className="flex flex-col w-full gap-2">
           <div className="flex flex-col w-full">
-            <p className="text-sm sm:text-base">
-              Any Additional Requests{" "}
-              <span className="text-gray-500">(optional)</span>
-            </p>
+            <label className="text-sm font-poppins font-medium text-gray-700 mb-1">
+              Any Additional Requests <span className="text-gray-500 text-xs">(optional)</span>
+            </label>
             <textarea
               placeholder="Additional Requests"
               value={additionalRequests || ""}
               onChange={(e) => setAdditionalRequests(e.target.value)}
-              className="border p-2 rounded w-full text-sm sm:text-base resize-y min-h-[100px]"
+              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50 resize-y min-h-[100px]"
             />
           </div>
         </div>
       )}
 
       {/* Dropdowns for Interior & Sales Associate */}
-      <div className="flex flex-col sm:flex-row w-full gap-2">
+      <div className="flex flex-col sm:flex-row w-full gap-4">
         <div className="flex flex-col w-full sm:w-1/2">
-          <div className="flex flex-wrap flex-row gap-3 px-2 items-center">
-            <p className="text-sm sm:text-base">Select Interior</p>
+          <div className="flex flex-wrap flex-row gap-4 items-center mb-3">
+            <label className="text-sm font-poppins font-medium text-gray-700">Select Interior</label>
             <button
-              className="mb-3 flex items-center md:!text-[15px] !text-xs px-2 py-1 border-1 border-blue-400 text-blue-500 font-semibold !rounded-xl hover:bg-blue-50 transition"
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-indigo-700 transition-colors duration-200"
               onClick={() => setIsOpen(true)}
             >
-              <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">
-                +
-              </span>
-              Interior
+              <FaPlus className="w-4 h-4" />
+              Add Interior
             </button>
           </div>
           <select
-            className="border border-black p-2 rounded w-full text-sm sm:text-base"
+            className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
             value={interiorArray}
             onChange={handleInteriorChange}
           >
-            <option value="">Select Interior Name (optional)</option>
+            <option value="" className="text-gray-500">Select Interior Name (optional)</option>
             {Array.isArray(interior) &&
               interior.map((data, index) => {
                 const value = data.name || data[0] || "";
                 return (
-                  <option key={index} value={value}>
+                  <option key={index} value={value} className="font-inter">
                     {value || "Unknown"}
                   </option>
                 );
@@ -282,29 +279,27 @@ const ProjectDetails = ({
         </div>
 
         <div className="flex flex-col w-full sm:w-1/2">
-          <div className="flex flex-wrap flex-row gap-3 px-2 items-center">
-            <p className="text-sm sm:text-base">Select Sales Associate</p>
+          <div className="flex flex-wrap flex-row gap-4 items-center mb-3">
+            <label className="text-sm font-poppins font-medium text-gray-700">Select Sales Associate</label>
             <button
               onClick={() => setIsSalesOpen(true)}
-              className="mb-3 flex items-center md:!text-[15px] !text-xs px-2 py-1 border-1 border-blue-400 text-blue-500 font-semibold !rounded-xl hover:bg-blue-50 transition"
+              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-indigo-700 transition-colors duration-200"
             >
-              <span className="mr-2 flex justify-center w-6 h-6 border-2 border-blue-500 rounded-full text-lg leading-none text-blue-600">
-                +
-              </span>
-              Sales Associate
+              <FaPlus className="w-4 h-4" />
+              Add Sales Associate
             </button>
           </div>
           <select
-            className="border border-black p-2 rounded w-full text-sm sm:text-base"
+            className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
             value={salesAssociateArray}
             onChange={handleSalesAssociateChange}
           >
-            <option value="">Select Sales Associate (optional)</option>
+            <option value="" className="text-gray-500">Select Sales Associate (optional)</option>
             {Array.isArray(salesdata) &&
               salesdata.map((data, index) => {
                 const value = data.name || data[0] || "";
                 return (
-                  <option key={index} value={value}>
+                  <option key={index} value={value} className="font-inter">
                     {value || "Unknown"}
                   </option>
                 );
@@ -314,22 +309,22 @@ const ProjectDetails = ({
       </div>
 
       {/* Select User */}
-      <div className="flex flex-col sm:flex-row w-full gap-2">
+      <div className="flex flex-col sm:flex-row w-full gap-4">
         <div className="flex flex-col w-full sm:w-1/2">
-          <p className="text-sm sm:text-base">Select User</p>
+          <label className="text-sm font-poppins font-medium text-gray-700 mb-1">Select User</label>
           <input
             type="text"
-            className="border p-2 rounded w-full text-sm sm:text-base"
+            className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
             value={user || ""}
             onChange={(e) => setUser(e.target.value)}
             placeholder="User Name"
           />
         </div>
         <div className="flex flex-col w-full sm:w-1/2">
-          <p className="text-sm sm:text-base">Project Deadline</p>
+          <label className="text-sm font-poppins font-medium text-gray-700 mb-1">Project Deadline</label>
           <input
             type="date"
-            className="border p-2 rounded w-full text-sm sm:text-base"
+            className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
             value={projectDate || ""}
             onChange={(e) => setProjectDate(e.target.value)}
           />
@@ -337,36 +332,38 @@ const ProjectDetails = ({
       </div>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/50">
-          <div className="bg-white p-6 rounded shadow-md w-[90%] sm:w-[80%] md:w-[500px] border">
-            <h2 className="text-xl font-bold mb-4">Add Interior</h2>
-            <input
-              className="border p-2 rounded w-full mb-2 text-sm sm:text-base"
-              placeholder="Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-            <input
-              className="border p-2 rounded w-full mb-2 text-sm sm:text-base"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <input
-              className="border p-2 rounded w-full mb-2 text-sm sm:text-base"
-              placeholder="Phone Number"
-              value={phonenumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-            />
-            <input
-              className="border p-2 rounded w-full mb-2 text-sm sm:text-base"
-              placeholder="Address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-            />
-            <div className="flex justify-end gap-2 mt-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/60">
+          <div className="bg-white p-8 !rounded-2xl shadow-2xl border border-gray-100 w-[90%] sm:w-[80%] md:w-[500px] transition-all duration-300">
+            <h2 className="text-2xl font-poppins font-bold text-gray-900 mb-6 tracking-tight">Add Interior</h2>
+            <div className="space-y-4">
+              <input
+                className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+                placeholder="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+              <input
+                className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+              <input
+                className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+                placeholder="Phone Number"
+                value={phonenumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+              />
+              <input
+                className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+                placeholder="Address"
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+              />
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
               <button
-                className="bg-gray-500 text-white px-4 py-2 rounded text-sm sm:text-base"
+                className="px-5 py-2.5 bg-gray-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-gray-700 transition-colors duration-200"
                 onClick={() => {
                   setName("");
                   setEmail("");
@@ -378,7 +375,7 @@ const ProjectDetails = ({
                 Cancel
               </button>
               <button
-                className="bg-blue-500 text-white px-4 py-2 rounded text-sm sm:text-base"
+                className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-indigo-700 transition-colors duration-200"
                 onClick={handleSubmit}
               >
                 Save
@@ -389,36 +386,38 @@ const ProjectDetails = ({
       )}
 
       {isSalesOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/50">
-          <div className="bg-white p-6 rounded shadow-md w-[90%] sm:w-[80%] md:w-[500px] border">
-            <h2 className="text-xl font-bold mb-4">Add Sales Associate</h2>
-            <input
-              className="border p-2 rounded w-full mb-2 text-sm sm:text-base"
-              placeholder="Name"
-              value={salesname}
-              onChange={(e) => salesSetName(e.target.value)}
-            />
-            <input
-              className="border p-2 rounded w-full mb-2 text-sm sm:text-base"
-              placeholder="Email"
-              value={salesemail}
-              onChange={(e) => salesSetEmail(e.target.value)}
-            />
-            <input
-              className="border p-2 rounded w-full mb-2 text-sm sm:text-base"
-              placeholder="Phone Number"
-              value={salesphonenumber}
-              onChange={(e) => salesSetPhoneNumber(e.target.value)}
-            />
-            <input
-              className="border p-2 rounded w-full mb-2 text-sm sm:text-base"
-              placeholder="Address"
-              value={salesaddress}
-              onChange={(e) => salesSetAddress(e.target.value)}
-            />
-            <div className="flex justify-end gap-2 mt-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/60">
+          <div className="bg-white p-8 !rounded-2xl shadow-2xl border border-gray-100 w-[90%] sm:w-[80%] md:w-[500px] transition-all duration-300">
+            <h2 className="text-2xl font-poppins font-bold text-gray-900 mb-6 tracking-tight">Add Sales Associate</h2>
+            <div className="space-y-4">
+              <input
+                className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+                placeholder="Name"
+                value={salesname}
+                onChange={(e) => salesSetName(e.target.value)}
+              />
+              <input
+                className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+                placeholder="Email"
+                value={salesemail}
+                onChange={(e) => salesSetEmail(e.target.value)}
+              />
+              <input
+                className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+                placeholder="Phone Number"
+                value={salesphonenumber}
+                onChange={(e) => salesSetPhoneNumber(e.target.value)}
+              />
+              <input
+                className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+                placeholder="Address"
+                value={salesaddress}
+                onChange={(e) => salesSetAddress(e.target.value)}
+              />
+            </div>
+            <div className="flex justify-end gap-3 mt-6">
               <button
-                className="bg-gray-500 text-white px-4 py-2 rounded text-sm sm:text-base"
+                className="px-5 py-2.5 bg-gray-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-gray-700 transition-colors duration-200"
                 onClick={() => {
                   salesSetName("");
                   salesSetEmail("");
@@ -430,7 +429,7 @@ const ProjectDetails = ({
                 Cancel
               </button>
               <button
-                className="bg-blue-500 text-white px-4 py-2 rounded text-sm sm:text-base"
+                className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-indigo-700 transition-colors duration-200"
                 onClick={handleSalesSubmit}
               >
                 Save
@@ -454,11 +453,11 @@ class ProjectDetailsErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="p-4 text-red-500">
-          <h2>Something went wrong in Project Details.</h2>
-          <p>{this.state.error?.toString()}</p>
+        <div className="p-6 text-red-500 bg-white !rounded-2xl shadow-lg border border-gray-100 font-inter">
+          <h2 className="text-2xl font-poppins font-bold text-gray-900 mb-4">Something went wrong in Project Details.</h2>
+          <p className="text-sm mb-4">{this.state.error?.toString()}</p>
           <button
-            className="mt-2 bg-blue-500 text-white px-4 py-2 rounded"
+            className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-indigo-700 transition-colors duration-200"
             onClick={() => this.setState({ hasError: false, error: null })}
           >
             Try Again
