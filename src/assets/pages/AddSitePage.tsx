@@ -177,7 +177,7 @@ function AddSitePage() {
   };
 
   return (
-    <div className="flex flex-col gap-8 p-8 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen w-full font-inter">
+    <div className="flex mt-5 md:!mt-1 flex-col gap-8 p-8 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen w-full font-inter">
       {/* Header Section */}
       <div className="flex flex-col gap-3">
         <h1 className="text-4xl md:text-5xl font-poppins font-bold text-gray-900 tracking-tight">

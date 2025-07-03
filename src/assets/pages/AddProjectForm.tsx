@@ -1134,7 +1134,8 @@ function AddProjectForm() {
     number | null
   >(null);
 
-  const fetchProjectData = async () => {
+const fetchProjectData = async () => {
+  try {
     const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
       {
@@ -1148,9 +1149,8 @@ function AddProjectForm() {
 
     const data = await response.json();
 
-    if (!data.body || !Array.isArray(data.body)) {
-      throw new Error("Invalid data format: Expected an array in data.body");
-    }
+    // Ensure data.body is an array; fallback to empty array if invalid
+    const projectsData = Array.isArray(data.body) ? data.body : [];
 
     const parseSafely = (value: any, fallback: any) => {
       try {
@@ -1186,8 +1186,8 @@ function AddProjectForm() {
       }
     };
 
-    const projects = data.body.map((row: any[]) => ({
-      projectName: row[0],
+    const projects = projectsData.map((row: any[]) => ({
+      projectName: row[0] || "",
       customerLink: parseSafely(row[1], []),
       projectReference: row[2] || "",
       status: row[3] || "",
@@ -1204,16 +1204,20 @@ function AddProjectForm() {
       additionalItems: deepClone(parseSafely(row[14], [])),
       goodsArray: deepClone(parseSafely(row[15], [])),
       tailorsArray: deepClone(parseSafely(row[16], [])),
-      projectAddress: row[17],
-      date: row[18],
-      grandTotal: row[19],
-      discountType: row[20],
+      projectAddress: row[17] || null,
+      date: row[18] || "",
+      grandTotal: parseFloat(row[19]) || 0,
+      discountType: row[20] || "cash",
       bankDetails: deepClone(parseSafely(row[21], [])),
       termsConditions: deepClone(parseSafely(row[22], [])),
     }));
 
     return projects;
-  };
+  } catch (error) {
+    console.error("Fetch error in fetchProjectData:", error);
+    return []; // Return empty array on error to prevent breaking
+  }
+};
 
   const parseSafely = (input: any, fallback: any) => {
     if (typeof input !== "string") return fallback;
@@ -1893,7 +1897,7 @@ const generatePDF = () => {
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" />
 
 return (
-  <div className="flex flex-col gap-8 p-8 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen w-full font-inter">
+  <div className="flex mt-5 md:!mt-1 flex-col gap-8 p-8 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen w-full font-inter">
     {/* Header Section */}
     <div className="flex flex-col gap-3">
       <h1 className="text-4xl md:text-5xl font-poppins font-bold text-gray-900 tracking-tight">

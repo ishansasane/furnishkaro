@@ -225,7 +225,7 @@ const OverviewPage = ({
         <div className="flex flex-col bg-white p-6 !rounded-xl shadow-sm">
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6">
             <p className="text-lg md:text-xl font-semibold text-gray-800">Payments</p>
-            <div className="flex flex-row gap-3 mt-3 sm:mt-0">
+            <div className="flex flex-wrap flex-row gap-3 mt-3 sm:mt-0">
               <button
                 onClick={() => { setNavState("Payments"); setAddPayment(true)}}
                 className="text-white bg-blue-600 !rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700 transition"
@@ -264,7 +264,7 @@ const OverviewPage = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Tailor Info */}
         <div className="flex flex-col bg-white p-6 !rounded-xl shadow-sm">
-          <div className="flex flex-row justify-between items-center mb-6">
+          <div className="flex flex-wrap flex-row justify-between items-center mb-6">
             <p className="text-lg md:text-xl font-semibold text-gray-800">Tailor Information</p>
             <button
               onClick={() => setNavState("Tailors")}
@@ -293,7 +293,7 @@ const OverviewPage = ({
             data: salesAssociateArray
           }].map((section, idx) => (
             <div key={idx} className="flex flex-col bg-white p-6 !rounded-xl shadow-sm">
-              <div className="flex flex-row justify-between items-center mb-4">
+              <div className="flex flex-wrap flex-row justify-between items-center mb-4">
                 <p className="text-lg md:text-xl font-semibold text-gray-800">{section.title}</p>
                 <button
                   onClick={() => setNavState("Customer & Project Details")}
@@ -312,7 +312,7 @@ const OverviewPage = ({
 
         {/* Tasks */}
         <div className="flex flex-col bg-white p-6 !rounded-xl shadow-sm">
-          <div className="flex flex-row justify-between items-center mb-6">
+          <div className="flex flex-wrap flex-row justify-between items-center mb-6">
             <p className="text-lg md:text-xl font-semibold text-gray-800">Tasks</p>
             <button
               onClick={addNewTask}
