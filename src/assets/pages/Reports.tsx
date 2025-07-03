@@ -285,7 +285,7 @@ function Reports() {
   const [paidAmount, setPaidAmount] = useState(0);
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
+    <div className="p-6 mt-5 md:!mt-2 bg-gray-100 min-h-screen">
       <h1 className={`text-2xl font-bold mb-6 ${flag ? "hidden" : ""}`}>
         Reports Dashboard
       </h1>
