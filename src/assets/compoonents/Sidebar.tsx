@@ -95,7 +95,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Mobile Top Bar */}
-      <div className="md:hidden p-4 flex items-center justify-between bg-white shadow fixed w-full z-50">
+      <div className="md:hidden p-3 flex items-center justify-between bg-white shadow fixed w-full z-50">
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           className="text-gray-700"
@@ -103,9 +103,9 @@ export default function Sidebar() {
           {mobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
         </button>
         <img
-          src="https://img.logoipsum.com/243.svg"
+          src="https://sheeladecor.free.nf/logo/sheelaDecore.png"
           onClick={() => navigate("/")}
-          className="w-28"
+          className="w-15"
           alt="Logo"
         />
       </div>
