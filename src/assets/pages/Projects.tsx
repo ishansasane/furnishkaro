@@ -387,16 +387,29 @@ const generatePDF = (project: any) => {
   doc.text("Invoice", pageWidth / 2, 18, { align: "center" });
 
   // === COMPANY INFO ===
-  yOffset += 15;
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
-  doc.setTextColor(...secondaryColor);
-  doc.text("Sheela Decor", 15, yOffset);
-  yOffset += 5;
-  doc.text("123 Business Street, City, Country", 15, yOffset);
-  yOffset += 5;
-  doc.text("Email: contact@sheeladecor.com | Phone: +123 456 7890", 15, yOffset);
-  yOffset += 8;
+yOffset += 15;
+
+doc.setFontSize(10);
+doc.setTextColor(...secondaryColor);
+
+// Make SHEELA DECOR bold
+doc.setFont("helvetica", "bold");
+doc.text("SHEELA DECOR", 15, yOffset);
+
+// Reset to normal font for the rest
+doc.setFont("helvetica", "normal");
+
+yOffset += 5;
+doc.text("2, Shivneri Heights, Nagar-Kalyan Road, Ahmednagar - 414001", 15, yOffset);
+
+yOffset += 5;
+doc.text("GSTIN/UIN: 27FOPPS8740H1Z3", 15, yOffset);
+
+yOffset += 5;
+doc.text("Email: sheeladecor@gmail.com | Phone: 9822097512 / 7020870276", 15, yOffset);
+
+yOffset += 8;
+
 
   doc.setDrawColor(...accentColor);
   doc.setLineWidth(0.4);
