@@ -1570,16 +1570,22 @@ const EditProjects = ({
 
   const [filteredTasks, setFilteredTasks] = useState([]);
 
-  useEffect(() => {
-    const filtered = Tasks.filter(
-      (task) => task[5] === projectData.projectName
-    ).filter((task) => {
+useEffect(() => {
+  if (!Array.isArray(Tasks) || Tasks.length === 0 || !projectData?.projectName) {
+    setFilteredTasks([]);  // If no tasks or no project, show empty list
+    return;
+  }
+
+  const filtered = Tasks
+    .filter((task) => task[5] === projectData.projectName)
+    .filter((task) => {
       if (taskFilter === "All Tasks") return true;
       return task[7] === taskFilter;
     });
 
-    setFilteredTasks(filtered);
-  }, [taskFilter, projectData, Tasks]);
+  setFilteredTasks(filtered);
+}, [taskFilter, projectData, Tasks]);
+
 
   const [taskDialogOpen, setTaskDialogOpen] = useState(false);
   const [editing, setediting] = useState<[]>(null);

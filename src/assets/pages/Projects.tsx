@@ -218,10 +218,8 @@ export default function Projects() {
         console.error('Failed to fetch tasks:', error);
       }
     };
-  
-    if (!tasks.length || deleted) {
+
       fetchTasks();
-    }
   }, [dispatch, tasks, deleted]);
   
   // --- Fetch Payments after Projects are available ---
