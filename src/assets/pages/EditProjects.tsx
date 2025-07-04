@@ -1433,7 +1433,8 @@ const handleItemTaxChange = (i: number, tax: string) => {
   const [paymentMode, setPaymentMode] = useState("");
   const [paymentRemarks, setPaymentRemarks] = useState("");
 
-  const [addPayment, setAddPayment] = useState(false);
+  const [addPayment, 
+    setAddPayment] = useState(false);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const fetchPaymentData = async () => {
