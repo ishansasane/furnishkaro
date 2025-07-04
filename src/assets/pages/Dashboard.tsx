@@ -783,10 +783,10 @@ useEffect(() => {
             </Link>
             <button
               onClick={() => setTaskDialog(true)}
-              className="relative overflow-hidden group mb-2 px-4 py-2 text-sm font-medium text-white transition-all duration-300 ease-out !rounded-lg shadow-sm bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 hover:shadow-md"
+              className="relative overflow-hidden group  mb-2 px-4 py-2 text-sm font-medium text-white transition-all duration-300 ease-out !rounded-lg shadow-sm bg-blue-500 "
             >
               {/* Animated background elements */}
-              <span className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"></span>
+             
 
               {/* Button content with icon */}
               <div className="relative flex items-center justify-center space-x-2">
