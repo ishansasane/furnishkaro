@@ -948,75 +948,79 @@ const EditProjects = ({
     return { totalTax, totalAmount };
   };
 
-  const handlequantitychange = (
-    mainIndex: number,
-    index: number,
-    quantity: number
-  ) => {
-    const updatedSelections = [...selections];
-    const areaCol = updatedSelections[mainIndex].areacollection[index];
-    areaCol.measurement.quantity = quantity;
+const handlequantitychange = (
+  mainIndex: number,
+  index: number,
+  quantity: number
+) => {
+  const updatedSelections = [...selections];
+  const areaCol = updatedSelections[mainIndex].areacollection[index];
 
-    const discountRaw =
-      discountType === "cash" ? `${Discount}` : `${Discount}%`;
+  areaCol.measurement.quantity = quantity;
 
-    const isPercent =
-      typeof discountRaw === "string" && discountRaw.toString().includes("%");
-    const discountValue =
-      parseInt(discountRaw.toString().replace("%", "")) || 0;
+  if (!areaCol.quantities) areaCol.quantities = [];
+  if (!areaCol.totalTax) areaCol.totalTax = [];
+  if (!areaCol.totalAmount) areaCol.totalAmount = [];
 
-    if (areaCol.items !== undefined) {
-      if (!areaCol.totalTax) areaCol.totalTax = [];
-      if (!areaCol.totalAmount) areaCol.totalAmount = [];
+  // Step 1: Calculate pre-tax total
+  let preTaxTotal = 0;
+  areaCol.items?.forEach((item, i) => {
+    const itemQty = parseFloat(areaCol.quantities?.[i]) || 0;
+    const itemRate = parseFloat(item[4]) || 0;
+    preTaxTotal += quantity * itemQty * itemRate;
+  });
 
-      // Step 1: Calculate total pre-tax amount for flat discount
-      let preTaxTotal = 0;
-      areaCol.items.forEach((item, i) => {
-        const itemQuantity = parseInt(areaCol.quantities?.[i]) || 0;
-        const itemRate = parseInt(item[4]) || 0;
-        preTaxTotal += quantity * itemQuantity * itemRate;
-      });
+  // Step 2: Calculate effective discount %
+  let effectiveDiscountPercent = 0;
+  if (discountType === "percent") {
+    effectiveDiscountPercent = Discount;
+  } else if (discountType === "cash" && preTaxTotal > 0) {
+    effectiveDiscountPercent = (Discount / preTaxTotal) * 100;
+  }
 
-      const effectiveDiscountPercent = isPercent
-        ? discountValue
-        : preTaxTotal > 0
-        ? (discountValue / preTaxTotal) * 100
-        : 0;
+  // Step 3: Apply discount and tax per item
+  areaCol.items = areaCol.items?.map((item, i) => {
+    const itemQty = parseFloat(areaCol.quantities?.[i]) || 0;
+    const itemRate = parseFloat(item[4]) || 0;
+    const itemTaxPercent = parseFloat(item[5]) || 0;
 
-      // Step 2: Calculate per item with discount + tax
-      const corrected = areaCol.items.map((item, i) => {
-        const itemQuantity = parseInt(areaCol.quantities?.[i]) || 0;
-        const itemRate = parseInt(item[4]) || 0;
-        const itemTaxPercent = parseInt(item[5]) || 0;
+    const baseAmount = quantity * itemQty * itemRate;
+    const discountAmount = (baseAmount * effectiveDiscountPercent) / 100;
+    const discountedAmount = baseAmount - discountAmount;
 
-        const baseAmount = quantity * itemQuantity * itemRate;
-        const discountAmount = (baseAmount * effectiveDiscountPercent) / 100;
-        const discountedAmount = baseAmount - discountAmount;
+    const taxAmount = parseFloat(((discountedAmount * itemTaxPercent) / 100).toFixed(2));
+    const totalAmount = parseFloat((discountedAmount + taxAmount).toFixed(2));
 
-        const taxAmount = parseInt(
-          ((discountedAmount * itemTaxPercent) / 100).toFixed(2)
-        );
-        const totalAmount = parseInt((discountedAmount + taxAmount).toFixed(2));
+    areaCol.totalTax[i] = taxAmount;
+    areaCol.totalAmount[i] = totalAmount;
 
-        areaCol.totalTax[i] = taxAmount;
-        areaCol.totalAmount[i] = totalAmount;
+    return [...item.slice(0, 6), taxAmount, totalAmount];
+  });
 
-        return [...item.slice(0, 6), taxAmount, totalAmount];
-      });
+  setSelections(updatedSelections);
 
-      areaCol.items = corrected;
-    }
+  // Step 4: Calculate accurate subtotal (without tax)
+  const selectionSubtotals = updatedSelections.flatMap(sel =>
+    sel.areacollection.flatMap(col =>
+      col.items?.reduce((acc, itm, idx) => {
+        const areaQty = col.measurement.quantity || 0;
+        const itemQty = parseFloat(col.quantities?.[idx]) || 0;
+        const itemRate = parseFloat(itm[4]) || 0;
+        return acc + areaQty * itemQty * itemRate;
+      }, 0) || 0
+    )
+  );
 
-    setSelections(updatedSelections);
+  const additionalSubtotals = additionalItems.map(item => item.quantity * item.rate);
+  const subtotal = [...selectionSubtotals, ...additionalSubtotals].reduce((a, b) => a + b, 0);
+  setAmount(parseFloat(subtotal.toFixed(2)));  // ✅ Subtotal without tax
 
-    const { totalTax, totalAmount } = recalculateTotals(
-      updatedSelections,
-      additionalItems
-    );
-    setTax(totalTax);
-    setAmount(totalAmount);
-    setGrandTotal(parseInt(totalAmount.toFixed(2))); // ✅ Grand Total = Amount + Tax
-  };
+  // Step 5: Calculate total tax and grand total
+  const { totalTax, totalAmount } = recalculateTotals(updatedSelections, additionalItems);
+  setTax(totalTax);
+  setGrandTotal(parseFloat(totalAmount.toFixed(2)));  // ✅ Grand Total with tax
+};
+
   const handleunitchange = (mainindex: number, index: number, unit) => {
     const updatedSelection = [...selections];
     updatedSelection[mainindex].areacollection[index].measurement.unit = unit;
@@ -1099,59 +1103,70 @@ const EditProjects = ({
     setGrandTotal(grandTotal);
   };
 
-  const handleItemQuantityChange = (i: number, quantity: string) => {
-    const updated = [...additionalItems];
-    const item = updated[i];
+const handleItemQuantityChange = (i: number, quantity: string) => {
+  const updated = [...additionalItems];
+  const item = updated[i];
 
-    const parsedQuantity = parseFloat(quantity) || 0;
-    item.quantity = parsedQuantity;
+  const parsedQuantity = parseFloat(quantity) || 0;
+  item.quantity = parsedQuantity;
 
-    const baseNetRate = parsedQuantity * item.rate;
+  // Step 1: Calculate totalBeforeDiscount using all additional items
+  const totalBeforeDiscount = updated.reduce(
+    (acc, itm) => acc + itm.quantity * itm.rate,
+    0
+  );
 
-    // Step 1: Compute effective discount percentage
-    let effectiveDiscountPercent = 0;
-    if (discountType === "percent") {
-      effectiveDiscountPercent = Discount;
-    } else if (discountType === "cash") {
-      const totalBeforeDiscount = baseNetRate;
-      effectiveDiscountPercent =
-        totalBeforeDiscount > 0 ? (Discount / totalBeforeDiscount) * 100 : 0;
-    }
+  // Step 2: Determine effective discount percentage
+  let effectiveDiscountPercent = 0;
+  if (discountType === "percent") {
+    effectiveDiscountPercent = discount;
+  } else if (discountType === "cash" && totalBeforeDiscount > 0) {
+    effectiveDiscountPercent = (discount / totalBeforeDiscount) * 100;
+  }
 
-    // Step 2: Apply discount to net rate
-    const discountAmount = (baseNetRate * effectiveDiscountPercent) / 100;
-    const discountedNetRate = baseNetRate - discountAmount;
+  // Step 3: Apply discount to this specific item
+  const baseNetRate = parsedQuantity * item.rate;
+  const discountAmount = (baseNetRate * effectiveDiscountPercent) / 100;
+  const discountedNetRate = baseNetRate - discountAmount;
 
-    // Step 3: Tax calculation
-    const taxAmount = parseFloat(
-      ((discountedNetRate * item.tax) / 100).toFixed(2)
-    );
-    const totalAmount = parseFloat((discountedNetRate + taxAmount).toFixed(2));
+  // Step 4: Apply tax on discounted net rate
+  const taxAmount = parseFloat(
+    ((discountedNetRate * item.tax) / 100).toFixed(2)
+  );
+  const totalAmount = parseFloat((discountedNetRate + taxAmount).toFixed(2));
 
-    item.netRate = parseFloat(discountedNetRate.toFixed(2));
-    item.taxAmount = taxAmount;
-    item.totalAmount = totalAmount;
+  item.netRate = parseFloat(discountedNetRate.toFixed(2));
+  item.taxAmount = taxAmount;
+  item.totalAmount = totalAmount;
 
-    setAdditionaItems(updated);
+  updated[i] = item;
 
-    const { totalTax, totalAmount: grandSubtotal } = recalculateTotals(
-      selections,
-      updated
-    );
-    setTax(totalTax);
-    setAmount(grandSubtotal);
+  setAdditionaItems(updated);
 
-    // Optional grand total and discount amount
-    let discountAmt = 0;
-    if (discountType === "percent") {
-      discountAmt = (grandSubtotal * discount) / 100;
-    } else if (discountType === "cash") {
-      discountAmt = discount;
-    }
+  // Step 5: Calculate subtotal (Amount) — this is base price without any tax
+  const selectionSubtotals = selections.flatMap(selection =>
+    selection.areacollection.flatMap(col =>
+      col.items?.reduce((acc, item, idx) => {
+        const areaQty = col.measurement.quantity || 0;
+        const itemQty = parseFloat(col.quantities?.[idx]) || 0;
+        const itemRate = parseFloat(item[4]) || 0;
+        return acc + areaQty * itemQty * itemRate;
+      }, 0) || 0
+    )
+  );
 
-    const grandTotal = parseFloat(grandSubtotal.toFixed(2));
-    setGrandTotal(grandTotal);
-  };
+  const additionalSubtotals = updated.map(itm => itm.quantity * itm.rate);
+
+  const pureSubtotal = [...selectionSubtotals, ...additionalSubtotals]
+    .reduce((acc, val) => acc + val, 0);
+
+  setAmount(parseFloat(pureSubtotal.toFixed(2)));  // ✅ Subtotal without tax
+
+  // Step 6: Recalculate grand total and tax
+  const { totalTax, totalAmount : grandSubtotal } = recalculateTotals(selections, updated);
+  setTax(totalTax);
+  setGrandTotal(parseFloat(grandSubtotal.toFixed(2)));  // ✅ Grand total including tax
+};
 
   const handleAddMiscItem = () => {
     setAdditionaItems((prev) => [
@@ -1170,28 +1185,45 @@ const EditProjects = ({
   };
 
   // Delete item by index
-  const handleDeleteMiscItem = (itemIndex: number) => {
-    const updated = [...additionalItems];
-    updated.splice(itemIndex, 1);
-    setAdditionaItems(updated);
-    // Recalculate totals
-    const { totalTax, totalAmount } = recalculateTotals(selections, updated);
-    setTax(totalTax);
-    setAmount(totalAmount);
+const handleDeleteMiscItem = (itemIndex: number) => {
+  const updated = [...additionalItems];
+  updated.splice(itemIndex, 1);
+  setAdditionaItems(updated);
 
-    // Recalculate discount amount
-    let discountAmt = 0;
+  // Step 1: Recalculate Subtotal (pure base price, no tax)
+  const selectionSubtotals = selections.flatMap(selection =>
+    selection.areacollection.flatMap(col =>
+      col.items?.reduce((acc, item, idx) => {
+        const areaQty = col.measurement.quantity || 0;
+        const itemQty = parseFloat(col.quantities?.[idx]) || 0;
+        const itemRate = parseFloat(item[4]) || 0;
+        return acc + areaQty * itemQty * itemRate;
+      }, 0) || 0
+    )
+  );
 
-    if (discountType === "percent") {
-      discountAmt = parseFloat(((totalAmount * discount) / 100).toFixed(2));
-    } else if (discountType === "cash") {
-      discountAmt = discount;
-    }
+  const additionalSubtotals = updated.map(itm => itm.quantity * itm.rate);
 
-    // Recalculate grand total with updated discount
-    const grandTotal = parseFloat(totalAmount.toFixed(2));
-    setGrandTotal(grandTotal);
-  };
+  const pureSubtotal = [...selectionSubtotals, ...additionalSubtotals]
+    .reduce((acc, val) => acc + val, 0);
+
+  setAmount(parseFloat(pureSubtotal.toFixed(2)));  // ✅ Subtotal without tax
+
+  // Step 2: Recalculate Tax and Total (including tax)
+  const { totalTax, totalAmount } = recalculateTotals(selections, updated);
+  setTax(totalTax);
+
+  // Step 3: Optional: Apply Discount Amount for Display (not used in calculation here)
+  let discountAmt = 0;
+  if (discountType === "percent") {
+    discountAmt = parseFloat(((pureSubtotal * discount) / 100).toFixed(2));
+  } else if (discountType === "cash") {
+    discountAmt = discount;
+  }
+
+  // Step 4: Set Grand Total (already includes discount inside recalculateTotals if you coded it there)
+  setGrandTotal(parseFloat(totalAmount.toFixed(2)));
+};
   const [itemTax, setItemTax] = useState(0);
   const [itemTotal, setItemTotal] = useState(0);
 
@@ -1242,85 +1274,119 @@ const EditProjects = ({
     setItemTotal(parseFloat(totalAmount.toFixed(2)));
   };
 
-  // Update rate and auto-update net rate, tax amount, and total amount
-  const handleItemRateChange = (i: number, rate: string) => {
-    const updated = [...additionalItems];
-    const item = updated[i];
+const handleItemRateChange = (i: number, rate: string) => {
+  const updated = [...additionalItems];
+  const item = updated[i];
 
-    item.rate = parseFloat(rate) || 0;
-    const baseNet = item.quantity * item.rate;
+  item.rate = parseFloat(rate) || 0;
+  const baseNet = item.quantity * item.rate;
 
-    // Step 1: Calculate total before discount (for cash discount % conversion)
-    const totalBeforeDiscount = updated.reduce(
-      (acc, itm) => acc + itm.quantity * itm.rate,
-      0
-    );
+  // Step 1: Calculate total before discount (for cash discount % conversion)
+  const totalBeforeDiscount = updated.reduce(
+    (acc, itm) => acc + itm.quantity * itm.rate,
+    0
+  );
 
-    // Step 2: Determine effective discount %
-    let effectiveDiscountPercent = 0;
-    if (discountType === "percent") {
-      effectiveDiscountPercent = discount;
-    } else if (discountType === "cash" && totalBeforeDiscount > 0) {
-      effectiveDiscountPercent = (discount / totalBeforeDiscount) * 100;
-    }
+  // Step 2: Determine effective discount %
+  let effectiveDiscountPercent = 0;
+  if (discountType === "percent") {
+    effectiveDiscountPercent = discount;
+  } else if (discountType === "cash" && totalBeforeDiscount > 0) {
+    effectiveDiscountPercent = (discount / totalBeforeDiscount) * 100;
+  }
 
-    // Step 3: Apply discount and compute tax
-    const discountAmount = (baseNet * effectiveDiscountPercent) / 100;
-    const discountedNet = baseNet - discountAmount;
+  // Step 3: Apply discount and compute tax
+  const discountAmount = (baseNet * effectiveDiscountPercent) / 100;
+  const discountedNet = baseNet - discountAmount;
 
-    item.netRate = parseFloat(discountedNet.toFixed(2));
-    item.taxAmount = parseFloat(((discountedNet * item.tax) / 100).toFixed(2));
-    item.totalAmount = parseFloat((item.netRate + item.taxAmount).toFixed(2));
+  item.netRate = parseFloat(discountedNet.toFixed(2));
+  item.taxAmount = parseFloat(((discountedNet * item.tax) / 100).toFixed(2));
+  item.totalAmount = parseFloat((item.netRate + item.taxAmount).toFixed(2));
 
-    updated[i] = item;
+  updated[i] = item;
 
-    setAdditionaItems(updated);
+  setAdditionaItems(updated);
 
-    const { totalTax, totalAmount } = recalculateTotals(selections, updated);
-    setTax(totalTax);
-    setAmount(totalAmount);
-    setGrandTotal(parseFloat(totalAmount.toFixed(2))); // ✅ Grand total logic added
-  };
+  // ===== Recalculate Subtotal (Without Tax) =====
+  const selectionSubtotals = selections.flatMap(selection =>
+    selection.areacollection.flatMap(col =>
+      col.items?.reduce((acc, item, idx) => {
+        const areaQty = col.measurement.quantity || 0;
+        const itemQty = parseFloat(col.quantities?.[idx]) || 0;
+        const itemRate = parseFloat(item[4]) || 0;
+        return acc + areaQty * itemQty * itemRate;
+      }, 0) || 0
+    )
+  );
 
-  // Update tax and auto-update tax amount and total amount
-  const handleItemTaxChange = (i: number, tax: string) => {
-    const updated = [...additionalItems];
-    const item = updated[i];
+  const additionalSubtotals = updated.map(itm => itm.quantity * itm.rate);
 
-    item.tax = parseFloat(tax) || 0;
-    const baseNet = item.quantity * item.rate;
+  const subTotalOnly = [...selectionSubtotals, ...additionalSubtotals]
+    .reduce((acc, val) => acc + val, 0);
 
-    // Step 1: Calculate total before discount (for cash discount % conversion)
-    const totalBeforeDiscount = updated.reduce(
-      (acc, itm) => acc + itm.quantity * itm.rate,
-      0
-    );
+  setAmount(parseFloat(subTotalOnly.toFixed(2)));  // ✅ Subtotal without tax
 
-    // Step 2: Determine effective discount %
-    let effectiveDiscountPercent = 0;
-    if (discountType === "percent") {
-      effectiveDiscountPercent = discount;
-    } else if (discountType === "cash" && totalBeforeDiscount > 0) {
-      effectiveDiscountPercent = (discount / totalBeforeDiscount) * 100;
-    }
+  const { totalTax, totalAmount } = recalculateTotals(selections, updated);
+  setTax(totalTax);
+  setGrandTotal(parseFloat(totalAmount.toFixed(2)));  // ✅ Grand total including tax
+};
 
-    // Step 3: Apply discount and compute tax
-    const discountAmount = (baseNet * effectiveDiscountPercent) / 100;
-    const discountedNet = baseNet - discountAmount;
+const handleItemTaxChange = (i: number, tax: string) => {
+  const updated = [...additionalItems];
+  const item = updated[i];
 
-    item.netRate = parseFloat(discountedNet.toFixed(2));
-    item.taxAmount = parseFloat(((discountedNet * item.tax) / 100).toFixed(2));
-    item.totalAmount = parseFloat((item.netRate + item.taxAmount).toFixed(2));
+  item.tax = parseFloat(tax) || 0;
+  const baseNet = item.quantity * item.rate;
 
-    updated[i] = item;
+  // Step 1: Calculate total before discount (for cash discount % conversion)
+  const totalBeforeDiscount = updated.reduce(
+    (acc, itm) => acc + itm.quantity * itm.rate,
+    0
+  );
 
-    setAdditionaItems(updated);
+  // Step 2: Determine effective discount %
+  let effectiveDiscountPercent = 0;
+  if (discountType === "percent") {
+    effectiveDiscountPercent = discount;
+  } else if (discountType === "cash" && totalBeforeDiscount > 0) {
+    effectiveDiscountPercent = (discount / totalBeforeDiscount) * 100;
+  }
 
-    const { totalTax, totalAmount } = recalculateTotals(selections, updated);
-    setTax(totalTax);
-    setAmount(totalAmount);
-    setGrandTotal(parseFloat(totalAmount.toFixed(2))); // ✅ Grand total logic added
-  };
+  // Step 3: Apply discount and compute tax
+  const discountAmount = (baseNet * effectiveDiscountPercent) / 100;
+  const discountedNet = baseNet - discountAmount;
+
+  item.netRate = parseFloat(discountedNet.toFixed(2));
+  item.taxAmount = parseFloat(((discountedNet * item.tax) / 100).toFixed(2));
+  item.totalAmount = parseFloat((item.netRate + item.taxAmount).toFixed(2));
+
+  updated[i] = item;
+
+  setAdditionaItems(updated);
+
+  // ===== Recalculate Subtotal (Without Tax) =====
+  const selectionSubtotals = selections.flatMap(selection =>
+    selection.areacollection.flatMap(col =>
+      col.items?.reduce((acc, item, idx) => {
+        const areaQty = col.measurement.quantity || 0;
+        const itemQty = parseFloat(col.quantities?.[idx]) || 0;
+        const itemRate = parseFloat(item[4]) || 0;
+        return acc + areaQty * itemQty * itemRate;
+      }, 0) || 0
+    )
+  );
+
+  const additionalSubtotals = updated.map(itm => itm.quantity * itm.rate);
+
+  const subTotalOnly = [...selectionSubtotals, ...additionalSubtotals]
+    .reduce((acc, val) => acc + val, 0);
+
+  setAmount(parseFloat(subTotalOnly.toFixed(2)));  // ✅ Subtotal without tax
+
+  const { totalTax, totalAmount } = recalculateTotals(selections, updated);
+  setTax(totalTax);
+  setGrandTotal(parseFloat(totalAmount.toFixed(2)));  // ✅ Grand total including tax
+};
   const handleItemRemarkChange = (i, remark) => {
     const updated = [...additionalItems];
     updated[i].remark = remark;
@@ -1658,100 +1724,122 @@ useEffect(() => {
     }
   };
 
-  const handleDiscountChange = (newDiscount, newDiscountType) => {
-    // --- Update discount state ---
-    setDiscount(newDiscount);
-    setDiscountType(newDiscountType);
+const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
+  setDiscount(newDiscount);
+  setDiscountType(newDiscountType);
 
-    // --- Deep clone selections and additionalItems ---
-    const updatedSelections = JSON.parse(JSON.stringify(selections));
-    const updatedAdditionalItems = JSON.parse(JSON.stringify(additionalItems));
+  const updatedSelections = [...selections];
+  const updatedAdditionalItems = [...additionalItems];
 
-    // === Recalculate Area-Based Items ===
-    updatedSelections.forEach((selection) => {
-      selection.areacollection.forEach((areaCol) => {
-        const quantity = parseFloat(areaCol.measurement.quantity) || 0;
+  let totalBaseAmount = 0;
 
-        if (!Array.isArray(areaCol.totalTax)) areaCol.totalTax = [];
-        if (!Array.isArray(areaCol.totalAmount)) areaCol.totalAmount = [];
+  // === First: Calculate total base (pre-tax, pre-discount) ===
+  updatedSelections.forEach((selection) => {
+    selection.areacollection.forEach((areaCol) => {
+      const areaQuantity = areaCol.measurement.quantity || 0;
 
-        // Calculate pre-tax total
-        let preTaxTotal = 0;
-        areaCol.items?.forEach((item, i) => {
-          const itemQty = parseFloat(areaCol.quantities?.[i]) || 0;
-          const itemRate = parseFloat(item[4]) || 0;
-          preTaxTotal += quantity * itemQty * itemRate;
-        });
+      let areaBase = 0;
+      areaCol.items?.forEach((item, i) => {
+        const itemQty = parseFloat(areaCol.quantities?.[i]) || 0;
+        const itemRate = parseFloat(item[4]) || 0;
+        areaBase += areaQuantity * itemQty * itemRate;
+      });
 
-        const isPercent = newDiscountType === "percent";
-        const effectiveDiscountPercent = isPercent
-          ? parseFloat(newDiscount)
-          : preTaxTotal > 0
-          ? (parseFloat(newDiscount) / preTaxTotal) * 100
-          : 0;
+      areaCol._baseAmount = areaBase; // Store temporarily
+      totalBaseAmount += areaBase;
+    });
+  });
 
-        // Apply discount and calculate tax
-        areaCol.items = areaCol.items?.map((item, i) => {
-          const itemQty = parseFloat(areaCol.quantities?.[i]) || 0;
-          const itemRate = parseFloat(item[4]) || 0;
-          const itemTaxPercent = parseFloat(item[5]) || 0;
+  const additionalBase = updatedAdditionalItems.reduce(
+    (acc, item) => acc + item.quantity * item.rate,
+    0
+  );
 
-          const baseAmount = quantity * itemQty * itemRate;
-          const discountAmount = (baseAmount * effectiveDiscountPercent) / 100;
-          const discountedAmount = baseAmount - discountAmount;
+  totalBaseAmount += additionalBase;
 
-          const taxAmount = parseFloat(
-            ((discountedAmount * itemTaxPercent) / 100).toFixed(2)
-          );
-          const totalAmount = parseFloat(
-            (discountedAmount + taxAmount).toFixed(2)
-          );
+  // === Calculate discount ratio ===
+  const isPercent = newDiscountType === "percent";
+  const discountPercent = isPercent
+    ? newDiscount
+    : totalBaseAmount > 0
+    ? (newDiscount / totalBaseAmount) * 100
+    : 0;
 
-          areaCol.totalTax[i] = taxAmount;
-          areaCol.totalAmount[i] = totalAmount;
+  const discountRatio = discountPercent / 100;
 
-          return [...item.slice(0, 6), taxAmount, totalAmount];
-        });
+  // === Apply to Selections ===
+  updatedSelections.forEach((selection) => {
+    selection.areacollection.forEach((areaCol) => {
+      const areaQuantity = areaCol.measurement.quantity || 0;
+      const areaBase = areaCol._baseAmount || 0;
+
+      if (!areaCol.totalTax) areaCol.totalTax = [];
+      if (!areaCol.totalAmount) areaCol.totalAmount = [];
+
+      areaCol.items = areaCol.items?.map((item, i) => {
+        const itemQty = parseFloat(areaCol.quantities?.[i]) || 0;
+        const itemRate = parseFloat(item[4]) || 0;
+        const itemTaxPercent = parseFloat(item[5]) || 0;
+
+        const baseAmount = areaQuantity * itemQty * itemRate;
+
+        const itemDiscount = baseAmount * discountRatio;
+        const discountedAmount = baseAmount - itemDiscount;
+
+        const taxAmount = parseFloat(((discountedAmount * itemTaxPercent) / 100).toFixed(2));
+        const totalAmount = parseFloat((discountedAmount + taxAmount).toFixed(2));
+
+        areaCol.totalTax[i] = taxAmount;
+        areaCol.totalAmount[i] = totalAmount;
+
+        return [...item.slice(0, 6), taxAmount, totalAmount];
       });
     });
+  });
 
-    // === Recalculate Additional Items ===
-    const totalBeforeDiscount = updatedAdditionalItems.reduce(
-      (acc, item) => acc + item.quantity * item.rate,
-      0
-    );
+  // === Apply to Additional Items ===
+  updatedAdditionalItems.forEach((item) => {
+    const baseNet = item.quantity * item.rate;
+    const itemDiscount = baseNet * discountRatio;
+    const discountedNet = baseNet - itemDiscount;
 
-    const additionalDiscountPercent =
-      newDiscountType === "percent"
-        ? parseFloat(newDiscount)
-        : totalBeforeDiscount > 0
-        ? (parseFloat(newDiscount) / totalBeforeDiscount) * 100
-        : 0;
+    item.netRate = parseFloat(discountedNet.toFixed(2));
+    item.taxAmount = parseFloat(((discountedNet * item.tax) / 100).toFixed(2));
+    item.totalAmount = parseFloat((item.netRate + item.taxAmount).toFixed(2));
+  });
 
-    updatedAdditionalItems.forEach((item) => {
-      const baseNet = item.quantity * item.rate;
-      const discountAmount = (baseNet * additionalDiscountPercent) / 100;
-      const discountedNet = baseNet - discountAmount;
+  // === Final Totals Calculation ===
+  const selectionTaxArray = updatedSelections.flatMap((selection) =>
+    selection.areacollection.flatMap((col) => col.totalTax || [])
+  );
 
-      item.netRate = parseFloat(discountedNet.toFixed(2));
-      item.taxAmount = parseFloat(
-        ((discountedNet * item.tax) / 100).toFixed(2)
-      );
-      item.totalAmount = parseFloat((item.netRate + item.taxAmount).toFixed(2));
-    });
+  const selectionAmountArray = updatedSelections.flatMap((selection) =>
+    selection.areacollection.flatMap((col) => col.totalAmount || [])
+  );
 
-    // === Set Everything ===
-    setSelections(updatedSelections);
-    setAdditionaItems(updatedAdditionalItems);
+  const additionalTaxArray = updatedAdditionalItems.map(
+    (item) => parseFloat(item.taxAmount?.toString()) || 0
+  );
 
-    const { totalTax, totalAmount } = recalculateTotals(
-      updatedSelections,
-      updatedAdditionalItems
-    );
-    setTax(totalTax);
-    setAmount(totalAmount);
-    setGrandTotal(parseFloat(totalAmount.toFixed(2)));
-  };
+  const additionalAmountArray = updatedAdditionalItems.map(
+    (item) => parseFloat(item.totalAmount?.toString()) || 0
+  );
+
+  const totalTax = parseFloat(
+    [...selectionTaxArray, ...additionalTaxArray].reduce((acc, val) => acc + val, 0).toFixed(2)
+  );
+
+  const totalAmount = parseFloat(
+    [...selectionAmountArray, ...additionalAmountArray].reduce((acc, val) => acc + val, 0).toFixed(2)
+  );
+
+  setSelections(updatedSelections);
+  setAdditionaItems(updatedAdditionalItems);
+  setTax(totalTax);
+  setAmount(totalBaseAmount);
+  setGrandTotal(totalAmount);
+  setGrandTotal(parseFloat(totalAmount.toFixed(2)));
+};
 
   const fetchProjectData = async () => {
     const response = await fetchWithLoading(
@@ -1889,6 +1977,67 @@ useEffect(() => {
       alert("Error: Network issue or server not responding");
     }
   };
+
+  const handleMRPChange = (
+  mainIndex: number,
+  collectionIndex: number,
+  value: number,
+  measurementQuantity: number,
+  taxRate: number,
+  qty: number
+) => {
+  const updatedSelections = [...selections];
+  const measurementQty = parseFloat(measurementQuantity.toString() || "0");
+  const newMRP = parseFloat(value.toString() || "0");
+
+  const areaCollection = updatedSelections[mainIndex].areacollection[collectionIndex];
+  areaCollection.items[0][4] = newMRP;
+
+  // Calculate original subtotal (before discount and tax)
+  const subtotal = newMRP * qty;
+
+  // Apply discount
+  let effectiveDiscountPercent = 0;
+  if (discountType === "percent") {
+    effectiveDiscountPercent = discount;
+  } else if (discountType === "cash") {
+    effectiveDiscountPercent = subtotal > 0 ? (discount / subtotal) * 100 : 0;
+  }
+
+  const discountAmount = (subtotal * effectiveDiscountPercent) / 100;
+  const discountedSubtotal = subtotal - discountAmount;
+
+  const taxAmount = (discountedSubtotal * parseFloat(taxRate.toString() || "0")) / 100;
+  const totalWithTax = discountedSubtotal + taxAmount;
+
+  areaCollection.totalTax[0] = parseFloat(taxAmount.toFixed(2));
+  areaCollection.totalAmount[0] = parseFloat(totalWithTax.toFixed(2));
+
+  setSelections(updatedSelections);
+
+  // ===== Recalculate Totals =====
+  const selectionAmountArray = updatedSelections.flatMap(selection =>
+    selection.areacollection.flatMap(col => {
+      return col.items?.reduce((acc, item, idx) => {
+        const itemQty = parseFloat(col.quantities?.[idx]) || 0;
+        const itemRate = parseFloat(item[4]) || 0;
+        const areaQty = col.measurement.quantity || 0;
+        return acc + areaQty * itemQty * itemRate;
+      }, 0) || 0;
+    })
+  );
+
+  const additionalAmountArray = additionalItems.map(item => item.quantity * item.rate);
+
+  const subTotalOnly = [...selectionAmountArray, ...additionalAmountArray]
+    .reduce((acc, val) => acc + val, 0);
+
+  setAmount(parseFloat(subTotalOnly.toFixed(2))); // ✅ This is your subtotal (no tax)
+
+  const { totalTax, totalAmount } = recalculateTotals(updatedSelections, additionalItems);
+  setTax(totalTax);
+  setGrandTotal(totalAmount);  // ✅ This is total including tax
+};
 
   return (
     <div className="p-6">
@@ -2485,7 +2634,7 @@ useEffect(() => {
                 </div>
                 <div className="flex flex-row justify-between w-full text-xs sm:text-sm">
                   <p>Total Amount</p>
-                  <p>{parseFloat(Amount.toFixed(2))}</p>
+                  <p>{grandTotal}</p>
                 </div>
                 <div className="border border-gray-400"></div>
                 <div className="flex justify-between mt-1 w-full text-xs sm:text-sm">
