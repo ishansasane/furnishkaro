@@ -26,6 +26,13 @@ import {
   User,
   Settings2,
   SettingsIcon,
+  PaintBucket,
+  Calendar,
+  PersonStanding,
+  PersonStandingIcon,
+  SwitchCamera,
+  CheckCircle,
+  ReceiptPoundSterling,
 } from "lucide-react";
 import {
   createContext,
@@ -95,7 +102,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Mobile Top Bar */}
-      <div className="md:hidden p-3 flex items-center justify-between bg-white shadow fixed w-full z-50">
+      <div className="md:hidden p-4 flex items-center justify-between bg-white shadow fixed w-full z-50">
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           className="text-gray-700"
@@ -155,25 +162,35 @@ function SidebarContent({
 
   const mastersItems = [
     { text: "Products", path: "/masters/items", icon: <Package size={20} /> },
-    {
-      text: "Product Groups",
-      path: "/masters/product-groups",
-      icon: <Layers size={20} />,
-    },
+    // {
+    //   text: "Product Groups",
+    //   path: "/masters/product-groups",
+    //   icon: <Layers size={20} />,
+    // },
     { text: "Brands", path: "/masters/brands", icon: <Star size={20} /> },
-    {
-      text: "Catalogues",
-      path: "/masters/catalogues",
-      icon: <BookOpen size={20} />,
-    },
+    // {
+    //   text: "Colours",
+    //   path: "/masters/colors",
+    //   icon: <PaintBucket size={20} />,
+    // },
+
     { text: "Interiors", path: "/masters/interiors", icon: <Home size={20} /> },
-    { text: "Tailors", path: "/masters/tailors", icon: <Scissors size={20} /> },
+    // { text: "Tailors", path: "/masters/tailors", icon: <Scissors size={20} /> },
     {
       text: "Sales Associate",
       path: "/masters/sales-associate",
       icon: <UserCheck size={20} />,
     },
-    { text: "Stores", path: "/masters/stores", icon: <Store size={20} /> },
+    {
+      text: "Tasks",
+      path: "/tasks",
+      icon: <CheckCircle size={20} />,
+    },
+    {
+      text: "Reports",
+      path: "/reports",
+      icon: <ReceiptPoundSterling size={20} />,
+    },
   ];
 
   return (
@@ -243,25 +260,37 @@ function SidebarContent({
           </div>
         </li>
 
-        <SidebarItem
+        {/* <SidebarItem
           icon={<ListChecks size={20} />}
           text="Tasks"
           path="/tasks"
           setMobileMenuOpen={setMobileMenuOpen}
-        />
-        <SidebarItem
+        /> */}
+        {/* <SidebarItem
+          icon={<PersonStandingIcon size={20} />}
+          text="Labours"
+          path="/masters/labours"
+          setMobileMenuOpen={setMobileMenuOpen}
+        /> */}
+        {/* <SidebarItem
           icon={<FileText size={20} />}
           text="Reports"
           path="/reports"
           setMobileMenuOpen={setMobileMenuOpen}
-        />
+        /> */}
 
         {/* <SidebarItem
-          icon={<Building2 size={20} />}
-          text="Banks"
-          path="/bank"
+          icon={<Calendar size={20} />}
+          text="Attendance"
+          path="/attendance"
           setMobileMenuOpen={setMobileMenuOpen}
         /> */}
+        <SidebarItem
+          icon={<SwitchCamera size={20} />}
+          text="Stores"
+          path="/masters/stores"
+          setMobileMenuOpen={setMobileMenuOpen}
+        />
         <SidebarItem
           icon={<SettingsIcon size={20} />}
           text="Settings"
@@ -319,8 +348,7 @@ function SidebarContent({
             <button
               onClick={() => {
                 localStorage.clear();
-                window.location.href =
-                  "https://sheeladecor.free.nf/logout.php";
+                window.location.href = "https://sheeladecor.free.nf/logout.php";
               }}
               className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
             >

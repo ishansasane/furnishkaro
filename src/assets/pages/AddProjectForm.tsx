@@ -2169,7 +2169,7 @@ return (
                     />
                   </td>
                   <td className="py-4 px-6 text-sm text-center font-inter">
-                    INR {item.netRate.toFixed(2)}
+                     {item.netRate.toFixed(2)}
                   </td>
                   <td className="py-4 px-6">
                     <input
@@ -2181,10 +2181,10 @@ return (
                     />
                   </td>
                   <td className="py-4 px-6 text-sm text-center font-inter">
-                    INR {item.taxAmount.toFixed(2)}
+                     {item.taxAmount.toFixed(2)}
                   </td>
                   <td className="py-4 px-6 text-sm text-center font-inter">
-                    INR {item.totalAmount.toFixed(2)}
+                     {item.totalAmount.toFixed(2)}
                   </td>
                   <td className="py-4 px-6">
                     <input
@@ -2263,7 +2263,7 @@ return (
                       Net Rate
                     </label>
                     <span className="text-sm font-inter">
-                      INR {item.netRate.toFixed(2)}
+                       {item.netRate.toFixed(2)}
                     </span>
                   </div>
                   <div>
@@ -2283,7 +2283,7 @@ return (
                       Tax Amount
                     </label>
                     <span className="text-sm font-inter">
-                      INR {item.taxAmount.toFixed(2)}
+                       {item.taxAmount.toFixed(2)}
                     </span>
                   </div>
                   <div>
@@ -2291,7 +2291,7 @@ return (
                       Total Amount
                     </label>
                     <span className="text-sm font-inter">
-                      INR {item.totalAmount.toFixed(2)}
+                       {item.totalAmount.toFixed(2)}
                     </span>
                   </div>
                   <div>
@@ -2424,7 +2424,7 @@ return (
                           />
                         </td>
                         <td className="py-4 px-6 text-sm font-inter">
-                          INR{" "}
+                          {" "}
                           {(
                             parseFloat(item[4]) *
                             parseFloat(collection.measurement.quantity || "0") *
@@ -2452,10 +2452,10 @@ return (
                           {item[5] || "0"}%
                         </td> */}
                         <td className="py-4 px-6 text-sm font-inter">
-                          INR {taxAmount}
+                           {taxAmount}
                         </td>
                         <td className="py-4 px-6 text-sm font-inter">
-                          INR {totalAmount}
+                           {totalAmount}
                         </td>
                       </tr>
                     );
@@ -2522,15 +2522,15 @@ return (
           <div className="space-y-4">
             <div className="flex justify-between text-sm">
               <span className="text-gray-700 font-poppins font-medium">Sub Total</span>
-              <span className="font-medium font-inter">INR {amount.toFixed(2)}</span>
+              <span className="font-medium font-inter"> {amount.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-700 font-poppins font-medium">Total Tax Amount</span>
-              <span className="font-medium font-inter">INR {tax.toFixed(2)}</span>
+              <span className="font-medium font-inter"> {tax.toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-700 font-poppins font-medium">Total Amount</span>
-              <span className="font-medium font-inter">INR {grandTotal.toFixed(2)}</span>
+              <span className="font-medium font-inter"> {grandTotal.toFixed(2)}</span>
             </div>
             <hr className="border-gray-200" />
             <div className="flex justify-between items-center">
@@ -2560,7 +2560,7 @@ return (
             <div className="flex justify-between text-sm">
               <span className="text-gray-700 font-poppins font-semibold">Grand Total</span>
               <span className="font-poppins font-bold text-indigo-600 text-lg">
-                INR {grandTotal.toFixed(2)}
+                 {grandTotal.toFixed(2)}
               </span>
             </div>
             <div className="flex gap-3 flex-col">
