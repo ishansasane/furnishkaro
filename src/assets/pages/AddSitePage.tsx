@@ -234,9 +234,9 @@ function AddSitePage() {
             <table className="w-full bg-white">
               <thead>
                 <tr className="bg-indigo-50 text-gray-800 text-sm font-poppins font-semibold">
-                  <th className="py-4 px-6 text-left">Total Value</th>
-                  <th className="py-4 px-6 text-left">Received</th>
-                  <th className="py-4 px-6 text-left">Due</th>
+                  <th className="py-4 px-6 text-left">Total Amount</th>
+                  <th className="py-4 px-6 text-left">Received Amount</th>
+                  <th className="py-4 px-6 text-left">Due Amount</th>
                 </tr>
               </thead>
               <tbody>
@@ -279,7 +279,7 @@ function AddSitePage() {
                 <span className="font-inter">₹{parseFloat(paymentData.totalValue || "0").toFixed(2)}</span>
               </div>
               <div className="flex justify-between mb-3 text-sm">
-                <span className="text-gray-700 font-poppins font-medium">Paid:</span>
+                <span className="text-gray-700 font-poppins font-medium">Received :</span>
                 <span className="font-inter">₹{parseFloat(paymentData.paid || "0").toFixed(2)}</span>
               </div>
               <div className="flex justify-between font-bold text-lg">

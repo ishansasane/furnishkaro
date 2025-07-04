@@ -1666,19 +1666,20 @@ const finalGrandTotal =
   const termsConditions = ["sadsdsad", "Adasdad"];
 
 const generatePDF = () => {
+  const formatAmount = (value: number): string =>
+    value % 1 === 0 ? value.toString() : value.toFixed(2);
+
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
   let yOffset = 20;
 
-  // Colors and fonts
   doc.setFont("helvetica", "normal");
   const primaryColor = [0, 51, 102];
   const secondaryColor = [33, 33, 33];
   const accentColor = [0, 102, 204];
   const lightGray = [245, 245, 245];
 
-  // Header
   doc.setFillColor(...primaryColor);
   doc.rect(0, 0, pageWidth, 30, "F");
   doc.setFillColor(...accentColor);
@@ -1686,9 +1687,8 @@ const generatePDF = () => {
   doc.setFontSize(20);
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
-  doc.text("Quotation", pageWidth / 2, 18, { align: "center" });
+  doc.text("Invoice", pageWidth / 2, 18, { align: "center" });
 
-  // Company Details
   yOffset += 15;
   doc.setFontSize(10);
   doc.setTextColor(...secondaryColor);
@@ -1700,13 +1700,11 @@ const generatePDF = () => {
   doc.text("Email: contact@sheeladecor.com | Phone: +123 456 7890", 15, yOffset);
   yOffset += 8;
 
-  // Divider
   doc.setDrawColor(...accentColor);
   doc.setLineWidth(0.4);
   doc.line(15, yOffset, pageWidth - 15, yOffset);
   yOffset += 8;
 
-  // Project and Customer Details Box
   doc.setFillColor(...lightGray);
   doc.roundedRect(15, yOffset, pageWidth - 30, 25, 2, 2, "F");
   doc.setFontSize(10);
@@ -1726,7 +1724,6 @@ const generatePDF = () => {
   doc.text(`Date: ${projectDate || new Date().toLocaleDateString()}`, 20, yOffset);
   yOffset += 10;
 
-  // Table Data
   const tableData: any[] = [];
   let srNo = 1;
 
@@ -1762,14 +1759,14 @@ const generatePDF = () => {
 
           tableData.push([
             srNo++,
-            `${item[0]} * ${measurementQty}`,
+            `${item[0]} * ${formatAmount(measurementQty)}`,
             size,
-            `INR ${mrp.toFixed(2)}`,
-            qty.toString(),
-            `INR ${subtotal.toFixed(2)}`,
-            `${taxRate.toFixed(2)}%`,
-            `INR ${taxAmount.toFixed(2)}`,
-            `INR ${total.toFixed(2)}`,
+            formatAmount(mrp),
+            formatAmount(qty),
+            formatAmount(subtotal),
+            `${formatAmount(taxRate)}%`,
+            formatAmount(taxAmount),
+            formatAmount(total),
           ]);
         });
       });
@@ -1797,19 +1794,19 @@ const generatePDF = () => {
         srNo++,
         item.name || `Misc Item ${idx + 1}`,
         item.description || item.remark || "N/A",
-        `INR ${rate.toFixed(2)}`,
-        qty.toString(),
-        `INR ${netRate.toFixed(2)}`,
-        `${tax.toFixed(0)}%`,
-        `INR ${taxAmount.toFixed(2)}`,
-        `INR ${totalAmount.toFixed(2)}`,
+        formatAmount(rate),
+        formatAmount(qty),
+        formatAmount(netRate),
+        `${formatAmount(tax)}%`,
+        formatAmount(taxAmount),
+        formatAmount(totalAmount),
       ]);
     });
   }
 
-  // Improved wider table layout
   autoTable(doc, {
     startY: yOffset,
+     margin: { left: 16.5 },
     head: [["Sr. No.", "Item Name", "Description", "Rate", "Qty", "Net Rate", "Tax Rate", "Tax Amount", "Total"]],
     body: tableData.length > 0
       ? tableData
@@ -1817,7 +1814,7 @@ const generatePDF = () => {
     theme: "grid",
     styles: {
       font: "helvetica",
-      fontSize: 7.5,
+      fontSize: 6.5,
       cellPadding: 1.5,
       textColor: secondaryColor,
       lineColor: [200, 200, 200],
@@ -1828,7 +1825,7 @@ const generatePDF = () => {
       fillColor: primaryColor,
       textColor: [255, 255, 255],
       fontStyle: "bold",
-      fontSize: 8,
+      fontSize: 6.5,
       halign: "center",
       cellPadding: 1.5,
     },
@@ -1861,13 +1858,9 @@ const generatePDF = () => {
   const footerHeight = 25;
   const bottomMargin = footerHeight + 10;
 
-  // Smart placement for Summary Box
-  if (tableEndY + summaryBoxHeight + bottomMargin > pageHeight) {
-    doc.addPage();
-    yOffset = 15;
-  } else {
-    yOffset = tableEndY + 10;
-  }
+  yOffset = tableEndY + summaryBoxHeight + bottomMargin > pageHeight
+    ? (doc.addPage(), 15)
+    : tableEndY + 10;
 
   doc.setFillColor(...lightGray);
   doc.roundedRect(pageWidth - 90, yOffset - 5, 75, 50, 2, 2, "F");
@@ -1885,11 +1878,12 @@ const generatePDF = () => {
   const numericTax = Number(tax) || 0;
   const numericDiscount = Number(discount) || 0;
   const summaryItems = [
-    { label: "Total Amount", value: `INR ${numericAmount.toFixed(2)}` },
-    { label: "Discount", value: `INR ${numericDiscount.toFixed(2)}` },
-    { label: "Total Tax", value: `INR ${numericTax.toFixed(2)}` },
-    { label: "Grand Total", value: `INR ${(numericAmount + numericTax - numericDiscount).toFixed(2)}` },
+    { label: "Total Amount", value: `  ${formatAmount(numericAmount)}` },
+    { label: "Discount", value: `  ${formatAmount(numericDiscount)}` },
+    { label: "Total Tax", value: `  ${formatAmount(numericTax)}` },
+    { label: "Grand Total", value: `  ${formatAmount(numericAmount + numericTax - numericDiscount)}` },
   ];
+
   summaryItems.forEach((item) => {
     doc.setFont("helvetica", "bold");
     doc.text(item.label, pageWidth - 85, yOffset);
@@ -1898,7 +1892,6 @@ const generatePDF = () => {
     yOffset += 8;
   });
 
-  // Terms & Conditions
   if (termsAndConditions.trim()) {
     if (yOffset + 30 > pageHeight - footerHeight - 10) {
       doc.addPage();
@@ -1924,7 +1917,6 @@ const generatePDF = () => {
     });
   }
 
-  // Footer only on last page
   const footerY = pageHeight - footerHeight;
   doc.setFillColor(...accentColor);
   doc.rect(0, footerY, pageWidth, 1, "F");
@@ -1937,6 +1929,7 @@ const generatePDF = () => {
 
   doc.save(`Quotation_${projectName || "Project"}_${projectDate || new Date().toLocaleDateString()}.pdf`);
 };
+
 
 
 const handleMRPChange = (
@@ -2148,7 +2141,7 @@ return (
                   <td className="py-4 px-6">
                     <input
                       onChange={(e) => handleItemQuantityChange(i, e.target.value)}
-                      className="w-full border border-gray-200 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+                      className="w-full border border-gray-200 !rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
                       value={item.quantity || ""}
                       type="number"
                       min="0"
@@ -2157,7 +2150,7 @@ return (
                   <td className="py-4 px-6">
                     <input
                       onChange={(e) => handleItemRateChange(i, e.target.value)}
-                      className="w-[80px] border border-gray-200 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+                      className="w-[80px] border border-gray-200 !rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
                       value={item.rate || ""}
                       type="number"
                       min="0"
@@ -2169,7 +2162,7 @@ return (
                   <td className="py-4 px-6">
                     <input
                       onChange={(e) => handleItemTaxChange(i, e.target.value)}
-                      className="w-[80px] border border-gray-200 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+                      className="w-[80px] border border-gray-200 !rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
                       value={item.tax || ""}
                       type="number"
                       min="0"
@@ -2325,7 +2318,7 @@ return (
                 <th className="py-4 px-6">Subtotal</th>
                 <th className="py-4 px-6">Tax Rate(%)</th>
                 <th className="py-4 px-6">Tax Amount</th>
-                 <th className="py-4 px-6">Tax Amount</th>
+                
                 <th className="py-4 px-6">Total</th>
               </tr>
             </thead>
@@ -2374,25 +2367,35 @@ return (
                         </td>
                         <td className="py-4 px-6 text-sm">
                           <input
-                            type="number"
-                            className="w-[140px] border border-gray-200 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-                            value={calculatedMRP}
-                            onChange={(e) =>
-                              handleMRPChange(
-                                mainIndex,
-                                collectionIndex,
-                                e.target.value,
-                                collection.measurement.quantity,
-                                item[5],
-                                qty
-                              )
-                            }
-                          />
+  type="number"
+  className="w-[140px] border border-gray-200 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+  value={calculatedMRP === 0 ? "" : calculatedMRP}
+  onChange={(e) => {
+    let inputValue = e.target.value;
+
+    // Remove leading zeros if more than one digit and not a decimal
+    if (inputValue.length > 1 && inputValue[0] === "0" && inputValue[1] !== ".") {
+      inputValue = inputValue.replace(/^0+/, "");
+    }
+
+    const parsedValue = parseFloat(inputValue || "0");
+
+    handleMRPChange(
+      mainIndex,
+      collectionIndex,
+      parsedValue,
+      collection.measurement.quantity,
+      item[5],
+      qty
+    );
+  }}
+/>
+
                         </td>
-                        <td className="py-4 px-6 text-sm">
+                        <td className="py-4 px-2 text-sm">
                           <input
                             type="number"
-                            className="w-full border border-gray-200 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+                            className="w-full border border-gray-200 !rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
                             value={qty}
                             onChange={(e) =>
                               handleQuantityChange(
@@ -2416,10 +2419,10 @@ return (
                             parseFloat(qty || "0")
                           ).toFixed(2)}
                         </td>
-                        <td className="py-4 px-6 text-sm">
+                        <td className="py-4 px-2 text-sm">
                           <input
                             type="number"
-                            className="w-full border border-gray-200 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+                            className="w-full border border-gray-200 !rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
                             value={item[5]}
                             onChange={(e) =>
                               handleTaxChange(
@@ -2433,9 +2436,9 @@ return (
                             }
                           />
                         </td>
-                        <td className="py-4 px-6 text-sm font-inter">
+                        {/* <td className="py-4 px-6 text-sm font-inter">
                           {item[5] || "0"}%
-                        </td>
+                        </td> */}
                         <td className="py-4 px-6 text-sm font-inter">
                           INR {taxAmount}
                         </td>

@@ -326,29 +326,26 @@ const MaterialSelectionComponent = ({
           className="flex flex-col sm:flex-row items-start sm:items-center gap-2 mb-4"
         >
           <div className="flex flex-col gap-2 w-full">
-            <select
-              className="border border-black opacity-50 p-2 sm:p-3 rounded-lg w-full text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
-              value={currentArea}
-              onChange={(e) => {
-                if (e.target.value === "__add_new__") {
-                  const newArea = prompt("Enter new Area name:");
-                  if (newArea && newArea.trim() !== "") {
-                    addArea(newArea.trim());
-                    handleAreaChange(index, newArea.trim());
-                  }
-                } else {
-                  handleAreaChange(index, e.target.value);
-                }
-              }}
-            >
-              <option value="">Select Area</option>
-              <option value="__add_new__">➕ Add New Space</option>
-              {availableAreas.map((area) => (
-                <option key={area} value={area}>
-                  {area[0]}
-                </option>
-              ))}
-            </select>
+            <SearchableSelect
+  options={[["➕ Add New Space"], ...availableAreas]}
+  value={currentArea}
+  placeholder="Select Area"
+  name="area"
+  mainindex={index}
+  i={0} // since area doesn't have subindex
+  handleProductGroupChange={(mainindex, _, selectedOption) => {
+    if (selectedOption[0] === "➕ Add New Space") {
+      const newArea = prompt("Enter new Area name:");
+      if (newArea && newArea.trim() !== "") {
+        addArea(newArea.trim());
+        handleAreaChange(mainindex, newArea.trim());
+      }
+    } else {
+      handleAreaChange(mainindex, selectedOption[0]);
+    }
+  }}
+/>
+
           </div>
           <button
             className="text-red-500 hover:text-red-700 mt-2 sm:mt-0"

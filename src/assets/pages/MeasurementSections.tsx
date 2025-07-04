@@ -120,7 +120,7 @@ const MeasurementSection: React.FC<MeasurementSectionProps> = ({
                         <p className="text-sm font-poppins font-medium text-gray-700 mb-1">Product Group</p>
                         <input
                           type="text"
-                          className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm bg-gray-50 font-inter"
+                          className="w-full border border-gray-200 !rounded-lg px-2 py-2 text-sm bg-gray-50 font-inter"
                           value={collection.productGroup[0]}
                           readOnly
                         />
@@ -132,7 +132,7 @@ const MeasurementSection: React.FC<MeasurementSectionProps> = ({
                           onChange={(e) =>
                             handleReferenceChange(mainindex, index, e.target.value)
                           }
-                          className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+                          className="w-full border border-gray-200 !rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
                           value={collection.reference}
                           placeholder="Enter reference"
                         />
@@ -143,7 +143,7 @@ const MeasurementSection: React.FC<MeasurementSectionProps> = ({
                           onChange={(e) =>
                             handleunitchange(mainindex, index, e.target.value)
                           }
-                          className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-white"
+                          className="w-full border border-gray-200 !rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-white"
                           value={
                             collection.measurement.unit == undefined
                               ? ""
@@ -165,7 +165,7 @@ const MeasurementSection: React.FC<MeasurementSectionProps> = ({
                             handlewidthchange(mainindex, index, e.target.value)
                           }
                           type="number"
-                          className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+                          className="w-full border border-gray-200 !rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
                           value={collection.measurement.width}
                           placeholder="Enter width"
                         />
@@ -177,7 +177,7 @@ const MeasurementSection: React.FC<MeasurementSectionProps> = ({
                             handleheightchange(mainindex, index, e.target.value)
                           }
                           type="number"
-                          className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+                          className="w-full border border-gray-200 !rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
                           value={collection.measurement.height}
                           placeholder="Enter height"
                         />
@@ -189,7 +189,7 @@ const MeasurementSection: React.FC<MeasurementSectionProps> = ({
                           onChange={(e) =>
                             handlequantitychange(mainindex, index, e.target.value)
                           }
-                          className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+                          className="w-full border border-gray-200 !rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
                           value={collection.measurement.quantity}
                           placeholder="Enter quantity"
                         />

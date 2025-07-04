@@ -6,6 +6,7 @@ import { FaPlus } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { setInteriorData, setSalesAssociateData } from "../Redux/dataSlice";
 import { fetchWithLoading } from "../Redux/fetchWithLoading";
+import Select from "react-select";
 
 const ProjectDetails = ({
   selectedCustomer,
@@ -154,8 +155,8 @@ const ProjectDetails = ({
   };
 
   // Handle sales associate selection
-  const handleSalesAssociateChange = (e) => {
-    const selectedValue = e.target.value;
+  const handleSalesAssociateChange = (selectedOption) => {
+    const selectedValue = selectedOption ? selectedOption.value : "";
     console.log("Selected Sales Associate:", selectedValue);
     console.log("Previous salesAssociateArray:", salesAssociateArray);
     setSalesAssociateArray(selectedValue);
@@ -163,8 +164,8 @@ const ProjectDetails = ({
   };
 
   // Handle interior selection
-  const handleInteriorChange = (e) => {
-    const selectedValue = e.target.value;
+  const handleInteriorChange = (selectedOption) => {
+    const selectedValue = selectedOption ? selectedOption.value : "";
     console.log("Selected Interior:", selectedValue);
     console.log("Previous interiorArray:", interiorArray);
     setInteriorArray(selectedValue);
@@ -179,6 +180,21 @@ const ProjectDetails = ({
   useEffect(() => {
     console.log("interiorArray updated:", interiorArray);
   }, [interiorArray]);
+
+  // Prepare options for react-select
+  const interiorOptions = Array.isArray(interior)
+    ? interior.map((data, index) => ({
+        value: data.name || data[0] || "",
+        label: data.name || data[0] || "Unknown",
+      }))
+    : [];
+
+  const salesAssociateOptions = Array.isArray(salesdata)
+    ? salesdata.map((data, index) => ({
+        value: data.name || data[0] || "",
+        label: data.name || data[0] || "Unknown",
+      }))
+    : [];
 
   return (
     <div className="flex flex-col gap-4 p-6 bg-white !rounded-2xl shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-xl font-inter">
@@ -260,22 +276,52 @@ const ProjectDetails = ({
               Add Interior
             </button>
           </div>
-          <select
-            className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-            value={interiorArray}
+          <Select
+            options={interiorOptions}
+            value={interiorOptions.find(option => option.value === interiorArray) || null}
             onChange={handleInteriorChange}
-          >
-            <option value="" className="text-gray-500">Select Interior Name (optional)</option>
-            {Array.isArray(interior) &&
-              interior.map((data, index) => {
-                const value = data.name || data[0] || "";
-                return (
-                  <option key={index} value={value} className="font-inter">
-                    {value || "Unknown"}
-                  </option>
-                );
-              })}
-          </select>
+            placeholder="Select Interior Name (optional)"
+            className="w-full text-sm font-inter"
+            classNamePrefix="react-select"
+            isClearable
+            isSearchable
+            styles={{
+              control: (provided) => ({
+                ...provided,
+                border: "1px solid #e5e7eb",
+                borderRadius: "0.5rem",
+                padding: "0.5rem",
+                backgroundColor: "#f9fafb",
+                boxShadow: "none",
+                "&:hover": {
+                  borderColor: "#6366f1",
+                },
+                "&:focus": {
+                  borderColor: "#6366f1",
+                  boxShadow: "0 0 0 2px rgba(99, 102, 241, 0.5)",
+                },
+              }),
+              option: (provided, state) => ({
+                ...provided,
+                fontFamily: "'Inter', sans-serif",
+                fontSize: "0.875rem",
+                backgroundColor: state.isSelected ? "#6366f1" : state.isFocused ? "#f3f4f6" : "white",
+                color: state.isSelected ? "white" : "#1f2937",
+                "&:hover": {
+                  backgroundColor: "#f3f4f6",
+                },
+              }),
+              menu: (provided) => ({
+                ...provided,
+                borderRadius: "0.5rem",
+                marginTop: "0.25rem",
+              }),
+              placeholder: (provided) => ({
+                ...provided,
+                color: "#6b7280",
+              }),
+            }}
+          />
         </div>
 
         <div className="flex flex-col w-full sm:w-1/2">
@@ -289,22 +335,52 @@ const ProjectDetails = ({
               Add Sales Associate
             </button>
           </div>
-          <select
-            className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-            value={salesAssociateArray}
+          <Select
+            options={salesAssociateOptions}
+            value={salesAssociateOptions.find(option => option.value === salesAssociateArray) || null}
             onChange={handleSalesAssociateChange}
-          >
-            <option value="" className="text-gray-500">Select Sales Associate (optional)</option>
-            {Array.isArray(salesdata) &&
-              salesdata.map((data, index) => {
-                const value = data.name || data[0] || "";
-                return (
-                  <option key={index} value={value} className="font-inter">
-                    {value || "Unknown"}
-                  </option>
-                );
-              })}
-          </select>
+            placeholder="Select Sales Associate (optional)"
+            className="w-full text-sm font-inter"
+            classNamePrefix="react-select"
+            isClearable
+            isSearchable
+            styles={{
+              control: (provided) => ({
+                ...provided,
+                border: "1px solid #e5e7eb",
+                borderRadius: "0.5rem",
+                padding: "0.5rem",
+                backgroundColor: "#f9fafb",
+                boxShadow: "none",
+                "&:hover": {
+                  borderColor: "#6366f1",
+                },
+                "&:focus": {
+                  borderColor: "#6366f1",
+                  boxShadow: "0 0 0 2px rgba(99, 102, 241, 0.5)",
+                },
+              }),
+              option: (provided, state) => ({
+                ...provided,
+                fontFamily: "'Inter', sans-serif",
+                fontSize: "0.875rem",
+                backgroundColor: state.isSelected ? "#6366f1" : state.isFocused ? "#f3f4f6" : "white",
+                color: state.isSelected ? "white" : "#1f2937",
+                "&:hover": {
+                  backgroundColor: "#f3f4f6",
+                },
+              }),
+              menu: (provided) => ({
+                ...provided,
+                borderRadius: "0.5rem",
+                marginTop: "0.25rem",
+              }),
+              placeholder: (provided) => ({
+                ...provided,
+                color: "#6b7280",
+              }),
+            }}
+          />
         </div>
       </div>
 
@@ -375,11 +451,12 @@ const ProjectDetails = ({
                 Cancel
               </button>
               <button
-                className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-indigo-700 transition-colors duration-200"
-                onClick={handleSubmit}
-              >
-                Save
-              </button>
+  className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-indigo-700 transition-colors duration-200"
+  onClick={handleSubmit}
+>
+  Save
+</button>
+
             </div>
           </div>
         </div>

@@ -373,7 +373,10 @@ const generatePDF = (project: any) => {
   const accentColor = [0, 102, 204];
   const lightGray = [245, 245, 245];
 
-  // Header
+  const formatNumber = (value: number) =>
+    value % 1 === 0 ? value.toString() : value.toFixed(2);
+
+  // === HEADER ===
   doc.setFillColor(...primaryColor);
   doc.rect(0, 0, pageWidth, 30, "F");
   doc.setFillColor(...accentColor);
@@ -381,9 +384,9 @@ const generatePDF = (project: any) => {
   doc.setFontSize(14);
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
-  doc.text("Quotation", pageWidth / 2, 18, { align: "center" });
+  doc.text("Invoice", pageWidth / 2, 18, { align: "center" });
 
-  // Company Details
+  // === COMPANY INFO ===
   yOffset += 15;
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
@@ -395,18 +398,16 @@ const generatePDF = (project: any) => {
   doc.text("Email: contact@sheeladecor.com | Phone: +123 456 7890", 15, yOffset);
   yOffset += 8;
 
-  // Divider
   doc.setDrawColor(...accentColor);
   doc.setLineWidth(0.4);
   doc.line(15, yOffset, pageWidth - 15, yOffset);
   yOffset += 8;
 
-  // Project and Customer Details
+  // === PROJECT & CUSTOMER ===
   const cleanAddress = typeof project.projectAddress === "string"
     ? project.projectAddress.replace(/^"(.*)"$/, '$1')
     : "N/A";
   const addressLines = doc.splitTextToSize(`Address: ${cleanAddress}`, (pageWidth / 2 - 20));
-
   const detailBoxHeight = Math.max(25, 12 + addressLines.length * 5);
   doc.setFillColor(...lightGray);
   doc.roundedRect(15, yOffset, pageWidth - 30, detailBoxHeight, 2, 2, "F");
@@ -416,12 +417,11 @@ const generatePDF = (project: any) => {
   doc.setTextColor(...primaryColor);
   doc.text("Project Details", 20, yOffset + 6);
   doc.text("Customer Details", pageWidth / 2 + 5, yOffset + 6);
-
   yOffset += 12;
+
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
   doc.setTextColor(...secondaryColor);
-
   doc.text(`Project Name: ${project.projectName || "N/A"}`, 20, yOffset);
   doc.text(
     `Customer: ${Array.isArray(project.customerLink) && project.customerLink.length > 0 ? project.customerLink[0] : "N/A"}`,
@@ -438,7 +438,7 @@ const generatePDF = (project: any) => {
   doc.text(`Date: ${project.projectDate || new Date().toLocaleDateString()}`, 20, yOffset);
   yOffset += 10;
 
-  // Quotation Items Table
+  // === QUOTATION TABLE ===
   const tableData: any[] = [];
   let srNo = 1;
 
@@ -457,26 +457,26 @@ const generatePDF = (project: any) => {
           const item = collection.items[0];
           const qty = parseFloat(collection.quantities?.[0]) || 0;
           const measurementQty = parseFloat(collection.measurement?.quantity || "0");
-          const calculatedMRP = (item[4] * measurementQty).toFixed(2);
+          const calculatedMRP = formatNumber(item[4] * measurementQty);
           tableData.push([
             srNo++,
             `${collection.productGroup?.[0] || "N/A"} * ${collection.measurement?.quantity || 0}`,
             collection.measurement?.width && collection.measurement?.height
               ? `${collection.measurement.width}x${collection.measurement.height} ${collection.measurement.unit || ""}`
               : "N/A",
-            `INR ${calculatedMRP}`,
+            ` ${calculatedMRP}`,
             qty.toString(),
-            `INR ${(item[4] * measurementQty * qty).toFixed(2)}`,
+            ` ${formatNumber(item[4] * measurementQty * qty)}`,
             `${item[5] || "0"}%`,
-            `INR ${collection.taxAmount?.[0]?.toFixed(2) || "0.00"}`,
-            `INR ${collection.totalAmount?.[0]?.toFixed(2) || "0.00"}`,
+            ` ${formatNumber(collection.taxAmount?.[0] || 0)}`,
+            ` ${formatNumber(collection.totalAmount?.[0] || 0)}`,
           ]);
         });
       }
     });
   }
 
-  if (Array.isArray(project.additionalItems) && project.additionalItems.length > 0) {
+  if (Array.isArray(project.additionalItems)) {
     tableData.push([
       {
         content: "Miscellaneous Items",
@@ -496,12 +496,12 @@ const generatePDF = (project: any) => {
         srNo++,
         item.name || `Miscellaneous Item ${index + 1}`,
         item.description || item.remark || "N/A",
-        `INR ${rate.toFixed(2)}`,
+        ` ${formatNumber(rate)}`,
         qty.toString(),
-        `INR ${netRate.toFixed(2)}`,
-        `${tax.toFixed(0)}%`,
-        `INR ${taxAmount.toFixed(2)}`,
-        `INR ${totalAmount.toFixed(2)}`,
+        ` ${formatNumber(netRate)}`,
+        `${formatNumber(tax)}%`,
+        ` ${formatNumber(taxAmount)}`,
+        ` ${formatNumber(totalAmount)}`,
       ]);
     });
   }
@@ -519,7 +519,7 @@ const generatePDF = (project: any) => {
     theme: "grid",
     styles: {
       font: "helvetica",
-      fontSize: 9,
+      fontSize: 6.5,
       cellPadding: 1.5,
       textColor: secondaryColor,
       lineColor: [200, 200, 200],
@@ -530,9 +530,8 @@ const generatePDF = (project: any) => {
       fillColor: primaryColor,
       textColor: [255, 255, 255],
       fontStyle: "bold",
-      fontSize: 9,
+      fontSize: 6.5,
       halign: "center",
-      cellPadding: 1.5,
     },
     alternateRowStyles: {
       fillColor: lightGray,
@@ -558,77 +557,70 @@ const generatePDF = (project: any) => {
     },
   });
 
-  // === Smart Summary Placement ===
-  const summaryBoxHeight = 60;
   const tableEndY = (doc as any).lastAutoTable.finalY;
-  const remainingSpace = pageHeight - tableEndY - 20;
+  let yCursor = tableEndY + 10;
 
-  if (remainingSpace < summaryBoxHeight) {
-    doc.addPage();
-    yOffset = 20;
-  } else {
-    yOffset = tableEndY + 10;
-  }
-
+  // ==== Summary Box ====
+  const summaryBoxHeight = 50;
   doc.setFillColor(...lightGray);
-  doc.roundedRect(pageWidth - 90, yOffset - 5, 75, 50, 2, 2, "F");
+  doc.roundedRect(pageWidth - 90, yCursor - 5, 75, summaryBoxHeight, 2, 2, "F");
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...primaryColor);
-  doc.text("Summary", pageWidth - 85, yOffset);
-  yOffset += 8;
+  doc.text("Summary", pageWidth - 85, yCursor);
+  yCursor += 8;
 
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...secondaryColor);
   const summaryItems = [
-    { label: "Total Amount", value: `INR ${(project.totalAmount || 0).toFixed(2)}` },
-    { label: "Discount", value: `INR ${(project.discount || 0).toFixed(2)}` },
-    { label: "Total Tax", value: `INR ${(project.totalTax || 0).toFixed(2)}` },
-    { label: "Grand Total", value: `INR ${(project.totalAmount || 0).toFixed(2)}` },
+    { label: "Total Amount", value: ` ${formatNumber(project.totalAmount || 0)}` },
+    { label: "Discount", value: ` ${formatNumber(project.discount || 0)}` },
+    { label: "Total Tax", value: ` ${formatNumber(project.totalTax || 0)}` },
+    { label: "Grand Total", value: ` ${formatNumber(project.totalAmount || 0)}` },
   ];
   summaryItems.forEach((item) => {
     doc.setFont("helvetica", "bold");
-    doc.text(item.label, pageWidth - 85, yOffset);
+    doc.text(item.label, pageWidth - 85, yCursor);
     doc.setFont("helvetica", "normal");
-    doc.text(item.value, pageWidth - 20, yOffset, { align: "right" });
-    yOffset += 8;
+    doc.text(item.value, pageWidth - 20, yCursor, { align: "right" });
+    yCursor += 8;
   });
 
-  // Terms & Conditions (Skip any standalone date lines)
-  if (typeof project.additionalRequests === "string" && project.additionalRequests.trim()) {
-    if (yOffset + 30 > pageHeight - 50) {
+  // ==== Terms ====
+  const termsText = typeof project.additionalRequests === "string" ? project.additionalRequests.trim() : "";
+  const termsLines = termsText ? doc.splitTextToSize(termsText, pageWidth - 30) : [];
+
+  if (termsLines.length > 0) {
+    if (yCursor + termsLines.length * 5 + 10 > pageHeight - 25) {
       doc.addPage();
-      yOffset = 20;
+      yCursor = 20;
     }
-    yOffset += 5;
     doc.setFont("helvetica", "bold");
     doc.setFontSize(10);
     doc.setTextColor(...primaryColor);
-    doc.text("Terms & Conditions", 15, yOffset);
-    yOffset += 5;
+    doc.text("Terms & Conditions", 15, yCursor);
+    yCursor += 5;
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
     doc.setTextColor(...secondaryColor);
 
-    const terms = doc.splitTextToSize(project.additionalRequests, pageWidth - 30);
     const datePattern = /^\s*\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}\s*$/;
-
-    terms.forEach((term: string) => {
+    termsLines.forEach((term) => {
       if (datePattern.test(term.trim())) return;
-      if (yOffset + 5 > pageHeight - 50) {
+      if (yCursor + 5 > pageHeight - 25) {
         doc.addPage();
-        yOffset = 20;
+        yCursor = 20;
       }
-      doc.text(`• ${term}`, 15, yOffset);
-      yOffset += 5;
+      doc.text(`• ${term}`, 15, yCursor);
+      yCursor += 5;
     });
   }
 
-  // Footer
-  if (yOffset + 20 > pageHeight - 50) {
+  // ==== FOOTER ====
+  if (yCursor + 15 > pageHeight - 10) {
     doc.addPage();
-    yOffset = 20;
+    yCursor = 20;
   }
   doc.setFillColor(...accentColor);
   doc.rect(0, pageHeight - 25, pageWidth, 1, "F");
@@ -643,6 +635,9 @@ const generatePDF = (project: any) => {
   const safeDate = (project.projectDate || new Date().toLocaleDateString()).replace(/[^a-zA-Z0-9]/g, "_");
   doc.save(`Quotation_${safeProjectName}_${safeDate}.pdf`);
 };
+
+
+
 
 
   const [paidAmount, setPaidAmount] = useState(0);

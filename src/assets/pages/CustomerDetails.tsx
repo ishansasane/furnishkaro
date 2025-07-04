@@ -1,5 +1,3 @@
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" />
-
 import React, { useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import AddCustomerDialog from "../compoonents/AddCustomerDialog";
@@ -7,6 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../Redux/store";
 import { setCustomerData } from "../Redux/dataSlice";
 import { fetchWithLoading } from "../Redux/fetchWithLoading";
+import Select from "react-select";
 
 const CustomerDetails = ({
   customers,
@@ -15,13 +14,13 @@ const CustomerDetails = ({
   projectData,
   setCustomers,
 }) => {
-  const handleCustomerChange = (e) => {
-    if (e.target.value === "") {
+  const handleCustomerChange = (option) => {
+    if (!option) {
       setSelectedCustomer(null);
     } else {
-      const customerObj = JSON.parse(e.target.value);
+      const customerObj = JSON.parse(option.value);
       setSelectedCustomer(customerObj);
-      projectData[0] = e.target.value;
+      projectData[0] = option.value;
     }
   };
 
@@ -84,26 +83,20 @@ const CustomerDetails = ({
     if (response.status === 200) {
       const data = await fetchCustomers();
 
-      // 1. Update Redux store
       dispatch(setCustomerData(data));
-
-      // 2. Update local component state
       setCustomers(data);
 
-      // 3. Update localStorage cache
       localStorage.setItem(
         "customerData",
         JSON.stringify({ data, time: Date.now() })
       );
 
-      // 4. Clear form
       setName("");
       setAddress("");
       setMobile("");
       setEmail("");
       setAlternateNumber("");
 
-      // 5. Show success
       alert("Customer added successfully");
     } else {
       alert("Error in adding customer");
@@ -122,7 +115,9 @@ const CustomerDetails = ({
         {/* Select Customer */}
         <div className="flex flex-col md:w-1/2 w-full">
           <div className="flex flex-wrap flex-row gap-4 items-center mb-3">
-            <label className="text-sm font-poppins font-medium text-gray-700">Select Customer</label>
+            <label className="text-sm font-poppins font-medium text-gray-700">
+              Select Customer
+            </label>
             <button
               className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-indigo-700 transition-colors duration-200"
               onClick={() => setIsOpen(true)}
@@ -131,27 +126,78 @@ const CustomerDetails = ({
               Add Customer
             </button>
           </div>
-          <select
-            className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-            value={selectedCustomer ? JSON.stringify(selectedCustomer) : ""}
-            onChange={handleCustomerChange}
-          >
-            <option value="" className="text-gray-500">
-              Select Customer
-            </option>
-            {Array.isArray(customers) &&
-              customers.map((customer, index) => (
-                <option key={index} value={JSON.stringify(customer)} className="font-inter">
-                  {customer[0]}
-                </option>
-              ))}
-          </select>
+
+          <Select
+  className="react-select-container"
+  classNamePrefix="react-select"
+  placeholder="Select Customer"
+  isClearable
+  value={
+    selectedCustomer
+      ? {
+          label: selectedCustomer[0],
+          value: JSON.stringify(selectedCustomer),
+        }
+      : null
+  }
+  options={
+    Array.isArray(customers)
+      ? customers.map((customer) => ({
+          label: customer[0],
+          value: JSON.stringify(customer),
+        }))
+      : []
+  }
+  onChange={handleCustomerChange}
+  styles={{
+    control: (base, state) => ({
+      ...base,
+      backgroundColor: "#f9fafb", // bg-gray-50
+      borderColor: "#e5e7eb", // border-gray-200
+      borderRadius: "0.5rem", // rounded-lg
+      paddingTop: "0.50rem",
+      paddingBottom: "0.50rem",
+      paddingLeft: "0.75rem",
+      paddingRight: "0.75rem",
+      fontSize: "0.875rem", // text-sm
+      fontFamily: "Inter, sans-serif",
+      boxShadow: state.isFocused ? "0 0 0 2px #6366f1" : "none", // ring-indigo-500
+      "&:hover": {
+        borderColor: "#6366f1", // hover focus:border-indigo-500
+      },
+    }),
+    option: (base, state) => ({
+      ...base,
+      fontSize: "0.875rem",
+      fontFamily: "Inter, sans-serif",
+      backgroundColor: state.isFocused ? "#eef2ff" : "#fff", // focus:bg-indigo-100
+      color: state.isFocused ? "#1e40af" : "#111827", // text-indigo-800 or text-gray-900
+      paddingTop: "0.5rem",
+      paddingBottom: "0.5rem",
+      paddingLeft: "0.75rem",
+      paddingRight: "0.75rem",
+    }),
+    singleValue: (base) => ({
+      ...base,
+      fontSize: "0.875rem",
+      fontFamily: "Inter, sans-serif",
+      color: "#374151", // text-gray-700
+    }),
+    menu: (base) => ({
+      ...base,
+      zIndex: 100,
+    }),
+  }}
+/>
+
         </div>
 
         {/* Email Field */}
         {selectedCustomer && (
           <div className="flex flex-col md:w-1/2 w-full">
-            <label className="text-sm font-poppins font-medium text-gray-700 mb-1">Email (optional)</label>
+            <label className="text-sm font-poppins font-medium text-gray-700 mb-1">
+              Email (optional)
+            </label>
             <input
               type="text"
               className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm bg-gray-50 text-gray-600 font-inter"
@@ -166,7 +212,9 @@ const CustomerDetails = ({
       {selectedCustomer && (
         <div className="flex md:flex-row flex-col justify-between gap-4">
           <div className="flex flex-col md:w-1/2 w-full">
-            <label className="text-sm font-poppins font-medium text-gray-700 mb-1">Phone Number</label>
+            <label className="text-sm font-poppins font-medium text-gray-700 mb-1">
+              Phone Number
+            </label>
             <input
               type="text"
               className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm bg-gray-50 text-gray-600 font-inter"
@@ -175,7 +223,9 @@ const CustomerDetails = ({
             />
           </div>
           <div className="flex flex-col md:w-1/2 w-full">
-            <label className="text-sm font-poppins font-medium text-gray-700 mb-1">Alternate Phone Number (optional)</label>
+            <label className="text-sm font-poppins font-medium text-gray-700 mb-1">
+              Alternate Phone Number (optional)
+            </label>
             <input
               type="text"
               className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm bg-gray-50 text-gray-600 font-inter"
@@ -186,10 +236,13 @@ const CustomerDetails = ({
         </div>
       )}
 
+      {/* Add Customer Modal */}
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/60">
           <div className="bg-white w-full max-w-md p-8 !rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300">
-            <h2 className="text-2xl font-poppins font-bold text-gray-900 mb-6 tracking-tight">Add Customer</h2>
+            <h2 className="text-2xl font-poppins font-bold text-gray-900 mb-6 tracking-tight">
+              Add Customer
+            </h2>
             <div className="space-y-4">
               <input
                 className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
