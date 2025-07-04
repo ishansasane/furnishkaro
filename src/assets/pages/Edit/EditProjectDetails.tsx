@@ -217,11 +217,15 @@ const EditProjectDetails = ({
             }
           >
             <option value="">Select Interior Name (optional)</option>
-            {interior.map((data, index) => (
-              <option key={index} value={JSON.stringify(data)}>
-                {data[0]}
-              </option>
-            ))}
+              {interior && interior.length > 0 ? (
+                interior.map((data, index) => (
+                  <option key={index} value={JSON.stringify(data)}>
+                    {data[0]}
+                  </option>
+                ))
+              ) : (
+                <option disabled>No interiors available</option>
+              )}
           </select>
         </div>
 
