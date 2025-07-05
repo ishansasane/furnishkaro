@@ -2481,11 +2481,16 @@ return (
               className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
             >
               <option value="">Select Bank Details</option>
-              {bankData.map((data, index) => (
-                <option key={index} value={data}>
-                  Account Name: {data[0]} - Account Number: {data[1]}
-                </option>
-              ))}
+              {Array.isArray(bankData) && bankData.length > 0 ? (
+                bankData.map((data, index) => (
+                  <option key={index} value={data}>
+                    Account Name: {data?.[0] || "N/A"} - Account Number: {data?.[1] || "N/A"}
+                  </option>
+                ))
+              ) : (
+                <option disabled>No bank accounts available</option>
+              )}
+
             </select>
             <textarea
               placeholder="Bank Details Description"
@@ -2499,11 +2504,16 @@ return (
               className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
             >
               <option value="">Select Terms & Conditions</option>
-              {termData.map((data, index) => (
-                <option key={index} value={data}>
-                  {data[0]}
-                </option>
-              ))}
+{Array.isArray(termData) && termData.length > 0 ? (
+  termData.map((data, index) => (
+    <option key={index} value={data}>
+      {data?.[0] || "N/A"}
+    </option>
+  ))
+) : (
+  <option disabled>No terms available</option>
+)}
+
             </select>
             <textarea
               placeholder="Terms & Conditions Description"

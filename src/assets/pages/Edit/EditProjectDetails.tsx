@@ -251,11 +251,16 @@ const EditProjectDetails = ({
             }
           >
             <option value="">Select Sales Associate (optional)</option>
-            {salesdata.map((data, index) => (
-              <option key={index} value={JSON.stringify(data)}>
-                {data[0]}
-              </option>
-            ))}
+{Array.isArray(salesdata) && salesdata.length > 0 ? (
+  salesdata.map((data, index) => (
+    <option key={index} value={JSON.stringify(data)}>
+      {data[0] || "Unnamed Sales Associate"}
+    </option>
+  ))
+) : (
+  <option disabled>No sales associates available</option>
+)}
+
           </select>
         </div>
       </div>

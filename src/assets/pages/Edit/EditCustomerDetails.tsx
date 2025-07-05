@@ -125,12 +125,16 @@ const EditCustomerDetails = ({
             }}
           >
             <option value="">Select Customer</option>
-            {Array.isArray(customers) &&
-              customers.map((customer, index) => (
-                <option key={index} value={JSON.stringify(customer)}>
-                  {customer[0]}
-                </option>
-              ))}
+{Array.isArray(customers) && customers.length > 0 ? (
+  customers.map((customer, index) => (
+    <option key={index} value={JSON.stringify(customer)}>
+      {customer[0] || "Unnamed Customer"}
+    </option>
+  ))
+) : (
+  <option disabled>No customers available</option>
+)}
+
           </select>
         </div>
 

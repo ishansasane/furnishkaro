@@ -108,11 +108,16 @@ const ProjectDetails = () => {
         <div>
           <select className="border p-2 rounded w-full">
             <option value="">Select Interior Name (optional)</option>
-            {interior.map((data, index) => (
-              <option value="Minimalist" key={index}>
-                {data[0]}
-              </option>
-            ))}
+{Array.isArray(interior) && interior.length > 0 ? (
+  interior.map((data, index) => (
+    <option key={index} value={data[0] || "Minimalist"}>
+      {data[0] || "Minimalist"}
+    </option>
+  ))
+) : (
+  <option disabled>No interiors available</option>
+)}
+
           </select>
         </div>
 

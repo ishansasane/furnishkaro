@@ -34,33 +34,38 @@ const MeasurementSection = () => {
         {/* Left Column: Select Area and Material */}
         <div>
           <h3 className="text-lg font-semibold mb-2">Select Area & Material</h3>
-          {measurements.map((measurement, index) => (
-            <div key={index} className="mb-4 p-4 border rounded-lg bg-gray-50">
-              {/* Select Area */}
-              <select
-                className="border p-2 rounded w-full mb-2"
-                value={measurement.area}
-                onChange={(e) => handleMeasurementChange(index, "area", e.target.value)}
-              >
-                <option value="">Select Area</option>
-                {availableAreas.map((area) => (
-                  <option key={area} value={area}>{area}</option>
-                ))}
-              </select>
+{Array.isArray(measurements) && measurements.length > 0 ? (
+  measurements.map((measurement, index) => (
+    <div key={index} className="mb-4 p-4 border rounded-lg bg-gray-50">
+      {/* Select Area */}
+      <select
+        className="border p-2 rounded w-full mb-2"
+        value={measurement.area}
+        onChange={(e) => handleMeasurementChange(index, "area", e.target.value)}
+      >
+        <option value="">Select Area</option>
+        {availableAreas.map((area) => (
+          <option key={area} value={area}>{area}</option>
+        ))}
+      </select>
 
-              {/* Select Material */}
-              <select
-                className="border p-2 rounded w-full"
-                value={measurement.material}
-                onChange={(e) => handleMeasurementChange(index, "material", e.target.value)}
-              >
-                <option value="">Select Material</option>
-                {availableMaterials.map((material) => (
-                  <option key={material} value={material}>{material}</option>
-                ))}
-              </select>
-            </div>
-          ))}
+      {/* Select Material */}
+      <select
+        className="border p-2 rounded w-full"
+        value={measurement.material}
+        onChange={(e) => handleMeasurementChange(index, "material", e.target.value)}
+      >
+        <option value="">Select Material</option>
+        {availableMaterials.map((material) => (
+          <option key={material} value={material}>{material}</option>
+        ))}
+      </select>
+    </div>
+  ))
+) : (
+  <p className="text-gray-500 italic">No measurements added yet.</p>
+)}
+
         </div>
 
         {/* Right Column: Enter Measurements */}
