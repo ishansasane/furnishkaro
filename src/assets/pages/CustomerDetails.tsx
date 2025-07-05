@@ -238,62 +238,65 @@ const CustomerDetails = ({
 
       {/* Add Customer Modal */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/60">
-          <div className="bg-white w-full max-w-md p-8 !rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300">
-            <h2 className="text-2xl font-poppins font-bold text-gray-900 mb-6 tracking-tight">
-              Add Customer
-            </h2>
-            <div className="space-y-4">
-              <input
-                className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-                placeholder="Name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-              />
-              <input
-                className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-              <input
-                className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-                placeholder="Mobile Number"
-                value={mobile}
-                onChange={(e) => setMobile(e.target.value)}
-              />
-              <input
-                className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-                placeholder="Address"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-              />
-              <input
-                className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-                placeholder="Alternate Number"
-                value={alternateNumber}
-                onChange={(e) => setAlternateNumber(e.target.value)}
-              />
-            </div>
-            <div className="flex justify-end gap-3 mt-6">
-              <button
-                className="px-5 py-2.5 bg-gray-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-gray-700 transition-colors duration-200"
-                onClick={() => {
-                  setIsOpen(false);
-                }}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-indigo-700 transition-colors duration-200"
-                onClick={sendcustomerData}
-              >
-                Save
-              </button>
-            </div>
-          </div>
+  <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/60">
+    <div className="bg-white w-full max-w-md p-8 !rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300">
+      <h2 className="text-2xl font-poppins font-bold text-gray-900 mb-6 tracking-tight">
+        Add Customer
+      </h2>
+      <form onSubmit={(e) => { e.preventDefault(); sendcustomerData(); }}>
+        <div className="space-y-4">
+          <input
+            className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+            placeholder="Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <input
+            className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+            className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+            placeholder="Mobile Number"
+            value={mobile}
+            onChange={(e) => setMobile(e.target.value)}
+          />
+          <input
+            className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+            placeholder="Address"
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+          />
+          <input
+            className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+            placeholder="Alternate Number"
+            value={alternateNumber}
+            onChange={(e) => setAlternateNumber(e.target.value)}
+          />
         </div>
-      )}
+        <div className="flex justify-end gap-3 mt-6">
+          <button
+            type="button"
+            className="px-5 py-2.5 bg-gray-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-gray-700 transition-colors duration-200"
+            onClick={() => {
+              setIsOpen(false);
+            }}
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-indigo-700 transition-colors duration-200"
+          >
+            Save
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+)}
     </div>
   );
 };

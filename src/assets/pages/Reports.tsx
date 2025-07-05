@@ -14,6 +14,17 @@ import BankDetails from "./BankDetails";
 import TermsAndConditions from "./TermsAndConditions";
 import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
+// Utility function to format numbers
+const formatNumber = (num) => {
+  if (num === undefined || num === null) return "0";
+  const number = Number(num);
+  const hasDecimals = number % 1 !== 0;
+  return number.toLocaleString('en-IN', {
+    minimumFractionDigits: hasDecimals ? 2 : 0,
+    maximumFractionDigits: 2,
+  });
+};
+
 function Reports() {
   const dispatch = useDispatch();
 
@@ -125,7 +136,6 @@ function Reports() {
     }
   };
 
-  //////////////////////////////////////////////////////////////////
   const [flag, setFlag] = useState(false);
   const [sendProject, setSendProject] = useState(null);
   const [index, setIndex] = useState(null);
@@ -345,7 +355,7 @@ function Reports() {
 
               {/* Summary */}
               <div className="mb-4 text-lg font-semibold">
-                Total Payments: ₹{totalPaymentAmount.toLocaleString()}
+                Total Payments: ₹{formatNumber(totalPaymentAmount)}
               </div>
 
               {/* Table */}
@@ -364,11 +374,12 @@ function Reports() {
                   <tbody>
                     {filteredPayments.map((pay, idx) => (
                       <tr key={idx} className="border-t">
-                        {pay.map((val, i) => (
-                          <td key={i} className="px-4 py-2">
-                            {val}
-                          </td>
-                        ))}
+                        <td className="px-4 py-2">{pay[0]}</td>
+                        <td className="px-4 py-2">{pay[1]}</td>
+                        <td className="px-4 py-2">₹{formatNumber(parseFloat(pay[2] || 0))}</td>
+                        <td className="px-4 py-2">{pay[3]}</td>
+                        <td className="px-4 py-2">{pay[4]}</td>
+                        <td className="px-4 py-2">{pay[5]}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -381,8 +392,8 @@ function Reports() {
             <>
               {/* Summary */}
               <div className="mb-4 text-lg font-semibold">
-                Total Project Value: ₹{totalProjectValue.toLocaleString()} |
-                Total Advance: ₹{totalAdvance.toLocaleString()}
+                Total Project Value: ₹{formatNumber(totalProjectValue)} |
+                Total Advance: ₹{formatNumber(totalAdvance)}
               </div>
 
               {/* Table */}
@@ -417,11 +428,9 @@ function Reports() {
                           {proj.projectName}
                         </td>
                         <td className="px-4 py-2">{proj.customerLink[0]}</td>
-                        <td className="px-4 py-2">₹{proj.grandTotal}</td>
-                        <td className="px-4 py-2">₹{projectPayments[idx]}</td>
-                        <td className="px-4 py-2">
-                          {proj.grandTotal - projectPayments[idx]}
-                        </td>
+                        <td className="px-4 py-2">₹{formatNumber(proj.grandTotal)}</td>
+                        <td className="px-4 py-2">₹{formatNumber(projectPayments[idx])}</td>
+                        <td className="px-4 py-2">₹{formatNumber(proj.grandTotal - projectPayments[idx])}</td>
                       </tr>
                     ))}
                   </tbody>

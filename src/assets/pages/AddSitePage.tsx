@@ -4,6 +4,19 @@ import React, { useState, useEffect } from "react";
 import CustomerDetails from "./CustomerDetails";
 import ProjectDetails from "./ProjectDetails";
 import { fetchWithLoading } from "../Redux/fetchWithLoading";
+import { useDispatch } from "react-redux";
+import { setPaymentData, setProjects } from "../Redux/dataSlice";
+
+// Utility function to format numbers
+const formatNumber = (num) => {
+  if (num === undefined || num === null) return "0";
+  const number = Number(num);
+  const hasDecimals = number % 1 !== 0;
+  return number.toLocaleString('en-IN', {
+    minimumFractionDigits: hasDecimals ? 2 : 0,
+    maximumFractionDigits: 2,
+  });
+};
 
 function AddSitePage() {
   const [customers, setCustomers] = useState([]);
@@ -19,7 +32,7 @@ function AddSitePage() {
   const [additionalRequests, setAdditionalRequests] = useState("");
   const [projectAddress, setProjectAddress] = useState("");
   const [salesData, setSalesData] = useState([]);
-  const [paymentData, setPaymentData] = useState({
+  const [paymentData, setPayment] = useState({
     totalValue: "",
     paid: "",
     due: 0,
@@ -66,12 +79,22 @@ function AddSitePage() {
     fetchInitialData();
   }, []);
 
+  const fetchPaymentData = async () => {
+    const response = await fetchWithLoading(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/getPayments"
+    );
+    const data = await response.json();
+    return data.message;
+  };
+
+  const dispatch = useDispatch();
+
   useEffect(() => {
     const total = parseFloat(paymentData.totalValue) || 0;
     const paid = parseFloat(paymentData.paid) || 0;
     const due = total - paid;
 
-    setPaymentData((prev) => ({
+    setPayment((prev) => ({
       ...prev,
       due: due > 0 ? due : 0,
     }));
@@ -79,13 +102,101 @@ function AddSitePage() {
 
   const handlePaymentChange = (e) => {
     const { name, value } = e.target;
-    setPaymentData((prev) => ({
+    setPayment((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
 
+  const fetchProjectData = async () => {
+    const response = await fetchWithLoading(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
+      {
+        credentials: "include",
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!data.body || !Array.isArray(data.body)) {
+      throw new Error("Invalid data format: Expected an array in data.body");
+    }
+
+    const parseSafely = (value: any, fallback: any) => {
+      try {
+        return typeof value === "string"
+          ? JSON.parse(value)
+          : value || fallback;
+      } catch (error) {
+        console.warn("Invalid JSON:", value, error);
+        return fallback;
+      }
+    };
+
+    const deepClone = (obj: any) => JSON.parse(JSON.stringify(obj));
+
+    const fixBrokenArray = (input: any): string[] => {
+      if (Array.isArray(input)) return input;
+      if (typeof input !== "string") return [];
+
+      try {
+        const fixed = JSON.parse(input);
+        if (Array.isArray(fixed)) return fixed;
+        return [];
+      } catch {
+        try {
+          const cleaned = input
+            .replace(/^\[|\]$/g, "")
+            .split(",")
+            .map((item: string) => item.trim().replace(/^"+|"+$/g, ""));
+          return cleaned;
+        } catch {
+          return [];
+        }
+      }
+    };
+
+    const projects = data.body.map((row: any[]) => ({
+      projectName: row[0],
+      customerLink: parseSafely(row[1], []),
+      projectReference: row[2] || "",
+      status: row[3] || "",
+      totalAmount: parseFloat(row[4]) || 0,
+      totalTax: parseFloat(row[5]) || 0,
+      paid: parseFloat(row[6]) || 0,
+      discount: parseFloat(row[7]) || 0,
+      createdBy: row[8] || "",
+      allData: deepClone(parseSafely(row[9], [])),
+      projectDate: row[10] || "",
+      additionalRequests: parseSafely(row[11], []),
+      interiorArray: fixBrokenArray(row[12]),
+      salesAssociateArray: fixBrokenArray(row[13]),
+      additionalItems: deepClone(parseSafely(row[14], [])),
+      goodsArray: deepClone(parseSafely(row[15], [])),
+      tailorsArray: deepClone(parseSafely(row[16], [])),
+      projectAddress: row[17],
+      date: row[18],
+      grandTotal: row[19],
+      discountType: row[20],
+      bankDetails: deepClone(parseSafely(row[21], [])),
+      termsConditions: deepClone(parseSafely(row[22], [])),
+    }));
+
+    return projects;
+  };
+
   const handleSaveProjectAndPayment = async () => {
+    const date = new Date();
+    const day = date.getDate(); // Corrected to getDate()
+    const month = date.getMonth() + 1; // Months are zero-based
+    const year = date.getFullYear();
+
+    const newdate = day + "/" + month + "/" + year;
+
     try {
       const amount = parseFloat(paymentData.totalValue || "0");
       const paidAmount = parseFloat(paymentData.paid || "0");
@@ -109,7 +220,7 @@ function AddSitePage() {
         goodsArray: JSON.stringify([]),
         tailorsArray: JSON.stringify([]),
         projectAddress: JSON.stringify(projectAddress),
-        date: new Date().toISOString(),
+        date: newdate,
         grandTotal: amount,
         discountType: "",
         bankDetails: JSON.stringify({}),
@@ -130,6 +241,12 @@ function AddSitePage() {
 
       if (projectResponse.ok) {
         alert("✅ Project saved successfully");
+        const updatedData = await fetchProjectData();
+        dispatch(setProjects(updatedData));
+        localStorage.setItem(
+          "projectData",
+          JSON.stringify({ data: updatedData, time: Date.now() })
+        );
 
         const customerName = selectedCustomer?.Name || "NA";
         const project = projectName || "NA";
@@ -162,6 +279,12 @@ function AddSitePage() {
         );
 
         if (paymentResponse.ok) {
+          const latestPayments = await fetchPaymentData();
+          dispatch(setPaymentData(latestPayments));
+          localStorage.setItem(
+            "paymentData",
+            JSON.stringify({ data: latestPayments, time: Date.now() })
+          );
           alert("✅ Payment Created Successfully");
         } else {
           const errorText = await paymentResponse.text();
@@ -261,9 +384,9 @@ function AddSitePage() {
                       placeholder="Enter received amount"
                     />
                   </td>
-                  <td className="py-4 px-6">
+                <td className="py-4 px-6">
                     <div className={`text-sm font-inter ${paymentData.due > 0 ? "text-red-500" : "text-green-500"}`}>
-                      ₹{paymentData.due.toFixed(2)}
+                      ₹{formatNumber(paymentData.due)}
                     </div>
                   </td>
                 </tr>
@@ -276,16 +399,16 @@ function AddSitePage() {
             <div className="bg-gray-50 p-6 !rounded-lg w-full md:w-80 border border-gray-100">
               <div className="flex justify-between mb-3 text-sm">
                 <span className="text-gray-700 font-poppins font-medium">Total:</span>
-                <span className="font-inter">₹{parseFloat(paymentData.totalValue || "0").toFixed(2)}</span>
+                <span className="font-inter">₹{formatNumber(parseFloat(paymentData.totalValue || "0"))}</span>
               </div>
               <div className="flex justify-between mb-3 text-sm">
-                <span className="text-gray-700 font-poppins font-medium">Received :</span>
-                <span className="font-inter">₹{parseFloat(paymentData.paid || "0").toFixed(2)}</span>
+                <span className="text-gray-700 font-poppins font-medium">Received:</span>
+                <span className="font-inter">₹{formatNumber(parseFloat(paymentData.paid || "0"))}</span>
               </div>
               <div className="flex justify-between font-bold text-lg">
                 <span className="text-gray-700 font-poppins">Balance Due:</span>
                 <span className={`font-poppins ${paymentData.due > 0 ? "text-red-500" : "text-green-500"}`}>
-                  ₹{paymentData.due.toFixed(2)}
+                  ₹{formatNumber(paymentData.due)}
                 </span>
               </div>
             </div>
@@ -296,7 +419,7 @@ function AddSitePage() {
         <div className="flex justify-end">
           <button
             onClick={handleSaveProjectAndPayment}
-            className="px-6 py-3 bg-indigo-600 text-white text-sm font-poppins font-semibold !rounded-lg hover:bg-indigo-700 transition-colors duration-300"
+            className="px-6 py-3 bg-indigo-600 text-white text-sm font-poppins font-semibold !rounded-lg hover:bg-indigo-700 transition-colors duration-200"
           >
             Save Project & Create Payment
           </button>

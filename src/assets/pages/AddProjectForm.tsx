@@ -157,6 +157,21 @@ function AddProjectForm() {
     return data.body;
   };
 
+  useEffect(() => {
+    const loadCustomers = async () => {
+      const response = await fetch(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/getcustomerdata",
+        { credentials: "include" }
+      );
+      const data = await response.json();
+      const parsed = Array.isArray(data.body) ? data.body : [];
+      setCustomers(parsed);
+    };
+
+    loadCustomers();
+  }, []); // fetch only once on mount
+
+
   const fetchCustomers = async () => {
     try {
       const response = await fetchWithLoading(
@@ -789,67 +804,79 @@ const handleQuantityChange = async (
   mainIndex: number,
   collectionIndex: number,
   quantity: string,
-  num1: number, // rate
-  num2: number, // tax %
+  rate: number, // num1
+  taxPercent: number, // num2
   itemIndex: number
 ) => {
   const updatedSelections = [...selections];
   const areaCol = updatedSelections[mainIndex].areacollection[collectionIndex];
 
-  const measurementQty = parseFloat(value) || 0;
-  const itemQty = parseFloat(quantity) || 0;
+  const itemQty = parseFloat(value) || 0; // New quantity from user input
+  const measurementQty = parseFloat(quantity) || 0; // Measurement quantity
 
+  // Ensure quantities array is initialized
   if (!areaCol.quantities) areaCol.quantities = [];
-  areaCol.quantities[itemIndex] = quantity;
+  areaCol.quantities[itemIndex] = itemQty.toString();
+
+  // Ensure measurement object and quantity are valid
+  if (!areaCol.measurement) areaCol.measurement = {};
   areaCol.measurement.quantity = measurementQty;
 
-  // Step 1: Base calculation (no discount, no tax)
-  const baseCost = num1 * measurementQty * itemQty;
+  // Step 1: Calculate Base Cost
+  const baseCost = rate * measurementQty * itemQty;
 
-  // Step 2: Effective discount percentage
+  // Step 2: Calculate Discount
   let effectiveDiscountPercent = 0;
+
   if (discountType === "percent") {
     effectiveDiscountPercent = discount;
   } else if (discountType === "cash" && baseCost > 0) {
-    // Cash discount is proportionally spread
     effectiveDiscountPercent = (discount / baseCost) * 100;
   }
 
   const discountAmount = (baseCost * effectiveDiscountPercent) / 100;
   const discountedCost = baseCost - discountAmount;
 
-  const taxAmount = parseFloat(((discountedCost * num2) / 100).toFixed(2));
+  // Step 3: Calculate Tax
+  const taxAmount = parseFloat(((discountedCost * taxPercent) / 100).toFixed(2));
   const totalWithTax = parseFloat((discountedCost + taxAmount).toFixed(2));
 
+  // Ensure arrays exist
   if (!areaCol.totalTax) areaCol.totalTax = [];
   if (!areaCol.totalAmount) areaCol.totalAmount = [];
 
   areaCol.totalTax[itemIndex] = taxAmount;
   areaCol.totalAmount[itemIndex] = totalWithTax;
 
+  // Step 4: Update state
   setSelections(updatedSelections);
 
-  // Step 3: Recalculate Subtotal (without tax)
-  const selectionSubtotals = updatedSelections.flatMap(selection =>
-    selection.areacollection.flatMap(col =>
+  // Step 5: Calculate subtotal (excluding tax)
+  const selectionSubtotals = updatedSelections.flatMap((selection) =>
+    selection.areacollection.flatMap((col) =>
       col.items?.reduce((acc, item, idx) => {
-        const areaQty = col.measurement.quantity || 0;
-        const itemQuantity = parseFloat(col.quantities?.[idx]) || 0;
+        const areaQty = parseFloat(col.measurement?.quantity || "0");
+        const itemQuantity = parseFloat(col.quantities?.[idx] || "0");
         const itemRate = parseFloat(item[4]) || 0;
         return acc + areaQty * itemQuantity * itemRate;
       }, 0) || 0
     )
   );
 
-  const additionalSubtotals = additionalItems.map(itm => itm.quantity * itm.rate);
-  const pureSubtotal = [...selectionSubtotals, ...additionalSubtotals].reduce((a, b) => a + b, 0);
-  setAmount(parseFloat(pureSubtotal.toFixed(2)));  // ✅ Correct subtotal without tax
+  // Additional Items subtotal
+  const additionalSubtotals = additionalItems.map((itm) =>
+    parseFloat(itm.quantity) * parseFloat(itm.rate)
+  );
 
-  // Step 4: Recalculate Total Tax and Grand Total
+  const pureSubtotal = [...selectionSubtotals, ...additionalSubtotals].reduce((a, b) => a + b, 0);
+  setAmount(parseFloat(pureSubtotal.toFixed(2))); // subtotal without tax
+
+  // Step 6: Recalculate final tax and grand total
   const { totalTax, totalAmount } = recalculateTotals(updatedSelections, additionalItems);
   setTax(totalTax);
   setGrandTotal(parseFloat(totalAmount.toFixed(2)));
 };
+
 
 
   const handleAddMiscItem = () => {
@@ -1674,12 +1701,12 @@ const generatePDF = () => {
   const pageHeight = doc.internal.pageSize.getHeight();
   let yOffset = 20;
 
-  doc.setFont("helvetica", "normal");
   const primaryColor = [0, 51, 102];
   const secondaryColor = [33, 33, 33];
   const accentColor = [0, 102, 204];
   const lightGray = [245, 245, 245];
 
+  doc.setFont("helvetica", "normal");
   doc.setFillColor(...primaryColor);
   doc.rect(0, 0, pageWidth, 30, "F");
   doc.setFillColor(...accentColor);
@@ -1689,29 +1716,21 @@ const generatePDF = () => {
   doc.setFont("helvetica", "bold");
   doc.text("Invoice", pageWidth / 2, 18, { align: "center" });
 
-yOffset += 15;
+  yOffset += 15;
 
-doc.setFontSize(10);
-doc.setTextColor(...secondaryColor);
+  doc.setFontSize(10);
+  doc.setTextColor(...secondaryColor);
+  doc.setFont("helvetica", "bold");
+  doc.text("SHEELA DECOR", 15, yOffset);
+  doc.setFont("helvetica", "normal");
+  yOffset += 5;
+  doc.text("2, Shivneri Heights, Nagar-Kalyan Road, Ahmednagar - 414001", 15, yOffset);
+  yOffset += 5;
+  doc.text("GSTIN/UIN: 27FOPPS8740H1Z3", 15, yOffset);
+  yOffset += 5;
+  doc.text("Email: sheeladecor@gmail.com | Phone: 9822097512 / 7020870276", 15, yOffset);
 
-// Make SHEELA DECOR bold
-doc.setFont("helvetica", "bold");
-doc.text("SHEELA DECOR", 15, yOffset);
-
-// Reset to normal font for the rest
-doc.setFont("helvetica", "normal");
-
-yOffset += 5;
-doc.text("2, Shivneri Heights, Nagar-Kalyan Road, Ahmednagar - 414001", 15, yOffset);
-
-yOffset += 5;
-doc.text("GSTIN/UIN: 27FOPPS8740H1Z3", 15, yOffset);
-
-yOffset += 5;
-doc.text("Email: sheeladecor@gmail.com | Phone: 9822097512 / 7020870276", 15, yOffset);
-
-yOffset += 8;
-
+  yOffset += 8;
   doc.setDrawColor(...accentColor);
   doc.setLineWidth(0.4);
   doc.line(15, yOffset, pageWidth - 15, yOffset);
@@ -1739,6 +1758,10 @@ yOffset += 8;
   const tableData: any[] = [];
   let srNo = 1;
 
+  // Debugging: Log selections and items to verify data
+  console.log("Selections:", JSON.stringify(selections, null, 2));
+  console.log("Items array:", JSON.stringify(items, null, 2));
+
   selections.forEach((selection) => {
     if (selection.areacollection?.length > 0) {
       tableData.push([
@@ -1750,19 +1773,27 @@ yOffset += 8;
       ]);
 
       selection.areacollection.forEach((collection) => {
-        const pg = collection.productGroup;
-        if (!Array.isArray(pg) || pg.length < 2) return;
+        const quantities = collection.quantities || [];
+        const measurementQty = parseFloat(collection.measurement?.quantity || "0");
+        const measurement = collection.measurement || {};
 
-        const relevantPG = pg.slice(1, -2);
-        relevantPG.forEach((pgItem, index) => {
-          const item = items.find((it) => it[0] === pgItem);
-          if (!item) return;
+        // Debugging: Log collection data
+        console.log("Collection productGroup:", collection.productGroup);
+        console.log("Collection items:", collection.items);
 
-          const qty = parseFloat(collection.quantities?.[index]) || 0;
-          const measurementQty = parseFloat(collection.measurement?.quantity || "0");
-          const size = (collection.measurement.width && collection.measurement.height)
-            ? `${collection.measurement.width} x ${collection.measurement.height} ${collection.measurement.unit || ""}`
+        collection.items?.forEach((item, index) => {
+          if (!item || !Array.isArray(item) || !item[0]) {
+            console.warn(`Invalid item at index ${index}:`, item);
+            return;
+          }
+
+          // Use item[0] directly for the product name
+          const productName = item[0]?.trim() || "Unknown Item";
+          const qty = parseFloat(quantities[index]) || 0;
+          const size = (measurement.width && measurement.height)
+            ? `${measurement.width} x ${measurement.height} ${measurement.unit || ""}`
             : "N/A";
+
           const mrp = parseFloat(item[4]) * measurementQty;
           const subtotal = mrp * qty;
           const taxRate = parseFloat(item[5]) || 0;
@@ -1771,7 +1802,7 @@ yOffset += 8;
 
           tableData.push([
             srNo++,
-            `${item[0]} * ${formatAmount(measurementQty)}`,
+            `${productName} * ${formatAmount(measurementQty)}`,
             size,
             formatAmount(mrp),
             formatAmount(qty),
@@ -1785,40 +1816,9 @@ yOffset += 8;
     }
   });
 
-  if (additionalItems.length > 0) {
-    tableData.push([
-      {
-        content: "Miscellaneous Items",
-        colSpan: 9,
-        styles: { fontStyle: "bold", fillColor: accentColor, textColor: [255, 255, 255], fontSize: 9 },
-      },
-    ]);
-
-    additionalItems.forEach((item, idx) => {
-      const qty = parseFloat(item.quantity?.toString()) || 0;
-      const rate = parseFloat(item.rate?.toString()) || 0;
-      const netRate = parseFloat(item.netRate?.toString()) || 0;
-      const tax = parseFloat(item.tax?.toString()) || 0;
-      const taxAmount = parseFloat(item.taxAmount?.toString()) || 0;
-      const totalAmount = parseFloat(item.totalAmount?.toString()) || 0;
-
-      tableData.push([
-        srNo++,
-        item.name || `Misc Item ${idx + 1}`,
-        item.description || item.remark || "N/A",
-        formatAmount(rate),
-        formatAmount(qty),
-        formatAmount(netRate),
-        `${formatAmount(tax)}%`,
-        formatAmount(taxAmount),
-        formatAmount(totalAmount),
-      ]);
-    });
-  }
-
   autoTable(doc, {
     startY: yOffset,
-     margin: { left: 16.5 },
+    margin: { left: 16.5 },
     head: [["Sr. No.", "Item Name", "Description", "Rate", "Qty", "Net Rate", "Tax Rate", "Tax Amount", "Total"]],
     body: tableData.length > 0
       ? tableData
@@ -1943,7 +1943,6 @@ yOffset += 8;
 };
 
 
-
 const handleMRPChange = (
   mainIndex: number,
   collectionIndex: number,
@@ -2006,6 +2005,16 @@ const handleMRPChange = (
 };
 
 
+// Utility function to format numbers
+const formatNumber = (num) => {
+  if (num === undefined || num === null) return "0";
+  const number = Number(num);
+  const hasDecimals = number % 1 !== 0;
+  return number.toLocaleString('en-IN', {
+    minimumFractionDigits: hasDecimals ? 2 : 0,
+    maximumFractionDigits: 2,
+  });
+};
  
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" />
@@ -2110,275 +2119,266 @@ return (
 
       {/* Miscellaneous Section */}
       <div className="mt-8 p-8 bg-white !rounded-2xl border border-gray-100 shadow-lg transition-all duration-300 hover:shadow-xl">
-        <div className="flex flex-wrap justify-between items-center mb-6">
-          <h2 className="text-2xl md:text-3xl font-poppins font-semibold text-gray-900 tracking-tight">
-            Miscellaneous
-          </h2>
-          <button
-            className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm md:text-base font-poppins font-medium !rounded-lg hover:bg-indigo-700 transition-colors duration-300"
-            onClick={handleAddMiscItem}
-          >
-            <FaPlus className="w-4 h-4" />
-            Add Item
-          </button>
-        </div>
-        <div className="overflow-x-auto !rounded-lg border border-gray-100">
-          <table className="w-full bg-white hidden sm:table">
-            <thead>
-              <tr className="bg-indigo-50 text-gray-800 text-sm font-poppins font-semibold">
-                <th className="py-4 px-6 text-center">SR</th>
-                <th className="py-4 px-6">Item Name</th>
-                <th className="py-4 px-6">Quantity</th>
-                <th className="py-4 px-6">Rate</th>
-                <th className="py-4 px-6">Net Rate</th>
-                <th className="py-4 px-6">Tax (%)</th>
-                <th className="py-4 px-6">Tax Amount</th>
-                <th className="py-4 px-6">Total Amount</th>
-                <th className="py-4 px-6">Remark</th>
-                <th className="py-4 px-6 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {additionalItems.map((item, i) => (
-                <tr key={i} className="border-b border-gray-100 hover:bg-indigo-50/50 transition-colors duration-200">
-                  <td className="py-4 px-6 text-center text-sm">{i + 1}</td>
-                  <td className="py-4 px-6">
-                    <input
-                      onChange={(e) => handleItemNameChange(i, e.target.value)}
-                      className="w-[140px] border border-gray-200 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-                      value={item.name || ""}
-                      type="text"
-                    />
-                  </td>
-                  <td className="py-4 px-6">
-                    <input
-                      onChange={(e) => handleItemQuantityChange(i, e.target.value)}
-                      className="w-full border border-gray-200 !rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-                      value={item.quantity || ""}
-                      type="number"
-                      min="0"
-                    />
-                  </td>
-                  <td className="py-4 px-6">
-                    <input
-                      onChange={(e) => handleItemRateChange(i, e.target.value)}
-                      className="w-[80px] border border-gray-200 !rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-                      value={item.rate || ""}
-                      type="number"
-                      min="0"
-                    />
-                  </td>
-                  <td className="py-4 px-6 text-sm text-center font-inter">
-                     {item.netRate.toFixed(2)}
-                  </td>
-                  <td className="py-4 px-6">
-                    <input
-                      onChange={(e) => handleItemTaxChange(i, e.target.value)}
-                      className="w-[80px] border border-gray-200 !rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-                      value={item.tax || ""}
-                      type="number"
-                      min="0"
-                    />
-                  </td>
-                  <td className="py-4 px-6 text-sm text-center font-inter">
-                     {item.taxAmount.toFixed(2)}
-                  </td>
-                  <td className="py-4 px-6 text-sm text-center font-inter">
-                     {item.totalAmount.toFixed(2)}
-                  </td>
-                  <td className="py-4 px-6">
-                    <input
-                      onChange={(e) => handleItemRemarkChange(i, e.target.value)}
-                      className="w-[140px] border border-gray-200 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-                      value={item.remark || ""}
-                      type="text"
-                    />
-                  </td>
-                  <td className="py-4 px-6 text-center">
-                    <button
-                      onClick={() => handleDeleteMiscItem(i)}
-                      className="text-red-500 hover:text-red-600 transition-colors duration-200"
-                    >
-                      <FaTrash className="w-4 h-4" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {/* Mobile View for Miscellaneous */}
-          <div className="sm:hidden flex flex-col gap-6 mt-6">
-            {additionalItems.map((item, i) => (
-              <div
-                key={i}
-                className="bg-white p-6 !rounded-2xl shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-xl"
+  <div className="flex flex-wrap justify-between items-center mb-6">
+    <h2 className="text-2xl md:text-3xl font-poppins font-semibold text-gray-900 tracking-tight">
+      Miscellaneous
+    </h2>
+    <button
+      className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm md:text-base font-poppins font-medium !rounded-lg hover:bg-indigo-700 transition-colors duration-300"
+      onClick={handleAddMiscItem}
+    >
+      <FaPlus className="w-4 h-4" />
+      Add Item
+    </button>
+  </div>
+  <div className="overflow-x-auto !rounded-lg border border-gray-100">
+    <table className="w-full bg-white hidden sm:table">
+      <thead>
+        <tr className="bg-indigo-50 text-gray-800 text-sm font-poppins font-semibold">
+          <th className="py-4 px-6 text-center">SR</th>
+          <th className="py-4 px-6">Item Name</th>
+          <th className="py-4 px-6">Quantity</th>
+          <th className="py-4 px-6">Rate</th>
+          <th className="py-4 px-6">Net Rate</th>
+          <th className="py-4 px-6">Tax (%)</th>
+          <th className="py-4 px-6">Tax Amount</th>
+          <th className="py-4 px-6">Total Amount</th>
+          <th className="py-4 px-6">Remark</th>
+          <th className="py-4 px-6 text-center">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {additionalItems.map((item, i) => (
+          <tr key={i} className="border-b border-gray-100 hover:bg-indigo-50/50 transition-colors duration-200">
+            <td className="py-4 px-6 text-center text-sm">{i + 1}</td>
+            <td className="py-4 px-6">
+              <input
+                onChange={(e) => handleItemNameChange(i, e.target.value)}
+                className="w-[140px] border border-gray-200 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+                value={item.name || ""}
+                type="text"
+              />
+            </td>
+            <td className="py-4 px-6">
+              <input
+                onChange={(e) => handleItemQuantityChange(i, e.target.value)}
+                className="w-full border border-gray-200 !rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+                value={item.quantity || ""}
+                type="number"
+                min="0"
+              />
+            </td>
+            <td className="py-4 px-6">
+              <input
+                onChange={(e) => handleItemRateChange(i, e.target.value)}
+                className="w-[80px] border border-gray-200 !rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+                value={item.rate || ""}
+                type="number"
+                min="0"
+              />
+            </td>
+            <td className="py-4 px-6 text-sm text-center font-inter">
+              {formatNumber(item.netRate)}
+            </td>
+            <td className="py-4 px-6">
+              <input
+                onChange={(e) => handleItemTaxChange(i, e.target.value)}
+                className="w-[80px] border border-gray-200 !rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+                value={item.tax || ""}
+                type="number"
+                min="0"
+              />
+            </td>
+            <td className="py-4 px-6 text-sm text-center font-inter">
+              {formatNumber(item.taxAmount)}
+            </td>
+            <td className="py-4 px-6 text-sm text-center font-inter">
+              {formatNumber(item.totalAmount)}
+            </td>
+            <td className="py-4 px-6">
+              <input
+                onChange={(e) => handleItemRemarkChange(i, e.target.value)}
+                className="w-[140px] border border-gray-200 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+                value={item.remark || ""}
+                type="text"
+              />
+            </td>
+            <td className="py-4 px-6 text-center">
+              <button
+                onClick={() => handleDeleteMiscItem(i)}
+                className="text-red-500 hover:text-red-600 transition-colors duration-200"
               >
-                <div className="flex justify-between items-center mb-4">
-                  <span className="font-poppins font-semibold text-sm">SR: {i + 1}</span>
-                  <button
-                    onClick={() => handleDeleteMiscItem(i)}
-                    className="text-red-500 hover:text-red-600 transition-colors duration-200"
-                  >
-                    <FaTrash className="w-4 h-4" />
-                  </button>
-                </div>
-                <div className="grid grid-cols-1 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 font-poppins">
-                      Item Name
-                    </label>
-                    <input
-                      onChange={(e) => handleItemNameChange(i, e.target.value)}
-                      className="w-full border border-gray-200 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-                      value={item.name || ""}
-                      type="text"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 font-poppins">
-                      Quantity
-                    </label>
-                    <input
-                      onChange={(e) => handleItemQuantityChange(i, e.target.value)}
-                      className="w-full border border-gray-200 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-                      value={item.quantity || ""}
-                      type="number"
-                      min="0"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 font-poppins">
-                      Rate
-                    </label>
-                    <input
-                      onChange={(e) => handleItemRateChange(i, e.target.value)}
-                      className="w-full border border-gray-200 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-                      value={item.rate || ""}
-                      type="number"
-                      min="0"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 font-poppins">
-                      Net Rate
-                    </label>
-                    <span className="text-sm font-inter">
-                       {item.netRate.toFixed(2)}
-                    </span>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 font-poppins">
-                      Tax (%)
-                    </label>
-                    <input
-                      onChange={(e) => handleItemTaxChange(i, e.target.value)}
-                      className="w-full border border-gray-200 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-                      value={item.tax || ""}
-                      type="number"
-                      min="0"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 font-poppins">
+                <FaTrash className="w-4 h-4" />
+              </button>
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    {/* Mobile View for Miscellaneous */}
+    <div className="sm:hidden flex flex-col gap-6 mt-6">
+      {additionalItems.map((item, i) => (
+        <div
+          key={i}
+          className="bg-white p-6 !rounded-2xl shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-xl"
+        >
+          <div className="flex justify-between items-center mb-4">
+            <span className="font-poppins font-semibold text-sm">SR: {i + 1}</span>
+            <button
+              onClick={() => handleDeleteMiscItem(i)}
+              className="text-red-500 hover:text-red-600 transition-colors duration-200"
+            >
+              <FaTrash className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="grid grid-cols-1 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 font-poppins">
+                Item Name
+              </label>
+              <input
+                onChange={(e) => handleItemNameChange(i, e.target.value)}
+                className="w-full border border-gray-200 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+                value={item.name || ""}
+                type="text"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 font-poppins">
+                Quantity
+              </label>
+              <input
+                onChange={(e) => handleItemQuantityChange(i, e.target.value)}
+                className="w-full border border-gray-200 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+                value={item.quantity || ""}
+                type="number"
+                min="0"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 font-poppins">
+                Rate
+              </label>
+              <input
+                onChange={(e) => handleItemRateChange(i, e.target.value)}
+                className="w-full border border-gray-200 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+                value={item.rate || ""}
+                type="number"
+                min="0"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 font-poppins">
+                Net Rate
+              </label>
+              <span className="text-sm font-inter">
+                {formatNumber(item.netRate)}
+              </span>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 font-poppins">
+                Tax (%)
+              </label>
+              <input
+                onChange={(e) => handleItemTaxChange(i, e.target.value)}
+                className="w-full border border-gray-200 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+                value={item.tax || ""}
+                type="number"
+                min="0"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 font-poppins">
                       Tax Amount
                     </label>
-                    <span className="text-sm font-inter">
-                       {item.taxAmount.toFixed(2)}
-                    </span>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 font-poppins">
-                      Total Amount
-                    </label>
-                    <span className="text-sm font-inter">
-                       {item.totalAmount.toFixed(2)}
-                    </span>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 font-poppins">
-                      Remark
-                    </label>
-                    <input
-                      onChange={(e) => handleItemRemarkChange(i, e.target.value)}
-                      className="w-full border border-gray-200 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-                      value={item.remark || ""}
-                      type="text"
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
+              <span className="text-sm font-inter">
+                {formatNumber(item.taxAmount)}
+              </span>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 font-poppins">
+                Total Amount
+              </label>
+              <span className="text-sm font-inter">
+                {formatNumber(item.totalAmount)}
+              </span>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 font-poppins">
+                Remark
+              </label>
+              <input
+                onChange={(e) => handleItemRemarkChange(i, e.target.value)}
+                className="w-full border border Rate-gray-200 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+                value={item.remark || ""}
+                type="text"
+              />
+            </div>
           </div>
         </div>
-      </div>
+      ))}
+    </div>
+  </div>
+</div>
 
       {/* Quotation Section */}
-      <div className="bg-white p-8 !rounded-2xl shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-xl">
-        <h2 className="text-2xl md:text-3xl font-poppins font-semibold text-gray-900 mb-6 tracking-tight pl-0">
-          Quotation
-        </h2>
-        <div className="overflow-x-auto !rounded-lg border border-gray-100">
-          <table className="w-full bg-white min-w-[800px]">
-            <thead>
-              <tr className="bg-indigo-50 text-gray-800 text-sm font-poppins font-semibold">
-                <th className="py-4 px-6 text-center">SR</th>
-                <th className="py-4 px-6">Area</th>
-                <th className="py-4 px-6">Product Name</th>
-                <th className="py-4 px-6">Size</th>
-                <th className="py-4 px-6">MRP</th>
-                <th className="py-4 px-6">Quantity</th>
-                <th className="py-4 px-6">Subtotal</th>
-                <th className="py-4 px-6">Tax Rate(%)</th>
-                <th className="py-4 px-6">Tax Amount</th>
-                
-                <th className="py-4 px-6">Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {selections.flatMap((selection, mainIndex) =>
-                selection.areacollection?.map(
-                  (collection, collectionIndex) => {
-                    const item = collection.items?.[0];
-                    const qty = collection.quantities?.[0] || 0;
-                    if (!item) return null;
+     <div className="bg-white p-8 !rounded-2xl shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-xl">
+  <h2 className="text-2xl md:text-3xl font-poppins font-semibold text-gray-900 mb-6 tracking-tight pl-0">
+    Quotation
+  </h2>
+  <div className="overflow-x-auto !rounded-lg border border-gray-100">
+    <table className="w-full bg-white min-w-[800px]">
+      <thead>
+        <tr className="bg-indigo-50 text-gray-800 text-sm font-poppins font-semibold">
+          <th className="py-4 px-6 text-center">SR</th>
+          <th className="py-4 px-6">Area</th>
+          <th className="py-4 px-6">Product Name</th>
+          <th className="py-4 px-6">Size</th>
+          <th className="py-4 px-6">MRP</th>
+          <th className="py-4 px-6">Quantity</th>
+          <th className="py-4 px-6">Subtotal</th>
+          <th className="py-4 px-6">Tax Rate(%)</th>
+          <th className="py-4 px-6">Tax Amount</th>
+          <th className="py-4 px-6">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {selections.flatMap((selection, mainIndex) =>
+          selection.areacollection?.map(
+            (collection, collectionIndex) => {
+              const item = collection.items?.[0];
+              const qty = collection.quantities?.[0] || 0;
+              if (!item) return null;
 
-                    const calculatedMRP = (
-                      item[4]
-                    );
-                    const subtotal = (
-                      item[4] *
-                      parseFloat(collection.measurement.quantity || 0) *
-                      qty
-                    ).toFixed(2);
-                    const taxAmount =
-                      collection.totalTax?.[0]?.toFixed(2) || "0.00";
-                    const totalAmount =
-                      collection.totalAmount?.[0]?.toFixed(2) || "0.00";
+              const calculatedMRP = item[4];
+              const subtotal = parseFloat(item[4]) * parseFloat(collection.measurement.quantity || "0") * parseFloat(qty || "0");
+              const taxAmount = collection.totalTax?.[0] || 0;
+              const totalAmount = collection.totalAmount?.[0] || 0;
 
-                    return (
-                      <tr
-                        key={`${mainIndex}-${collectionIndex}`}
-                        className="border-b border-gray-100 hover:bg-indigo-50/50 transition-colors duration-200"
-                      >
-                        <td className="py-4 px-6 text-center text-sm font-inter">
-                          {collectionIndex + 1}
-                        </td>
-                        <td className="py-4 px-6 text-sm font-inter">
-                          {selection.area}
-                        </td>
-                        <td className="py-4 px-6 text-sm font-inter">
-                          {collection.productGroup?.[0] || "N/A"}
-                        </td>
-                        <td className="py-4 px-6 text-sm font-inter">
-                          {collection.measurement.width &&
+              return (
+                <tr
+                  key={`${mainIndex}-${collectionIndex}`}
+                  className="border-b border-gray-100 hover:bg-indigo-50/50 transition-colors duration-200"
+                >
+                  <td className="py-4 px-6 text-center text-sm font-inter">
+                    {collectionIndex + 1}
+                  </td>
+                  <td className="py-4 px-6 text-sm font-inter">
+                    {selection.area}
+                  </td>
+                  <td className="py-4 px-6 text-sm font-inter">
+                    {collection.productGroup?.[0] || "N/A"}
+                  </td>
+                  <td className="py-4 px-6 text-sm font-inter">
+                    {collection.measurement.width &&
+                    collection.measurement.height
+                      ? `${collection.measurement.width} x ${
                           collection.measurement.height
-                            ? `${collection.measurement.width} x ${
-                                collection.measurement.height
-                              } ${collection.measurement.unit || ""}`
-                            : "N/A"}
-                        </td>
-                        <td className="py-4 px-6 text-sm">
-                          <input
+                        } ${collection.measurement.unit || ""}`
+                      : "N/A"}
+                  </td>
+                  <td className="py-4 px-6 text-sm">
+                    <input
   type="number"
   className="w-[140px] border border-gray-200 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
   value={calculatedMRP === 0 ? "" : calculatedMRP}
@@ -2402,184 +2402,188 @@ return (
     );
   }}
 />
+                  </td>
+                  <td className="py-4 px-2 text-sm">
+                    <input
+                      type="number"
+                      min="0"
+                      step="any"
+                      className="w-full border border-gray-200 !rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+                      value={qty}
+                      onChange={(e) => {
+                        let value = e.target.value;
 
-                        </td>
-                        <td className="py-4 px-2 text-sm">
-                          <input
-                            type="number"
-                            className="w-full border border-gray-200 !rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-                            value={qty}
-                            onChange={(e) =>
-                              handleQuantityChange(
-                                `${mainIndex}-${collectionIndex}`,
-                                e.target.value,
-                                mainIndex,
-                                collectionIndex,
-                                collection.measurement.quantity,
-                                parseFloat(item[4]),
-                                parseFloat(item[5]),
-                                0
-                              )
-                            }
-                          />
-                        </td>
-                        <td className="py-4 px-6 text-sm font-inter">
-                          {" "}
-                          {(
-                            parseFloat(item[4]) *
-                            parseFloat(collection.measurement.quantity || "0") *
-                            parseFloat(qty || "0")
-                          ).toFixed(2)}
-                        </td>
-                        <td className="py-4 px-2 text-sm">
-                          <input
-                            type="number"
-                            className="w-full border border-gray-200 !rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-                            value={item[5]}
-                            onChange={(e) =>
-                              handleTaxChange(
-                                mainIndex,
-                                collectionIndex,
-                                parseFloat(e.target.value),
-                                item[4],
-                                collection.measurement.quantity,
-                                qty
-                              )
-                            }
-                          />
-                        </td>
-                        {/* <td className="py-4 px-6 text-sm font-inter">
-                          {item[5] || "0"}%
-                        </td> */}
-                        <td className="py-4 px-6 text-sm font-inter">
-                           {taxAmount}
-                        </td>
-                        <td className="py-4 px-6 text-sm font-inter">
-                           {totalAmount}
-                        </td>
-                      </tr>
-                    );
-                  }
-                )
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                        // Optional: Prevent leading zero issues
+                        if (value.length > 1 && value[0] === "0" && value[1] !== ".") {
+                          value = value.replace(/^0+/, "");
+                        }
+
+                        const parsedQty = parseFloat(value) || 0;
+
+                        handleQuantityChange(
+                          `${mainIndex}-${collectionIndex}`,
+                          parsedQty,
+                          mainIndex,
+                          collectionIndex,
+                          parseFloat(collection.measurement?.quantity || "0"),
+                          parseFloat(item[4]),
+                          parseFloat(item[5]),
+                          0
+                        );
+                      }}
+                    />
+                  </td>
+                  <td className="py-4 px-6 text-sm font-inter">
+                    {formatNumber(subtotal)}
+                  </td>
+                  <td className="py-4 px-2 text-sm">
+                    <input
+                      type="number"
+                      className="w-full border border-gray-200 !rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+                      value={item[5]}
+                      onChange={(e) =>
+                        handleTaxChange(
+                          mainIndex,
+                          collectionIndex,
+                          parseFloat(e.target.value),
+                          item[4],
+                          collection.measurement.quantity,
+                          qty
+                        )
+                      }
+                    />
+                  </td>
+                  <td className="py-4 px-6 text-sm font-inter">
+                    {formatNumber(taxAmount)}
+                  </td>
+                  <td className="py-4 px-6 text-sm font-inter">
+                    {formatNumber(totalAmount)}
+                  </td>
+                </tr>
+              );
+            }
+          )
+        )}
+      </tbody>
+    </table>
+  </div>
+</div>
 
       {/* Summary and Bank Details */}
       <div className="flex flex-col md:flex-row gap-8">
-        {/* Bank Details and Terms */}
-        <div className="bg-white p-8 !rounded-2xl shadow-lg border border-gray-100 w-full md:w-1/2 transition-all duration-300 hover:shadow-xl">
-          <h3 className="text-xl font-poppins font-semibold text-gray-900 mb-6 tracking-tight">
-            Bank Details & Terms
-          </h3>
-          <div className="space-y-6">
-            <select
-              value={bank}
-              onChange={(e) => setBank(e.target.value.split(","))}
-              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-            >
-              <option value="">Select Bank Details</option>
-              {bankData.map((data, index) => (
-                <option key={index} value={data}>
-                  Account Name: {data[0]} - Account Number: {data[1]}
-                </option>
-              ))}
-            </select>
-            <textarea
-              placeholder="Bank Details Description"
-              value={`Account Name: ${bank == "NA" ? "" : bank[0]}\nAccount Number: ${bank == "NA" ? "" : bank[1]}\nIFSC code: ${bank == "NA" ? "" : bank[2]}`}
-              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-              rows={4}
-            ></textarea>
-            <select
-              value={terms}
-              onChange={(e) => setTerms(e.target.value.split(","))}
-              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-            >
-              <option value="">Select Terms & Conditions</option>
-              {termData.map((data, index) => (
-                <option key={index} value={data}>
-                  {data[0]}
-                </option>
-              ))}
-            </select>
-            <textarea
-              placeholder="Terms & Conditions Description"
-              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-              rows={4}
-              value={`Terms & Conditions: ${terms == "NA" ? "" : terms[0]}`}
-            ></textarea>
-          </div>
-        </div>
+  {/* Bank Details and Terms */}
+  <div className="bg-white p-8 !rounded-2xl shadow-lg border border-gray-100 w-full md:w-1/2 transition-all duration-300 hover:shadow-xl">
+    <h3 className="text-xl font-poppins font-semibold text-gray-900 mb-6 tracking-tight">
+      Bank Details & Terms
+    </h3>
+    <div className="space-y-6">
+      <select
+        value={bank}
+        onChange={(e) => setBank(e.target.value.split(","))}
+        className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+      >
+        <option value="">Select Bank Details</option>
+        {bankData.map((data, index) => (
+          <option key={index} value={data}>
+            Account Name: {data[0]} - Account Number: {data[1]}
+          </option>
+        ))}
+      </select>
+      <textarea
+        placeholder="Bank Details Description"
+        value={`Account Name: ${bank == "NA" ? "" : bank[0]}\nAccount Number: ${bank == "NA" ? "" : bank[1]}\nIFSC code: ${bank == "NA" ? "" : bank[2]}`}
+        className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+        rows={4}
+      ></textarea>
+      <select
+        value={terms}
+        onChange={(e) => setTerms(e.target.value.split(","))}
+        className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+      >
+        <option value="">Select Terms & Conditions</option>
+        {termData.map((data, index) => (
+          <option key={index} value={data}>
+            {data[0]}
+          </option>
+        ))}
+      </select>
+      <textarea
+        placeholder="Terms & Conditions Description"
+        className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+        rows={4}
+        value={`Terms & Conditions: ${terms == "NA" ? "" : terms[0]}`}
+      ></textarea>
+    </div>
+  </div>
 
-        {/* Summary */}
-        <div className="bg-white p-8 !rounded-2xl shadow-lg border border-gray-100 w-full md:w-1/2 transition-all duration-300 hover:shadow-xl">
-          <h3 className="text-xl font-poppins font-semibold text-gray-900 mb-6 tracking-tight">
-            Summary
-          </h3>
-          <div className="space-y-4">
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-700 font-poppins font-medium">Sub Total</span>
-              <span className="font-medium font-inter"> {amount.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-700 font-poppins font-medium">Total Tax Amount</span>
-              <span className="font-medium font-inter"> {tax.toFixed(2)}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-700 font-poppins font-medium">Total Amount</span>
-              <span className="font-medium font-inter"> {grandTotal.toFixed(2)}</span>
-            </div>
-            <hr className="border-gray-200" />
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-700 font-poppins font-medium">Discount</span>
-              <div className="flex items-center gap-3">
-                <select
-                  onChange={(e) => {
-                    handleDiscountChange(discount, e.target.value);
-                  }}
-                  className="border border-gray-200 !rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-                >
-                  <option value="cash">₹</option>
-                  <option value="percent">%</option>
-                </select>
-                <input
-                  className="w-20 md:w-28 border border-gray-200 !rounded-lg px-4 py-2 text-sm text-right focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-                  value={discount}
-                  onChange={(e) => {
-                    handleDiscountChange(e.target.value, discountType);
-                  }}
-                  type="number"
-                  min="0"
-                />
-              </div>
-            </div>
-            <hr className="border-gray-200" />
-            <div className="flex justify-between text-sm">
-              <span className="text-gray-700 font-poppins font-semibold">Grand Total</span>
-              <span className="font-poppins font-bold text-indigo-600 text-lg">
-                 {grandTotal.toFixed(2)}
-              </span>
-            </div>
-            <div className="flex gap-3 flex-col">
-              <button
-                onClick={sendProjectData}
-                className="w-full bg-indigo-600 text-white py-3 !rounded-lg hover:bg-indigo-700 transition-colors duration-300 text-sm font-poppins font-semibold"
-              >
-                Add Project & Generate Quote
-              </button>
-              <button
-                onClick={generatePDF}
-                className="w-full bg-emerald-600 text-white py-3 !rounded-lg hover:bg-emerald-700 transition-colors duration-300 text-sm font-poppins font-semibold"
-              >
-                Download Quotation PDF
-              </button>
-            </div>
-          </div>
+  {/* Summary */}
+  <div className="bg-white p-8 !rounded-2xl shadow-lg border border-gray-100 w-full md:w-1/2 transition-all duration-300 hover:shadow-xl">
+    <h3 className="text-xl font-poppins font-semibold text-gray-900 mb-6 tracking-tight">
+      Summary
+    </h3>
+    <div className="space-y-4">
+      <div className="flex justify-between text-sm">
+        <span className="text-gray-700 font-poppins font-medium">Sub Total</span>
+        <span className="font-medium font-inter">{formatNumber(amount)}</span>
+      </div>
+      <div className="flex justify-between text-sm">
+        <span className="text-gray-700 font-poppins font-medium">Total Tax Amount</span>
+        <span className="font-medium font-inter">{formatNumber(tax)}</span>
+      </div>
+      <div className="flex justify-between text-sm">
+        <span className="text-gray-700 font-poppins font-medium">Total Amount</span>
+        <span className="font-medium font-inter">{formatNumber(grandTotal)}</span>
+      </div>
+      <hr className="border-gray-200" />
+      <div className="flex justify-between items-center">
+        <span className="text-sm text-gray-700 font-poppins font-medium">Discount</span>
+        <div className="flex items-center gap-3">
+          <select
+            onChange={(e) => {
+              handleDiscountChange(discount, e.target.value);
+            }}
+            className="border border-gray-200 !rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+          >
+            <option value="cash">₹</option>
+            <option value="percent">%</option>
+          </select>
+          <input
+            className="w-20 md:w-28 border border-gray-200 !rounded-lg px-4 py-2 text-sm text-right focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+            value={discount}
+            onChange={(e) => {
+              handleDiscountChange(e.target.value, discountType);
+            }}
+            type="number"
+            min="0"
+          />
         </div>
       </div>
+      <hr className="border-gray-200" />
+      <div className="flex justify-between text-sm">
+        <span className="text-gray-700 font-poppins font-semibold">Grand Total</span>
+        <span className="font-poppins font-bold text-indigo-600 text-lg">
+          {formatNumber(grandTotal)}
+        </span>
+      </div>
+      <div className="flex gap-3 flex-col">
+        <button
+          onClick={sendProjectData}
+          className="w-full bg-indigo-600 text-white py-3 !rounded-lg hover:bg-indigo-700 transition-colors duration-300 text-sm font-poppins font-semibold"
+        >
+          Add Project & Generate Quote
+        </button>
+        <button
+          onClick={generatePDF}
+          className="w-full bg-emerald-600 text-white py-3 !rounded-lg hover:bg-emerald-700 transition-colors duration-300 text-sm font-poppins font-semibold"
+        >
+          Download Quotation PDF
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
     </div>
   </div>
 );

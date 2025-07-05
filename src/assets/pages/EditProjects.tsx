@@ -510,13 +510,7 @@ const EditProjects = ({
         "customerData"
       );
     }, [
-      fetchAndSetData,
-      interiorData.length,
-      items.length,
-      salesAssociateData.length,
-      products.length,
-      catalogueData.length,
-      customerData.length,
+      dispatch
     ]);
   };
 

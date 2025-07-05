@@ -49,7 +49,8 @@ const SearchableSelect = ({
     <div className="relative w-full" ref={dropdownRef}>
       <input
         type="text"
-        value={searchTerm || value}
+        value={isOpen ? searchTerm : value}
+
         onChange={(e) => setSearchTerm(e.target.value)}
         onFocus={() => setIsOpen(true)}
         placeholder={placeholder}
