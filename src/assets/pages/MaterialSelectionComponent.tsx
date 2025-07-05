@@ -328,8 +328,7 @@ const MaterialSelectionComponent = ({
         >
           <div className="flex flex-col gap-2 w-full">
             <SearchableSelect
-options={[["➕ Add New Space"], ...(availableAreas || [])]}
-
+  options={[["➕ Add New Space"], ...availableAreas]}
   value={currentArea}
   placeholder="Select Area"
   name="area"

@@ -31,7 +31,7 @@ function Store() {
           </tr>
         </thead>
         <tbody>
-          <tr className="border-t">
+          {/* <tr className="border-t">
             <td className="p-2">Sheela Decore</td>
             <td className="p-2">
               <button
@@ -43,7 +43,7 @@ function Store() {
                 Switch
               </button>
             </td>
-          </tr>
+          </tr> */}
           <tr className="border-t">
             <td className="p-2">Sahani Paints</td>
             <td className="p-2">

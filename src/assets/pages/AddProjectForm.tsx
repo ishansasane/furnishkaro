@@ -1652,51 +1652,34 @@ const finalGrandTotal =
     fetchAllData();
   }, [dispatch]);
 
-  useEffect(() => {
-    async function getAreas() {
-      try {
-        const cachedData = localStorage.getItem("areasData");
-        const oneHour = 3600 * 1000;
-
-        if (cachedData) {
-          const { data, time } = JSON.parse(cachedData);
-
-          if (Date.now() - time < oneHour) {
-            setAvailableAreas(data);
-            return;
-          } else {
-            localStorage.removeItem("areasData");
-          }
-        }
-
-        const response = await fetchWithLoading(
-          "https://sheeladecor.netlify.app/.netlify/functions/server/getAreas"
-        );
-        const data = await response.json();
-        setAvailableAreas(data.body);
-
-        localStorage.setItem(
-          "areasData",
-          JSON.stringify({ data: data.body, time: Date.now() })
-        );
-      } catch (error) {
-        console.error("Error fetching areas:", error);
-      }
+useEffect(() => {
+  const getAreas = async () => {
+    try {
+      const response = await fetchWithLoading(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/getAreas"
+      );
+      const data = await response.json();
+      setAvailableAreas(data.body || []);  // Even if empty, it's fine
+    } catch (error) {
+      console.error("Error fetching areas:", error);
+      setAvailableAreas([]);  // Optional: set empty array in case of error
     }
+  };
 
-    if (availableAreas.length === 0) {
-      getAreas();
-    }
-  }, []);
+  getAreas();
+}, []);  // Only run once when component mounts
+
 
   const bankDetails = ["123213", "!23123213", "123132"];
   const termsConditions = ["sadsdsad", "Adasdad"];
 
 const generatePDF = () => {
-  const formatNumber = (value: number): string =>
-    value % 1 === 0
-      ? value.toLocaleString("en-IN", { maximumFractionDigits: 0 })
-      : value.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+ const formatNumber = (value: number): string =>
+  Math.round(value).toLocaleString("en-IN", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+
 
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -1738,8 +1721,20 @@ const generatePDF = () => {
   doc.line(15, yOffset, pageWidth - 15, yOffset);
   yOffset += 8;
 
+  // === PROJECT & CUSTOMER DETAILS ===
+  const cleanAddress = typeof projectAddress === "string"
+    ? projectAddress.replace(/^"(.*)"$/, '$1')
+    : "N/A";
+
+  const addressLabel = "Address: ";
+  const addressContentWidth = (pageWidth - 30) / 2 - 10;
+  const addressLines = doc.splitTextToSize(`${addressLabel}${cleanAddress}`, addressContentWidth);
+  const firstAddressLine = addressLines[0] || `${addressLabel}N/A`;
+  const remainingAddressLines = addressLines.slice(1);
+  const detailBoxHeight = Math.max(25, 12 + (remainingAddressLines.length + 2) * 5);
+
   doc.setFillColor(...lightGray);
-  doc.roundedRect(15, yOffset, pageWidth - 30, 25, 2, 2, "F");
+  doc.roundedRect(15, yOffset, pageWidth - 30, detailBoxHeight, 2, 2, "F");
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...primaryColor);
@@ -1752,80 +1747,149 @@ const generatePDF = () => {
   doc.text(`Project Name: ${projectName || "N/A"}`, 20, yOffset);
   doc.text(`Customer: ${selectedCustomer?.name || "N/A"}`, pageWidth / 2 + 5, yOffset);
   yOffset += 5;
-  doc.text(`Address: ${projectAddress || "N/A"}`, pageWidth / 2 + 5, yOffset);
-  yOffset += 5;
   doc.text(`Date: ${projectDate || new Date().toLocaleDateString()}`, 20, yOffset);
-  yOffset += 10;
+  doc.text(firstAddressLine, pageWidth / 2 + 5, yOffset);
+  yOffset += 5;
+
+  remainingAddressLines.forEach((line: string) => {
+    doc.text(line, pageWidth / 2 + 5, yOffset);
+    yOffset += 5;
+  });
+
+  yOffset += 5;
 
   const tableData: any[] = [];
   let srNo = 1;
 
   selections.forEach((selection) => {
-    if (selection.areacollection?.length > 0) {
+    const areaName = selection.area || "Unnamed Area";
+
+    // Always push the area name row
+    tableData.push([
+      {
+        content: areaName,
+        colSpan: 9,
+        styles: {
+          fontStyle: "bold",
+          fontSize: 9,
+          fillColor: accentColor,
+          textColor: [255, 255, 255],
+          halign: "left",
+        },
+      },
+    ]);
+
+    let addedItem = false;
+
+    (selection.areacollection || []).forEach((collection) => {
+      const pg = Array.isArray(collection.productGroup)
+        ? collection.productGroup.map((name: string) => name?.trim()).filter((name) => name && name !== "undefined" && name !== "null")
+        : [];
+
+      const quantities = Array.isArray(collection.quantities) ? collection.quantities : [];
+      const measurementQty = parseFloat(collection.measurement?.quantity || "0");
+      const measurement = collection.measurement || {};
+
+      pg.forEach((productName: string, index: number) => {
+        if (index >= quantities.length || index >= (collection.items?.length || 0)) return;
+
+        const matchedItem = collection.items?.find(
+          (item: any) => item[0]?.trim().toLowerCase() === productName.toLowerCase()
+        ) || collection.items?.[index] || [];
+
+        const qty = parseFloat(quantities[index]) || 0;
+        const size = (measurement.width && measurement.height)
+          ? `${measurement.width} x ${measurement.height} ${measurement.unit || ""}`
+          : "N/A";
+
+        const mrp = parseFloat(matchedItem[4] || 0) * measurementQty;
+        const subtotal = mrp * qty;
+        const taxRate = parseFloat(matchedItem[5] || 0);
+        const taxAmount = parseFloat(collection.totalTax?.[index]?.toString() || "0");
+        const total = parseFloat(collection.totalAmount?.[index]?.toString() || "0");
+
+        tableData.push([
+          srNo++,
+          `${productName} * ${formatNumber(measurementQty)}`,
+          size,
+          formatNumber(mrp),
+          formatNumber(qty),
+          formatNumber(subtotal),
+          `${formatNumber(taxRate)}%`,
+          formatNumber(taxAmount),
+          formatNumber(total),
+        ]);
+
+        addedItem = true;
+      });
+    });
+
+    // If no product rows added under this area, add placeholder row
+    if (!addedItem) {
       tableData.push([
         {
-          content: selection.area,
+          content: "No items available.",
           colSpan: 9,
-          styles: { fontStyle: "bold", fontSize: 9, fillColor: accentColor, textColor: [255, 255, 255] },
+          styles: { halign: "center", fontSize: 7 },
         },
       ]);
-
-      selection.areacollection.forEach((collection) => {
-        const pg = Array.isArray(collection.productGroup)
-          ? collection.productGroup.map((name: string) => name?.trim()).filter((name) => name && name !== "undefined" && name !== "null")
-          : [];
-
-        const quantities = Array.isArray(collection.quantities) ? collection.quantities : [];
-        const measurementQty = parseFloat(collection.measurement?.quantity || "0");
-        const measurement = collection.measurement || {};
-
-        if (pg.length === 0) return;
-
-        pg.forEach((productName: string, index: number) => {
-          if (index >= quantities.length || index >= (collection.items?.length || 0)) return;
-
-          const matchedItem = collection.items?.find(
-            (item: any) => item[0]?.trim().toLowerCase() === productName.toLowerCase()
-          ) || collection.items?.[index] || [];
-
-          const qty = parseFloat(quantities[index]) || 0;
-          const size = (measurement.width && measurement.height)
-            ? `${measurement.width} x ${measurement.height} ${measurement.unit || ""}`
-            : "N/A";
-
-          const mrp = parseFloat(matchedItem[4] || 0) * measurementQty;
-          const subtotal = mrp * qty;
-          const taxRate = parseFloat(matchedItem[5] || 0);
-          const taxAmount = parseFloat(collection.totalTax?.[index]?.toString() || "0");
-          const total = parseFloat(collection.totalAmount?.[index]?.toString() || "0");
-
-          tableData.push([
-            srNo++,
-            `${productName} * ${formatNumber(measurementQty)}`,
-            size,
-            formatNumber(mrp),
-            formatNumber(qty),
-            formatNumber(subtotal),
-            `${formatNumber(taxRate)}%`,
-            formatNumber(taxAmount),
-            formatNumber(total),
-          ]);
-        });
-      });
     }
   });
+
+  // Add Miscellaneous Section
+  if (additionalItems.length > 0) {
+    tableData.push([
+      {
+        content: "Miscellaneous",
+        colSpan: 9,
+        styles: {
+          fontStyle: "bold",
+          fontSize: 9,
+          fillColor: accentColor,
+          textColor: [255, 255, 255],
+          halign: "left",
+        },
+      },
+    ]);
+
+    additionalItems.forEach((item) => {
+      const netRate = item.netRate || 0;
+      const qty = item.quantity || 0;
+      const taxRate = item.tax || 0;
+      const taxAmount = item.taxAmount || 0;
+      const total = item.totalAmount || 0;
+
+      tableData.push([
+        srNo++,
+        item.name || "N/A",
+        item.remark || "N/A",
+        formatNumber(item.rate || 0),
+        formatNumber(qty),
+        formatNumber(netRate),
+        `${formatNumber(taxRate)}%`,
+        formatNumber(taxAmount),
+        formatNumber(total),
+      ]);
+    });
+  } else {
+    tableData.push([
+      {
+        content: "No miscellaneous items.",
+        colSpan: 9,
+        styles: { halign: "center", fontSize: 7 },
+      },
+    ]);
+  }
 
   autoTable(doc, {
     startY: yOffset,
     margin: { left: 16.5 },
     head: [["Sr. No.", "Item Name", "Description", "Rate", "Qty", "Net Rate", "Tax Rate", "Tax Amount", "Total"]],
-    body: tableData.length > 0
-      ? tableData
-      : [[{ content: "No product data available.", colSpan: 9, styles: { halign: "center" } }]],
+    body: tableData,
     theme: "grid",
     styles: {
       font: "helvetica",
-      fontSize: 6.5,
+      fontSize: 7.8,
       cellPadding: 1.5,
       textColor: secondaryColor,
       lineColor: [200, 200, 200],
@@ -1836,7 +1900,7 @@ const generatePDF = () => {
       fillColor: primaryColor,
       textColor: [255, 255, 255],
       fontStyle: "bold",
-      fontSize: 6.5,
+      fontSize: 7,
       halign: "center",
       cellPadding: 1.5,
     },
@@ -1875,12 +1939,12 @@ const generatePDF = () => {
 
   doc.setFillColor(...lightGray);
   doc.roundedRect(pageWidth - 90, yOffset - 5, 75, 50, 2, 2, "F");
+  yOffset += 8;
+
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...primaryColor);
-  doc.text("Summary", pageWidth - 85, yOffset);
-  yOffset += 8;
-
+  doc.text("Summary", pageWidth - 85, yOffset - 8);
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...secondaryColor);
@@ -2008,13 +2072,13 @@ const handleMRPChange = (
 // Utility function to format numbers
 const formatNumber = (num) => {
   if (num === undefined || num === null) return "0";
-  const number = Number(num);
-  const hasDecimals = number % 1 !== 0;
+  const number = Math.round(Number(num));
   return number.toLocaleString('en-IN', {
-    minimumFractionDigits: hasDecimals ? 2 : 0,
-    maximumFractionDigits: 2,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   });
 };
+
  
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" />

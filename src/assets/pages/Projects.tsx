@@ -15,13 +15,13 @@ import BankDetails from "./BankDetails";
 // Utility function to format numbers
 const formatNumber = (num) => {
   if (num === undefined || num === null) return "0";
-  const number = Number(num);
-  const hasDecimals = number % 1 !== 0;
+  const number = Math.round(Number(num));
   return number.toLocaleString('en-IN', {
-    minimumFractionDigits: hasDecimals ? 2 : 0,
-    maximumFractionDigits: 2,
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
   });
 };
+
 
 // Define the type for a project
 interface Project {
@@ -219,21 +219,39 @@ export default function Projects() {
   }, [dispatch, flag]);
 
   // --- Fetch Tasks ---
-  useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const data = await fetchTaskData();
-        dispatch(setTasks(data));
-        setTaskData(data);
-        setDeleted(false); // reset deleted after refreshing
-      } catch (error) {
-        console.error('Failed to fetch tasks:', error);
+useEffect(() => {
+  const fetchTasks = async () => {
+    try {
+      // Step 1: Check Redux state
+      if (tasks && tasks.length > 0 && !deleted) {
+        setTaskData(tasks);
+        return;
       }
-    };
 
-    fetchTasks();
-  }, [dispatch, tasks, deleted]);
+      // Step 2: Check Local Storage
+      const storedTasks = localStorage.getItem("tasks");
+      if (storedTasks && !deleted) {
+        const parsedTasks = JSON.parse(storedTasks);
+        dispatch(setTasks(parsedTasks));
+        setTaskData(parsedTasks);
+        return;
+      }
 
+      // Step 3: Fetch from API
+      const data = await fetchTaskData();
+      dispatch(setTasks(data));
+      localStorage.setItem("tasks", JSON.stringify(data));
+      setTaskData(data);
+      setDeleted(false); // reset deleted after refreshing
+    } catch (error) {
+      console.error("Failed to fetch tasks:", error);
+    }
+  };
+
+  fetchTasks();
+}, [dispatch, deleted]);
+
+  
   // --- Fetch Payments after Projects are available ---
   useEffect(() => {
     const fetchPayments = async () => {
@@ -260,8 +278,7 @@ export default function Projects() {
         console.error('Failed to fetch payments:', error);
       }
     };
-
-    fetchPayments();
+      fetchPayments();
   }, [dispatch, added, projectData]);
 
   // --- API fetching functions ---
@@ -383,15 +400,15 @@ const generatePDF = (project: any) => {
   const accentColor = [0, 102, 204];
   const lightGray = [245, 245, 245];
 
-  const formatNumber = (value: number) => {
-    if (value === undefined || value === null) return "0";
-    const number = Number(value);
-    const hasDecimals = number % 1 !== 0;
-    return number.toLocaleString('en-US', {
-      minimumFractionDigits: hasDecimals ? 2 : 0,
-      maximumFractionDigits: 2,
-    });
-  };
+const formatNumber = (value: number) => {
+  if (value === undefined || value === null) return "0";
+  const number = Math.round(Number(value));
+  return number.toLocaleString('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+};
+
 
   // === HEADER ===
   doc.setFillColor(...primaryColor);
@@ -550,7 +567,7 @@ const generatePDF = (project: any) => {
     theme: "grid",
     styles: {
       font: "helvetica",
-      fontSize: 6.5,
+      fontSize: 7.8,
       cellPadding: 1.5,
       textColor: secondaryColor,
       lineColor: [200, 200, 200],
@@ -561,7 +578,7 @@ const generatePDF = (project: any) => {
       fillColor: primaryColor,
       textColor: [255, 255, 255],
       fontStyle: "bold",
-      fontSize: 6.5,
+      fontSize: 7,
       halign: "center",
     },
     alternateRowStyles: {
