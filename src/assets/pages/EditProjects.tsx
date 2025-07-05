@@ -2568,55 +2568,59 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
               </div>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 justify-between w-full">
-              <div className="bg-white p-6 !rounded-xl shadow-md border border-gray-200 w-full md:w-1/2">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                  Bank Details & Terms
-                </h3>
-                <div className="space-y-4">
-                  <select
-                    value={bank}
-                    onChange={(e) => setBank(e.target.value.split(","))}
-                    className="w-full border border-gray-300 !rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Select Bank Details</option>
-                    {bankData.map((data, index) => (
-                      <option key={index} value={data}>
-                        Account Name : {data[0]} - Account Number : {data[1]}
-                      </option>
-                    ))}
-                  </select>
-                  <textarea
-                    placeholder="Bank Details Description"
-                    value={`Account Name : ${
-                      bank == "NA" ? "" : bank[0]
-                    } \nAccount Number : ${
-                      bank == "NA" ? "" : bank[1]
-                    }\nIFSC code : ${bank == "NA" ? "" : bank[2]}`}
-                    className="w-full border border-gray-300 !rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    rows={3}
-                  ></textarea>
-                  <select
-                    value={terms}
-                    onChange={(e) => setTerms(e.target.value.split(","))}
-                    className="w-full border border-gray-300 !rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    <option value="">Select Terms & Conditions</option>
-                    {termData.map((data, index) => (
-                      <option key={index} value={data}>
-                        {data[0]}
-                      </option>
-                    ))}
-                  </select>
-                  <textarea
-                    placeholder="Terms & Conditions Description"
-                    className="w-full border border-gray-300 !rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    rows={3}
-                    value={`Terms & Conditions : ${
-                      terms == "NA" ? "" : terms[0]
-                    }`}
-                  ></textarea>
-                </div>
-              </div>
+           <div className="bg-white p-8 !rounded-2xl shadow-lg border border-gray-100 w-full md:w-1/2 transition-all duration-300 hover:shadow-xl">
+          <h3 className="text-xl font-poppins font-semibold text-gray-900 mb-6 tracking-tight">
+            Bank Details & Terms
+          </h3>
+          <div className="space-y-6">
+            <select
+              value={bank}
+              onChange={(e) => setBank(e.target.value.split(","))}
+              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+            >
+              <option value="">Select Bank Details</option>
+              {Array.isArray(bankData) && bankData.length > 0 ? (
+                bankData.map((data, index) => (
+                  <option key={index} value={data} className="overflow-y-scroll">
+                    Account Name: { data?.[0] || "NA" } - Bank: { data?.[1] || "NA" } - Account Number: {data?.[4] || "N/A"} 
+                  </option>
+                ))
+              ) : (
+                <option disabled>No bank accounts available</option>
+              )}
+
+            </select>
+            <textarea
+              placeholder="Bank Details Description"
+              value={`Bank: ${ bank[1] == "NA" ? "" : bank[1] }\nAccount Name: ${bank[0] == "NA" ? "" : bank[0]}\nAccount Number: ${bank[4] == "NA" ? "" : bank[4]}\nIFSC code: ${bank[5] == "NA" ? "" : bank[5]}\n Branch: ${bank[2] == "NA" ? "" : bank[2]} \n Pincode: ${bank[3] == "NA" ? "" : bank[3]}`}
+              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+              rows={5}
+            ></textarea>
+            <select
+              value={terms}
+              onChange={(e) => setTerms(e.target.value.split(","))}
+              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+            >
+              <option value="">Select Terms & Conditions</option>
+{Array.isArray(termData) && termData.length > 0 ? (
+  termData.map((data, index) => (
+    <option key={index} value={data}>
+      {data?.[0] || "N/A"}
+    </option>
+  ))
+) : (
+  <option disabled>No terms available</option>
+)}
+
+            </select>
+            <textarea
+              placeholder="Terms & Conditions Description"
+              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+              rows={4}
+              value={`Terms & Conditions: ${terms == "NA" ? "" : terms[0]}`}
+            ></textarea>
+          </div>
+        </div>
               <div className="shadow-xl p-4 sm:p-6 flex flex-col gap-2 border w-full sm:w-1/2 !rounded-lg">
                 <p className="text-base sm:text-lg font-semibold">Summary</p>
                 <div className="flex flex-row justify-between w-full text-xs sm:text-sm">

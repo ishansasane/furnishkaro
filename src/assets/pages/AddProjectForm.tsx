@@ -2483,8 +2483,8 @@ return (
               <option value="">Select Bank Details</option>
               {Array.isArray(bankData) && bankData.length > 0 ? (
                 bankData.map((data, index) => (
-                  <option key={index} value={data}>
-                    Account Name: {data?.[0] || "N/A"} - Account Number: {data?.[1] || "N/A"}
+                  <option key={index} value={data} className="overflow-y-scroll">
+                    Account Name: { data?.[0] || "NA" } - Bank: { data?.[1] || "NA" } - Account Number: {data?.[4] || "N/A"} 
                   </option>
                 ))
               ) : (
@@ -2494,9 +2494,9 @@ return (
             </select>
             <textarea
               placeholder="Bank Details Description"
-              value={`Account Name: ${bank == "NA" ? "" : bank[0]}\nAccount Number: ${bank == "NA" ? "" : bank[1]}\nIFSC code: ${bank == "NA" ? "" : bank[2]}`}
+              value={`Bank: ${ bank[1] == "NA" ? "" : bank[1] }\nAccount Name: ${bank[0] == "NA" ? "" : bank[0]}\nAccount Number: ${bank[4] == "NA" ? "" : bank[4]}\nIFSC code: ${bank[5] == "NA" ? "" : bank[5]}\n Branch: ${bank[2] == "NA" ? "" : bank[2]} \n Pincode: ${bank[3] == "NA" ? "" : bank[3]}`}
               className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-              rows={4}
+              rows={5}
             ></textarea>
             <select
               value={terms}
