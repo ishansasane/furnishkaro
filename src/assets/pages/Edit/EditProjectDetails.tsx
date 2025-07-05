@@ -301,6 +301,24 @@ const EditProjectDetails = ({
               </div>
             )}
           </div>
+          <select
+            className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base opacity-80 focus:opacity-100 focus:ring-2 focus:ring-blue-400"
+            value={interiorArray ? JSON.stringify(interiorArray) : ""}
+            onChange={(e) =>
+              setInteriorArray(e.target.value ? JSON.parse(e.target.value) : [])
+            }
+          >
+            <option value="">Select Interior Name (optional)</option>
+              {interior && interior.length > 0 ? (
+                interior.map((data, index) => (
+                  <option key={index} value={JSON.stringify(data)}>
+                    {data[0]}
+                  </option>
+                ))
+              ) : (
+                <option disabled>No interiors available</option>
+              )}
+          </select>
         </div>
 
         <div className="flex flex-col w-full sm:w-1/2" ref={salesDropdownRef}>
@@ -351,6 +369,29 @@ const EditProjectDetails = ({
               </div>
             )}
           </div>
+          <select
+            className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base opacity-80 focus:opacity-100 focus:ring-2 focus:ring-blue-400"
+            value={
+              salesAssociateArray ? JSON.stringify(salesAssociateArray) : ""
+            }
+            onChange={(e) =>
+              setSalesAssociateArray(
+                e.target.value ? JSON.parse(e.target.value) : []
+              )
+            }
+          >
+            <option value="">Select Sales Associate (optional)</option>
+{Array.isArray(salesdata) && salesdata.length > 0 ? (
+  salesdata.map((data, index) => (
+    <option key={index} value={JSON.stringify(data)}>
+      {data[0] || "Unnamed Sales Associate"}
+    </option>
+  ))
+) : (
+  <option disabled>No sales associates available</option>
+)}
+
+          </select>
         </div>
       </div>
 

@@ -123,24 +123,32 @@ const TermsAndConditions = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {termsData.length > 0 &&
-                termsData.map((data, index) => (
-                  <tr key={index} className="hover:bg-sky-50">
-                    <td className="px-4 py-2">{index + 1}</td>
-                    <td className="px-4 py-2 max-w-[600px] break-words">
-                      {data[0]}
-                    </td>
-                    <td className="px-4 py-2">
-                      <button
-                        onClick={() => deleteTermsData(data[0])}
-                        className="text-red-600 hover:text-red-800"
-                        title="Delete"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+{Array.isArray(termsData) && termsData.length > 0 ? (
+  termsData.map((data, index) => (
+    <tr key={index} className="hover:bg-sky-50">
+      <td className="px-4 py-2">{index + 1}</td>
+      <td className="px-4 py-2 max-w-[600px] break-words">
+        {data?.[0] || "No Term Provided"}
+      </td>
+      <td className="px-4 py-2">
+        <button
+          onClick={() => deleteTermsData(data?.[0])}
+          className="text-red-600 hover:text-red-800"
+          title="Delete"
+        >
+          <Trash2 size={16} />
+        </button>
+      </td>
+    </tr>
+  ))
+) : (
+  <tr>
+    <td colSpan={3} className="px-4 py-2 text-center text-gray-500">
+      No terms available.
+    </td>
+  </tr>
+)}
+
             </tbody>
           </table>
         </div>

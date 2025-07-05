@@ -35,38 +35,47 @@ const QuotationSection = ({ materials, measurements }: any) => {
           </tr>
         </thead>
         <tbody>
-          {quotation.map((item, index) => {
-            const subtotal = item.saleRate * item.quantity;
-            const taxAmount = (subtotal * item.tax) / 100;
-            const total = subtotal + taxAmount;
+{Array.isArray(quotation) && quotation.length > 0 ? (
+  quotation.map((item, index) => {
+    const subtotal = (item.saleRate || 0) * (item.quantity || 0);
+    const taxAmount = ((subtotal * (item.tax || 0)) / 100);
+    const total = subtotal + taxAmount;
 
-            return (
-              <tr key={index} className="border">
-                <td className="border p-2">{item.product}</td>
-                <td className="border p-2">{item.size}</td>
-                <td className="border p-2">₹{item.mrp}</td>
-                <td className="border p-2">₹{item.saleRate}</td>
-                <td className="border p-2">
-                  <input
-                    type="number"
-                    value={item.quantity}
-                    min="1"
-                    className="w-16 border p-1 text-center"
-                    onChange={(e) => {
-                      const newQuantity = parseInt(e.target.value) || 1;
-                      const updatedQuotation = [...quotation];
-                      updatedQuotation[index].quantity = newQuantity;
-                      setQuotation(updatedQuotation);
-                    }}
-                  />
-                </td>
-                <td className="border p-2">₹{subtotal.toFixed(2)}</td>
-                <td className="border p-2">{item.tax}%</td>
-                <td className="border p-2">₹{taxAmount.toFixed(2)}</td>
-                <td className="border p-2 font-semibold">₹{total.toFixed(2)}</td>
-              </tr>
-            );
-          })}
+    return (
+      <tr key={index} className="border">
+        <td className="border p-2">{item.product || "-"}</td>
+        <td className="border p-2">{item.size || "-"}</td>
+        <td className="border p-2">₹{item.mrp || 0}</td>
+        <td className="border p-2">₹{item.saleRate || 0}</td>
+        <td className="border p-2">
+          <input
+            type="number"
+            value={item.quantity || 1}
+            min="1"
+            className="w-16 border p-1 text-center"
+            onChange={(e) => {
+              const newQuantity = parseInt(e.target.value) || 1;
+              const updatedQuotation = [...quotation];
+              updatedQuotation[index].quantity = newQuantity;
+              setQuotation(updatedQuotation);
+            }}
+          />
+        </td>
+        <td className="border p-2">₹{subtotal.toFixed(2)}</td>
+        <td className="border p-2">{item.tax || 0}%</td>
+        <td className="border p-2">₹{taxAmount.toFixed(2)}</td>
+        <td className="border p-2 font-semibold">₹{total.toFixed(2)}</td>
+      </tr>
+    );
+  })
+) : (
+  <tr>
+    <td colSpan="9" className="text-center p-4 text-gray-500 italic">
+      No quotation items available.
+    </td>
+  </tr>
+)}
+
         </tbody>
       </table>
     </div>

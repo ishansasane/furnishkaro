@@ -107,37 +107,42 @@ const MaterialSelection = ({ setMaterials }) => {
           <h3 className="text-lg font-semibold mb-4 text-gray-600">
             Select Product Groups
           </h3>
-          {selections.map(
-            (selection, index) =>
-              selection.area && (
-                <div
-                  key={index}
-                  className="mb-4 border p-4 rounded-lg shadow-sm bg-gray-50"
-                >
-                  <h4 className="text-md font-semibold mb-2 text-gray-700">
-                    {selection.area}
-                  </h4>
-                  <div className="grid grid-cols-2 gap-3">
-                    {availableProductGroups.map((product) => (
-                      <label
-                        key={product}
-                        className="flex items-center gap-2 cursor-pointer"
-                      >
-                        <input
-                          type="checkbox"
-                          className="form-checkbox h-4 w-4 text-blue-500"
-                          checked={selection.productGroups.includes(product)}
-                          onChange={() =>
-                            handleProductGroupChange(index, product)
-                          }
-                        />
-                        {product}
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              )
-          )}
+{selections && selections.length > 0 ? (
+  selections.map(
+    (selection, index) =>
+      selection.area && (
+        <div
+          key={index}
+          className="mb-4 border p-4 rounded-lg shadow-sm bg-gray-50"
+        >
+          <h4 className="text-md font-semibold mb-2 text-gray-700">
+            {selection.area}
+          </h4>
+          <div className="grid grid-cols-2 gap-3">
+            {availableProductGroups.map((product) => (
+              <label
+                key={product}
+                className="flex items-center gap-2 cursor-pointer"
+              >
+                <input
+                  type="checkbox"
+                  className="form-checkbox h-4 w-4 text-blue-500"
+                  checked={selection.productGroups.includes(product)}
+                  onChange={() =>
+                    handleProductGroupChange(index, product)
+                  }
+                />
+                {product}
+              </label>
+            ))}
+          </div>
+        </div>
+      )
+  )
+) : (
+  <div className="text-gray-500 italic">No areas available</div>
+)}
+
         </div>
       </div>
     </div>

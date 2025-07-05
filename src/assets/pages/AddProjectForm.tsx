@@ -1773,32 +1773,50 @@ const generatePDF = () => {
       ]);
 
       selection.areacollection.forEach((collection) => {
-        const quantities = collection.quantities || [];
+        // Only include valid, non-empty productGroup entries
+        const pg = Array.isArray(collection.productGroup)
+          ? collection.productGroup
+              .map((name: string) => name?.trim())
+              .filter((name: string) => name && name !== "undefined" && name !== "null")
+          : [];
+        const quantities = Array.isArray(collection.quantities) ? collection.quantities : [];
         const measurementQty = parseFloat(collection.measurement?.quantity || "0");
         const measurement = collection.measurement || {};
 
         // Debugging: Log collection data
-        console.log("Collection productGroup:", collection.productGroup);
+        console.log("Collection productGroup (filtered):", pg);
         console.log("Collection items:", collection.items);
+        console.log("Collection quantities:", quantities);
 
-        collection.items?.forEach((item, index) => {
-          if (!item || !Array.isArray(item) || !item[0]) {
-            console.warn(`Invalid item at index ${index}:`, item);
+        // Only process if productGroup has valid entries
+        if (pg.length === 0) {
+          console.warn("No valid productGroup entries for collection:", collection);
+          return;
+        }
+
+        // Iterate over filtered productGroup
+        pg.forEach((productName: string, index: number) => {
+          // Skip if index exceeds quantities or items length to avoid extra rows
+          if (index >= quantities.length || index >= (collection.items?.length || 0)) {
+            console.warn(`Skipping productName at index ${index} due to missing quantities or items:`, productName);
             return;
           }
 
-          // Use item[0] directly for the product name
-          const productName = item[0]?.trim() || "Unknown Item";
+          // Find the matching item in the items array for other details
+          const matchedItem = collection.items?.find(
+            (item: any) => item[0]?.trim().toLowerCase() === productName.toLowerCase()
+          ) || collection.items?.[index] || [];
+
           const qty = parseFloat(quantities[index]) || 0;
           const size = (measurement.width && measurement.height)
             ? `${measurement.width} x ${measurement.height} ${measurement.unit || ""}`
             : "N/A";
 
-          const mrp = parseFloat(item[4]) * measurementQty;
+          const mrp = parseFloat(matchedItem[4] || 0) * measurementQty;
           const subtotal = mrp * qty;
-          const taxRate = parseFloat(item[5]) || 0;
-          const taxAmount = parseFloat(collection.totalTax?.[index]?.toString()) || 0;
-          const total = parseFloat(collection.totalAmount?.[index]?.toString()) || 0;
+          const taxRate = parseFloat(matchedItem[5] || 0);
+          const taxAmount = parseFloat(collection.totalTax?.[index]?.toString() || "0");
+          const total = parseFloat(collection.totalAmount?.[index]?.toString() || "0");
 
           tableData.push([
             srNo++,
@@ -2471,50 +2489,60 @@ return (
 
       {/* Summary and Bank Details */}
       <div className="flex flex-col md:flex-row gap-8">
-  {/* Bank Details and Terms */}
-  <div className="bg-white p-8 !rounded-2xl shadow-lg border border-gray-100 w-full md:w-1/2 transition-all duration-300 hover:shadow-xl">
-    <h3 className="text-xl font-poppins font-semibold text-gray-900 mb-6 tracking-tight">
-      Bank Details & Terms
-    </h3>
-    <div className="space-y-6">
-      <select
-        value={bank}
-        onChange={(e) => setBank(e.target.value.split(","))}
-        className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-      >
-        <option value="">Select Bank Details</option>
-        {bankData.map((data, index) => (
-          <option key={index} value={data}>
-            Account Name: {data[0]} - Account Number: {data[1]}
-          </option>
-        ))}
-      </select>
-      <textarea
-        placeholder="Bank Details Description"
-        value={`Account Name: ${bank == "NA" ? "" : bank[0]}\nAccount Number: ${bank == "NA" ? "" : bank[1]}\nIFSC code: ${bank == "NA" ? "" : bank[2]}`}
-        className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-        rows={4}
-      ></textarea>
-      <select
-        value={terms}
-        onChange={(e) => setTerms(e.target.value.split(","))}
-        className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-      >
-        <option value="">Select Terms & Conditions</option>
-        {termData.map((data, index) => (
-          <option key={index} value={data}>
-            {data[0]}
-          </option>
-        ))}
-      </select>
-      <textarea
-        placeholder="Terms & Conditions Description"
-        className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-        rows={4}
-        value={`Terms & Conditions: ${terms == "NA" ? "" : terms[0]}`}
-      ></textarea>
-    </div>
-  </div>
+        {/* Bank Details and Terms */}
+        <div className="bg-white p-8 !rounded-2xl shadow-lg border border-gray-100 w-full md:w-1/2 transition-all duration-300 hover:shadow-xl">
+          <h3 className="text-xl font-poppins font-semibold text-gray-900 mb-6 tracking-tight">
+            Bank Details & Terms
+          </h3>
+          <div className="space-y-6">
+            <select
+              value={bank}
+              onChange={(e) => setBank(e.target.value.split(","))}
+              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+            >
+              <option value="">Select Bank Details</option>
+              {Array.isArray(bankData) && bankData.length > 0 ? (
+                bankData.map((data, index) => (
+                  <option key={index} value={data} className="overflow-y-scroll">
+                    Account Name: { data?.[0] || "NA" } - Bank: { data?.[1] || "NA" } - Account Number: {data?.[4] || "N/A"} 
+                  </option>
+                ))
+              ) : (
+                <option disabled>No bank accounts available</option>
+              )}
+
+            </select>
+            <textarea
+              placeholder="Bank Details Description"
+              value={`Bank: ${ bank[1] == "NA" ? "" : bank[1] }\nAccount Name: ${bank[0] == "NA" ? "" : bank[0]}\nAccount Number: ${bank[4] == "NA" ? "" : bank[4]}\nIFSC code: ${bank[5] == "NA" ? "" : bank[5]}\n Branch: ${bank[2] == "NA" ? "" : bank[2]} \n Pincode: ${bank[3] == "NA" ? "" : bank[3]}`}
+              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+              rows={5}
+            ></textarea>
+            <select
+              value={terms}
+              onChange={(e) => setTerms(e.target.value.split(","))}
+              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+            >
+              <option value="">Select Terms & Conditions</option>
+{Array.isArray(termData) && termData.length > 0 ? (
+  termData.map((data, index) => (
+    <option key={index} value={data}>
+      {data?.[0] || "N/A"}
+    </option>
+  ))
+) : (
+  <option disabled>No terms available</option>
+)}
+
+            </select>
+            <textarea
+              placeholder="Terms & Conditions Description"
+              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+              rows={4}
+              value={`Terms & Conditions: ${terms == "NA" ? "" : terms[0]}`}
+            ></textarea>
+          </div>
+        </div>
 
   {/* Summary */}
   <div className="bg-white p-8 !rounded-2xl shadow-lg border border-gray-100 w-full md:w-1/2 transition-all duration-300 hover:shadow-xl">

@@ -172,6 +172,29 @@ const EditCustomerDetails = ({
               </div>
             )}
           </div>
+          <select
+            className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base opacity-80 focus:opacity-100 focus:ring-2 focus:ring-blue-400"
+            value={selectedCustomer ? JSON.stringify(selectedCustomer) : ""}
+            onChange={(e) => {
+              if (e.target.value === "") {
+                setSelectedCustomer(null);
+              } else {
+                setSelectedCustomer(JSON.parse(e.target.value));
+              }
+            }}
+          >
+            <option value="">Select Customer</option>
+{Array.isArray(customers) && customers.length > 0 ? (
+  customers.map((customer, index) => (
+    <option key={index} value={JSON.stringify(customer)}>
+      {customer[0] || "Unnamed Customer"}
+    </option>
+  ))
+) : (
+  <option disabled>No customers available</option>
+)}
+
+          </select>
         </div>
 
         {projectData.customerLink && selectedCustomer && (
