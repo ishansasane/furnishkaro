@@ -207,20 +207,38 @@ export default function Projects() {
   }, [dispatch, flag]);
 
   // --- Fetch Tasks ---
-  useEffect(() => {
-    const fetchTasks = async () => {
-      try {
-        const data = await fetchTaskData();
-        dispatch(setTasks(data));
-        setTaskData(data);
-        setDeleted(false); // reset deleted after refreshing
-      } catch (error) {
-        console.error('Failed to fetch tasks:', error);
+useEffect(() => {
+  const fetchTasks = async () => {
+    try {
+      // Step 1: Check Redux state
+      if (tasks && tasks.length > 0 && !deleted) {
+        setTaskData(tasks);
+        return;
       }
-    };
 
-      fetchTasks();
-  }, [dispatch, tasks, deleted]);
+      // Step 2: Check Local Storage
+      const storedTasks = localStorage.getItem("tasks");
+      if (storedTasks && !deleted) {
+        const parsedTasks = JSON.parse(storedTasks);
+        dispatch(setTasks(parsedTasks));
+        setTaskData(parsedTasks);
+        return;
+      }
+
+      // Step 3: Fetch from API
+      const data = await fetchTaskData();
+      dispatch(setTasks(data));
+      localStorage.setItem("tasks", JSON.stringify(data));
+      setTaskData(data);
+      setDeleted(false); // reset deleted after refreshing
+    } catch (error) {
+      console.error("Failed to fetch tasks:", error);
+    }
+  };
+
+  fetchTasks();
+}, [dispatch, deleted]);
+
   
   // --- Fetch Payments after Projects are available ---
   useEffect(() => {
@@ -248,8 +266,6 @@ export default function Projects() {
         console.error('Failed to fetch payments:', error);
       }
     };
-  
-    
       fetchPayments();
   }, [dispatch, added, projectData]);
   

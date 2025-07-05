@@ -435,7 +435,7 @@ const EditProjects = ({
           }
 
           // If store is empty or cache expired, fetch fresh
-          if (shouldFetch) {
+          if (shouldFetch || storeData.length === 0) {
             const data = await fetchFn();
             dispatch(dispatchFn(data));
             if (localStateSetter) localStateSetter(data);
@@ -451,7 +451,7 @@ const EditProjects = ({
           console.error(`Error fetching ${keyName || "data"}:`, error);
         }
       },
-      []
+      [dispatch]
     );
 
     useEffect(() => {
@@ -1498,46 +1498,24 @@ const handleItemTaxChange = (i: number, tax: string) => {
     };
   }, [added, dispatch, projectData.projectName]);
 
-  useEffect(() => {
-    async function getAreas() {
-      try {
-        // Check localStorage first to avoid unnecessary API calls
-        const cachedData = localStorage.getItem("areasData");
-        const oneHour = 3600 * 1000; // 1 hour expiration for cached data
-
-        if (cachedData) {
-          const { data, time } = JSON.parse(cachedData);
-
-          if (Date.now() - time < oneHour) {
-            // Use cached data if it hasn't expired
-            setAvailableAreas(data);
-            return;
-          } else {
-            // Remove expired data from localStorage
-            localStorage.removeItem("areasData");
-          }
-        }
-
-        // If no valid cached data, fetch from the API
-        const response = await fetchWithLoading(
-          "https://sheeladecor.netlify.app/.netlify/functions/server/getAreas"
-        );
-        const data = await response.json();
-        setAvailableAreas(data.body);
-
-        // Cache the fresh data
-        localStorage.setItem(
-          "areasData",
-          JSON.stringify({ data: data.body, time: Date.now() })
-        );
-      } catch (error) {
-        console.error("Error fetching areas:", error);
-      }
+useEffect(() => {
+  const getAreas = async () => {
+    try {
+      const response = await fetchWithLoading(
+        "https://sheeladecor.netlify.app/.netlify/functions/server/getAreas"
+      );
+      const data = await response.json();
+      setAvailableAreas(data.body || []);  // Even if empty, it's fine
+    } catch (error) {
+      console.error("Error fetching areas:", error);
+      setAvailableAreas([]);  // Optional: set empty array in case of error
     }
+  };
 
-    // Fetch areas only if not already loaded
-    getAreas();
-  }, [availableAreas]); // Only re-run when availableAreas length changes
+  getAreas();
+}, []);  // Only run once when component mounts
+
+ // Only re-run when availableAreas length changes
 
   const addPaymentFunction = async () => {
     const isEdit = typeof editProjects !== "undefined";
