@@ -571,12 +571,12 @@ const generatePDF = (project: any) => {
       0: { cellWidth: 10, halign: "center" },
       1: { cellWidth: 38 },
       2: { cellWidth: 32 },
-      3: { cellWidth: 22, halign: "right" },
+      3: { cellWidth: 22, halign: "center" },
       4: { cellWidth: 12, halign: "center" },
-      5: { cellWidth: 22, halign: "right" },
+      5: { cellWidth: 22, halign: "center" },
       6: { cellWidth: 12, halign: "center" },
-      7: { cellWidth: 12, halign: "right" },
-      8: { cellWidth: 22, halign: "right" },
+      7: { cellWidth: 12, halign: "center" },
+      8: { cellWidth: 22, halign: "center" },
     },
     willDrawCell: (data) => {
       if (data.section === "body" && (data.column.index === 1 || data.column.index === 2)) {

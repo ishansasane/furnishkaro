@@ -328,7 +328,8 @@ const MaterialSelectionComponent = ({
         >
           <div className="flex flex-col gap-2 w-full">
             <SearchableSelect
-  options={[["➕ Add New Space"], ...availableAreas]}
+options={[["➕ Add New Space"], ...(availableAreas || [])]}
+
   value={currentArea}
   placeholder="Select Area"
   name="area"
@@ -373,7 +374,7 @@ const MaterialSelectionComponent = ({
 
         {/* Right Column: Product Group Selection */}
         <div className="w-full lg:w-3/4">
-          <div className="flex flex-row items-center justify-between mb-4">
+          <div className="flex flex-row items-center justify-between ">
             <p className="text-sm font-poppins font-medium text-gray-700">Select Product Groups</p>
           </div>
           {selections.map((selection, mainindex) => (
@@ -417,7 +418,7 @@ const MaterialSelectionComponent = ({
 
                       {/* Company */}
                       <div className="flex flex-col w-full lg:w-1/5">
-                        <div className="flex flex-row items-center gap-3 mb-2">
+                        <div className="flex flex-row items-center gap-3 mb-1">
                           <p className="text-sm font-poppins font-medium text-gray-700">Company</p>
                           <button
                             className="text-indigo-600 hover:text-indigo-700 transition-colors duration-200"
@@ -439,7 +440,7 @@ const MaterialSelectionComponent = ({
 
                       {/* Catalogue */}
                       <div className="flex flex-col w-full lg:w-1/5">
-                        <div className="flex flex-row items-center gap-3 mb-2">
+                        <div className="flex flex-row items-center gap-3 mb-1 ">
                           <p className="text-sm font-poppins font-medium text-gray-700">Catalogue</p>
                           <button
                             className="text-indigo-600 hover:text-indigo-700 transition-colors duration-200"
@@ -461,7 +462,7 @@ const MaterialSelectionComponent = ({
 
                       {/* Design No */}
                       <div className="flex flex-col w-full lg:w-1/6">
-                        <p className="text-sm font-poppins font-medium text-gray-700 mb-1">Design No.</p>
+                        <p className="text-sm font-poppins font-medium text-gray-700 mb-3">Design No.</p>
                         <input
                           type="text"
                           placeholder="Design No"
@@ -476,7 +477,7 @@ const MaterialSelectionComponent = ({
 
                       {/* Reference */}
                       <div className="flex flex-col w-full lg:w-1/4">
-                        <p className="text-sm font-poppins font-medium text-gray-700 mb-1">Reference/Notes</p>
+                        <p className="text-sm font-poppins font-medium text-gray-700 mb-3">Reference/Notes</p>
                         <input
                           type="text"
                           value={element.reference}

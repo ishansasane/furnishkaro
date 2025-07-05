@@ -435,7 +435,7 @@ const EditProjects = ({
           }
 
           // If store is empty or cache expired, fetch fresh
-          if (shouldFetch || storeData.length === 0) {
+          if (shouldFetch) {
             const data = await fetchFn();
             dispatch(dispatchFn(data));
             if (localStateSetter) localStateSetter(data);
@@ -451,7 +451,7 @@ const EditProjects = ({
           console.error(`Error fetching ${keyName || "data"}:`, error);
         }
       },
-      [dispatch]
+      []
     );
 
     useEffect(() => {
@@ -1536,10 +1536,8 @@ const handleItemTaxChange = (i: number, tax: string) => {
     }
 
     // Fetch areas only if not already loaded
-    if (availableAreas.length === 0) {
-      getAreas();
-    }
-  }, [availableAreas.length]); // Only re-run when availableAreas length changes
+    getAreas();
+  }, [availableAreas]); // Only re-run when availableAreas length changes
 
   const addPaymentFunction = async () => {
     const isEdit = typeof editProjects !== "undefined";

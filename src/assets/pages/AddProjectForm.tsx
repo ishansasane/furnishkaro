@@ -1693,8 +1693,10 @@ const finalGrandTotal =
   const termsConditions = ["sadsdsad", "Adasdad"];
 
 const generatePDF = () => {
-  const formatAmount = (value: number): string =>
-    value % 1 === 0 ? value.toString() : value.toFixed(2);
+  const formatNumber = (value: number): string =>
+    value % 1 === 0
+      ? value.toLocaleString("en-IN", { maximumFractionDigits: 0 })
+      : value.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -1758,10 +1760,6 @@ const generatePDF = () => {
   const tableData: any[] = [];
   let srNo = 1;
 
-  // Debugging: Log selections and items to verify data
-  console.log("Selections:", JSON.stringify(selections, null, 2));
-  console.log("Items array:", JSON.stringify(items, null, 2));
-
   selections.forEach((selection) => {
     if (selection.areacollection?.length > 0) {
       tableData.push([
@@ -1773,36 +1771,19 @@ const generatePDF = () => {
       ]);
 
       selection.areacollection.forEach((collection) => {
-        // Only include valid, non-empty productGroup entries
         const pg = Array.isArray(collection.productGroup)
-          ? collection.productGroup
-              .map((name: string) => name?.trim())
-              .filter((name: string) => name && name !== "undefined" && name !== "null")
+          ? collection.productGroup.map((name: string) => name?.trim()).filter((name) => name && name !== "undefined" && name !== "null")
           : [];
+
         const quantities = Array.isArray(collection.quantities) ? collection.quantities : [];
         const measurementQty = parseFloat(collection.measurement?.quantity || "0");
         const measurement = collection.measurement || {};
 
-        // Debugging: Log collection data
-        console.log("Collection productGroup (filtered):", pg);
-        console.log("Collection items:", collection.items);
-        console.log("Collection quantities:", quantities);
+        if (pg.length === 0) return;
 
-        // Only process if productGroup has valid entries
-        if (pg.length === 0) {
-          console.warn("No valid productGroup entries for collection:", collection);
-          return;
-        }
-
-        // Iterate over filtered productGroup
         pg.forEach((productName: string, index: number) => {
-          // Skip if index exceeds quantities or items length to avoid extra rows
-          if (index >= quantities.length || index >= (collection.items?.length || 0)) {
-            console.warn(`Skipping productName at index ${index} due to missing quantities or items:`, productName);
-            return;
-          }
+          if (index >= quantities.length || index >= (collection.items?.length || 0)) return;
 
-          // Find the matching item in the items array for other details
           const matchedItem = collection.items?.find(
             (item: any) => item[0]?.trim().toLowerCase() === productName.toLowerCase()
           ) || collection.items?.[index] || [];
@@ -1820,14 +1801,14 @@ const generatePDF = () => {
 
           tableData.push([
             srNo++,
-            `${productName} * ${formatAmount(measurementQty)}`,
+            `${productName} * ${formatNumber(measurementQty)}`,
             size,
-            formatAmount(mrp),
-            formatAmount(qty),
-            formatAmount(subtotal),
-            `${formatAmount(taxRate)}%`,
-            formatAmount(taxAmount),
-            formatAmount(total),
+            formatNumber(mrp),
+            formatNumber(qty),
+            formatNumber(subtotal),
+            `${formatNumber(taxRate)}%`,
+            formatNumber(taxAmount),
+            formatNumber(total),
           ]);
         });
       });
@@ -1866,12 +1847,12 @@ const generatePDF = () => {
       0: { cellWidth: 10, halign: "center" },
       1: { cellWidth: 35 },
       2: { cellWidth: 28 },
-      3: { cellWidth: 22, halign: "right" },
+      3: { cellWidth: 22, halign: "center" },
       4: { cellWidth: 12, halign: "center" },
-      5: { cellWidth: 22, halign: "right" },
+      5: { cellWidth: 22, halign: "center" },
       6: { cellWidth: 12, halign: "center" },
-      7: { cellWidth: 15, halign: "right" },
-      8: { cellWidth: 22, halign: "right" },
+      7: { cellWidth: 15, halign: "center" },
+      8: { cellWidth: 22, halign: "center" },
     },
     willDrawCell: (data) => {
       if (data.section === "body" && (data.column.index === 1 || data.column.index === 2)) {
@@ -1908,10 +1889,10 @@ const generatePDF = () => {
   const numericTax = Number(tax) || 0;
   const numericDiscount = Number(discount) || 0;
   const summaryItems = [
-    { label: "Total Amount", value: `  ${formatAmount(numericAmount)}` },
-    { label: "Discount", value: `  ${formatAmount(numericDiscount)}` },
-    { label: "Total Tax", value: `  ${formatAmount(numericTax)}` },
-    { label: "Grand Total", value: `  ${formatAmount(numericAmount + numericTax - numericDiscount)}` },
+    { label: "Total Amount", value: `  ${formatNumber(numericAmount)}` },
+    { label: "Discount", value: `  ${formatNumber(numericDiscount)}` },
+    { label: "Total Tax", value: `  ${formatNumber(numericTax)}` },
+    { label: "Grand Total", value: `  ${formatNumber(numericAmount + numericTax - numericDiscount)}` },
   ];
 
   summaryItems.forEach((item) => {
@@ -1959,6 +1940,7 @@ const generatePDF = () => {
 
   doc.save(`Quotation_${projectName || "Project"}_${projectDate || new Date().toLocaleDateString()}.pdf`);
 };
+
 
 
 const handleMRPChange = (
