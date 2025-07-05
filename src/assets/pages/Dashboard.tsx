@@ -783,14 +783,14 @@ useEffect(() => {
             </Link>
             <button
               onClick={() => setTaskDialog(true)}
-              className="relative overflow-hidden group  mb-2 px-4 py-2 text-sm font-medium text-white transition-all duration-300 ease-out !rounded-lg shadow-sm bg-blue-500 "
+              className="relative group  mb-2 px-2 py-1 text-sm  text-white hover:bg-sky-700 !rounded-lg shadow-sm bg-sky-600 "
             >
               {/* Animated background elements */}
              
 
               {/* Button content with icon */}
               <div className="relative flex items-center justify-center space-x-2">
-                <svg
+                {/* <svg
                   className="w-5 h-5 text-white transition-transform group-hover:scale-110"
                   fill="none"
                   stroke="currentColor"
@@ -802,12 +802,12 @@ useEffect(() => {
                     strokeWidth={2}
                     d="M12 6v6m0 0v6m0-6h6m-6 0H6"
                   />
-                </svg>
-                <span className="font-semibold tracking-wide">Add Task</span>
+                </svg> */}
+                <span className=" tracking-wide">Add Task</span>
               </div>
 
               {/* Ripple effect (optional) */}
-              <span className="absolute inset-0 scale-0 !rounded-full bg-white opacity-20 group-hover:scale-100 transition-transform duration-500"></span>
+    
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto max-h-[90vh] pr-2">
