@@ -67,7 +67,7 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
     if (!projectData?.projectName || !paymentData?.length) return;
 
     const total = paymentData
-      .filter(payment => payment[1]?.toLowerCase() === projectData.projectName.toLowerCase())
+      .filter(payment => payment[1] === projectData.projectName)
       .reduce((sum, payment) => {
         const amount = parseFloat(payment[2]);
         return sum + (isNaN(amount) ? 0 : amount);

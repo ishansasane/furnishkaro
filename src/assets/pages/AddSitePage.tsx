@@ -7,6 +7,17 @@ import { fetchWithLoading } from "../Redux/fetchWithLoading";
 import { useDispatch } from "react-redux";
 import { setPaymentData, setProjects } from "../Redux/dataSlice";
 
+// Utility function to format numbers
+const formatNumber = (num) => {
+  if (num === undefined || num === null) return "0";
+  const number = Number(num);
+  const hasDecimals = number % 1 !== 0;
+  return number.toLocaleString('en-IN', {
+    minimumFractionDigits: hasDecimals ? 2 : 0,
+    maximumFractionDigits: 2,
+  });
+};
+
 function AddSitePage() {
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
@@ -97,7 +108,7 @@ function AddSitePage() {
     }));
   };
 
-    const fetchProjectData = async () => {
+  const fetchProjectData = async () => {
     const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
       {
@@ -178,8 +189,14 @@ function AddSitePage() {
     return projects;
   };
 
-
   const handleSaveProjectAndPayment = async () => {
+    const date = new Date();
+    const day = date.getDate(); // Corrected to getDate()
+    const month = date.getMonth() + 1; // Months are zero-based
+    const year = date.getFullYear();
+
+    const newdate = day + "/" + month + "/" + year;
+
     try {
       const amount = parseFloat(paymentData.totalValue || "0");
       const paidAmount = parseFloat(paymentData.paid || "0");
@@ -203,7 +220,7 @@ function AddSitePage() {
         goodsArray: JSON.stringify([]),
         tailorsArray: JSON.stringify([]),
         projectAddress: JSON.stringify(projectAddress),
-        date: new Date().toISOString(),
+        date: newdate,
         grandTotal: amount,
         discountType: "",
         bankDetails: JSON.stringify({}),
@@ -227,8 +244,8 @@ function AddSitePage() {
         const updatedData = await fetchProjectData();
         dispatch(setProjects(updatedData));
         localStorage.setItem(
-        "projectData",
-        JSON.stringify({ data: updatedData, time: Date.now() })
+          "projectData",
+          JSON.stringify({ data: updatedData, time: Date.now() })
         );
 
         const customerName = selectedCustomer?.Name || "NA";
@@ -265,8 +282,8 @@ function AddSitePage() {
           const latestPayments = await fetchPaymentData();
           dispatch(setPaymentData(latestPayments));
           localStorage.setItem(
-                    "paymentData",
-          JSON.stringify({ data: latestPayments, time: Date.now() })
+            "paymentData",
+            JSON.stringify({ data: latestPayments, time: Date.now() })
           );
           alert("✅ Payment Created Successfully");
         } else {
@@ -367,9 +384,9 @@ function AddSitePage() {
                       placeholder="Enter received amount"
                     />
                   </td>
-                  <td className="py-4 px-6">
+                <td className="py-4 px-6">
                     <div className={`text-sm font-inter ${paymentData.due > 0 ? "text-red-500" : "text-green-500"}`}>
-                      ₹{paymentData.due.toFixed(2)}
+                      ₹{formatNumber(paymentData.due)}
                     </div>
                   </td>
                 </tr>
@@ -382,16 +399,16 @@ function AddSitePage() {
             <div className="bg-gray-50 p-6 !rounded-lg w-full md:w-80 border border-gray-100">
               <div className="flex justify-between mb-3 text-sm">
                 <span className="text-gray-700 font-poppins font-medium">Total:</span>
-                <span className="font-inter">₹{parseFloat(paymentData.totalValue || "0").toFixed(2)}</span>
+                <span className="font-inter">₹{formatNumber(parseFloat(paymentData.totalValue || "0"))}</span>
               </div>
               <div className="flex justify-between mb-3 text-sm">
-                <span className="text-gray-700 font-poppins font-medium">Received :</span>
-                <span className="font-inter">₹{parseFloat(paymentData.paid || "0").toFixed(2)}</span>
+                <span className="text-gray-700 font-poppins font-medium">Received:</span>
+                <span className="font-inter">₹{formatNumber(parseFloat(paymentData.paid || "0"))}</span>
               </div>
               <div className="flex justify-between font-bold text-lg">
                 <span className="text-gray-700 font-poppins">Balance Due:</span>
                 <span className={`font-poppins ${paymentData.due > 0 ? "text-red-500" : "text-green-500"}`}>
-                  ₹{paymentData.due.toFixed(2)}
+                  ₹{formatNumber(paymentData.due)}
                 </span>
               </div>
             </div>
@@ -402,7 +419,7 @@ function AddSitePage() {
         <div className="flex justify-end">
           <button
             onClick={handleSaveProjectAndPayment}
-            className="px-6 py-3 bg-indigo-600 text-white text-sm font-poppins font-semibold !rounded-lg hover:bg-indigo-700 transition-colors duration-300"
+            className="px-6 py-3 bg-indigo-600 text-white text-sm font-poppins font-semibold !rounded-lg hover:bg-indigo-700 transition-colors duration-200"
           >
             Save Project & Create Payment
           </button>

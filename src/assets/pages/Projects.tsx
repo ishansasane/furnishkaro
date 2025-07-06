@@ -1,3 +1,4 @@
+
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import { Pencil, XCircle, Plus, Download } from "lucide-react";
@@ -10,6 +11,17 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import ConfirmBox from "./ConfirmBox";
 import BankDetails from "./BankDetails";
+
+// Utility function to format numbers
+const formatNumber = (num) => {
+  if (num === undefined || num === null) return "0";
+  const number = Math.round(Number(num));
+  return number.toLocaleString('en-IN', {
+    maximumFractionDigits: 0,
+    minimumFractionDigits: 0,
+  });
+};
+
 
 // Define the type for a project
 interface Project {
@@ -33,8 +45,8 @@ interface Project {
   additionalItems: any[];
   interiorArray: string[];
   salesAssociateArray: string[];
-  grandTotal : number;
-  discountType : string;
+  grandTotal: number;
+  discountType: string;
 }
 
 // Status filter options
@@ -66,7 +78,7 @@ export default function Projects() {
   const paymentData = useSelector((state: RootState) => state.data.paymentData);
   const [projectPayments, setProjectPayments] = useState([]);
 
-  const [grandTotal , setGrandTotal] = useState(0);
+  const [grandTotal, setGrandTotal] = useState(0);
 
   const fetchProjectData = async () => {
     const response = await fetch(
@@ -138,10 +150,10 @@ export default function Projects() {
       tailorsArray: deepClone(parseSafely(row[16], [])),
       projectAddress: row[17],
       date: row[18],
-      grandTotal : row[19],
-      discountType : row[20],
-      bankDetails : deepClone(parseSafely(row[21], [])),
-      termsConditions : deepClone(parseSafely(row[22], [])),
+      grandTotal: row[19],
+      discountType: row[20],
+      bankDetails: deepClone(parseSafely(row[21], [])),
+      termsConditions: deepClone(parseSafely(row[22], [])),
     }));
 
     return projects;
@@ -156,7 +168,7 @@ export default function Projects() {
   };
 
   const [deleted, setDeleted] = useState(false);
-  
+
   // --- Fetch Projects ---
   useEffect(() => {
     const fetchProjects = async () => {
@@ -246,7 +258,7 @@ useEffect(() => {
       try {
         const data = await fetchPaymentData();
         dispatch(setPaymentData(data));
-  
+
         if (data && projectData?.length) {
           const projectWisePayments = projectData.map((project) => {
             const total = data
@@ -257,10 +269,10 @@ useEffect(() => {
               }, 0);
             return total;
           });
-  
+
           setProjectPayments(projectWisePayments);
         }
-  
+
         setAdded(true);
       } catch (error) {
         console.error('Failed to fetch payments:', error);
@@ -268,14 +280,14 @@ useEffect(() => {
     };
       fetchPayments();
   }, [dispatch, added, projectData]);
-  
+
   // --- API fetching functions ---
   const fetchTaskData = async () => {
     const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/gettasks");
     const data = await response.json();
     return data.body || [];
   };
-  
+
   const [filteredTasks, setTaskNames] = useState([]);
 
   const deleteTask = async (name: string) => {
@@ -290,19 +302,18 @@ useEffect(() => {
     setAdded(false);
   };
 
+  // Status filter
+  const filteredProjects = projectData.filter((proj) => {
+    const statusMatch = filter === "All" || proj.status === filter;
 
-    // Status filter
-const filteredProjects = projectData.filter((proj) => {
-  const statusMatch = filter === "All" || proj.status === filter;
+    const searchMatch =
+      searchQuery.trim() === "" ||
+      (proj.projectName && proj.projectName.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (proj.customerLink && Array.isArray(proj.customerLink) && proj.customerLink[0]?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (proj.createdBy && proj.createdBy.toLowerCase().includes(searchQuery.toLowerCase()));
 
-  const searchMatch =
-    searchQuery.trim() === "" ||
-    (proj.projectName && proj.projectName.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (proj.customerLink && Array.isArray(proj.customerLink) && proj.customerLink[0]?.toLowerCase().includes(searchQuery.toLowerCase())) ||
-    (proj.createdBy && proj.createdBy.toLowerCase().includes(searchQuery.toLowerCase()));
-
-  return statusMatch && searchMatch;
-});
+    return statusMatch && searchMatch;
+  });
 
   const deleteProject = async (name) => {
     try {
@@ -389,8 +400,15 @@ const generatePDF = (project: any) => {
   const accentColor = [0, 102, 204];
   const lightGray = [245, 245, 245];
 
-  const formatNumber = (value: number) =>
-    value % 1 === 0 ? value.toString() : value.toFixed(2);
+const formatNumber = (value: number) => {
+  if (value === undefined || value === null) return "0";
+  const number = Math.round(Number(value));
+  return number.toLocaleString('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+};
+
 
   // === HEADER ===
   doc.setFillColor(...primaryColor);
@@ -403,41 +421,39 @@ const generatePDF = (project: any) => {
   doc.text("Invoice", pageWidth / 2, 18, { align: "center" });
 
   // === COMPANY INFO ===
-yOffset += 15;
+  yOffset += 15;
 
-doc.setFontSize(10);
-doc.setTextColor(...secondaryColor);
+  doc.setFontSize(10);
+  doc.setTextColor(...secondaryColor);
+  doc.setFont("helvetica", "bold");
+  doc.text("SHEELA DECOR", 15, yOffset);
+  doc.setFont("helvetica", "normal");
 
-// Make SHEELA DECOR bold
-doc.setFont("helvetica", "bold");
-doc.text("SHEELA DECOR", 15, yOffset);
+  yOffset += 5;
+  doc.text("2, Shivneri Heights, Nagar-Kalyan Road, Ahmednagar - 414001", 15, yOffset);
+  yOffset += 5;
+  doc.text("GSTIN/UIN: 27FOPPS8740H1Z3", 15, yOffset);
+  yOffset += 5;
+  doc.text("Email: sheeladecor@gmail.com | Phone: 9822097512 / 7020870276", 15, yOffset);
 
-// Reset to normal font for the rest
-doc.setFont("helvetica", "normal");
-
-yOffset += 5;
-doc.text("2, Shivneri Heights, Nagar-Kalyan Road, Ahmednagar - 414001", 15, yOffset);
-
-yOffset += 5;
-doc.text("GSTIN/UIN: 27FOPPS8740H1Z3", 15, yOffset);
-
-yOffset += 5;
-doc.text("Email: sheeladecor@gmail.com | Phone: 9822097512 / 7020870276", 15, yOffset);
-
-yOffset += 8;
-
-
+  yOffset += 8;
   doc.setDrawColor(...accentColor);
   doc.setLineWidth(0.4);
   doc.line(15, yOffset, pageWidth - 15, yOffset);
   yOffset += 8;
 
-  // === PROJECT & CUSTOMER ===
+  // === PROJECT & CUSTOMER DETAILS ===
   const cleanAddress = typeof project.projectAddress === "string"
     ? project.projectAddress.replace(/^"(.*)"$/, '$1')
     : "N/A";
-  const addressLines = doc.splitTextToSize(`Address: ${cleanAddress}`, (pageWidth / 2 - 20));
-  const detailBoxHeight = Math.max(25, 12 + addressLines.length * 5);
+
+  const addressLabel = "Address: ";
+  const addressContentWidth = (pageWidth - 30) / 2 - 10;
+  const addressLines = doc.splitTextToSize(`${addressLabel}${cleanAddress}`, addressContentWidth);
+  const firstAddressLine = addressLines[0] || `${addressLabel}N/A`;
+  const remainingAddressLines = addressLines.slice(1);
+  const detailBoxHeight = Math.max(25, 12 + (remainingAddressLines.length + 2) * 5);
+
   doc.setFillColor(...lightGray);
   doc.roundedRect(15, yOffset, pageWidth - 30, detailBoxHeight, 2, 2, "F");
 
@@ -459,13 +475,16 @@ yOffset += 8;
   );
   yOffset += 5;
 
-  addressLines.forEach((line: string) => {
+  doc.text(`Date: ${project.projectDate || new Date().toLocaleDateString()}`, 20, yOffset);
+  doc.text(firstAddressLine, pageWidth / 2 + 5, yOffset);
+  yOffset += 5;
+
+  remainingAddressLines.forEach((line: string) => {
     doc.text(line, pageWidth / 2 + 5, yOffset);
     yOffset += 5;
   });
 
-  doc.text(`Date: ${project.projectDate || new Date().toLocaleDateString()}`, 20, yOffset);
-  yOffset += 10;
+  yOffset += 5;
 
   // === QUOTATION TABLE ===
   const tableData: any[] = [];
@@ -486,17 +505,17 @@ yOffset += 8;
           const item = collection.items[0];
           const qty = parseFloat(collection.quantities?.[0]) || 0;
           const measurementQty = parseFloat(collection.measurement?.quantity || "0");
-          const calculatedMRP = formatNumber(item[4] * measurementQty);
+          const calculatedMRP = item[4] * measurementQty;
           tableData.push([
             srNo++,
             `${collection.productGroup?.[0] || "N/A"} * ${collection.measurement?.quantity || 0}`,
             collection.measurement?.width && collection.measurement?.height
               ? `${collection.measurement.width}x${collection.measurement.height} ${collection.measurement.unit || ""}`
               : "N/A",
-            ` ${calculatedMRP}`,
+            ` ${formatNumber(calculatedMRP)}`,
             qty.toString(),
             ` ${formatNumber(item[4] * measurementQty * qty)}`,
-            `${item[5] || "0"}%`,
+            `${formatNumber(item[5] || 0)}%`,
             ` ${formatNumber(collection.taxAmount?.[0] || 0)}`,
             ` ${formatNumber(collection.totalAmount?.[0] || 0)}`,
           ]);
@@ -548,7 +567,7 @@ yOffset += 8;
     theme: "grid",
     styles: {
       font: "helvetica",
-      fontSize: 6.5,
+      fontSize: 7.8,
       cellPadding: 1.5,
       textColor: secondaryColor,
       lineColor: [200, 200, 200],
@@ -559,7 +578,7 @@ yOffset += 8;
       fillColor: primaryColor,
       textColor: [255, 255, 255],
       fontStyle: "bold",
-      fontSize: 6.5,
+      fontSize: 7,
       halign: "center",
     },
     alternateRowStyles: {
@@ -569,12 +588,12 @@ yOffset += 8;
       0: { cellWidth: 10, halign: "center" },
       1: { cellWidth: 38 },
       2: { cellWidth: 32 },
-      3: { cellWidth: 22, halign: "right" },
+      3: { cellWidth: 22, halign: "center" },
       4: { cellWidth: 12, halign: "center" },
-      5: { cellWidth: 22, halign: "right" },
+      5: { cellWidth: 22, halign: "center" },
       6: { cellWidth: 12, halign: "center" },
-      7: { cellWidth: 12, halign: "right" },
-      8: { cellWidth: 22, halign: "right" },
+      7: { cellWidth: 12, halign: "center" },
+      8: { cellWidth: 22, halign: "center" },
     },
     willDrawCell: (data) => {
       if (data.section === "body" && (data.column.index === 1 || data.column.index === 2)) {
@@ -589,7 +608,7 @@ yOffset += 8;
   const tableEndY = (doc as any).lastAutoTable.finalY;
   let yCursor = tableEndY + 10;
 
-  // ==== Summary Box ====
+  // === Summary Box ===
   const summaryBoxHeight = 50;
   doc.setFillColor(...lightGray);
   doc.roundedRect(pageWidth - 90, yCursor - 5, 75, summaryBoxHeight, 2, 2, "F");
@@ -606,7 +625,7 @@ yOffset += 8;
     { label: "Total Amount", value: ` ${formatNumber(project.totalAmount || 0)}` },
     { label: "Discount", value: ` ${formatNumber(project.discount || 0)}` },
     { label: "Total Tax", value: ` ${formatNumber(project.totalTax || 0)}` },
-    { label: "Grand Total", value: ` ${formatNumber(project.totalAmount || 0)}` },
+    { label: "Grand Total", value: ` ${formatNumber(project.grandTotal || 0)}` },
   ];
   summaryItems.forEach((item) => {
     doc.setFont("helvetica", "bold");
@@ -616,7 +635,7 @@ yOffset += 8;
     yCursor += 8;
   });
 
-  // ==== Terms ====
+  // === Terms & Conditions ===
   const termsText = typeof project.additionalRequests === "string" ? project.additionalRequests.trim() : "";
   const termsLines = termsText ? doc.splitTextToSize(termsText, pageWidth - 30) : [];
 
@@ -646,7 +665,7 @@ yOffset += 8;
     });
   }
 
-  // ==== FOOTER ====
+  // === FOOTER ===
   if (yCursor + 15 > pageHeight - 10) {
     doc.addPage();
     yCursor = 20;
@@ -666,9 +685,6 @@ yOffset += 8;
 };
 
 
-
-
-
   const [paidAmount, setPaidAmount] = useState(0);
 
   return (
@@ -676,16 +692,16 @@ yOffset += 8;
       <div className={`flex justify-between flex-wrap items-center mb-4`}>
         <h1 className="text-2xl font-bold">Projects</h1>
         <div className="flex gap-2">
-        <Link to="/add-project">
-          <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 !rounded-md">
-            <Plus size={18} /> Add Project
-          </button>
-        </Link>
-        <Link to="/add-site">
-          <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 !rounded-md">
-            <Plus size={18} /> Add Site
-          </button>
-        </Link>
+          <Link to="/add-project">
+            <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 !rounded-md">
+              <Plus size={18} /> Add Project
+            </button>
+          </Link>
+          <Link to="/add-site">
+            <button className="flex items-center gap-2 bg-blue-600 text-white px-4 py-2 !rounded-md">
+              <Plus size={18} /> Add Site
+            </button>
+          </Link>
         </div>
       </div>
       <div className="bg-white md:!p-6 p-2 mt-5 md:mt-0 rounded-md shadow overflow-x-auto">
@@ -699,9 +715,9 @@ yOffset += 8;
               <option key={status} value={status}>{status}</option>
             ))}
           </select>
-          <input 
-            type="text" 
-            placeholder="Search projects..." 
+          <input
+            type="text"
+            placeholder="Search projects..."
             className="border px-3 py-2 rounded-md"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -726,14 +742,14 @@ yOffset += 8;
           <tbody>
             {filteredProjects.map((project, index) => (
               <tr key={index} className="hover:bg-sky-50">
-                <td onClick={() => {setValues(index); setIndex(index); setSendProject(project); setDiscountType(project.discountType); setFlag(true); }} className="px-4 py-2">{project.projectName}</td>
-                <td onClick={() => {setValues(index); setIndex(index); setSendProject(project); setDiscountType(project.discountType); setFlag(true); }} className="px-4 py-2">{project.customerLink ? project.customerLink[0] : ""}</td>
-                <td onClick={() => {setValues(index); setIndex(index); setSendProject(project); setDiscountType(project.discountType); setFlag(true); }} className="px-4 py-2">{project.grandTotal}</td>
-                <td onClick={() => {setValues(index); setIndex(index); setSendProject(project); setDiscountType(project.discountType); setFlag(true); }} className="px-4 py-2">{projectPayments[index]}</td>
-                <td onClick={() => {setValues(index); setIndex(index); setSendProject(project); setDiscountType(project.discountType); setFlag(true); }} className="px-4 py-2">{(project.grandTotal - (projectPayments[index] || 0)).toFixed(2)}</td>
-                <td onClick={() => {setValues(index); setIndex(index); setSendProject(project); setDiscountType(project.discountType); setFlag(true); }} className="px-4 py-2">{project.createdBy}</td>
-                <td onClick={() => {setValues(index); setIndex(index); setSendProject(project); setDiscountType(project.discountType); setFlag(true); }} className="px-4 py-2">{project.projectDate}</td>
-                <td onClick={() => {setValues(index); setIndex(index); setSendProject(project); setDiscountType(project.discountType); setFlag(true); }} className="px-4 py-2">{project.date}</td>
+                <td onClick={() => { setValues(index); setIndex(index); setSendProject(project); setDiscountType(project.discountType); setFlag(true); }} className="px-4 py-2">{project.projectName}</td>
+                <td onClick={() => { setValues(index); setIndex(index); setSendProject(project); setDiscountType(project.discountType); setFlag(true); }} className="px-4 py-2">{project.customerLink ? project.customerLink[0] : ""}</td>
+                <td onClick={() => { setValues(index); setIndex(index); setSendProject(project); setDiscountType(project.discountType); setFlag(true); }} className="px-4 py-2">{formatNumber(project.grandTotal)}</td>
+                <td onClick={() => { setValues(index); setIndex(index); setSendProject(project); setDiscountType(project.discountType); setFlag(true); }} className="px-4 py-2">{formatNumber(projectPayments[index])}</td>
+                <td onClick={() => { setValues(index); setIndex(index); setSendProject(project); setDiscountType(project.discountType); setFlag(true); }} className="px-4 py-2">{formatNumber(project.grandTotal - (projectPayments[index] || 0))}</td>
+                <td onClick={() => { setValues(index); setIndex(index); setSendProject(project); setDiscountType(project.discountType); setFlag(true); }} className="px-4 py-2">{project.createdBy}</td>
+                <td onClick={() => { setValues(index); setIndex(index); setSendProject(project); setDiscountType(project.discountType); setFlag(true); }} className="px-4 py-2">{project.projectDate}</td>
+                <td onClick={() => { setValues(index); setIndex(index); setSendProject(project); setDiscountType(project.discountType); setFlag(true); }} className="px-4 py-2">{project.date}</td>
                 <td className="px-4 py-2">
                   <button
                     onClick={() => generatePDF(project)}
@@ -799,4 +815,3 @@ yOffset += 8;
     </div>
   );
 }
-

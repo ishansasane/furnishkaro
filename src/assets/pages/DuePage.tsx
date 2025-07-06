@@ -5,6 +5,16 @@ import { RootState } from "../Redux/store";
 import { setProjects, setPaymentData } from "../Redux/dataSlice";
 import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
+// ✅ Round number and format it as Indian currency with no decimals
+const formatNumber = (num: number) => {
+  if (num === undefined || num === null) return "0";
+  const number = Math.round(Number(num));
+  return number.toLocaleString("en-IN", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+};
+
 const DuePage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -104,7 +114,6 @@ const DuePage = () => {
 
     const loadProjectAndPaymentData = async () => {
       try {
-        // === Handle Project Data ===
         let finalProjects = [];
 
         if (projects && projects.length > 0) {
@@ -136,15 +145,11 @@ const DuePage = () => {
                 JSON.stringify({ data: freshProjects, time: now })
               );
             } else {
-              console.warn(
-                "Fetched project data is not an array:",
-                freshProjects
-              );
+              console.warn("Fetched project data is not an array:", freshProjects);
             }
           }
         }
 
-        // === Handle Payment Data ===
         let finalPayments = [];
 
         if (paymentData && paymentData.length > 0) {
@@ -154,12 +159,9 @@ const DuePage = () => {
           dispatch(setPaymentData(finalPayments));
         }
 
-        // === Calculate Project-wise Payments and Combined Array ===
         if (finalPayments.length > 0 && finalProjects.length > 0) {
           const combinedArray = finalProjects.map((project) => {
-            const totalAmount = parseFloat(
-              project.totalAmount + project.totalTax
-            );
+            const totalAmount = parseFloat(project.totalAmount + project.totalTax);
             const discount = parseFloat(project.discount);
             const grandTotal = totalAmount - discount;
 
@@ -212,7 +214,7 @@ const DuePage = () => {
               <tr className="font-semibold text-gray-700">
                 <th className="p-2 text-left">Customer Name</th>
                 <th className="p-2 text-left">Project</th>
-                <th className="p-theory2 text-left">Project Value</th>
+                <th className="p-2 text-left">Project Value</th>
                 <th className="p-2 text-left">Paid Amount</th>
                 <th className="p-2 text-left">Due Amount</th>
               </tr>
@@ -222,9 +224,9 @@ const DuePage = () => {
                 <tr key={index} className="hover:bg-sky-50">
                   <td className="p-2">{payment[0][0] || ""}</td>
                   <td className="p-2">{payment[1]}</td>
-                  <td className="p-2">₹{payment[2].toLocaleString("en-IN")}</td>
-                  <td className="p-2">₹{payment[3].toLocaleString("en-IN")}</td>
-                  <td className="p-2">₹{payment[4].toLocaleString("en-IN")}</td>
+                  <td className="p-2">₹{formatNumber(payment[2])}</td>
+                  <td className="p-2">₹{formatNumber(payment[3])}</td>
+                  <td className="p-2">₹{formatNumber(payment[4])}</td>
                 </tr>
               ))}
             </tbody>

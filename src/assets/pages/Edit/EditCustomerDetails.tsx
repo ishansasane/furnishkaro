@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react";
-import SelectInputWithAdd from "../SelectInputWithAdd";
+import React, { useEffect, useState, useRef } from "react";
 import { FaPlus } from "react-icons/fa";
 import { setCustomerData } from "../../Redux/dataSlice";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,17 +11,19 @@ const EditCustomerDetails = ({
   projectData,
   setCustomers,
 }) => {
-  const handleCustomerChange = (e) => {
-    if (e.target.value === "") {
+  const handleCustomerChange = (customerObj) => {
+    if (!customerObj) {
       setSelectedCustomer(null);
+      setSearchTerm("");
     } else {
-      const customerObj = customers.find((c) => c[0] === e.target.value);
       setSelectedCustomer(customerObj);
+      setSearchTerm(customerObj[0]);
     }
   };
 
   useEffect(() => {
     console.log(selectedCustomer);
+    setSearchTerm(selectedCustomer ? selectedCustomer[0] : "");
   }, [selectedCustomer]);
 
   async function fetchCustomers() {
@@ -48,6 +49,9 @@ const EditCustomerDetails = ({
   const [address, setAddress] = useState("");
   const [alternateNumber, setAlternateNumber] = useState("");
   const [email, setEmail] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   const dispatch = useDispatch();
   const customerData = useSelector((state: RootState) => state.data.customers);
@@ -97,13 +101,30 @@ const EditCustomerDetails = ({
     setIsOpen(false);
   }
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const filteredCustomers = Array.isArray(customers)
+    ? customers.filter((customer) =>
+        customer[0].toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    : [];
+
   return (
     <div className="flex flex-col gap-4 p-4 sm:p-6 rounded-xl shadow-xl w-full border-gray-200 border-2 mt-4">
       <p className="text-lg sm:text-xl font-semibold">Customer Details</p>
 
       <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
-        {/* Select Customer */}
-        <div className="flex flex-col w-full sm:w-1/2">
+        <div className="flex flex-col w-full sm:w-1/2" ref={dropdownRef}>
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
             <p className="text-sm sm:text-base">Select Customer</p>
             <button
@@ -112,6 +133,44 @@ const EditCustomerDetails = ({
             >
               <FaPlus className="mr-2 text-blue-600" /> Add Customer
             </button>
+          </div>
+          <div className="relative">
+            <input
+              type="text"
+              className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base opacity-80 focus:opacity-100 focus:ring-2 focus:ring-blue-400"
+              placeholder="Search or select customer"
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setIsDropdownOpen(true);
+              }}
+              onFocus={() => setIsDropdownOpen(true)}
+            />
+            {isDropdownOpen && (
+              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-y-auto">
+                <div
+                  className="p-2 cursor-pointer hover:bg-gray-100 text-sm sm:text-base"
+                  onClick={() => {
+                    handleCustomerChange(null);
+                    setIsDropdownOpen(false);
+                  }}
+                >
+                  Select Customer
+                </div>
+                {filteredCustomers.map((customer, index) => (
+                  <div
+                    key={index}
+                    className="p-2 cursor-pointer hover:bg-gray-100 text-sm sm:text-base"
+                    onClick={() => {
+                      handleCustomerChange(customer);
+                      setIsDropdownOpen(false);
+                    }}
+                  >
+                    {customer[0]}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <select
             className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base opacity-80 focus:opacity-100 focus:ring-2 focus:ring-blue-400"
@@ -138,7 +197,6 @@ const EditCustomerDetails = ({
           </select>
         </div>
 
-        {/* Email Field */}
         {projectData.customerLink && selectedCustomer && (
           <div className="flex flex-col w-full sm:w-1/2">
             <p className="text-sm sm:text-base">
@@ -154,7 +212,6 @@ const EditCustomerDetails = ({
         )}
       </div>
 
-      {/* Phone and Alternate Phone */}
       {projectData.customerLink && selectedCustomer && (
         <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
           <div className="flex flex-col w-full sm:w-1/2">

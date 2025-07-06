@@ -1591,6 +1591,12 @@ useEffect(() => {
     );
 
     if (response.status == 200) {
+        const latestPayments = await fetchPaymentData();
+        dispatch(setPaymentData(latestPayments));
+        localStorage.setItem(
+          "paymentData",
+          JSON.stringify({ data: latestPayments, time: Date.now() })
+        )
       alert("Deleted");
       if (added) {
         setAdded(false);

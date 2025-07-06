@@ -1,5 +1,5 @@
 import { Target } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { FaPlus } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import { setInteriorData, setSalesAssociateData } from "../../Redux/dataSlice";
@@ -65,6 +65,12 @@ const EditProjectDetails = ({
 
   const [isOpen, setIsOpen] = useState(false);
   const [isSalesOpen, setIsSalesOpen] = useState(false);
+  const [interiorSearchTerm, setInteriorSearchTerm] = useState("");
+  const [salesSearchTerm, setSalesSearchTerm] = useState("");
+  const [isInteriorDropdownOpen, setIsInteriorDropdownOpen] = useState(false);
+  const [isSalesDropdownOpen, setIsSalesDropdownOpen] = useState(false);
+  const interiorDropdownRef = useRef(null);
+  const salesDropdownRef = useRef(null);
   const dispatch = useDispatch();
   const [interiorData, setInterior] = useState([]);
   const [name, setName] = useState("");
@@ -75,6 +81,31 @@ const EditProjectDetails = ({
   const [salesemail, salesSetEmail] = useState("");
   const [salesphonenumber, salesSetPhoneNumber] = useState("");
   const [salesaddress, salesSetAddress] = useState("");
+
+  const handleInteriorChange = (interiorObj) => {
+    if (!interiorObj) {
+      setInteriorArray([]);
+      setInteriorSearchTerm("");
+    } else {
+      setInteriorArray(interiorObj);
+      setInteriorSearchTerm(interiorObj[0]);
+    }
+  };
+
+  const handleSalesAssociateChange = (salesObj) => {
+    if (!salesObj) {
+      setSalesAssociateArray([]);
+      setSalesSearchTerm("");
+    } else {
+      setSalesAssociateArray(salesObj);
+      setSalesSearchTerm(salesObj[0]);
+    }
+  };
+
+  useEffect(() => {
+    setInteriorSearchTerm(interiorArray && interiorArray[0] ? interiorArray[0] : "");
+    setSalesSearchTerm(salesAssociateArray && salesAssociateArray[0] ? salesAssociateArray[0] : "");
+  }, [interiorArray, salesAssociateArray]);
 
   const handleSubmit = async () => {
     const url =
@@ -139,11 +170,37 @@ const EditProjectDetails = ({
     }
   };
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (interiorDropdownRef.current && !interiorDropdownRef.current.contains(event.target)) {
+        setIsInteriorDropdownOpen(false);
+      }
+      if (salesDropdownRef.current && !salesDropdownRef.current.contains(event.target)) {
+        setIsSalesDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const filteredInteriors = Array.isArray(interior)
+    ? interior.filter((data) =>
+        data[0].toLowerCase().includes(interiorSearchTerm.toLowerCase())
+      )
+    : [];
+
+  const filteredSalesAssociates = Array.isArray(salesdata)
+    ? salesdata.filter((data) =>
+        data[0].toLowerCase().includes(salesSearchTerm.toLowerCase())
+      )
+    : [];
+
   return (
     <div className="flex flex-col gap-4 p-4 sm:p-6 rounded-xl shadow-xl w-full border-gray-200 border-2 mt-4">
       <p className="text-lg sm:text-xl font-semibold">Project Details</p>
 
-      {/* Reference & Project Name */}
       <div className="flex flex-col sm:flex-row w-full gap-4">
         <div className="flex flex-col w-full sm:w-1/2">
           <p className="text-sm sm:text-base">
@@ -169,7 +226,6 @@ const EditProjectDetails = ({
         </div>
       </div>
 
-      {/* Address */}
       {projectData.customerLink && (
         <div className="flex flex-col w-full">
           <p className="text-sm sm:text-base">Address</p>
@@ -182,7 +238,6 @@ const EditProjectDetails = ({
         </div>
       )}
 
-      {/* Additional Requests */}
       {projectData.additionalRequests && (
         <div className="flex flex-col w-full">
           <p className="text-sm sm:text-base">
@@ -197,9 +252,8 @@ const EditProjectDetails = ({
         </div>
       )}
 
-      {/* Dropdowns for Interior & Sales Associate */}
       <div className="flex flex-col sm:flex-row w-full gap-4">
-        <div className="flex flex-col w-full sm:w-1/2">
+        <div className="flex flex-col w-full sm:w-1/2" ref={interiorDropdownRef}>
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
             <p className="text-sm sm:text-base">Select Interior</p>
             <button
@@ -208,6 +262,44 @@ const EditProjectDetails = ({
             >
               <FaPlus className="mr-2 text-blue-600" /> Add Interior
             </button>
+          </div>
+          <div className="relative">
+            <input
+              type="text"
+              className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base opacity-80 focus:opacity-100 focus:ring-2 focus:ring-blue-400"
+              placeholder="Search or select interior"
+              value={interiorSearchTerm}
+              onChange={(e) => {
+                setInteriorSearchTerm(e.target.value);
+                setIsInteriorDropdownOpen(true);
+              }}
+              onFocus={() => setIsInteriorDropdownOpen(true)}
+            />
+            {isInteriorDropdownOpen && (
+              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-y-auto">
+                <div
+                  className="p-2 cursor-pointer hover:bg-gray-100 text-sm sm:text-base"
+                  onClick={() => {
+                    handleInteriorChange(null);
+                    setIsInteriorDropdownOpen(false);
+                  }}
+                >
+                  Select Interior Name (optional)
+                </div>
+                {filteredInteriors.map((data, index) => (
+                  <div
+                    key={index}
+                    className="p-2 cursor-pointer hover:bg-gray-100 text-sm sm:text-base"
+                    onClick={() => {
+                      handleInteriorChange(data);
+                      setIsInteriorDropdownOpen(false);
+                    }}
+                  >
+                    {data[0]}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <select
             className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base opacity-80 focus:opacity-100 focus:ring-2 focus:ring-blue-400"
@@ -229,7 +321,7 @@ const EditProjectDetails = ({
           </select>
         </div>
 
-        <div className="flex flex-col w-full sm:w-1/2">
+        <div className="flex flex-col w-full sm:w-1/2" ref={salesDropdownRef}>
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
             <p className="text-sm sm:text-base">Select Sales Associate</p>
             <button
@@ -238,6 +330,44 @@ const EditProjectDetails = ({
             >
               <FaPlus className="mr-2 text-blue-600" /> Add Sales Associate
             </button>
+          </div>
+          <div className="relative">
+            <input
+              type="text"
+              className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base opacity-80 focus:opacity-100 focus:ring-2 focus:ring-blue-400"
+              placeholder="Search or select sales associate"
+              value={salesSearchTerm}
+              onChange={(e) => {
+                setSalesSearchTerm(e.target.value);
+                setIsSalesDropdownOpen(true);
+              }}
+              onFocus={() => setIsSalesDropdownOpen(true)}
+            />
+            {isSalesDropdownOpen && (
+              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-y-auto">
+                <div
+                  className="p-2 cursor-pointer hover:bg-gray-100 text-sm sm:text-base"
+                  onClick={() => {
+                    handleSalesAssociateChange(null);
+                    setIsSalesDropdownOpen(false);
+                  }}
+                >
+                  Select Sales Associate (optional)
+                </div>
+                {filteredSalesAssociates.map((data, index) => (
+                  <div
+                    key={index}
+                    className="p-2 cursor-pointer hover:bg-gray-100 text-sm sm:text-base"
+                    onClick={() => {
+                      handleSalesAssociateChange(data);
+                      setIsSalesDropdownOpen(false);
+                    }}
+                  >
+                    {data[0]}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <select
             className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base opacity-80 focus:opacity-100 focus:ring-2 focus:ring-blue-400"
@@ -265,7 +395,6 @@ const EditProjectDetails = ({
         </div>
       </div>
 
-      {/* Select User & Project Deadline */}
       <div className="flex flex-col sm:flex-row w-full gap-4">
         <div className="flex flex-col w-full sm:w-1/2">
           <p className="text-sm sm:text-base">Select User</p>
@@ -287,7 +416,6 @@ const EditProjectDetails = ({
         </div>
       </div>
 
-      {/* Interior Modal */}
       {isOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-white p-4 sm:p-6 rounded-xl shadow-xl w-full max-w-xs sm:max-w-md">
@@ -334,7 +462,6 @@ const EditProjectDetails = ({
         </div>
       )}
 
-      {/* Sales Associate Modal */}
       {isSalesOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
           <div className="bg-white p-4 sm:p-6 rounded-xl shadow-xl w-full max-w-xs sm:max-w-md">

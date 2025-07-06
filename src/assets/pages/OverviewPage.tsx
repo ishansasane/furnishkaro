@@ -107,8 +107,10 @@ const OverviewPage = ({
   useEffect(() => {
     if (!projectData?.projectName || !paymentData?.length) return;
 
+    console.log(paymentData);
+
     const total = paymentData
-      .filter(payment => payment[1]?.toLowerCase() === projectData.projectName.toLowerCase())
+      .filter(payment => payment[1] == projectData.projectName)
       .reduce((sum, payment) => {
         const amount = parseFloat(payment[2]);
         return sum + (isNaN(amount) ? 0 : amount);
@@ -243,8 +245,8 @@ const OverviewPage = ({
           <div className="flex flex-col gap-3">
             <div className="flex flex-row justify-between items-center border border-gray-200 !rounded-lg p-3 bg-gray-50">
               <div className="w-1 bg-gray-500 h-6 !rounded"></div>
-              <p className="text-sm font-medium text-gray-800">Total Payment</p>
-              <p className="text-sm font-semibold text-gray-800">{(projectData.totalAmount).toFixed(2)}</p>
+              <p className="text-sm font-medium text-gray-800">Total Project Value</p>
+              <p className="text-sm font-semibold text-gray-800">{Math.round((projectData.grandTotal))}</p>
             </div>
             <div className="flex flex-row justify-between items-center border border-gray-200 !rounded-lg p-3 bg-gray-50">
               <div className="w-1 bg-green-500 h-6 !rounded"></div>
@@ -254,7 +256,7 @@ const OverviewPage = ({
             <div className="flex flex-row justify-between items-center border border-gray-200 !rounded-lg p-3 bg-gray-50">
               <div className="w-1 bg-yellow-500 h-6 !rounded"></div>
               <p className="text-sm font-medium text-gray-800">Due</p>
-              <p className="text-sm font-semibold text-gray-800">{(projectData.totalAmount - paymentReceived).toFixed(2)}</p>
+              <p className="text-sm font-semibold text-gray-800">{Math.round((projectData.grandTotal - paymentReceived))}</p>
             </div>
           </div>
         </div>

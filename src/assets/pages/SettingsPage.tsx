@@ -12,7 +12,7 @@ const SettingsPage = () => {
   // Fetch data functions
   const fetchTermsData = async () => {
     const response = await fetch(
-      "https://sheeladecor.netlify.app/.netlify/functions/server/getTermsData"
+      "https://sheeladecor.netlify.app/.netlify/functions/server/getPaintsTermsData"
     );
     const data = await response.json();
     return data.body || [];
@@ -20,7 +20,7 @@ const SettingsPage = () => {
 
   const fetchBankData = async () => {
     const response = await fetch(
-      "https://sheeladecor.netlify.app/.netlify/functions/server/getBankData"
+      "https://sheeladecor.netlify.app/.netlify/functions/server/getBankDetails"
     );
     const data = await response.json();
     return data.body || [];
@@ -124,7 +124,7 @@ const SettingsPage = () => {
   }
 
   return (
-    <div className="min-h-screen mt-5 md:!mt-2 bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-8">Settings</h1>
         <div className="bg-white rounded-lg shadow overflow-hidden">
@@ -148,7 +148,7 @@ const TermsSection = () => {
 
   const fetchTermsData = async () => {
     const response = await fetch(
-      "https://sheeladecor.netlify.app/.netlify/functions/server/getTermsData"
+      "https://sheeladecor.netlify.app/.netlify/functions/server/getPaintsTermsData"
     );
     const data = await response.json();
     return data.body || [];
@@ -168,7 +168,7 @@ const TermsSection = () => {
       }/${date.getFullYear()}`;
 
       const response = await fetch(
-        "https://sheeladecor.netlify.app/.netlify/functions/server/sendTermsData",
+        "https://sheeladecor.netlify.app/.netlify/functions/server/sendPaintsTermsData",
         {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -196,13 +196,13 @@ const TermsSection = () => {
     }
   };
 
-  const deleteTermsData = async (termsText: string) => {
+  const deletePaintsTermsData = async (termsText: string) => {
     if (!confirm("Are you sure you want to delete these terms?")) return;
 
     setIsLoading(true);
     try {
       const response = await fetch(
-        "https://sheeladecor.netlify.app/.netlify/functions/server/deleteTermsData",
+        "https://sheeladecor.netlify.app/.netlify/functions/server/deletePaintsTermsData",
         {
           method: "POST",
           headers: { "content-type": "application/json" },
@@ -230,14 +230,14 @@ const TermsSection = () => {
 
   return (
     <div>
-      <div className="flex flex-wrap justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold text-gray-800">
           Terms & Conditions Management
         </h2>
         {!termsDialog && (
           <button
             onClick={() => setTermsDialog(true)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 !rounded-md shadow-sm"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow-sm"
             disabled={isLoading}
           >
             <PlusCircle size={18} />
@@ -278,7 +278,7 @@ const TermsSection = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
-                        onClick={() => deleteTermsData(data[0])}
+                        onClick={() => deletePaintsTermsData(data[0])}
                         className="text-red-600 hover:text-red-900"
                         title="Delete"
                         disabled={isLoading}
@@ -369,6 +369,9 @@ const BankSection = () => {
   const [editBankData, setEditBankData] = useState(false);
   const [formData, setFormData] = useState({
     customerName: "",
+    bankName: "",
+    branch: "",
+    pincode: "",
     accountNumber: "",
     ifscCode: "",
   });
@@ -381,7 +384,7 @@ const BankSection = () => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        "https://sheeladecor.netlify.app/.netlify/functions/server/getBankData"
+        "https://sheeladecor.netlify.app/.netlify/functions/server/getBankDetails"
       );
       const data = await response.json();
       return data.body || [];
@@ -398,6 +401,9 @@ const BankSection = () => {
   const sendBankDetails = async () => {
     if (
       !formData.customerName ||
+      !formData.bankName ||
+      !formData.branch ||
+      !formData.pincode ||
       !formData.accountNumber ||
       !formData.ifscCode
     ) {
@@ -444,7 +450,7 @@ const BankSection = () => {
     }
   };
 
-  const deleteBankData = async (customerName: string) => {
+  const deletePaintsBankData = async (customerName: string) => {
     if (!confirm("Are you sure you want to delete this bank record?")) return;
 
     setIsLoading(true);
@@ -479,6 +485,9 @@ const BankSection = () => {
   const resetForm = () => {
     setFormData({
       customerName: "",
+      bankName: "",
+      branch: "",
+      pincode: "",
       accountNumber: "",
       ifscCode: "",
     });
@@ -489,8 +498,11 @@ const BankSection = () => {
   const handleEdit = (data: any) => {
     setFormData({
       customerName: data[0],
-      accountNumber: data[1],
-      ifscCode: data[2],
+      bankName: data[1],
+      branch: data[2],
+      pincode: data[3],
+      accountNumber: data[4],
+      ifscCode: data[5],
     });
     setEditBankData(true);
     setBankDialog(true);
@@ -498,14 +510,14 @@ const BankSection = () => {
 
   return (
     <div>
-      <div className="flex flex-wrap justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold text-gray-800">
           Bank Account Management
         </h2>
         {!bankDialog && (
           <button
             onClick={() => setBankDialog(true)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 !rounded-md shadow-sm"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow-sm"
             disabled={isLoading}
           >
             <PlusCircle size={18} />
@@ -529,10 +541,10 @@ const BankSection = () => {
             </h3>
           </div>
 
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Account Name
+                Customer Name*
               </label>
               <input
                 type="text"
@@ -547,7 +559,52 @@ const BankSection = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Account Number
+                Bank Name*
+              </label>
+              <input
+                type="text"
+                name="bankName"
+                value={formData.bankName}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter bank name"
+                disabled={isLoading}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Branch*
+              </label>
+              <input
+                type="text"
+                name="branch"
+                value={formData.branch}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter branch"
+                disabled={isLoading}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Pincode*
+              </label>
+              <input
+                type="text"
+                name="pincode"
+                value={formData.pincode}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter pincode"
+                disabled={isLoading}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Account Number*
               </label>
               <input
                 type="text"
@@ -562,7 +619,7 @@ const BankSection = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                IFSC Code
+                IFSC Code*
               </label>
               <input
                 type="text"
@@ -590,6 +647,9 @@ const BankSection = () => {
               disabled={
                 isLoading ||
                 !formData.customerName ||
+                !formData.bankName ||
+                !formData.branch ||
+                !formData.pincode ||
                 !formData.accountNumber ||
                 !formData.ifscCode
               }
@@ -639,7 +699,13 @@ const BankSection = () => {
                   #
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Account Name
+                  Customer Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Bank Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Branch
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Account Number
@@ -647,9 +713,7 @@ const BankSection = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   IFSC Code
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Created Date
-                </th>
+
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
@@ -671,8 +735,12 @@ const BankSection = () => {
                     {data[2]}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {data[3]}
+                    {data[4]}
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {data[5]}
+                  </td>
+
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end gap-3">
                       <button
@@ -684,7 +752,7 @@ const BankSection = () => {
                         <Pencil size={18} />
                       </button>
                       <button
-                        onClick={() => deleteBankData(data[0])}
+                        onClick={() => deletePaintsBankData(data[0])}
                         className="text-red-600 hover:text-red-800"
                         title="Delete"
                         disabled={isLoading}
