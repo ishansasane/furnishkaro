@@ -22,7 +22,7 @@ import BankDetails from "./BankDetails.tsx";
 import { fetchWithLoading } from "../Redux/fetchWithLoading.ts";
 
 const fetchTaskData = async () => {
-  const response = await fetch(
+  const response = await fetchWithLoading(
     "https://sheeladecor.netlify.app/.netlify/functions/server/gettasks"
   );
   const data = await response.json();
@@ -34,7 +34,7 @@ const fetchTaskData = async () => {
 };
 
 const fetchInquiryData = async () => {
-  const response = await fetch(
+  const response = await fetchWithLoading(
     "https://sheeladecor.netlify.app/.netlify/functions/server/getInquiry"
   );
   const data = await response.json();
@@ -86,7 +86,7 @@ const Dashboard: React.FC = () => {
     }
 
     // ✅ Proceed to send the inquiry
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/sendInquiry",
       {
         method: "POST",
@@ -150,7 +150,7 @@ const Dashboard: React.FC = () => {
 
   const deleteTask = async (name: string) => {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/deletetask",
         {
           method: "POST",
@@ -248,7 +248,7 @@ useEffect(() => {
           }
         }
 
-        const taskRes = await fetch(
+        const taskRes = await fetchWithLoading(
           "https://sheeladecor.netlify.app/.netlify/functions/server/gettasks",
           {
             credentials: "include",
@@ -285,7 +285,7 @@ useEffect(() => {
 
   const fetchProjectData = async () => {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
         {
           credentials: "include",
@@ -390,7 +390,7 @@ useEffect(() => {
 
   const fetchPaymentData = async () => {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/getPayments"
       );
       if (!response.ok) {

@@ -939,7 +939,7 @@ const EditProjects = ({
         .toFixed(2)
     );
 
-    return { totalTax, totalAmount };
+    return { totalTax : Math.round(totalTax), totalAmount : Math.round(totalAmount) };
   };
 
 const handlequantitychange = (
@@ -1007,12 +1007,12 @@ const handlequantitychange = (
 
   const additionalSubtotals = additionalItems.map(item => item.quantity * item.rate);
   const subtotal = [...selectionSubtotals, ...additionalSubtotals].reduce((a, b) => a + b, 0);
-  setAmount(parseFloat(subtotal.toFixed(2)));  // ✅ Subtotal without tax
+  setAmount(Math.round(subtotal));  // ✅ Subtotal without tax
 
   // Step 5: Calculate total tax and grand total
   const { totalTax, totalAmount } = recalculateTotals(updatedSelections, additionalItems);
-  setTax(totalTax);
-  setGrandTotal(parseFloat(totalAmount.toFixed(2)));  // ✅ Grand Total with tax
+  setTax(Math.round(totalTax));
+  setGrandTotal(Math.round(totalAmount));  // ✅ Grand Total with tax
 };
 
   const handleunitchange = (mainindex: number, index: number, unit) => {
@@ -1082,8 +1082,8 @@ const handlequantitychange = (
       updatedSelections,
       additionalItems
     );
-    setTax(totalTax);
-    setAmount(totalAmount);
+    setTax(Math.round(totalTax));
+    setAmount(Math.round(baseCost));
 
     // Optional: Update grand total
     let discountAmt = 0;
@@ -1094,7 +1094,7 @@ const handlequantitychange = (
     }
 
     const grandTotal = parseFloat(totalAmount.toFixed(2)); // if you're tracking this
-    setGrandTotal(grandTotal);
+    setGrandTotal(Math.round(grandTotal));
   };
 
 const handleItemQuantityChange = (i: number, quantity: string) => {
@@ -1154,12 +1154,12 @@ const handleItemQuantityChange = (i: number, quantity: string) => {
   const pureSubtotal = [...selectionSubtotals, ...additionalSubtotals]
     .reduce((acc, val) => acc + val, 0);
 
-  setAmount(parseFloat(pureSubtotal.toFixed(2)));  // ✅ Subtotal without tax
+  setAmount(Math.round(pureSubtotal));  // ✅ Subtotal without tax
 
   // Step 6: Recalculate grand total and tax
   const { totalTax, totalAmount : grandSubtotal } = recalculateTotals(selections, updated);
-  setTax(totalTax);
-  setGrandTotal(parseFloat(grandSubtotal.toFixed(2)));  // ✅ Grand total including tax
+  setTax(Math.round(totalTax));
+  setGrandTotal(Math.round(grandSubtotal));  // ✅ Grand total including tax
 };
 
   const handleAddMiscItem = () => {
@@ -1201,11 +1201,11 @@ const handleDeleteMiscItem = (itemIndex: number) => {
   const pureSubtotal = [...selectionSubtotals, ...additionalSubtotals]
     .reduce((acc, val) => acc + val, 0);
 
-  setAmount(parseFloat(pureSubtotal.toFixed(2)));  // ✅ Subtotal without tax
+  setAmount(Math.round(pureSubtotal));  // ✅ Subtotal without tax
 
   // Step 2: Recalculate Tax and Total (including tax)
   const { totalTax, totalAmount } = recalculateTotals(selections, updated);
-  setTax(totalTax);
+  setTax(Math.round(totalTax));
 
   // Step 3: Optional: Apply Discount Amount for Display (not used in calculation here)
   let discountAmt = 0;
@@ -1216,7 +1216,7 @@ const handleDeleteMiscItem = (itemIndex: number) => {
   }
 
   // Step 4: Set Grand Total (already includes discount inside recalculateTotals if you coded it there)
-  setGrandTotal(parseFloat(totalAmount.toFixed(2)));
+  setGrandTotal(Math.round(totalAmount));
 };
   const [itemTax, setItemTax] = useState(0);
   const [itemTotal, setItemTotal] = useState(0);
@@ -1258,14 +1258,14 @@ const handleDeleteMiscItem = (itemIndex: number) => {
       return {
         ...item,
         netRate: parseFloat(discountedNet.toFixed(2)),
-        taxAmount: taxAmt,
-        totalAmount: totalAmt,
+        taxAmount: Math.round(taxAmt),
+        totalAmount: Math.round(totalAmt),
       };
     });
 
     setAdditionaItems(updatedItems);
-    setItemTax(parseFloat(totalTax.toFixed(2)));
-    setItemTotal(parseFloat(totalAmount.toFixed(2)));
+    setItemTax(Math.round(totalTax));
+    setItemTotal(Math.round(totalAmount));
   };
 
 const handleItemRateChange = (i: number, rate: string) => {
@@ -1318,11 +1318,11 @@ const handleItemRateChange = (i: number, rate: string) => {
   const subTotalOnly = [...selectionSubtotals, ...additionalSubtotals]
     .reduce((acc, val) => acc + val, 0);
 
-  setAmount(parseFloat(subTotalOnly.toFixed(2)));  // ✅ Subtotal without tax
+  setAmount(Math.round(subTotalOnly));  // ✅ Subtotal without tax
 
   const { totalTax, totalAmount } = recalculateTotals(selections, updated);
-  setTax(totalTax);
-  setGrandTotal(parseFloat(totalAmount.toFixed(2)));  // ✅ Grand total including tax
+  setTax(Math.round(totalTax));
+  setGrandTotal(Math.round(totalAmount));  // ✅ Grand total including tax
 };
 
 const handleItemTaxChange = (i: number, tax: string) => {
@@ -1375,11 +1375,11 @@ const handleItemTaxChange = (i: number, tax: string) => {
   const subTotalOnly = [...selectionSubtotals, ...additionalSubtotals]
     .reduce((acc, val) => acc + val, 0);
 
-  setAmount(parseFloat(subTotalOnly.toFixed(2)));  // ✅ Subtotal without tax
+  setAmount(Math.round(subTotalOnly));  // ✅ Subtotal without tax
 
   const { totalTax, totalAmount } = recalculateTotals(selections, updated);
-  setTax(totalTax);
-  setGrandTotal(parseFloat(totalAmount.toFixed(2)));  // ✅ Grand total including tax
+  setTax(Math.round(totalTax));
+  setGrandTotal(Math.round(totalAmount));  // ✅ Grand total including tax
 };
   const handleItemRemarkChange = (i, remark) => {
     const updated = [...additionalItems];
@@ -1763,7 +1763,7 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
         areaCol.totalTax[i] = taxAmount;
         areaCol.totalAmount[i] = totalAmount;
 
-        return [...item.slice(0, 6), taxAmount, totalAmount];
+        return [...item.slice(0, 6), Math.round(taxAmount), Math.round(totalAmount)];
       });
     });
   });
@@ -1806,10 +1806,10 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
 
   setSelections(updatedSelections);
   setAdditionaItems(updatedAdditionalItems);
-  setTax(totalTax);
-  setAmount(totalBaseAmount);
-  setGrandTotal(totalAmount);
-  setGrandTotal(parseFloat(totalAmount.toFixed(2)));
+  setTax(Math.round(totalTax));
+  setAmount(Math.round(totalBaseAmount));
+  setGrandTotal(Math.round(totalAmount));
+  setGrandTotal(Math.round(parseFloat(totalAmount.toFixed(2))));
 };
 
   const fetchProjectData = async () => {
@@ -1950,12 +1950,12 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
   };
 
   const handleMRPChange = (
-  mainIndex: number,
-  collectionIndex: number,
-  value: number,
-  measurementQuantity: number,
-  taxRate: number,
-  qty: number
+  mainIndex,
+  collectionIndex,
+  value,
+  measurementQuantity,
+  taxRate,
+  qty
 ) => {
   const updatedSelections = [...selections];
   const measurementQty = parseFloat(measurementQuantity.toString() || "0");
@@ -2003,11 +2003,11 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
   const subTotalOnly = [...selectionAmountArray, ...additionalAmountArray]
     .reduce((acc, val) => acc + val, 0);
 
-  setAmount(parseFloat(subTotalOnly.toFixed(2))); // ✅ This is your subtotal (no tax)
+  setAmount(Math.round(subTotalOnly)); // ✅ This is your subtotal (no tax)
 
   const { totalTax, totalAmount } = recalculateTotals(updatedSelections, additionalItems);
-  setTax(totalTax);
-  setGrandTotal(totalAmount);  // ✅ This is total including tax
+  setTax(Math.round(totalTax));
+  setGrandTotal(Math.round(totalAmount));  // ✅ This is total including tax
 };
 
   return (
