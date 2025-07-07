@@ -820,10 +820,10 @@ const handleQuantityChange = async (
 
   // Ensure measurement object and quantity are valid
   if (!areaCol.measurement) areaCol.measurement = {};
-  areaCol.measurement.quantity = measurementQty;
+  areaCol.measurement.quantity = 1;
 
   // Step 1: Calculate Base Cost
-  const baseCost = rate * measurementQty * itemQty;
+  const baseCost = rate * 1 * itemQty;
 
   // Step 2: Calculate Discount
   let effectiveDiscountPercent = 0;
@@ -855,10 +855,10 @@ const handleQuantityChange = async (
   const selectionSubtotals = updatedSelections.flatMap((selection) =>
     selection.areacollection.flatMap((col) =>
       col.items?.reduce((acc, item, idx) => {
-        const areaQty = parseFloat(col.measurement?.quantity || "0");
+        const areaQty = parseFloat(col.measurement?.quantity || 1);
         const itemQuantity = parseFloat(col.quantities?.[idx] || "0");
         const itemRate = parseFloat(item[4]) || 0;
-        return acc + areaQty * itemQuantity * itemRate;
+        return acc + 1 * itemQuantity * itemRate;
       }, 0) || 0
     )
   );
@@ -905,7 +905,7 @@ const handleQuantityChange = async (
   const updatedSelections = [...selections];
   const collection = updatedSelections[mainIndex].areacollection[collectionIndex];
 
-  const parsedMeasurementQty = parseFloat(measurementQty.toString()) || 0;
+  const parsedMeasurementQty = 1;
   const subtotal = rate * parsedMeasurementQty * qty;
   const taxAmount = subtotal * (newTaxRate / 100);
   const total = subtotal + taxAmount;
@@ -923,10 +923,10 @@ const handleQuantityChange = async (
   const selectionSubtotals = updatedSelections.flatMap(sel =>
     sel.areacollection.flatMap(col =>
       col.items?.reduce((acc, item, idx) => {
-        const areaQty = col.measurement.quantity || 0;
+        const areaQty = col.measurement.quantity || 1;
         const itemQty = parseFloat(col.quantities?.[idx]) || 0;
         const itemRate = parseFloat(item[4]) || 0;
-        return acc + areaQty * itemQty * itemRate;
+        return acc + 1 * itemQty * itemRate;
       }, 0) || 0
     )
   );
@@ -955,7 +955,7 @@ const handleDeleteMiscItem = (itemIndex: number) => {
         const areaQty = col.measurement.quantity || 0;
         const itemQty = parseFloat(col.quantities?.[idx]) || 0;
         const itemRate = parseFloat(item[4]) || 0;
-        return acc + areaQty * itemQty * itemRate;
+        return acc + 1 * itemQty * itemRate;
       }, 0) || 0
     )
   );
@@ -1037,7 +1037,7 @@ const handleItemQuantityChange = (i: number, quantity: string) => {
         const areaQty = col.measurement.quantity || 0;
         const itemQty = parseFloat(col.quantities?.[idx]) || 0;
         const itemRate = parseFloat(item[4]) || 0;
-        return acc + areaQty * itemQty * itemRate;
+        return acc + 1 * itemQty * itemRate;
       }, 0) || 0
     )
   );
@@ -1140,7 +1140,7 @@ const handleItemRateChange = (i: number, rate: string) => {
         const areaQty = col.measurement.quantity || 0;
         const itemQty = parseFloat(col.quantities?.[idx]) || 0;
         const itemRate = parseFloat(item[4]) || 0;
-        return acc + areaQty * itemQty * itemRate;
+        return acc + 1 * itemQty * itemRate;
       }, 0) || 0
     )
   );
@@ -1197,7 +1197,7 @@ const handleItemTaxChange = (i: number, tax: string) => {
         const areaQty = col.measurement.quantity || 0;
         const itemQty = parseFloat(col.quantities?.[idx]) || 0;
         const itemRate = parseFloat(item[4]) || 0;
-        return acc + areaQty * itemQty * itemRate;
+        return acc + 1 * itemQty * itemRate;
       }, 0) || 0
     )
   );
@@ -1356,7 +1356,7 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
   // === First: Calculate total base (pre-tax, pre-discount) ===
   updatedSelections.forEach((selection) => {
     selection.areacollection.forEach((areaCol) => {
-      const areaQuantity = areaCol.measurement.quantity || 0;
+      const areaQuantity = 1;
 
       let areaBase = 0;
       areaCol.items?.forEach((item, i) => {
@@ -1390,7 +1390,7 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
   // === Apply to Selections ===
   updatedSelections.forEach((selection) => {
     selection.areacollection.forEach((areaCol) => {
-      const areaQuantity = areaCol.measurement.quantity || 0;
+      const areaQuantity = 1;
       const areaBase = areaCol._baseAmount || 0;
 
       if (!areaCol.totalTax) areaCol.totalTax = [];
@@ -1787,7 +1787,7 @@ const generatePDF = () => {
         : [];
 
       const quantities = Array.isArray(collection.quantities) ? collection.quantities : [];
-      const measurementQty = parseFloat(collection.measurement?.quantity || "0");
+      const measurementQty = 1;
       const measurement = collection.measurement || {};
 
       pg.forEach((productName: string, index: number) => {
@@ -2016,7 +2016,7 @@ const handleMRPChange = (
   qty: number
 ) => {
   const updatedSelections = [...selections];
-  const measurementQty = parseFloat(measurementQuantity.toString() || "0");
+  const measurementQty = 1;
   const newMRP = parseFloat(value.toString() || "0");
 
   const areaCollection = updatedSelections[mainIndex].areacollection[collectionIndex];
@@ -2050,7 +2050,7 @@ const handleMRPChange = (
       return col.items?.reduce((acc, item, idx) => {
         const itemQty = parseFloat(col.quantities?.[idx]) || 0;
         const itemRate = parseFloat(item[4]) || 0;
-        const areaQty = col.measurement.quantity || 0;
+        const areaQty = 1
         return acc + areaQty * itemQty * itemRate;
       }, 0) || 0;
     })

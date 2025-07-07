@@ -950,7 +950,7 @@ const handlequantitychange = (
   const updatedSelections = [...selections];
   const areaCol = updatedSelections[mainIndex].areacollection[index];
 
-  areaCol.measurement.quantity = quantity;
+  areaCol.measurement.quantity = 1;
 
   if (!areaCol.quantities) areaCol.quantities = [];
   if (!areaCol.totalTax) areaCol.totalTax = [];
@@ -997,7 +997,7 @@ const handlequantitychange = (
   const selectionSubtotals = updatedSelections.flatMap(sel =>
     sel.areacollection.flatMap(col =>
       col.items?.reduce((acc, itm, idx) => {
-        const areaQty = col.measurement.quantity || 0;
+        const areaQty = 1;
         const itemQty = parseFloat(col.quantities?.[idx]) || 0;
         const itemRate = parseFloat(itm[4]) || 0;
         return acc + areaQty * itemQty * itemRate;
@@ -1065,8 +1065,8 @@ const handlequantitychange = (
     const discountedCost = baseCost - discountAmount;
 
     // Step 4: Apply tax
-    const taxAmount = parseFloat(((discountedCost * num2) / 100).toFixed(2));
-    const totalWithTax = parseFloat((discountedCost + taxAmount).toFixed(2));
+    const taxAmount = Math.round((discountedCost * num2) / 100)
+    const totalWithTax = Math.round(discountedCost + taxAmount)
 
     // Step 5: Set tax & total
     if (!areaCol.totalTax) areaCol.totalTax = [];
@@ -1141,7 +1141,7 @@ const handleItemQuantityChange = (i: number, quantity: string) => {
   const selectionSubtotals = selections.flatMap(selection =>
     selection.areacollection.flatMap(col =>
       col.items?.reduce((acc, item, idx) => {
-        const areaQty = col.measurement.quantity || 0;
+        const areaQty = 1;
         const itemQty = parseFloat(col.quantities?.[idx]) || 0;
         const itemRate = parseFloat(item[4]) || 0;
         return acc + areaQty * itemQty * itemRate;
@@ -1188,7 +1188,7 @@ const handleDeleteMiscItem = (itemIndex: number) => {
   const selectionSubtotals = selections.flatMap(selection =>
     selection.areacollection.flatMap(col =>
       col.items?.reduce((acc, item, idx) => {
-        const areaQty = col.measurement.quantity || 0;
+        const areaQty = 1;
         const itemQty = parseFloat(col.quantities?.[idx]) || 0;
         const itemRate = parseFloat(item[4]) || 0;
         return acc + areaQty * itemQty * itemRate;
@@ -1305,7 +1305,7 @@ const handleItemRateChange = (i: number, rate: string) => {
   const selectionSubtotals = selections.flatMap(selection =>
     selection.areacollection.flatMap(col =>
       col.items?.reduce((acc, item, idx) => {
-        const areaQty = col.measurement.quantity || 0;
+        const areaQty = 1;
         const itemQty = parseFloat(col.quantities?.[idx]) || 0;
         const itemRate = parseFloat(item[4]) || 0;
         return acc + areaQty * itemQty * itemRate;
@@ -1362,7 +1362,7 @@ const handleItemTaxChange = (i: number, tax: string) => {
   const selectionSubtotals = selections.flatMap(selection =>
     selection.areacollection.flatMap(col =>
       col.items?.reduce((acc, item, idx) => {
-        const areaQty = col.measurement.quantity || 0;
+        const areaQty = 1;
         const itemQty = parseFloat(col.quantities?.[idx]) || 0;
         const itemRate = parseFloat(item[4]) || 0;
         return acc + areaQty * itemQty * itemRate;
@@ -1713,7 +1713,7 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
   // === First: Calculate total base (pre-tax, pre-discount) ===
   updatedSelections.forEach((selection) => {
     selection.areacollection.forEach((areaCol) => {
-      const areaQuantity = areaCol.measurement.quantity || 0;
+      const areaQuantity = 1;
 
       let areaBase = 0;
       areaCol.items?.forEach((item, i) => {
@@ -1747,7 +1747,7 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
   // === Apply to Selections ===
   updatedSelections.forEach((selection) => {
     selection.areacollection.forEach((areaCol) => {
-      const areaQuantity = areaCol.measurement.quantity || 0;
+      const areaQuantity = 1;
       const areaBase = areaCol._baseAmount || 0;
 
       if (!areaCol.totalTax) areaCol.totalTax = [];
@@ -1964,7 +1964,7 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
   qty
 ) => {
   const updatedSelections = [...selections];
-  const measurementQty = parseFloat(measurementQuantity.toString() || "0");
+  const measurementQty = 1;
   const newMRP = parseFloat(value.toString() || "0");
 
   const areaCollection = updatedSelections[mainIndex].areacollection[collectionIndex];
@@ -1998,7 +1998,7 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
       return col.items?.reduce((acc, item, idx) => {
         const itemQty = parseFloat(col.quantities?.[idx]) || 0;
         const itemRate = parseFloat(item[4]) || 0;
-        const areaQty = col.measurement.quantity || 0;
+        const areaQty = 1;
         return acc + areaQty * itemQty * itemRate;
       }, 0) || 0;
     })
