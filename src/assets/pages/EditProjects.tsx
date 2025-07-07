@@ -2329,9 +2329,7 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
                                           {itemIndex + 1}
                                         </td>
                                         <td className="w-full sm:w-[45%] text-xs sm:text-sm py-1 before:content-['Product_Name:_'] sm:before:content-none before:font-bold before:pr-2">
-                                          {item[0] +
-                                            " * " +
-                                            collection.measurement.quantity}
+                                          {item[0]}
                                         </td>
                                         <td className="w-full sm:w-[45%] text-xs sm:text-sm py-1 before:content-['Size:_'] sm:before:content-none before:font-bold before:pr-2">
                                           {collection.measurement.width +
@@ -2342,11 +2340,8 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
                                         </td>
                                         <td className="w-full sm:w-[20%] text-xs sm:text-sm py-1 sm:text-center before:content-['MRP:_'] sm:before:content-none before:font-bold before:pr-2">
                                           {(
-                                            item[4] *
-                                            parseFloat(
-                                              collection.measurement.quantity
-                                            )
-                                          ).toFixed(2)}
+                                            (Math.round(item[4])).toLocaleString("en-IN")
+                                          )}
                                         </td>
                                         <td className="w-full sm:w-[20%] py-1 before:content-['Quantity:_'] sm:before:content-none before:font-bold before:pr-2">
                                           <div className="flex flex-col">
@@ -2378,30 +2373,27 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
                                           </div>
                                         </td>
                                         <td className="w-full sm:w-[20%] text-xs sm:text-sm py-1 sm:text-center before:content-['Subtotal:_'] sm:before:content-none before:font-bold before:pr-2">
-                                          {(
+                                          {(Math.round(
                                             item[4] *
-                                            parseFloat(
-                                              collection.measurement.quantity
-                                            ) *
                                             qty
-                                          ).toFixed(2)}
+                                          )).toLocaleString("en-IN")}
                                         </td>
                                         <td className="w-full sm:w-[20%] text-xs sm:text-sm py-1 sm:text-center before:content-['Tax_Rate_(%):_'] sm:before:content-none before:font-bold before:pr-2">
                                           {item[5]}
                                         </td>
                                         <td className="w-full sm:w-[20%] text-xs sm:text-sm py-1 sm:text-center before:content-['Tax_Amount:_'] sm:before:content-none before:font-bold before:pr-2">
                                           {collection.totalTax[itemIndex]
-                                            ? collection.totalTax[
+                                            ? (Math.round(collection.totalTax[
                                                 itemIndex
-                                              ].toFixed(2)
-                                            : "0.00"}
+                                              ])).toLocaleString("en-IN")
+                                            : "0"}
                                         </td>
                                         <td className="w-full sm:w-[20%] text-xs sm:text-sm py-1 sm:text-center before:content-['Total:_'] sm:before:content-none before:font-bold before:pr-2">
                                           {collection.totalAmount[itemIndex]
-                                            ? collection.totalAmount[
+                                            ? (Math.round(collection.totalAmount[
                                                 itemIndex
-                                              ].toFixed(2)
-                                            : "0.00"}
+                                              ])).toLocaleString("en-IN")
+                                            : "0"}
                                         </td>
                                       </tr>
                                     );
@@ -2495,14 +2487,14 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
                                   handleItemRateChange(i, e.target.value)
                                 }
                                 className="w-[130px] border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                value={item.rate || ""}
+                                value={(Math.round(item.rate)).toLocaleString("en-IN") || ""}
                                 type="number"
                                 min="0"
                               />
                             </td>
 
                             <td className="w-[130px] py-3 px-4 text-sm text-left sm:text-center before:content-['Net_Rate:_'] sm:before:content-none before:font-semibold">
-                              INR {item.netRate?.toFixed(2) || "0.00"}
+                              {(Math.round(item.netRate)).toLocaleString("en-IN") || "0"}
                             </td>
 
                             <td className="py-3 px-4 before:content-['Tax_(%):_'] sm:before:content-none before:font-semibold">
@@ -2518,11 +2510,11 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
                             </td>
 
                             <td className="py-3 px-4 text-sm text-left sm:text-center before:content-['Tax_Amount:_'] sm:before:content-none before:font-semibold">
-                              INR {item.taxAmount?.toFixed(2) || "0.00"}
+                              {(Math.round(item.taxAmount)).toLocaleString("en-IN") || "0"}
                             </td>
 
                             <td className="py-3 px-4 text-sm text-left sm:text-center before:content-['Total_Amount:_'] sm:before:content-none before:font-semibold">
-                              INR {item.totalAmount?.toFixed(2) || "0.00"}
+                              {(Math.round(item.totalAmount)).toLocaleString("en-IN") || "0"}
                             </td>
 
                             <td className="py-3 px-4 before:content-['Remark:_'] sm:before:content-none before:font-semibold">
@@ -2607,15 +2599,15 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
                 <p className="text-base sm:text-lg font-semibold">Summary</p>
                 <div className="flex flex-row justify-between w-full text-xs sm:text-sm">
                   <p>Sub Total</p>
-                  <p>{Amount}</p>
+                  <p>{Amount.toLocaleString("en-IN")}</p>
                 </div>
                 <div className="flex flex-row justify-between w-full text-xs sm:text-sm">
                   <p>Total Tax Amount</p>
-                  <p>{Tax}</p>
+                  <p>{Tax.toLocaleString("en-IN")}</p>
                 </div>
                 <div className="flex flex-row justify-between w-full text-xs sm:text-sm">
                   <p>Total Amount</p>
-                  <p>{grandTotal}</p>
+                  <p>{grandTotal.toLocaleString("en-IN")}</p>
                 </div>
                 <div className="border border-gray-400"></div>
                 <div className="flex justify-between mt-1 w-full text-xs sm:text-sm">
@@ -2643,7 +2635,7 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
 
                     <input
                       className="w-20 sm:w-24 border border-gray-300 !rounded-md px-3 py-1 text-xs sm:text-sm text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={Discount}
+                      value={Math.round(Discount.toLocaleString("en-IN"))}
                       onChange={(e) =>
                         handleDiscountChange(e.target.value, discountType)
                       }
@@ -2655,7 +2647,7 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
                 <div className="border border-gray-400"></div>
                 <div className="flex w-full flex-row items-center justify-between text-xs sm:text-sm">
                   <p>Grand Total</p>
-                  <p>{grandTotal}</p>
+                  <p>{(Math.round(grandTotal)).toLocaleString("en-IN")}</p>
                 </div>
                 <button
                   onClick={sendProjectData}

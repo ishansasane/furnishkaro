@@ -246,17 +246,17 @@ const OverviewPage = ({
             <div className="flex flex-row justify-between items-center border border-gray-200 !rounded-lg p-3 bg-gray-50">
               <div className="w-1 bg-gray-500 h-6 !rounded"></div>
               <p className="text-sm font-medium text-gray-800">Total Project Value</p>
-              <p className="text-sm font-semibold text-gray-800">{Math.round((projectData.grandTotal))}</p>
+              <p className="text-sm font-semibold text-gray-800">{Math.round((projectData.grandTotal)).toLocaleString("en-IN")}</p>
             </div>
             <div className="flex flex-row justify-between items-center border border-gray-200 !rounded-lg p-3 bg-gray-50">
               <div className="w-1 bg-green-500 h-6 !rounded"></div>
               <p className="text-sm font-medium text-gray-800">Payment Received</p>
-              <p className="text-sm font-semibold text-gray-800">{paymentReceived}</p>
+              <p className="text-sm font-semibold text-gray-800">{paymentReceived.toLocaleString("en-IN")}</p>
             </div>
             <div className="flex flex-row justify-between items-center border border-gray-200 !rounded-lg p-3 bg-gray-50">
               <div className="w-1 bg-yellow-500 h-6 !rounded"></div>
               <p className="text-sm font-medium text-gray-800">Due</p>
-              <p className="text-sm font-semibold text-gray-800">{Math.round((projectData.grandTotal - paymentReceived))}</p>
+              <p className="text-sm font-semibold text-gray-800">{Math.round((projectData.grandTotal - paymentReceived)).toLocaleString("en-IN")}</p>
             </div>
           </div>
         </div>

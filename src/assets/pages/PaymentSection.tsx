@@ -113,19 +113,19 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
       <div className="flex flex-col sm:flex-row w-full justify-between gap-3">
         <div className="border !rounded-lg w-full sm:w-1/4 p-3">
           <p className="text-gray-500 text-xs sm:text-sm">Total Amount</p>
-          <p className="text-xs sm:text-sm">{Amount.toFixed(2)}</p>
+          <p className="text-xs sm:text-sm">{(Math.round(Amount)).toLocaleString("en-IN")}</p>
         </div>
         <div className="border !rounded-lg w-full sm:w-1/4 p-3">
           <p className="text-gray-500 text-xs sm:text-sm">Payment Received</p>
-          <p className="text-xs sm:text-sm">{paymentReceived}</p>
+          <p className="text-xs sm:text-sm">{(Math.round(paymentReceived)).toLocaleString("en-IN")}</p>
         </div>
         <div className="border !rounded-lg w-full sm:w-1/4 p-3">
           <p className="text-gray-500 text-xs sm:text-sm">Payment Due</p>
-          <p className="text-xs sm:text-sm">{(Amount - paymentReceived).toFixed(2)}</p>
+          <p className="text-xs sm:text-sm">{(Math.round(Amount - paymentReceived)).toLocaleString("en-IN")}</p>
         </div>
         <div className="border !rounded-lg w-full sm:w-1/4 p-3">
           <p className="text-gray-500 text-xs sm:text-sm">Discount</p>
-          <p className="text-xs sm:text-sm">{Discount + ` in ${discountType}`}</p>
+          <p className="text-xs sm:text-sm">{(Math.round(Discount)).toLocaleString("en-IN") + ` in ${discountType}`}</p>
         </div>
       </div>
 
@@ -156,7 +156,7 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
               .map((data, index) => (
                 <tr key={index} className="border-t flex flex-col sm:flex-row">
                   <td className="w-full sm:w-1/5 p-2 text-xs sm:text-sm before:content-['Amount_Received:_'] sm:before:content-none before:font-bold before:pr-2">
-                    {data[2]}
+                    {(Math.round(data[2])).toLocaleString("en-IN")}
                   </td>
                   <td className="w-full sm:w-1/5 p-2 text-xs sm:text-sm before:content-['Received_Date:_'] sm:before:content-none before:font-bold before:pr-2">
                     {data[3]}
