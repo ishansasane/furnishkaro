@@ -368,12 +368,13 @@ const BankSection = () => {
   const [bankDialog, setBankDialog] = useState(false);
   const [editBankData, setEditBankData] = useState(false);
   const [formData, setFormData] = useState({
-    customerName: "",
     bankName: "",
+    accountName: "",
     branch: "",
     pincode: "",
     accountNumber: "",
     ifscCode: "",
+    accountType : "",
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -384,7 +385,7 @@ const BankSection = () => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        "https://sheeladecor.netlify.app/.netlify/functions/server/getBankDetails"
+        "https://sheeladecor.netlify.app/.netlify/functions/server/getBankData"
       );
       const data = await response.json();
       return data.body || [];
@@ -398,59 +399,75 @@ const BankSection = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const sendBankDetails = async () => {
-    if (
-      !formData.customerName ||
-      !formData.bankName ||
-      !formData.branch ||
-      !formData.pincode ||
-      !formData.accountNumber ||
-      !formData.ifscCode
-    ) {
-      alert("Please fill all fields");
-      return;
+const sendBankDetails = async () => {
+  if (
+    !formData.bankName ||
+    !formData.accountName ||
+    !formData.branch ||
+    !formData.pincode ||
+    !formData.accountNumber ||
+    !formData.ifscCode ||
+    !formData.accountType
+  ) {
+    alert("Please fill all fields");
+    return;
+  }
+
+  // 🆕 Safely check if bankData exists and is not empty
+  const isDuplicate =
+    !editBankData &&
+    Array.isArray(bankData) &&
+    bankData.length > 0 &&
+    bankData.some(
+      (item) =>
+        item[0] === formData.bankName &&
+        item[1] === formData.accountName &&
+        item[2] === formData.accountNumber
+    );
+
+  if (isDuplicate) {
+    alert("Bank with the same Bank Name, Account Name and Account Number already exists.");
+    return;
+  }
+
+  setIsLoading(true);
+  try {
+    const date = new Date();
+    const newDate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+
+    const url = editBankData
+      ? "https://sheeladecor.netlify.app/.netlify/functions/server/updateBankData"
+      : "https://sheeladecor.netlify.app/.netlify/functions/server/sendBankData";
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        ...formData,
+        date: newDate,
+      }),
+    });
+
+    if (response.ok) {
+      const updatedBankData = await fetchBankData();
+      localStorage.setItem(
+        "bankData",
+        JSON.stringify({ data: updatedBankData, time: Date.now() })
+      );
+      dispatch(setBankData(updatedBankData));
+      resetForm();
+      alert(editBankData ? "Bank Details Updated" : "New Bank Details Added");
+    } else {
+      throw new Error("Failed to save bank details");
     }
+  } catch (error) {
+    alert(error.message || "Error saving bank details");
+  } finally {
+    setIsLoading(false);
+  }
+};
 
-    setIsLoading(true);
-    try {
-      const date = new Date();
-      const newDate = `${date.getDate()}/${
-        date.getMonth() + 1
-      }/${date.getFullYear()}`;
-
-      const url = editBankData
-        ? "https://sheeladecor.netlify.app/.netlify/functions/server/updateBankData"
-        : "https://sheeladecor.netlify.app/.netlify/functions/server/sendBankData";
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          date: newDate,
-        }),
-      });
-
-      if (response.ok) {
-        const updatedBankData = await fetchBankData();
-        localStorage.setItem(
-          "bankData",
-          JSON.stringify({ data: updatedBankData, time: Date.now() })
-        );
-        dispatch(setBankData(updatedBankData));
-        resetForm();
-        alert(editBankData ? "Bank Details Updated" : "New Bank Details Added");
-      } else {
-        throw new Error("Failed to save bank details");
-      }
-    } catch (error) {
-      alert(error.message || "Error saving bank details");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const deletePaintsBankData = async (customerName: string) => {
+  const deletePaintsBankData = async (bankName, accountName) => {
     if (!confirm("Are you sure you want to delete this bank record?")) return;
 
     setIsLoading(true);
@@ -460,7 +477,7 @@ const BankSection = () => {
         {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ customerName }),
+          body: JSON.stringify({ bankName, accountName }),
         }
       );
 
@@ -484,12 +501,13 @@ const BankSection = () => {
 
   const resetForm = () => {
     setFormData({
-      customerName: "",
       bankName: "",
+      accountName: "",
       branch: "",
       pincode: "",
       accountNumber: "",
       ifscCode: "",
+      accountType : ""
     });
     setEditBankData(false);
     setBankDialog(false);
@@ -497,12 +515,13 @@ const BankSection = () => {
 
   const handleEdit = (data: any) => {
     setFormData({
-      customerName: data[0],
-      bankName: data[1],
+      bankName: data[0],
+      accountName: data[1],
       branch: data[2],
       pincode: data[3],
       accountNumber: data[4],
       ifscCode: data[5],
+      accountType : data[6]
     });
     setEditBankData(true);
     setBankDialog(true);
@@ -544,21 +563,6 @@ const BankSection = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Customer Name*
-              </label>
-              <input
-                type="text"
-                name="customerName"
-                value={formData.customerName}
-                onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter customer name"
-                disabled={isLoading}
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
                 Bank Name*
               </label>
               <input
@@ -567,7 +571,22 @@ const BankSection = () => {
                 value={formData.bankName}
                 onChange={handleInputChange}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Enter bank name"
+                placeholder="Enter Bank Name"
+                disabled={isLoading}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Account Holder Name*
+              </label>
+              <input
+                type="text"
+                name="accountName"
+                value={formData.accountName}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter Account Holder Name"
                 disabled={isLoading}
               />
             </div>
@@ -631,6 +650,20 @@ const BankSection = () => {
                 disabled={isLoading}
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Account Type*
+              </label>
+              <input
+                type="text"
+                name="accountType"
+                value={formData.accountType}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter Account Type"
+                disabled={isLoading}
+              />
+            </div>
           </div>
 
           <div className="flex justify-end gap-3 mt-6">
@@ -646,12 +679,13 @@ const BankSection = () => {
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
               disabled={
                 isLoading ||
-                !formData.customerName ||
                 !formData.bankName ||
+                !formData.accountName ||
                 !formData.branch ||
                 !formData.pincode ||
                 !formData.accountNumber ||
-                !formData.ifscCode
+                !formData.ifscCode ||
+                !formData.accountType
               }
             >
               {isLoading ? (
@@ -699,10 +733,10 @@ const BankSection = () => {
                   #
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Customer Name
+                  Bank Name
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Bank Name
+                  Account Holder Name
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Branch
@@ -712,6 +746,9 @@ const BankSection = () => {
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   IFSC Code
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Account Type
                 </th>
 
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -740,6 +777,9 @@ const BankSection = () => {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {data[5]}
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {data[6]}
+                  </td>
 
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex justify-end gap-3">
@@ -752,7 +792,7 @@ const BankSection = () => {
                         <Pencil size={18} />
                       </button>
                       <button
-                        onClick={() => deletePaintsBankData(data[0])}
+                        onClick={() => deletePaintsBankData(data[0], data[1])}
                         className="text-red-600 hover:text-red-800"
                         title="Delete"
                         disabled={isLoading}
