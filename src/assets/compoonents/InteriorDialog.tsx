@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchWithLoading } from "../Redux/fetchWithLoading";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 
 interface InteriorDialogProps {
   setDialogOpen: (open: boolean) => void;

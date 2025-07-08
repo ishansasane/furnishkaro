@@ -55,7 +55,7 @@ export default function Interiors() {
         "https://sheeladecor.netlify.app/.netlify/functions/server/deleteinteriordata",
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "content-Type": "application/json" },
           credentials: "include",
           body: JSON.stringify({ name }),
         }

@@ -44,6 +44,7 @@ const InquiryCard = ({
         <div className="space-y-1">
           <h3 className="!text-lg font-bold text-indigo-700 truncate">{project}</h3>
           <p className="!text-sm text-blue-600 font-medium truncate">{customer}</p>
+          <p className="!text-sm text-blue-600 font-medium truncate">{inquiryData[1]}</p>
           <p className="text-sm text-gray-500 line-clamp-2">{comments}</p>
         </div>
 
