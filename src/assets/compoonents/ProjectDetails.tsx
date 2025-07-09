@@ -56,22 +56,44 @@ const ProjectDetails = () => {
     }
   }
 
-  useEffect(() => {
-    async function getData() {
-      let data = await fetchInteriors();
-      dispatch(setInteriorData(data));
-      setinterior(interiorData);
-      data = await fetchSalesAssociates();
-      dispatch(setSalesAssociateData(data));
-      setsalesdata(salesAssociateData);
+useEffect(() => {
+  const cacheExpiry = 5 * 60 * 1000; // 5 minutes
+  const now = Date.now();
+
+  const fetchDataWithCache = async (
+    cacheKey: string,
+    fetchFunction: () => Promise<string[][]>,
+    reduxSetter: (data: string[][]) => any,
+    stateSetter: React.Dispatch<React.SetStateAction<string[][]>>
+  ) => {
+    try {
+      const cached = localStorage.getItem(cacheKey);
+
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.data?.length > 0 && now - parsed.time < cacheExpiry) {
+          reduxSetter(parsed.data);
+          stateSetter(parsed.data);
+          return;
+        }
+      }
+
+      const freshData = await fetchFunction();
+      if (Array.isArray(freshData)) {
+        reduxSetter(freshData);
+        stateSetter(freshData);
+        localStorage.setItem(cacheKey, JSON.stringify({ data: freshData, time: now }));
+      }
+    } catch (error) {
+      console.error(`Error fetching ${cacheKey}:`, error);
     }
-    if (interiorData.length == 0 || salesAssociateData.length == 0) {
-      getData();
-    } else {
-      setinterior(interiorData);
-      setsalesdata(salesAssociateData);
-    }
-  }, [dispatch, interiorData, salesAssociateData]);
+  };
+
+  fetchDataWithCache("interiorData", fetchInteriors, (data) => dispatch(setInteriorData(data)), setinterior);
+  fetchDataWithCache("salesAssociateData", fetchSalesAssociates, (data) => dispatch(setSalesAssociateData(data)), setsalesdata);
+
+}, [dispatch]);
+
 
   return (
     <div className="mb-6 bg-white p-6 rounded shadow">
