@@ -33,6 +33,9 @@ const Payments = () => {
   const [deleted, setDeleted] = useState(true);
   const [filteredPayments, setFilteredPayments] = useState([]);
 
+  const formatINR = (value: number | string) =>
+    Number(value).toLocaleString("en-IN");
+
   const fetchProjectData = async () => {
     const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
@@ -110,7 +113,7 @@ const Payments = () => {
   useEffect(() => {
     let isMounted = true;
     const now = Date.now();
-    const cacheExpiry = 5 * 60 * 1000; // 5 minutes
+    const cacheExpiry = 5 * 60 * 1000;
 
     const fetchData = async () => {
       try {
@@ -256,23 +259,18 @@ const Payments = () => {
   };
 
   const setCancelPayment = () => {
-    if (editPayments) {
-      setPayment(0);
-      setPaymentDate("");
-      setPaymentMode("");
-      setPaymentRemarks("NA");
-      setAddPayment(false);
-    } else {
-      setAddPayment(false);
-    }
+    setAddPayment(false);
+    setEditPayments(undefined);
+    setPayment(0);
+    setPaymentDate("");
+    setPaymentMode("");
+    setPaymentRemarks("");
   };
 
   return (
     <div className="w-full p-4 sm:p-6 flex flex-col min-h-screen">
       <div className="flex mt-5 flex-wrap flex-row justify-between items-center mb-6">
-        <h1 className="text-lg sm:text-2xl !items-center  font-semibold">
-          Payments
-        </h1>
+        <h1 className="text-lg sm:text-2xl font-semibold">Payments</h1>
         <button
           onClick={() => navigate("/")}
           className="px-3 py-2 text-sm sm:text-base text-white bg-sky-600 hover:bg-sky-700 !rounded-lg"
@@ -294,11 +292,11 @@ const Payments = () => {
             </tr>
           </thead>
           <tbody>
-            {filteredPayments.length !== 0 &&
+            {filteredPayments.length > 0 &&
               filteredPayments.map((payment, index) => (
                 <tr className="hover:bg-sky-50" key={index}>
                   <td className="p-2">{index + 1}</td>
-                  <td className="p-2">{payment[2]}</td>
+                  <td className="p-2">{formatINR(payment[2])}</td>
                   <td className="p-2">{payment[1]}</td>
                   <td className="p-2">{payment[4]}</td>
                   <td className="p-2">{payment[3] || "-"}</td>
@@ -345,12 +343,7 @@ const Payments = () => {
           <div className="w-full max-w-md sm:max-w-lg bg-white rounded-xl p-4 sm:p-6">
             <div className="flex flex-col gap-4">
               <div className="flex flex-col">
-                <div className="flex flex-row gap-1 items-center">
-                  <label className="text-sm sm:text-base">
-                    Amount Received
-                  </label>
-                  <span className="text-red-500">*</span>
-                </div>
+                <label className="text-sm sm:text-base">Amount Received <span className="text-red-500">*</span></label>
                 <input
                   type="number"
                   value={payment}
@@ -363,10 +356,7 @@ const Payments = () => {
                 />
               </div>
               <div className="flex flex-col">
-                <div className="flex flex-row gap-1 items-center">
-                  <label className="text-sm sm:text-base">Payment Date</label>
-                  <span className="text-red-500">*</span>
-                </div>
+                <label className="text-sm sm:text-base">Payment Date <span className="text-red-500">*</span></label>
                 <input
                   type="date"
                   value={paymentDate}
@@ -375,10 +365,7 @@ const Payments = () => {
                 />
               </div>
               <div className="flex flex-col">
-                <div className="flex flex-row gap-1 items-center">
-                  <label className="text-sm sm:text-base">Payment Mode</label>
-                  <span className="text-red-500">*</span>
-                </div>
+                <label className="text-sm sm:text-base">Payment Mode <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   value={paymentMode}
@@ -387,10 +374,7 @@ const Payments = () => {
                 />
               </div>
               <div className="flex flex-col">
-                <div className="flex flex-row gap-1 items-center">
-                  <label className="text-sm sm:text-base">Remarks</label>
-                  <span className="text-red-500">*</span>
-                </div>
+                <label className="text-sm sm:text-base">Remarks <span className="text-red-500">*</span></label>
                 <input
                   type="text"
                   value={paymentRemarks}

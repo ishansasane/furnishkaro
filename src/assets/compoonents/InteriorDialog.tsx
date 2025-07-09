@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchWithLoading } from "../Redux/fetchWithLoading";
-import { useDispatch } from "react-redux";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../Redux/store";
+import { setInteriorData } from "../Redux/dataSlice"; // ✅ Add this if you missed it
 
 interface InteriorDialogProps {
   setDialogOpen: (open: boolean) => void;
@@ -40,21 +41,16 @@ const InteriorDialog: React.FC<InteriorDialogProps> = ({
 
   const [name, setName] = useState(editingInterior ? editingInterior[0] : "");
   const [email, setEmail] = useState(editingInterior ? editingInterior[1] : "");
-  const [phonenumber, setPhoneNumber] = useState(
-    editingInterior ? editingInterior[2] : ""
-  );
-  const [address, setAddress] = useState(
-    editingInterior ? editingInterior[3] : ""
-  );
+  const [phonenumber, setPhoneNumber] = useState(editingInterior ? editingInterior[2] : "");
+  const [address, setAddress] = useState(editingInterior ? editingInterior[3] : "");
 
-  const handleSubmit = async () => {
-    // ✅ Duplicate check for Add
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+
     if (!editingInterior) {
       const duplicate = interiors.find(
-        (interior) =>
-          interior[0].toLowerCase().trim() === name.toLowerCase().trim()
+        (interior) => interior[0].toLowerCase().trim() === name.toLowerCase().trim()
       );
-
       if (duplicate) {
         alert("Already data present");
         setDialogOpen(false);
@@ -77,21 +73,14 @@ const InteriorDialog: React.FC<InteriorDialogProps> = ({
       });
 
       if (response.status === 200) {
-        alert(
-          editingInterior
-            ? "Interior updated successfully"
-            : "Interior added successfully"
-        );
+        alert(editingInterior ? "Interior updated successfully" : "Interior added successfully");
 
         const updatedInteriors = await fetchInteriors();
         const now = Date.now();
 
         if (Array.isArray(updatedInteriors)) {
           dispatch(setInteriorData(updatedInteriors));
-          localStorage.setItem(
-            "interiorData",
-            JSON.stringify({ data: updatedInteriors, time: now })
-          );
+          localStorage.setItem("interiorData", JSON.stringify({ data: updatedInteriors, time: now }));
         }
 
         setDialogOpen(false);
@@ -119,53 +108,78 @@ const InteriorDialog: React.FC<InteriorDialogProps> = ({
             {editingInterior ? "Edit Interior" : "Add Interior"}
           </h2>
 
-          {/* ✅ Name Field (hide during edit if needed) */}
-          <input
-            className={`${
-              editingInterior ? "hidden" : ""
-            } border p-2 rounded w-full mb-2`}
-            placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
+          {/* ✅ Form wrapper to handle Enter key */}
+          <form onSubmit={handleSubmit}>
+  {/* Name (only shown and required when not editing) */}
+  {!editingInterior && (
+    <div className="mb-2">
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        Name <span className="text-red-500">*</span>
+      </label>
+      <input
+        className="border p-2 rounded w-full"
+        placeholder="Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        required
+      />
+    </div>
+  )}
 
-          <input
-            className="border p-2 rounded w-full mb-2"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            className="border p-2 rounded w-full mb-2"
-            placeholder="Phone Number"
-            value={phonenumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-          />
-          <input
-            className="border p-2 rounded w-full mb-2"
-            placeholder="Address"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-          />
+  <div className="mb-2">
+    <label className="block text-sm font-medium text-gray-700 mb-1">
+      Email
+    </label>
+    <input
+      className="border p-2 rounded w-full"
+      placeholder="Email"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+    />
+  </div>
 
-          <div className="flex justify-end gap-2 mt-4">
-            <button
-              className="bg-gray-500 text-white px-4 py-2 rounded"
-              onClick={() => {
-                setDialogOpen(false);
-                setEditingInterior(null);
-                navigate("/masters/interiors");
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              className="bg-blue-500 text-white px-4 py-2 rounded"
-              onClick={handleSubmit}
-            >
-              Save
-            </button>
-          </div>
+  <div className="mb-2">
+    <label className="block text-sm font-medium text-gray-700 mb-1">
+      Phone Number
+    </label>
+    <input
+      className="border p-2 rounded w-full"
+      placeholder="Phone Number"
+      value={phonenumber}
+      onChange={(e) => setPhoneNumber(e.target.value)}
+    />
+  </div>
+
+  <div className="mb-2">
+    <label className="block text-sm font-medium text-gray-700 mb-1">
+      Address
+    </label>
+    <input
+      className="border p-2 rounded w-full"
+      placeholder="Address"
+      value={address}
+      onChange={(e) => setAddress(e.target.value)}
+    />
+  </div>
+
+  <div className="flex justify-end gap-2 mt-4">
+    <button
+      type="button"
+      className="bg-gray-500 text-white px-4 py-2 rounded"
+      onClick={() => {
+        setDialogOpen(false);
+        setEditingInterior(null);
+        navigate("/masters/interiors");
+      }}
+    >
+      Cancel
+    </button>
+    <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
+      Save
+    </button>
+  </div>
+</form>
+
         </div>
       </div>
     </>

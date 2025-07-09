@@ -1889,7 +1889,7 @@ const generatePDF = () => {
     theme: "grid",
     styles: {
       font: "helvetica",
-      fontSize: 7.8,
+      fontSize: 8.5,
       cellPadding: 1.5,
       textColor: secondaryColor,
       lineColor: [200, 200, 200],
@@ -1900,7 +1900,7 @@ const generatePDF = () => {
       fillColor: primaryColor,
       textColor: [255, 255, 255],
       fontStyle: "bold",
-      fontSize: 7,
+      fontSize: 8.5,
       halign: "center",
       cellPadding: 1.5,
     },
@@ -2002,7 +2002,7 @@ const generatePDF = () => {
   doc.setFont("helvetica", "normal");
   doc.text("Sheela Decor - All Rights Reserved", pageWidth / 2, footerY + 17, { align: "center" });
 
-  doc.save(`Quotation_${projectName || "Project"}_${projectDate || new Date().toLocaleDateString()}.pdf`);
+  doc.save(`Invoice_${projectName || "Project"}_${projectDate || new Date().toLocaleDateString()}.pdf`);
 };
 
 

@@ -198,28 +198,31 @@ const EditProjectDetails = ({
     : [];
 
   return (
-    <div className="flex flex-col gap-4 p-4 sm:p-6 rounded-xl shadow-xl w-full border-gray-200 border-2 mt-4">
-      <p className="text-lg sm:text-xl font-semibold">Project Details</p>
+    <div className="flex flex-col gap-6 p-6 sm:p-8 !rounded-2xl shadow-lg w-full bg-white border border-gray-100 mt-6 transition-all duration-300 hover:shadow-xl">
+      <div className="flex items-center gap-2">
+        
+        <p className="text-xl sm:text-2xl font-bold text-gray-800">Project Details</p>
+      </div>
 
-      <div className="flex flex-col sm:flex-row w-full gap-4">
+      <div className="flex flex-col sm:flex-row w-full gap-6">
         <div className="flex flex-col w-full sm:w-1/2">
-          <p className="text-sm sm:text-base">
-            Reference <span className="text-gray-500">(optional)</span>
+          <p className="text-sm sm:text-base font-medium text-gray-600">
+            Reference <span className="text-gray-400 text-xs">(optional)</span>
           </p>
           <input
             type="text"
-            className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
+            className="border border-gray-200 p-3 !rounded-lg w-full text-sm sm:text-base bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
             value={projectReference}
             onChange={(e) => setProjectReference(e.target.value)}
           />
         </div>
         <div className="flex flex-col w-full sm:w-1/2">
-          <p className="text-sm sm:text-base">
-            Project Name <span className="text-gray-500">(Unique name )</span>
+          <p className="text-sm sm:text-base font-medium text-gray-600">
+            Project Name <span className="text-gray-400 text-xs">(Unique name)</span>
           </p>
           <input
             type="text"
-            className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
+            className="border border-gray-200 p-3 !rounded-lg w-full text-sm sm:text-base bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
             value={projectName}
             onChange={(e) => setProjectName(e.target.value)}
           />
@@ -228,10 +231,10 @@ const EditProjectDetails = ({
 
       {projectData.customerLink && (
         <div className="flex flex-col w-full">
-          <p className="text-sm sm:text-base">Address</p>
+          <p className="text-sm sm:text-base font-medium text-gray-600">Address</p>
           <input
             type="text"
-            className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base bg-gray-100"
+            className="border border-gray-200 p-3 !rounded-lg w-full text-sm sm:text-base bg-gray-100 text-gray-600 cursor-not-allowed"
             value={selectedCustomer[3] || ""}
             readOnly
           />
@@ -240,33 +243,32 @@ const EditProjectDetails = ({
 
       {projectData.additionalRequests && (
         <div className="flex flex-col w-full">
-          <p className="text-sm sm:text-base">
-            Any Additional Requests{" "}
-            <span className="text-gray-500">(optional)</span>
+          <p className="text-sm sm:text-base font-medium text-gray-600">
+            Any Additional Requests <span className="text-gray-400 text-xs">(optional)</span>
           </p>
           <textarea
             value={additionalRequests}
             onChange={(e) => setAdditionalRequests(e.target.value)}
-            className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base focus:ring-2 focus:ring-blue-400 resize-y min-h-[100px]"
+            className="border border-gray-200 p-3 !rounded-lg w-full text-sm sm:text-base bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent resize-y min-h-[100px] transition-all duration-200"
           />
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row w-full gap-4">
+      <div className="flex flex-col sm:flex-row w-full gap-6">
         <div className="flex flex-col w-full sm:w-1/2" ref={interiorDropdownRef}>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
-            <p className="text-sm sm:text-base">Select Interior</p>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-3">
+            <p className="text-sm sm:text-base font-medium text-gray-600">Select Interior</p>
             <button
-              className="flex items-center px-3 py-1 border border-blue-400 text-blue-500 font-semibold rounded-lg hover:bg-blue-50 transition-colors"
+              className="flex items-center px-4 py-2 border border-indigo-500 text-indigo-600 font-semibold !rounded-lg bg-indigo-50 hover:bg-indigo-100 hover:border-indigo-600 transition-all duration-200"
               onClick={() => setIsOpen(true)}
             >
-              <FaPlus className="mr-2 text-blue-600" /> Add Interior
+              <FaPlus className="mr-2 text-indigo-600" /> Add Interior
             </button>
           </div>
           <div className="relative">
             <input
               type="text"
-              className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base opacity-80 focus:opacity-100 focus:ring-2 focus:ring-blue-400"
+              className="border border-gray-200 p-3 !rounded-lg w-full text-sm sm:text-base bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
               placeholder="Search or select interior"
               value={interiorSearchTerm}
               onChange={(e) => {
@@ -276,9 +278,9 @@ const EditProjectDetails = ({
               onFocus={() => setIsInteriorDropdownOpen(true)}
             />
             {isInteriorDropdownOpen && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-y-auto">
+              <div className="absolute z-10 w-full mt-2 bg-white border border-gray-200 !rounded-lg shadow-md max-h-60 overflow-y-auto">
                 <div
-                  className="p-2 cursor-pointer hover:bg-gray-100 text-sm sm:text-base"
+                  className="p-3 cursor-pointer hover:bg-indigo-50 text-sm sm:text-base text-gray-700 transition-colors duration-150"
                   onClick={() => {
                     handleInteriorChange(null);
                     setIsInteriorDropdownOpen(false);
@@ -289,7 +291,7 @@ const EditProjectDetails = ({
                 {filteredInteriors.map((data, index) => (
                   <div
                     key={index}
-                    className="p-2 cursor-pointer hover:bg-gray-100 text-sm sm:text-base"
+                    className="p-3 cursor-pointer hover:bg-indigo-50 text-sm sm:text-base text-gray-700 transition-colors duration-150"
                     onClick={() => {
                       handleInteriorChange(data);
                       setIsInteriorDropdownOpen(false);
@@ -301,40 +303,40 @@ const EditProjectDetails = ({
               </div>
             )}
           </div>
-          <select
-            className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base opacity-80 focus:opacity-100 focus:ring-2 focus:ring-blue-400"
+          {/* <select
+            className="border border-gray-200 p-3 !rounded-lg w-full text-sm sm:text-base bg-gray-50 text-gray-700 mt-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
             value={interiorArray ? JSON.stringify(interiorArray) : ""}
             onChange={(e) =>
               setInteriorArray(e.target.value ? JSON.parse(e.target.value) : [])
             }
           >
             <option value="">Select Interior Name (optional)</option>
-              {interior && interior.length > 0 ? (
-                interior.map((data, index) => (
-                  <option key={index} value={JSON.stringify(data)}>
-                    {data[0]}
-                  </option>
-                ))
-              ) : (
-                <option disabled>No interiors available</option>
-              )}
-          </select>
+            {interior && interior.length > 0 ? (
+              interior.map((data, index) => (
+                <option key={index} value={JSON.stringify(data)}>
+                  {data[0]}
+                </option>
+              ))
+            ) : (
+              <option disabled>No interiors available</option>
+            )}
+          </select> */}
         </div>
 
         <div className="flex flex-col w-full sm:w-1/2" ref={salesDropdownRef}>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
-            <p className="text-sm sm:text-base">Select Sales Associate</p>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-3">
+            <p className="text-sm sm:text-base font-medium text-gray-600">Select Sales Associate</p>
             <button
-              className="flex items-center px-3 py-1 border border-blue-400 text-blue-500 font-semibold rounded-lg hover:bg-blue-50 transition-colors"
+              className="flex items-center px-4 py-2 border border-indigo-500 text-indigo-600 font-semibold !rounded-lg bg-indigo-50 hover:bg-indigo-100 hover:border-indigo-600 transition-all duration-200"
               onClick={() => setIsSalesOpen(true)}
             >
-              <FaPlus className="mr-2 text-blue-600" /> Add Sales Associate
+              <FaPlus className="mr-2 text-indigo-600" /> Add Sales Associate
             </button>
           </div>
           <div className="relative">
             <input
               type="text"
-              className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base opacity-80 focus:opacity-100 focus:ring-2 focus:ring-blue-400"
+              className="border border-gray-200 p-3 !rounded-lg w-full text-sm sm:text-base bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
               placeholder="Search or select sales associate"
               value={salesSearchTerm}
               onChange={(e) => {
@@ -344,9 +346,9 @@ const EditProjectDetails = ({
               onFocus={() => setIsSalesDropdownOpen(true)}
             />
             {isSalesDropdownOpen && (
-              <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded shadow-lg max-h-60 overflow-y-auto">
+              <div className="absolute z-10 w-full mt-2 bg-white border border-gray-200 !rounded-lg shadow-md max-h-60 overflow-y-auto">
                 <div
-                  className="p-2 cursor-pointer hover:bg-gray-100 text-sm sm:text-base"
+                  className="p-3 cursor-pointer hover:bg-indigo-50 text-sm sm:text-base text-gray-700 transition-colors duration-150"
                   onClick={() => {
                     handleSalesAssociateChange(null);
                     setIsSalesDropdownOpen(false);
@@ -357,7 +359,7 @@ const EditProjectDetails = ({
                 {filteredSalesAssociates.map((data, index) => (
                   <div
                     key={index}
-                    className="p-2 cursor-pointer hover:bg-gray-100 text-sm sm:text-base"
+                    className="p-3 cursor-pointer hover:bg-indigo-50 text-sm sm:text-base text-gray-700 transition-colors duration-150"
                     onClick={() => {
                       handleSalesAssociateChange(data);
                       setIsSalesDropdownOpen(false);
@@ -369,47 +371,42 @@ const EditProjectDetails = ({
               </div>
             )}
           </div>
-          <select
-            className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base opacity-80 focus:opacity-100 focus:ring-2 focus:ring-blue-400"
-            value={
-              salesAssociateArray ? JSON.stringify(salesAssociateArray) : ""
-            }
+          {/* <select
+            className="border border-gray-200 p-3 !rounded-lg w-full text-sm sm:text-base bg-gray-50 text-gray-700 mt-2 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
+            value={salesAssociateArray ? JSON.stringify(salesAssociateArray) : ""}
             onChange={(e) =>
-              setSalesAssociateArray(
-                e.target.value ? JSON.parse(e.target.value) : []
-              )
+              setSalesAssociateArray(e.target.value ? JSON.parse(e.target.value) : [])
             }
           >
             <option value="">Select Sales Associate (optional)</option>
-{Array.isArray(salesdata) && salesdata.length > 0 ? (
-  salesdata.map((data, index) => (
-    <option key={index} value={JSON.stringify(data)}>
-      {data[0] || "Unnamed Sales Associate"}
-    </option>
-  ))
-) : (
-  <option disabled>No sales associates available</option>
-)}
-
-          </select>
+            {Array.isArray(salesdata) && salesdata.length > 0 ? (
+              salesdata.map((data, index) => (
+                <option key={index} value={JSON.stringify(data)}>
+                  {data[0] || "Unnamed Sales Associate"}
+                </option>
+              ))
+            ) : (
+              <option disabled>No sales associates available</option>
+            )}
+          </select> */}
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row w-full gap-4">
+      <div className="flex flex-col sm:flex-row w-full gap-6">
         <div className="flex flex-col w-full sm:w-1/2">
-          <p className="text-sm sm:text-base">Select User</p>
+          <p className="text-sm sm:text-base font-medium text-gray-600">Select User</p>
           <input
             type="text"
-            className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
+            className="border border-gray-200 p-3 !rounded-lg w-full text-sm sm:text-base bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
             value={user}
             onChange={(e) => setUser(e.target.value)}
           />
         </div>
         <div className="flex flex-col w-full sm:w-1/2">
-          <p className="text-sm sm:text-base">Project Deadline</p>
+          <p className="text-sm sm:text-base font-medium text-gray-600">Project Deadline</p>
           <input
             type="date"
-            className="border border-gray-300 p-2 rounded w-full text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
+            className="border border-gray-200 p-3 !rounded-lg w-full text-sm sm:text-base bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
             value={projectDate}
             onChange={(e) => setProjectDate(e.target.value)}
           />
@@ -417,98 +414,156 @@ const EditProjectDetails = ({
       </div>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white p-4 sm:p-6 rounded-xl shadow-xl w-full max-w-xs sm:max-w-md">
-            <h2 className="text-lg sm:text-xl font-bold mb-4">Add Interior</h2>
-            <input
-              className="border border-gray-300 p-2 rounded w-full mb-3 text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
-              placeholder="Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-            <input
-              className="border border-gray-300 p-2 rounded w-full mb-3 text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <input
-              className="border border-gray-300 p-2 rounded w-full mb-3 text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
-              placeholder="Phone Number"
-              value={phonenumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-            />
-            <input
-              className="border border-gray-300 p-2 rounded w-full mb-3 text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
-              placeholder="Address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-            />
-            <div className="flex justify-end gap-2">
-              <button
-                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm sm:text-base"
-                onClick={() => setIsOpen(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm sm:text-base"
-                onClick={handleSubmit}
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleSubmit();
+      }}
+      className="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-xs sm:max-w-md transform transition-all duration-300 scale-100"
+    >
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6">Add Interior</h2>
 
-      {isSalesOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="bg-white p-4 sm:p-6 rounded-xl shadow-xl w-full max-w-xs sm:max-w-md">
-            <h2 className="text-lg sm:text-xl font-bold mb-4">
-              Add Sales Associate
-            </h2>
-            <input
-              className="border border-gray-300 p-2 rounded w-full mb-3 text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
-              placeholder="Name"
-              value={salesname}
-              onChange={(e) => salesSetName(e.target.value)}
-            />
-            <input
-              className="border border-gray-300 p-2 rounded w-full mb-3 text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
-              placeholder="Email"
-              value={salesemail}
-              onChange={(e) => salesSetEmail(e.target.value)}
-            />
-            <input
-              className="border border-gray-300 p-2 rounded w-full mb-3 text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
-              placeholder="Phone Number"
-              value={salesphonenumber}
-              onChange={(e) => salesSetPhoneNumber(e.target.value)}
-            />
-            <input
-              className="border border-gray-300 p-2 rounded w-full mb-3 text-sm sm:text-base focus:ring-2 focus:ring-blue-400"
-              placeholder="Address"
-              value={salesaddress}
-              onChange={(e) => salesSetAddress(e.target.value)}
-            />
-            <div className="flex justify-end gap-2">
-              <button
-                className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors text-sm sm:text-base"
-                onClick={() => setIsSalesOpen(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm sm:text-base"
-                onClick={handleSalesSubmit}
-              >
-                Save
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <label className="text-sm font-medium text-gray-700 mb-1">
+        Name <span className="text-red-500">*</span>
+      </label>
+      <input
+        required
+        className="border border-gray-200 p-3 rounded-lg w-full mb-4 bg-gray-50 text-gray-700"
+        placeholder="Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
+
+      <label className="text-sm font-medium text-gray-700 mb-1">
+        Email <span className="text-red-500">*</span>
+      </label>
+      <input
+        required
+        type="email"
+        className="border border-gray-200 p-3 rounded-lg w-full mb-4 bg-gray-50 text-gray-700"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+
+      <label className="text-sm font-medium text-gray-700 mb-1">
+        Phone Number <span className="text-red-500">*</span>
+      </label>
+      <input
+        required
+        className="border border-gray-200 p-3 rounded-lg w-full mb-4 bg-gray-50 text-gray-700"
+        placeholder="Phone Number"
+        value={phonenumber}
+        onChange={(e) => setPhoneNumber(e.target.value)}
+      />
+
+      <label className="text-sm font-medium text-gray-700 mb-1">
+        Address <span className="text-red-500">*</span>
+      </label>
+      <input
+        required
+        className="border border-gray-200 p-3 rounded-lg w-full mb-4 bg-gray-50 text-gray-700"
+        placeholder="Address"
+        value={address}
+        onChange={(e) => setAddress(e.target.value)}
+      />
+
+      <div className="flex justify-end gap-3">
+        <button
+          type="button"
+          className="px-5 py-2 bg-gray-600 text-white !rounded-lg hover:bg-gray-700"
+          onClick={() => setIsOpen(false)}
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className="px-5 py-2 bg-indigo-600 text-white !rounded-lg hover:bg-indigo-700"
+        >
+          Save
+        </button>
+      </div>
+    </form>
+  </div>
+)}
+
+
+     {isSalesOpen && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        handleSalesSubmit();
+      }}
+      className="bg-white p-6 sm:p-8 rounded-2xl shadow-2xl w-full max-w-xs sm:max-w-md transform transition-all duration-300 scale-100"
+    >
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6">Add Sales Associate</h2>
+
+      <label className="text-sm font-medium text-gray-700 mb-1">
+        Name <span className="text-red-500">*</span>
+      </label>
+      <input
+        required
+        className="border border-gray-200 p-3 rounded-lg w-full mb-4 bg-gray-50 text-gray-700"
+        placeholder="Name"
+        value={salesname}
+        onChange={(e) => salesSetName(e.target.value)}
+      />
+
+      <label className="text-sm font-medium text-gray-700 mb-1">
+        Email <span className="text-red-500">*</span>
+      </label>
+      <input
+        required
+        type="email"
+        className="border border-gray-200 p-3 rounded-lg w-full mb-4 bg-gray-50 text-gray-700"
+        placeholder="Email"
+        value={salesemail}
+        onChange={(e) => salesSetEmail(e.target.value)}
+      />
+
+      <label className="text-sm font-medium text-gray-700 mb-1">
+        Phone Number <span className="text-red-500">*</span>
+      </label>
+      <input
+        required
+        className="border border-gray-200 p-3 rounded-lg w-full mb-4 bg-gray-50 text-gray-700"
+        placeholder="Phone Number"
+        value={salesphonenumber}
+        onChange={(e) => salesSetPhoneNumber(e.target.value)}
+      />
+
+      <label className="text-sm font-medium text-gray-700 mb-1">
+        Address <span className="text-red-500">*</span>
+      </label>
+      <input
+        required
+        className="border border-gray-200 p-3 rounded-lg w-full mb-4 bg-gray-50 text-gray-700"
+        placeholder="Address"
+        value={salesaddress}
+        onChange={(e) => salesSetAddress(e.target.value)}
+      />
+
+      <div className="flex justify-end gap-3">
+        <button
+          type="button"
+          className="px-5 py-2 bg-gray-600 text-white !rounded-lg hover:bg-gray-700"
+          onClick={() => setIsSalesOpen(false)}
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          className="px-5 py-2 bg-indigo-600 text-white !rounded-lg hover:bg-indigo-700"
+        >
+          Save
+        </button>
+      </div>
+    </form>
+  </div>
+)}
+
     </div>
   );
 };

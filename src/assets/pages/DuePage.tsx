@@ -5,7 +5,7 @@ import { RootState } from "../Redux/store";
 import { setProjects, setPaymentData } from "../Redux/dataSlice";
 import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
-// ✅ Round number and format it as Indian currency with no decimals
+// ✅ Format number in Indian currency with no decimals
 const formatNumber = (num: number) => {
   if (num === undefined || num === null) return "0";
   const number = Math.round(Number(num));
@@ -19,11 +19,11 @@ const DuePage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const projects = useSelector((state: RootState) => state.data.projects);
-  const paymentData = useSelector((state: RootState) => state.data.paymentData);
+  const reduxProjects = useSelector((state: RootState) => state.data.projects);
+  const reduxPaymentData = useSelector((state: RootState) => state.data.paymentData);
 
-  const [projectData, setProjects] = useState([]);
-  const [projectPayments, setProjectPayments] = useState([]);
+  const [localProjectData, setLocalProjectData] = useState<any[]>([]);
+  const [projectPayments, setProjectPayments] = useState<any[][]>([]);
   const [added, setAdded] = useState(false);
 
   const fetchProjectData = async () => {
@@ -42,20 +42,19 @@ const DuePage = () => {
       throw new Error("Invalid data format: Expected an array in data.body");
     }
 
-    const parseSafely = (value, fallback) => {
+    const parseSafely = (value: any, fallback: any) => {
       try {
         return typeof value === "string"
           ? JSON.parse(value)
           : value || fallback;
-      } catch (error) {
-        console.warn("Invalid JSON:", value, error);
+      } catch {
         return fallback;
       }
     };
 
-    const deepClone = (obj) => JSON.parse(JSON.stringify(obj));
+    const deepClone = (obj: any) => JSON.parse(JSON.stringify(obj));
 
-    const fixBrokenArray = (input) => {
+    const fixBrokenArray = (input: any): string[] => {
       if (Array.isArray(input)) return input;
       if (typeof input !== "string") return [];
 
@@ -65,18 +64,17 @@ const DuePage = () => {
         return [];
       } catch {
         try {
-          const cleaned = input
+          return input
             .replace(/^\[|\]$/g, "")
             .split(",")
             .map((item) => item.trim().replace(/^"+|"+$/g, ""));
-          return cleaned;
         } catch {
           return [];
         }
       }
     };
 
-    const projects = data.body.map((row) => ({
+    const projects = data.body.map((row: any[]) => ({
       projectName: row[0],
       customerLink: parseSafely(row[1], []),
       projectReference: row[2] || "",
@@ -114,11 +112,11 @@ const DuePage = () => {
 
     const loadProjectAndPaymentData = async () => {
       try {
-        let finalProjects = [];
+        let finalProjects: any[] = [];
 
-        if (projects && projects.length > 0) {
-          finalProjects = projects;
-          setProjects(projects);
+        if (reduxProjects && reduxProjects.length > 0) {
+          finalProjects = reduxProjects;
+          setLocalProjectData(reduxProjects);
         } else {
           const cachedProjects = localStorage.getItem("projectData");
 
@@ -130,7 +128,7 @@ const DuePage = () => {
             if (isCacheValid) {
               finalProjects = parsed.data;
               dispatch(setProjects(parsed.data));
-              setProjects(parsed.data);
+              setLocalProjectData(parsed.data);
             }
           }
 
@@ -139,21 +137,19 @@ const DuePage = () => {
             if (Array.isArray(freshProjects)) {
               finalProjects = freshProjects;
               dispatch(setProjects(freshProjects));
-              setProjects(freshProjects);
+              setLocalProjectData(freshProjects);
               localStorage.setItem(
                 "projectData",
                 JSON.stringify({ data: freshProjects, time: now })
               );
-            } else {
-              console.warn("Fetched project data is not an array:", freshProjects);
             }
           }
         }
 
-        let finalPayments = [];
+        let finalPayments: any[] = [];
 
-        if (paymentData && paymentData.length > 0) {
-          finalPayments = paymentData;
+        if (reduxPaymentData && reduxPaymentData.length > 0) {
+          finalPayments = reduxPaymentData;
         } else {
           finalPayments = await fetchPaymentData();
           dispatch(setPaymentData(finalPayments));
@@ -194,7 +190,7 @@ const DuePage = () => {
     };
 
     loadProjectAndPaymentData();
-  }, [dispatch, added, paymentData, projects]);
+  }, [dispatch, added, reduxPaymentData, reduxProjects]);
 
   return (
     <div className="flex mt-2 flex-col items-center w-full min-h-screen p-4 sm:p-6">
@@ -222,7 +218,7 @@ const DuePage = () => {
             <tbody>
               {projectPayments.map((payment, index) => (
                 <tr key={index} className="hover:bg-sky-50">
-                  <td className="p-2">{payment[0][0] || ""}</td>
+                  <td className="p-2">{payment[0]?.[0] || "NA"}</td>
                   <td className="p-2">{payment[1]}</td>
                   <td className="p-2">₹{formatNumber(payment[2])}</td>
                   <td className="p-2">₹{formatNumber(payment[3])}</td>

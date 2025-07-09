@@ -17,6 +17,7 @@ const SearchableSelect = ({
   mainindex,
   i,
   handleProductGroupChange,
+   onDeleteOption,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -59,22 +60,41 @@ const SearchableSelect = ({
       {isOpen && (
         <div className="absolute z-10 w-full mt-1 bg-white border border-gray-100 !rounded-lg shadow-lg max-h-60 overflow-y-auto">
           {filteredOptions.length > 0 ? (
-            filteredOptions.map((option, index) => (
-              <div
-                key={index}
-                className="px-4 py-2 hover:bg-indigo-50/50 cursor-pointer text-sm font-inter transition-colors duration-200"
-                onClick={() => {
-                  handleProductGroupChange(mainindex, i, option);
-                  setIsOpen(false);
-                  setSearchTerm("");
-                }}
-              >
-                {option[0]}
-              </div>
-            ))
-          ) : (
-            <div className="px-4 py-2 text-gray-500 text-sm font-inter">No results found</div>
-          )}
+  filteredOptions.map((option, index) => (
+    <div
+      key={index}
+      className="flex items-center justify-between px-4 py-2 hover:bg-indigo-50/50 text-sm font-inter transition-colors duration-200"
+    >
+      <span
+        className="cursor-pointer flex-1"
+        onClick={() => {
+          handleProductGroupChange(mainindex, i, option);
+          setIsOpen(false);
+          setSearchTerm("");
+        }}
+      >
+        {option[0]}
+      </span>
+
+      {/* Show delete button for non-special options */}
+      {option[0] !== "➕ Add New Space" && onDeleteOption && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onDeleteOption(option[0]);
+          }}
+          className="ml-2 text-red-500 hover:text-red-700"
+          title="Delete"
+        >
+          <FaTrash className="w-3 h-4" />
+        </button>
+      )}
+    </div>
+  ))
+) : (
+  <div className="px-4 py-2 text-gray-500 text-sm font-inter">No results found</div>
+)}
+
         </div>
       )}
     </div>
@@ -308,6 +328,16 @@ const MaterialSelectionComponent = ({
     }
   };
 
+  const handleDeleteArea = (areaName: string) => {
+  const confirmed = window.confirm(`Are you sure you want to delete "${areaName}"?`);
+  if (!confirmed) return;
+
+  const newAreas = availableAreas.filter((a) => a[0] !== areaName);
+  setAvailableAreas(newAreas);
+  alert(`"${areaName}" deleted from dropdown.`);
+};
+
+
   return (
     <div className="flex flex-col gap-6 p-6 bg-white !rounded-2xl shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-xl font-inter">
       <h2 className="text-2xl md:text-3xl font-poppins font-semibold text-gray-900 tracking-tight mb-4">
@@ -345,7 +375,9 @@ const MaterialSelectionComponent = ({
       handleAreaChange(mainindex, selectedOption[0]);
     }
   }}
+  onDeleteOption={handleDeleteArea}
 />
+
 
           </div>
           <button

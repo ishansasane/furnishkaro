@@ -116,7 +116,7 @@ const SettingsPage = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
+          <div className="animate-spin !rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading settings...</p>
         </div>
       </div>
@@ -127,7 +127,7 @@ const SettingsPage = () => {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-8">Settings</h1>
-        <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="bg-white !rounded-lg shadow overflow-hidden">
           <TabNavigation />
           <div className="p-6">
             {activeTab === "terms" ? <TermsSection /> : <BankSection />}
@@ -146,6 +146,17 @@ const TermsSection = () => {
   const dispatch = useDispatch();
   const termsData = useSelector((state: RootState) => state.data.termsData);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (termsDialog && e.key === "Enter") {
+        e.preventDefault();
+        sendTermDetails();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [termsDialog, terms]);
+
   const fetchTermsData = async () => {
     const response = await fetch(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getPaintsTermsData"
@@ -163,9 +174,7 @@ const TermsSection = () => {
     setIsLoading(true);
     try {
       const date = new Date();
-      const newdate = `${date.getDate()}/${
-        date.getMonth() + 1
-      }/${date.getFullYear()}`;
+      const newdate = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
 
       const response = await fetch(
         "https://sheeladecor.netlify.app/.netlify/functions/server/sendPaintsTermsData",
@@ -228,6 +237,8 @@ const TermsSection = () => {
     }
   };
 
+  
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -237,7 +248,7 @@ const TermsSection = () => {
         {!termsDialog && (
           <button
             onClick={() => setTermsDialog(true)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow-sm"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 !rounded-md shadow-sm"
             disabled={isLoading}
           >
             <PlusCircle size={18} />
@@ -248,10 +259,10 @@ const TermsSection = () => {
 
       {isLoading ? (
         <div className="flex justify-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+          <div className="animate-spin !rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
         </div>
       ) : !termsDialog ? (
-        <div className="overflow-x-auto border rounded-lg shadow">
+        <div className="overflow-x-auto border !rounded-lg shadow">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -302,7 +313,7 @@ const TermsSection = () => {
           </table>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow p-6 max-w-3xl mx-auto">
+        <div className="bg-white !rounded-lg shadow p-6 max-w-3xl mx-auto">
           <h3 className="text-lg font-semibold text-gray-800 mb-4">
             Add New Terms & Conditions
           </h3>
@@ -311,7 +322,7 @@ const TermsSection = () => {
             value={terms}
             onChange={(e) => setTerms(e.target.value)}
             rows={8}
-            className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full border border-gray-300 !rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           <div className="flex justify-end gap-3 mt-4">
             <button
@@ -319,14 +330,14 @@ const TermsSection = () => {
                 setTerms("");
                 setTermsDialog(false);
               }}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              className="px-4 py-2 border border-gray-300 !rounded-md text-gray-700 hover:bg-gray-50"
               disabled={isLoading}
             >
               Cancel
             </button>
             <button
               onClick={sendTermDetails}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
+              className="px-4 py-2 bg-blue-600 text-white !rounded-md hover:bg-blue-700 flex items-center gap-2"
               disabled={isLoading || !terms.trim()}
             >
               {isLoading ? (
@@ -365,6 +376,9 @@ const TermsSection = () => {
 };
 
 const BankSection = () => {
+
+  
+
   const [bankDialog, setBankDialog] = useState(false);
   const [editBankData, setEditBankData] = useState(false);
   const [formData, setFormData] = useState({
@@ -527,6 +541,18 @@ const sendBankDetails = async () => {
     setBankDialog(true);
   };
 
+  useEffect(() => {
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (bankDialog && e.key === "Enter") {
+      e.preventDefault();
+      sendBankDetails();
+    }
+  };
+  window.addEventListener("keydown", handleKeyDown);
+  return () => window.removeEventListener("keydown", handleKeyDown);
+}, [bankDialog, formData]);
+
+
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -536,7 +562,7 @@ const sendBankDetails = async () => {
         {!bankDialog && (
           <button
             onClick={() => setBankDialog(true)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow-sm"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 !rounded-md shadow-sm"
             disabled={isLoading}
           >
             <PlusCircle size={18} />
@@ -546,7 +572,7 @@ const sendBankDetails = async () => {
       </div>
 
       {bankDialog ? (
-        <div className="bg-white rounded-lg shadow p-6 max-w-2xl mx-auto">
+        <div className="bg-white !rounded-lg shadow p-6 max-w-2xl mx-auto">
           <div className="flex items-center mb-4">
             <button
               onClick={resetForm}
@@ -570,7 +596,7 @@ const sendBankDetails = async () => {
                 name="bankName"
                 value={formData.bankName}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 !rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter Bank Name"
                 disabled={isLoading}
               />
@@ -585,7 +611,7 @@ const sendBankDetails = async () => {
                 name="accountName"
                 value={formData.accountName}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 !rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter Account Holder Name"
                 disabled={isLoading}
               />
@@ -600,7 +626,7 @@ const sendBankDetails = async () => {
                 name="branch"
                 value={formData.branch}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 !rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter branch"
                 disabled={isLoading}
               />
@@ -615,7 +641,7 @@ const sendBankDetails = async () => {
                 name="pincode"
                 value={formData.pincode}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 !rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter pincode"
                 disabled={isLoading}
               />
@@ -630,7 +656,7 @@ const sendBankDetails = async () => {
                 name="accountNumber"
                 value={formData.accountNumber}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 !rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter account number"
                 disabled={isLoading}
               />
@@ -645,7 +671,7 @@ const sendBankDetails = async () => {
                 name="ifscCode"
                 value={formData.ifscCode}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 !rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter IFSC code"
                 disabled={isLoading}
               />
@@ -659,7 +685,7 @@ const sendBankDetails = async () => {
                 name="accountType"
                 value={formData.accountType}
                 onChange={handleInputChange}
-                className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-gray-300 !rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter Account Type"
                 disabled={isLoading}
               />
@@ -669,14 +695,14 @@ const sendBankDetails = async () => {
           <div className="flex justify-end gap-3 mt-6">
             <button
               onClick={resetForm}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              className="px-4 py-2 border border-gray-300 !rounded-md text-gray-700 hover:bg-gray-50"
               disabled={isLoading}
             >
               Cancel
             </button>
             <button
               onClick={sendBankDetails}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
+              className="px-4 py-2 bg-blue-600 text-white !rounded-md hover:bg-blue-700 flex items-center gap-2"
               disabled={
                 isLoading ||
                 !formData.bankName ||
@@ -722,10 +748,10 @@ const sendBankDetails = async () => {
         </div>
       ) : isLoading ? (
         <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+          <div className="animate-spin !rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
         </div>
       ) : bankData.length > 0 ? (
-        <div className="overflow-x-auto border rounded-lg shadow">
+        <div className="overflow-x-auto border !rounded-lg shadow">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -807,7 +833,7 @@ const sendBankDetails = async () => {
           </table>
         </div>
       ) : (
-        <div className="text-center py-12 bg-white rounded-lg shadow">
+        <div className="text-center py-12 bg-white !rounded-lg shadow">
           <svg
             className="mx-auto h-12 w-12 text-gray-400"
             fill="none"
@@ -830,7 +856,7 @@ const sendBankDetails = async () => {
           <div className="mt-6">
             <button
               onClick={() => setBankDialog(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium !rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               disabled={isLoading}
             >
               <PlusCircle className="-ml-1 mr-2 h-5 w-5" />

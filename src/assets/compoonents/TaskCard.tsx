@@ -7,6 +7,10 @@ const TaskCard = ({ taskData }) => {
     Low: "bg-green-500",
   };
 
+  useEffect(()=>{
+    console.log("Task Data:", taskData);
+  })
+
   return (
     <div className="bg-white shadow-sm rounded-xl  p-3 border-l-4 border-gray-100 transition-transform transform hover:scale-102">
       <div className="flex justify-between !gap-0 items-start">

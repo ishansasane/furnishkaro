@@ -69,6 +69,7 @@ const CustomerDetails: React.FC<CustomerDetailsProps> = ({
           className="border p-2 rounded w-full"
           value={selectedCustomer || ""}
           onChange={(e) => setSelectedCustomer(e.target.value)}
+         
         >
           <option value="">Select Customer</option>
           {Array.isArray(customers) &&

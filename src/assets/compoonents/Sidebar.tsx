@@ -162,11 +162,11 @@ function SidebarContent({
 
   const mastersItems = [
     { text: "Products", path: "/masters/items", icon: <Package size={20} /> },
-    // {
-    //   text: "Product Groups",
-    //   path: "/masters/product-groups",
-    //   icon: <Layers size={20} />,
-    // },
+    {
+      text: "Product Groups",
+      path: "/masters/product-groups",
+      icon: <Layers size={20} />,
+    },
     { text: "Brands", path: "/masters/brands", icon: <Star size={20} /> },
     // {
     //   text: "Colours",

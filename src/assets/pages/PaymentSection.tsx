@@ -134,7 +134,7 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
           <p className="text-base sm:text-lg font-semibold">Received Payments</p>
           <button
             onClick={() => setAddPayment(true)}
-            className="shadow-xl hover:bg-sky-700 bg-sky-600 text-white px-4 py-2 !rounded-lg text-xs sm:text-sm"
+            className="shadow-xl hover:bg-sky-700 bg-sky-600 text-white px-2 h-8 !rounded-lg text-xs sm:text-sm"
           >
             Add Payment
           </button>

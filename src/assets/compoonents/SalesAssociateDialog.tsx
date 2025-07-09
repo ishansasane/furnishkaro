@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchWithLoading } from "../Redux/fetchWithLoading";
 import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../Redux/store";
+import { setSalesAssociateData } from "../Redux/dataSlice"; // make sure this import exists
 
 interface SalesAssociateDialogProps {
   setDialogOpen: (open: boolean) => void;
@@ -39,21 +41,15 @@ const SalesAssociateDialog: React.FC<SalesAssociateDialogProps> = ({
     (state: RootState) => state.data.salesAssociates
   );
 
-  const [name, setName] = useState(
-    editingSalesAssociate ? editingSalesAssociate[0] : ""
-  );
-  const [email, setEmail] = useState(
-    editingSalesAssociate ? editingSalesAssociate[1] : ""
-  );
-  const [phonenumber, setPhoneNumber] = useState(
-    editingSalesAssociate ? editingSalesAssociate[2] : ""
-  );
-  const [address, setAddress] = useState(
-    editingSalesAssociate ? editingSalesAssociate[3] : ""
-  );
+  const [name, setName] = useState(editingSalesAssociate ? editingSalesAssociate[0] : "");
+  const [email, setEmail] = useState(editingSalesAssociate ? editingSalesAssociate[1] : "");
+  const [phonenumber, setPhoneNumber] = useState(editingSalesAssociate ? editingSalesAssociate[2] : "");
+  const [address, setAddress] = useState(editingSalesAssociate ? editingSalesAssociate[3] : "");
 
-  const handleSubmit = async () => {
-    // ✅ Duplicate check (only for Add mode)
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+
+    // ✅ Duplicate check (only for Add)
     if (!editingSalesAssociate) {
       const duplicate = salesAssociates.find(
         (sa) => sa[0].toLowerCase().trim() === name.toLowerCase().trim()
@@ -119,56 +115,84 @@ const SalesAssociateDialog: React.FC<SalesAssociateDialogProps> = ({
       <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md">
         <div className="bg-white p-6 rounded shadow-md w-full border">
           <h2 className="text-xl font-bold mb-4">
-            {editingSalesAssociate
-              ? "Edit Sales Associate"
-              : "Add Sales Associate"}
+            {editingSalesAssociate ? "Edit Sales Associate" : "Add Sales Associate"}
           </h2>
 
-          <input
-            className={`${
-              editingSalesAssociate ? "hidden" : ""
-            } border p-2 rounded w-full mb-2`}
-            placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <input
-            className="border p-2 rounded w-full mb-2"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            className="border p-2 rounded w-full mb-2"
-            placeholder="Phone Number"
-            value={phonenumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-          />
-          <input
-            className="border p-2 rounded w-full mb-2"
-            placeholder="Address"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-          />
+          {/* ✅ Form wrapper to allow Enter key submission */}
+          <form onSubmit={handleSubmit}>
+  {/* Name field (only shown when not editing) */}
+  {!editingSalesAssociate && (
+    <div className="mb-2">
+      <label className="block text-sm font-medium text-gray-700 mb-1">
+        Name <span className="text-red-500">*</span>
+      </label>
+      <input
+        className="border p-2 rounded w-full"
+        placeholder="Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        required
+      />
+    </div>
+  )}
 
-          <div className="flex justify-end gap-2 mt-4">
-            <button
-              className="bg-gray-500 text-white px-4 py-2 rounded"
-              onClick={() => {
-                setDialogOpen(false);
-                setEditingSalesAssociate(null);
-                navigate("/masters/sales-associate");
-              }}
-            >
-              Cancel
-            </button>
-            <button
-              className="bg-blue-500 text-white px-4 py-2 rounded"
-              onClick={handleSubmit}
-            >
-              Save
-            </button>
-          </div>
+  <div className="mb-2">
+    <label className="block text-sm font-medium text-gray-700 mb-1">
+      Email
+    </label>
+    <input
+      className="border p-2 rounded w-full"
+      placeholder="Email"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+    />
+  </div>
+
+  <div className="mb-2">
+    <label className="block text-sm font-medium text-gray-700 mb-1">
+      Phone Number
+    </label>
+    <input
+      className="border p-2 rounded w-full"
+      placeholder="Phone Number"
+      value={phonenumber}
+      onChange={(e) => setPhoneNumber(e.target.value)}
+    />
+  </div>
+
+  <div className="mb-2">
+    <label className="block text-sm font-medium text-gray-700 mb-1">
+      Address
+    </label>
+    <input
+      className="border p-2 rounded w-full"
+      placeholder="Address"
+      value={address}
+      onChange={(e) => setAddress(e.target.value)}
+    />
+  </div>
+
+  <div className="flex justify-end gap-2 mt-4">
+    <button
+      type="button"
+      className="bg-gray-500 text-white px-4 py-2 rounded"
+      onClick={() => {
+        setDialogOpen(false);
+        setEditingSalesAssociate(null);
+        navigate("/masters/sales-associate");
+      }}
+    >
+      Cancel
+    </button>
+    <button
+      type="submit"
+      className="bg-blue-500 text-white px-4 py-2 rounded"
+    >
+      Save
+    </button>
+  </div>
+</form>
+
         </div>
       </div>
     </>

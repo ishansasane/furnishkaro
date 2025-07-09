@@ -2264,418 +2264,345 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
             </div>
           </div>
         )}
-        {navState == "Quotation" && (
-          <div className="flex flex-col gap-3">
-            <div className="flex flex-col p-6 border !rounded-lg w-full shadow-2xl">
-              <p className="">Quotation</p>
-              <div className="flex flex-col gap-3 w-full">
-                {selections.map((selection, mainindex) => (
-                  <div key={mainindex} className="w-full">
-                    <p className="text-base sm:text-lg font-semibold mb-2">
-                      {selection.area}
-                    </p>
-                    <div className="overflow-x-auto">
-                      <table className="w-full border-collapse mb-6 text-xs sm:text-sm min-w-[600px] sm:min-w-full">
-                        <thead>
-                          <tr className="flex flex-col sm:flex-row justify-between w-full bg-gray-100 p-2 border-b font-semibold hidden sm:flex">
-                            <td className="w-full sm:w-[10%] py-1">Sr. No.</td>
-                            <td className="w-full sm:w-[45%] py-1">
-                              Product Name
+       {navState === "Quotation" && (
+  <div className="flex flex-col gap-6">
+    <div className="flex flex-col p-6 sm:p-8 !rounded-2xl shadow-lg w-full bg-white border border-gray-100 transition-all duration-300 hover:shadow-xl">
+      <p className="text-xl sm:text-2xl font-bold text-gray-800 mb-4">Quotation</p>
+      <div className="flex flex-col gap-6 w-full">
+        {selections.map((selection, mainindex) => (
+          <div key={mainindex} className="w-full">
+            <p className="text-base sm:text-lg font-semibold text-gray-700 mb-3">{selection.area}</p>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse text-xs sm:text-sm min-w-[600px] sm:min-w-full">
+                <thead>
+                  <tr className="flex flex-col sm:flex-row justify-between w-full bg-gray-50 p-3 border-b border-gray-200 font-semibold text-gray-600 hidden sm:flex">
+                    <td className="w-full sm:w-[10%] py-2 text-center">Sr. No.</td>
+                    <td className="w-full sm:w-[45%] py-2">Product Name</td>
+                    <td className="w-full sm:w-[45%] py-2">Size</td>
+                    <td className="w-full sm:w-[20%] py-2 text-center">MRP</td>
+                    <td className="w-full sm:w-[20%] py-2 text-center">Quantity</td>
+                    <td className="w-full sm:w-[20%] py-2 text-center">Subtotal</td>
+                    <td className="w-full sm:w-[20%] py-2 text-center">Tax Rate (%)</td>
+                    <td className="w-full sm:w-[20%] py-2 text-center">Tax Amount</td>
+                    <td className="w-full sm:w-[20%] py-2 text-center">Total</td>
+                  </tr>
+                </thead>
+                <tbody>
+                  {selection.areacollection && selection.areacollection.length > 0 ? (
+                    selection.areacollection.map((collection, collectionIndex) => {
+                      if (!Array.isArray(collection.items)) {
+                        return (
+                          <tr key={`error-${collectionIndex}`}>
+                            <td
+                              colSpan={9}
+                              className="text-center text-red-500 text-xs sm:text-sm py-3"
+                            >
+                              No items found for collection {collectionIndex + 1}
                             </td>
-                            <td className="w-full sm:w-[45%] py-1">Size</td>
-                            <td className="w-full sm:w-[20%] py-1">MRP</td>
-                            <td className="w-full sm:w-[20%] py-1">Quantity</td>
-                            <td className="w-full sm:w-[20%] py-1">Subtotal</td>
-                            <td className="w-full sm:w-[20%] py-1">
-                              Tax Rate (%)
-                            </td>
-                            <td className="w-full sm:w-[20%] py-1">
-                              Tax Amount
-                            </td>
-                            <td className="w-full sm:w-[20%] py-1">Total</td>
                           </tr>
-                        </thead>
-                        <tbody>
-                          {selection.areacollection &&
-                          selection.areacollection.length > 0 ? (
-                            selection.areacollection.map(
-                              (collection, collectionIndex) => {
-                                if (!Array.isArray(collection.items)) {
-                                  return (
-                                    <tr key={`error-${collectionIndex}`}>
-                                      <td
-                                        colSpan={9}
-                                        className="text-center text-red-500 text-xs sm:text-sm py-2"
-                                      >
-                                        No items found for collection{" "}
-                                        {collectionIndex + 1}
-                                      </td>
-                                    </tr>
-                                  );
-                                }
+                        );
+                      }
 
-                                return collection.items.map(
-                                  (item: any, itemIndex: number) => {
-                                    const key = `${mainindex}-${collectionIndex}-${itemIndex}`;
-                                    const qty =
-                                      collection.quantities?.[itemIndex] || 0;
+                      return collection.items.map((item, itemIndex) => {
+                        const key = `${mainindex}-${collectionIndex}-${itemIndex}`;
+                        const qty = collection.quantities?.[itemIndex] || 0;
 
-                                    return (
-                                      <tr
-                                        key={key}
-                                        className="flex flex-col sm:flex-row justify-between w-full border-b p-2 sm:p-4"
-                                      >
-                                        <td className="w-full sm:w-[10%] text-xs sm:text-sm py-1 sm:text-center before:content-['Sr._No.:_'] sm:before:content-none before:font-bold before:pr-2">
-                                          {itemIndex + 1}
-                                        </td>
-                                        <td className="w-full sm:w-[45%] text-xs sm:text-sm py-1 before:content-['Product_Name:_'] sm:before:content-none before:font-bold before:pr-2">
-                                          {item[0]}
-                                        </td>
-                                        <td className="w-full sm:w-[45%] text-xs sm:text-sm py-1 before:content-['Size:_'] sm:before:content-none before:font-bold before:pr-2">
-                                          {collection.measurement.width +
-                                            " x " +
-                                            collection.measurement.height +
-                                            " " +
-                                            collection.measurement.unit}
-                                        </td>
-                                        <td className="w-full sm:w-[20%] text-xs sm:text-sm py-1 sm:text-center before:content-['MRP:_'] sm:before:content-none before:font-bold before:pr-2">
-                                          {(
-                                            (Math.round(item[4])).toLocaleString("en-IN")
-                                          )}
-                                        </td>
-                                        <td className="w-full sm:w-[20%] py-1 before:content-['Quantity:_'] sm:before:content-none before:font-bold before:pr-2">
-                                          <div className="flex flex-col">
-                                            <input
-                                              type="text"
-                                              value={
-                                                collection.quantities?.[
-                                                  itemIndex
-                                                ] || ""
-                                              }
-                                              onChange={(e) =>
-                                                handleQuantityChange(
-                                                  key,
-                                                  e.target.value,
-                                                  mainindex,
-                                                  collectionIndex,
-                                                  collection.measurement
-                                                    .quantity,
-                                                  item[4],
-                                                  item[5],
-                                                  itemIndex
-                                                )
-                                              }
-                                              className="border w-max sm:w-4/5 px-2 py-1 !rounded text-xs sm:text-sm min-w-[80px]"
-                                            />
-                                            <p className="text-[10px] sm:text-xs text-gray-600 mt-1">
-                                              {item[3]}
-                                            </p>
-                                          </div>
-                                        </td>
-                                        <td className="w-full sm:w-[20%] text-xs sm:text-sm py-1 sm:text-center before:content-['Subtotal:_'] sm:before:content-none before:font-bold before:pr-2">
-                                          {(Math.round(
-                                            item[4] *
-                                            qty
-                                          )).toLocaleString("en-IN")}
-                                        </td>
-                                        <td className="w-full sm:w-[20%] text-xs sm:text-sm py-1 sm:text-center before:content-['Tax_Rate_(%):_'] sm:before:content-none before:font-bold before:pr-2">
-                                          {item[5]}
-                                        </td>
-                                        <td className="w-full sm:w-[20%] text-xs sm:text-sm py-1 sm:text-center before:content-['Tax_Amount:_'] sm:before:content-none before:font-bold before:pr-2">
-                                          {collection.totalTax[itemIndex]
-                                            ? (Math.round(collection.totalTax[
-                                                itemIndex
-                                              ])).toLocaleString("en-IN")
-                                            : "0"}
-                                        </td>
-                                        <td className="w-full sm:w-[20%] text-xs sm:text-sm py-1 sm:text-center before:content-['Total:_'] sm:before:content-none before:font-bold before:pr-2">
-                                          {collection.totalAmount[itemIndex]
-                                            ? (Math.round(collection.totalAmount[
-                                                itemIndex
-                                              ])).toLocaleString("en-IN")
-                                            : "0"}
-                                        </td>
-                                      </tr>
-                                    );
-                                  }
-                                );
-                              }
-                            )
-                          ) : (
-                            <tr>
-                              <td
-                                colSpan={9}
-                                className="text-center py-2 text-gray-500 text-xs sm:text-base"
-                              >
-                                No product data available.
-                              </td>
-                            </tr>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="border p-4 sm:p-6 !rounded-lg w-full flex flex-col">
-                <p className="text-base sm:text-lg font-semibold">
-                  Miscellaneous
-                </p>
-                <div className="flex w-full flex-col">
-                  <div className="flex flex-row justify-between items-center mt-4">
-                    <button
-                      className="flex flex-row gap-2 !rounded-xl bg-sky-50 hover:bg-sky-100 items-center px-2 py-1 text-sm"
-                      onClick={handleAddMiscItem}
-                    >
-                      <FaPlus className="text-sky-500" />
-                      Add Item
-                    </button>
-                  </div>
-                  <div className="w-full overflow-x-auto">
-                    <table className="mt-3 w-full bg-white">
-                      <thead className="hidden sm:table-header-group">
-                        <tr className="bg-gray-100 text-gray-700 text-sm font-semibold">
-                          <th className="py-3 px-4 text-center">SR</th>
-                          <th className="py-3 px-4">Item Name</th>
-                          <th className="py-3 px-4">Quantity</th>
-                          <th className="py-3 px-4">Rate</th>
-                          <th className="py-3 px-4">Net Rate</th>
-                          <th className="py-3 px-4">Tax (%)</th>
-                          <th className="py-3 px-4">Tax Amount</th>
-                          <th className="py-3 px-4">Total Amount</th>
-                          <th className="py-3 px-4">Remark</th>
-                          <th className="py-3 px-4 text-center">Actions</th>
-                        </tr>
-                      </thead>
-
-                      <tbody className="w-full">
-                        {additionalItems.map((item, i) => (
+                        return (
                           <tr
-                            key={i}
-                            className="flex flex-col sm:table-row w-full border-b hover:bg-gray-50"
+                            key={key}
+                            className="flex flex-col sm:flex-row justify-between w-full border-b border-gray-100 p-3 sm:p-4 hover:bg-gray-50 transition-colors duration-150"
                           >
-                            <td className="py-3 px-4 text-center text-sm before:content-['SR:_'] sm:before:content-none before:font-semibold sm:text-center">
-                              {i + 1}
+                            <td className="w-full sm:w-[10%] text-xs sm:text-sm py-2 sm:text-center before:content-['Sr._No.:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
+                              {itemIndex + 1}
                             </td>
-
-                            <td className="py-3 px-4 before:content-['Item_Name:_'] sm:before:content-none before:font-semibold">
-                              <input
-                                onChange={(e) =>
-                                  handleItemNameChange(i, e.target.value)
-                                }
-                                className="w-[100px] border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                value={item.name || ""}
-                                type="text"
-                              />
+                            <td className="w-full sm:w-[45%] text-xs sm:text-sm py-2 before:content-['Product_Name:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
+                              {item[0]}
                             </td>
-
-                            <td className="py-3 px-4 before:content-['Quantity:_'] sm:before:content-none before:font-semibold">
-                              <input
-                                onChange={(e) =>
-                                  handleItemQuantityChange(i, e.target.value)
-                                }
-                                className="w-full border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                value={item.quantity || ""}
-                                type="number"
-                                min="0"
-                              />
+                            <td className="w-full sm:w-[45%] text-xs sm:text-sm py-2 before:content-['Size:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
+                              {collection.measurement.width + " x " + collection.measurement.height + " " + collection.measurement.unit}
                             </td>
-
-                            <td className="w-[130px] py-3 px-4 before:content-['Rate:_'] sm:before:content-none before:font-semibold">
-                              <input
-                                onChange={(e) =>
-                                  handleItemRateChange(i, e.target.value)
-                                }
-                                className="w-[130px] border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                value={(Math.round(item.rate)).toLocaleString("en-IN") || ""}
-                                type="number"
-                                min="0"
-                              />
+                            <td className="w-full sm:w-[20%] text-xs sm:text-sm py-2 sm:text-center before:content-['MRP:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
+                              {(Math.round(item[4])).toLocaleString("en-IN")}
                             </td>
-
-                            <td className="w-[130px] py-3 px-4 text-sm text-left sm:text-center before:content-['Net_Rate:_'] sm:before:content-none before:font-semibold">
-                              {(Math.round(item.netRate)).toLocaleString("en-IN") || "0"}
+                            <td className="w-full sm:w-[20%] py-2 before:content-['Quantity:_'] sm:before:content-none before:font-semibold before:pr-2">
+                              <div className="flex flex-col">
+                                <input
+                                  type="text"
+                                  value={collection.quantities?.[itemIndex] || ""}
+                                  onChange={(e) =>
+                                    handleQuantityChange(
+                                      key,
+                                      e.target.value,
+                                      mainindex,
+                                      collectionIndex,
+                                      collection.measurement.quantity,
+                                      item[4],
+                                      item[5],
+                                      itemIndex
+                                    )
+                                  }
+                                  className="border border-gray-200 w-max sm:w-4/5 px-3 py-2 !rounded-lg text-xs sm:text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
+                                />
+                                <p className="text-[10px] sm:text-xs text-gray-500 mt-1">{item[3]}</p>
+                              </div>
                             </td>
-
-                            <td className="py-3 px-4 before:content-['Tax_(%):_'] sm:before:content-none before:font-semibold">
-                              <input
-                                onChange={(e) =>
-                                  handleItemTaxChange(i, e.target.value)
-                                }
-                                className="w-[70px] border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                value={item.tax || ""}
-                                type="number"
-                                min="0"
-                              />
+                            <td className="w-full sm:w-[20%] text-xs sm:text-sm py-2 sm:text-center before:content-['Subtotal:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
+                              {(Math.round(item[4] * qty)).toLocaleString("en-IN")}
                             </td>
-
-                            <td className="py-3 px-4 text-sm text-left sm:text-center before:content-['Tax_Amount:_'] sm:before:content-none before:font-semibold">
-                              {(Math.round(item.taxAmount)).toLocaleString("en-IN") || "0"}
+                            <td className="w-full sm:w-[20%] text-xs sm:text-sm py-2 sm:text-center before:content-['Tax_Rate_(%):_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
+                              {item[5]}
                             </td>
-
-                            <td className="py-3 px-4 text-sm text-left sm:text-center before:content-['Total_Amount:_'] sm:before:content-none before:font-semibold">
-                              {(Math.round(item.totalAmount)).toLocaleString("en-IN") || "0"}
+                            <td className="w-full sm:w-[20%] text-xs sm:text-sm py-2 sm:text-center before:content-['Tax_Amount:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
+                              {collection.totalTax[itemIndex] ? (Math.round(collection.totalTax[itemIndex])).toLocaleString("en-IN") : "0"}
                             </td>
-
-                            <td className="py-3 px-4 before:content-['Remark:_'] sm:before:content-none before:font-semibold">
-                              <input
-                                onChange={(e) =>
-                                  handleItemRemarkChange(i, e.target.value)
-                                }
-                                className="w-[100px] border border-gray-300 rounded-md px-3 py-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                value={item.remark || ""}
-                                type="text"
-                              />
-                            </td>
-
-                            <td className="py-3 px-4 text-left sm:text-center before:content-['Actions:_'] sm:before:content-none before:font-semibold">
-                              <button onClick={() => handleDeleteMiscItem(i)}>
-                                <FaTrash className="text-red-500 hover:text-red-600 w-4 h-4" />
-                              </button>
+                            <td className="w-full sm:w-[20%] text-xs sm:text-sm py-2 sm:text-center before:content-['Total:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
+                              {collection.totalAmount[itemIndex] ? (Math.round(collection.totalAmount[itemIndex])).toLocaleString("en-IN") : "0"}
                             </td>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
+                        );
+                      });
+                    })
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan={9}
+                        className="text-center py-3 text-gray-500 text-xs sm:text-base"
+                      >
+                        No product data available.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3 justify-between w-full">
-           <div className="bg-white p-8 !rounded-2xl shadow-lg border border-gray-100 w-full md:w-1/2 transition-all duration-300 hover:shadow-xl">
-          <h3 className="text-xl font-poppins font-semibold text-gray-900 mb-6 tracking-tight">
-            Bank Details & Terms
-          </h3>
-          <div className="space-y-6">
-            <select
-              value={bank}
-              onChange={(e) => setBank(e.target.value.split(","))}
-              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+          </div>
+        ))}
+      </div>
+      <div className="border border-gray-100 p-6 sm:p-8 !rounded-2xl w-full flex flex-col mt-6 bg-white shadow-md transition-all duration-300 hover:shadow-lg">
+        <p className="text-base sm:text-lg font-bold text-gray-700 mb-4">Miscellaneous</p>
+        <div className="flex w-full flex-col">
+          <div className="flex flex-row justify-between items-center mb-4">
+            <button
+              className="flex flex-row gap-2 !rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-500 text-indigo-600 px-4 py-2 text-sm font-medium transition-all duration-200"
+              onClick={handleAddMiscItem}
             >
-              <option value="">Select Bank Details</option>
-              {Array.isArray(bankData) && bankData.length > 0 ? (
-                bankData.map((data, index) => (
-                  <option key={index} value={data} className="overflow-y-scroll">
-                    Account Name: { data?.[0] || "NA" } - Bank: { data?.[1] || "NA" } - Account Number: {data?.[4] || "N/A"} 
-                  </option>
-                ))
-              ) : (
-                <option disabled>No bank accounts available</option>
-              )}
-
-            </select>
-            <textarea
-              placeholder="Bank Details Description"
-              value={`Bank: ${ bank[1] == "NA" ? "" : bank[1] }\nAccount Name: ${bank[0] == "NA" ? "" : bank[0]}\nAccount Number: ${bank[4] == "NA" ? "" : bank[4]}\nIFSC code: ${bank[5] == "NA" ? "" : bank[5]}\n Branch: ${bank[2] == "NA" ? "" : bank[2]} \n Pincode: ${bank[3] == "NA" ? "" : bank[3]}`}
-              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-              rows={5}
-            ></textarea>
-            <select
-              value={terms}
-              onChange={(e) => setTerms(e.target.value.split(","))}
-              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-            >
-              <option value="">Select Terms & Conditions</option>
-{Array.isArray(termData) && termData.length > 0 ? (
-  termData.map((data, index) => (
-    <option key={index} value={data}>
-      {data?.[0] || "N/A"}
-    </option>
-  ))
-) : (
-  <option disabled>No terms available</option>
-)}
-
-            </select>
-            <textarea
-              placeholder="Terms & Conditions Description"
-              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-              rows={4}
-              value={`Terms & Conditions: ${terms == "NA" ? "" : terms[0]}`}
-            ></textarea>
+              <FaPlus className="text-indigo-600" />
+              Add Item
+            </button>
+          </div>
+          <div className="w-full overflow-x-auto">
+            <table className="w-full bg-white text-xs sm:text-sm min-w-[600px] sm:min-w-full">
+              <thead className="hidden sm:table-header-group">
+                <tr className="bg-gray-50 text-gray-600 text-sm font-semibold border-b border-gray-200">
+                  <th className="py-3 px-4 text-center">SR</th>
+                  <th className="py-3 px-4">Item Name</th>
+                  <th className="py-3 px-4 text-center">Quantity</th>
+                  <th className="py-3 px-4 text-center">Rate</th>
+                  <th className="py-3 px-4 text-center">Net Rate</th>
+                  <th className="py-3 px-4 text-center">Tax (%)</th>
+                  <th className="py-3 px-4 text-center">Tax Amount</th>
+                  <th className="py-3 px-4 text-center">Total Amount</th>
+                  <th className="py-3 px-4">Remark</th>
+                  <th className="py-3 px-4 text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="w-full">
+                {additionalItems.map((item, i) => (
+                  <tr
+                    key={i}
+                    className="flex flex-col sm:table-row w-full border-b border-gray-100 hover:bg-gray-50 transition-colors duration-150"
+                  >
+                    <td className="py-3 px-4 text-center text-xs sm:text-sm before:content-['SR:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
+                      {i + 1}
+                    </td>
+                    <td className="py-3 px-4 before:content-['Item_Name:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
+                      <input
+                        onChange={(e) => handleItemNameChange(i, e.target.value)}
+                        className="w-[100px] border border-gray-200 !rounded-lg px-3 py-2 text-xs sm:text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
+                        value={item.name || ""}
+                        type="text"
+                      />
+                    </td>
+                    <td className="py-3 px-4 text-center before:content-['Quantity:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
+                      <input
+                        onChange={(e) => handleItemQuantityChange(i, e.target.value)}
+                        className="w-full border border-gray-200 !rounded-lg px-3 py-2 text-xs sm:text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
+                        value={item.quantity || ""}
+                        type="number"
+                        min="0"
+                      />
+                    </td>
+                    <td className="py-3 px-4 text-center before:content-['Rate:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
+                      <input
+                        onChange={(e) => handleItemRateChange(i, e.target.value)}
+                        className="w-[130px] border border-gray-200 !rounded-lg px-3 py-2 text-xs sm:text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
+                        value={(Math.round(item.rate)).toLocaleString("en-IN") || ""}
+                        type="number"
+                        min="0"
+                      />
+                    </td>
+                    <td className="py-3 px-4 text-center text-xs sm:text-sm before:content-['Net_Rate:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
+                      {(Math.round(item.netRate)).toLocaleString("en-IN") || "0"}
+                    </td>
+                    <td className="py-3 px-4 text-center before:content-['Tax_(%):_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
+                      <input
+                        onChange={(e) => handleItemTaxChange(i, e.target.value)}
+                        className="w-[70px] border border-gray-200 !rounded-lg px-3 py-2 text-xs sm:text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
+                        value={item.tax || ""}
+                        type="number"
+                        min="0"
+                      />
+                    </td>
+                    <td className="py-3 px-4 text-center text-xs sm:text-sm before:content-['Tax_Amount:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
+                      {(Math.round(item.taxAmount)).toLocaleString("en-IN") || "0"}
+                    </td>
+                    <td className="py-3 px-4 text-center text-xs sm:text-sm before:content-['Total_Amount:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
+                      {(Math.round(item.totalAmount)).toLocaleString("en-IN") || "0"}
+                    </td>
+                    <td className="py-3 px-4 before:content-['Remark:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
+                      <input
+                        onChange={(e) => handleItemRemarkChange(i, e.target.value)}
+                        className="w-[100px] border border-gray-200 !rounded-lg px-3 py-2 text-xs sm:text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
+                        value={item.remark || ""}
+                        type="text"
+                      />
+                    </td>
+                    <td className="py-3 px-4 text-center before:content-['Actions:_'] sm:before:content-none before:font-semibold before:pr-2">
+                      <button onClick={() => handleDeleteMiscItem(i)}>
+                        <FaTrash className="text-red-500 hover:text-red-600 w-4 h-4 transition-colors duration-200" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
-              <div className="shadow-xl p-4 sm:p-6 flex flex-col gap-2 border w-full sm:w-1/2 !rounded-lg">
-                <p className="text-base sm:text-lg font-semibold">Summary</p>
-                <div className="flex flex-row justify-between w-full text-xs sm:text-sm">
-                  <p>Sub Total</p>
-                  <p>{Amount.toLocaleString("en-IN")}</p>
-                </div>
-                <div className="flex flex-row justify-between w-full text-xs sm:text-sm">
-                  <p>Total Tax Amount</p>
-                  <p>{Tax.toLocaleString("en-IN")}</p>
-                </div>
-                <div className="flex flex-row justify-between w-full text-xs sm:text-sm">
-                  <p>Total Amount</p>
-                  <p>{grandTotal.toLocaleString("en-IN")}</p>
-                </div>
-                <div className="border border-gray-400"></div>
-                <div className="flex justify-between mt-1 w-full text-xs sm:text-sm">
-                  <p>Discount</p>
-                  <div className="flex items-center gap-2">
-                    <select
-                      value={discountType}
-                      onChange={(e) =>
-                        handleDiscountChange(Discount, e.target.value)
-                      }
-                      className="border border-gray-300 !rounded-md px-2 py-1 text-xs sm:text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    >
-                      {discountType === "cash" ? (
-                        <>
-                          <option value="cash">₹</option>
-                          <option value="percent">%</option>
-                        </>
-                      ) : (
-                        <>
-                          <option value="percent">%</option>
-                          <option value="cash">₹</option>
-                        </>
-                      )}
-                    </select>
-
-                    <input
-                      className="w-20 sm:w-24 border border-gray-300 !rounded-md px-3 py-1 text-xs sm:text-sm text-right focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      value={Math.round(Discount.toLocaleString("en-IN"))}
-                      onChange={(e) =>
-                        handleDiscountChange(e.target.value, discountType)
-                      }
-                      type="number"
-                      min="0"
-                    />
-                  </div>
-                </div>
-                <div className="border border-gray-400"></div>
-                <div className="flex w-full flex-row items-center justify-between text-xs sm:text-sm">
-                  <p>Grand Total</p>
-                  <p>{(Math.round(grandTotal)).toLocaleString("en-IN")}</p>
-                </div>
-                <button
-                  onClick={sendProjectData}
-                  className="!rounded-lg bg-sky-700 hover:bg-sky-800 text-white px-4 py-2 text-xs sm:text-sm mt-2"
-                >
-                  Edit Project & Generate Quote
-                </button>
-              </div>
-            </div>
-
-            <div className="flex flex-row justify-between">
-              <button
-                onClick={() => setNavState("Measurement")}
-                style={{ borderRadius: "8px" }}
-                className="!rounded-lg border px-2 h-8 bg-white"
-              >
-                Back
-              </button>
-              <button
-                onClick={() => setNavState("Goods")}
-                style={{ borderRadius: "8px" }}
-                className="!rounded-lg text-white border px-2 h-8 bg-sky-600"
-              >
-                Next
-              </button>
-            </div>
+      </div>
+    </div>
+    <div className="flex flex-col sm:flex-row gap-6 justify-between w-full">
+      <div className="bg-white p-6 sm:p-8 !rounded-2xl shadow-lg border border-gray-100 w-full sm:w-1/2 transition-all duration-300 hover:shadow-xl">
+        <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6 tracking-tight">Bank Details & Terms</h3>
+        <div className="space-y-6">
+          <select
+            value={bank}
+            onChange={(e) => setBank(e.target.value.split(","))}
+            className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
+          >
+            <option value="">Select Bank Details</option>
+            {Array.isArray(bankData) && bankData.length > 0 ? (
+              bankData.map((data, index) => (
+                <option key={index} value={data} className="overflow-y-scroll">
+                  Account Name: {data?.[0] || "NA"} - Bank: {data?.[1] || "NA"} - Account Number: {data?.[4] || "N/A"}
+                </option>
+              ))
+            ) : (
+              <option disabled>No bank accounts available</option>
+            )}
+          </select>
+          <textarea
+            placeholder="Bank Details Description"
+            value={`Bank: ${bank[1] == "NA" ? "" : bank[1]}\nAccount Name: ${bank[0] == "NA" ? "" : bank[0]}\nAccount Number: ${bank[4] == "NA" ? "" : bank[4]}\nIFSC code: ${bank[5] == "NA" ? "" : bank[5]}\nBranch: ${bank[2] == "NA" ? "" : bank[2]}\nPincode: ${bank[3] == "NA" ? "" : bank[3]}`}
+            className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
+            rows={5}
+          ></textarea>
+          <select
+            value={terms}
+            onChange={(e) => setTerms(e.target.value.split(","))}
+            className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
+          >
+            <option value="">Select Terms & Conditions</option>
+            {Array.isArray(termData) && termData.length > 0 ? (
+              termData.map((data, index) => (
+                <option key={index} value={data}>
+                  {data?.[0] || "N/A"}
+                </option>
+              ))
+            ) : (
+              <option disabled>No terms available</option>
+            )}
+          </select>
+          <textarea
+            placeholder="Terms & Conditions Description"
+            className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
+            rows={4}
+            value={`Terms & Conditions: ${terms == "NA" ? "" : terms[0]}`}
+          ></textarea>
+        </div>
+      </div>
+      <div className="bg-white p-6 sm:p-8 !rounded-2xl shadow-lg border border-gray-100 w-full sm:w-1/2 transition-all duration-300 hover:shadow-xl">
+        <p className="text-base sm:text-lg font-semibold text-gray-700 mb-4">Summary</p>
+        <div className="flex flex-row justify-between w-full text-xs sm:text-sm text-gray-600 mb-3">
+          <p>Sub Total</p>
+          <p>{Amount.toLocaleString("en-IN")}</p>
+        </div>
+        <div className="flex flex-row justify-between w-full text-xs sm:text-sm text-gray-600 mb-3">
+          <p>Total Tax Amount</p>
+          <p>{Tax.toLocaleString("en-IN")}</p>
+        </div>
+        <div className="flex flex-row justify-between w-full text-xs sm:text-sm text-gray-600 mb-3">
+          <p>Total Amount</p>
+          <p>{grandTotal.toLocaleString("en-IN")}</p>
+        </div>
+        <div className="border-t border-gray-200 my-3"></div>
+        <div className="flex justify-between w-full text-xs sm:text-sm text-gray-600 mb-3">
+          <p>Discount</p>
+          <div className="flex items-center gap-2">
+            <select
+              value={discountType}
+              onChange={(e) => handleDiscountChange(Discount, e.target.value)}
+              className="border border-gray-200 !rounded-lg px-3 py-2 text-xs sm:text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
+            >
+              {discountType === "cash" ? (
+                <>
+                  <option value="cash">₹</option>
+                  <option value="percent">%</option>
+                </>
+              ) : (
+                <>
+                  <option value="percent">%</option>
+                  <option value="cash">₹</option>
+                </>
+              )}
+            </select>
+            <input
+              className="w-20 sm:w-24 border border-gray-200 !rounded-lg px-3 py-2 text-xs sm:text-sm text-right bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
+              value={Math.round(Discount).toLocaleString("en-IN")}
+              onChange={(e) => handleDiscountChange(e.target.value, discountType)}
+              type="number"
+              min="0"
+            />
           </div>
-        )}
+        </div>
+        <div className="border-t border-gray-200 my-3"></div>
+        <div className="flex w-full flex-row items-center justify-between text-xs sm:text-sm text-gray-600">
+          <p>Grand Total</p>
+          <p>{(Math.round(grandTotal)).toLocaleString("en-IN")}</p>
+        </div>
+        <button
+          onClick={sendProjectData}
+          className="!rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 text-xs sm:text-sm mt-4 font-medium transition-colors duration-200 w-full sm:w-auto"
+        >
+          Edit Project & Generate Quote
+        </button>
+      </div>
+    </div>
+    <div className="flex flex-row justify-between">
+      <button
+        onClick={() => setNavState("Measurement")}
+        className="!rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs sm:text-sm text-gray-700 hover:bg-gray-50 transition-all duration-200"
+      >
+        Back
+      </button>
+      <button
+        onClick={() => setNavState("Goods")}
+        className="!rounded-lg bg-indigo-600 text-white px-4 py-2 text-xs sm:text-sm hover:bg-indigo-700 transition-all duration-200"
+      >
+        Next
+      </button>
+    </div>
+  </div>
+)}
         {navState == "Goods" && (
           <div className="flex flex-col w-full gap-3 mt-3">
             <div className="w-full">

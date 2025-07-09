@@ -174,10 +174,10 @@ const DeadlineCard: React.FC<DeadlineCardProps> = ({
             className="flex flex-col sm:flex-row sm:justify-between sm:items-center cursor-pointer"
           >
             <div>
-              <p className="text-[1.1vw] font-semibold text-gray-900 line-clamp-1 hover:text-blue-600">
+              <p className=" font-semibold text-gray-900 line-clamp-1 hover:text-blue-600">
                 {projectName}
               </p>
-              <div className="flex items-center gap-1 text-gray-500 text-[0.9vw]">
+              <div className="flex items-center gap-1 text-gray-500 ">
                 <svg
                   className="w-3 h-3"
                   fill="none"
@@ -208,7 +208,7 @@ const DeadlineCard: React.FC<DeadlineCardProps> = ({
           >
             <div>
               <div className="flex gap-1 items-center">
-                <p className="text-[0.9vw] font-medium text-gray-500 uppercase">
+                <p className=" font-medium text-gray-500 uppercase">
                   Items :
                 </p>
                 <span className="text-[0.8vw] text-gray-400 bg-gray-100 rounded-full px-1">

@@ -567,7 +567,7 @@ const formatNumber = (value: number) => {
     theme: "grid",
     styles: {
       font: "helvetica",
-      fontSize: 7.8,
+      fontSize: 8.5,
       cellPadding: 1.5,
       textColor: secondaryColor,
       lineColor: [200, 200, 200],
@@ -578,7 +578,7 @@ const formatNumber = (value: number) => {
       fillColor: primaryColor,
       textColor: [255, 255, 255],
       fontStyle: "bold",
-      fontSize: 7,
+      fontSize: 8.5,
       halign: "center",
     },
     alternateRowStyles: {
@@ -592,7 +592,7 @@ const formatNumber = (value: number) => {
       4: { cellWidth: 12, halign: "center" },
       5: { cellWidth: 22, halign: "center" },
       6: { cellWidth: 12, halign: "center" },
-      7: { cellWidth: 12, halign: "center" },
+      7: { cellWidth: 15, halign: "center" },
       8: { cellWidth: 22, halign: "center" },
     },
     willDrawCell: (data) => {
@@ -681,7 +681,7 @@ const formatNumber = (value: number) => {
 
   const safeProjectName = (project.projectName || "Project").replace(/[^a-zA-Z0-9]/g, "_");
   const safeDate = (project.projectDate || new Date().toLocaleDateString()).replace(/[^a-zA-Z0-9]/g, "_");
-  doc.save(`Quotation_${safeProjectName}_${safeDate}.pdf`);
+  doc.save(`Invoice_${safeProjectName}_${safeDate}.pdf`);
 };
 
 

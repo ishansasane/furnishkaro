@@ -221,15 +221,17 @@ const ProjectDetails = ({
       <div className="flex flex-col sm:flex-row w-full gap-4">
         <div className="flex flex-col w-full sm:w-1/2">
           <label className="text-sm font-poppins font-medium text-gray-700 mb-1">
-            Project Name <span className="text-gray-500 text-xs">(unique name)</span>
+            Project Name <span className="text-gray-500 text-xs"> <span className="text-red-500">*</span>{" "}(unique name)</span>
   </label>
-  <input
-    type="text"
-    className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-    value={projectName || ""}
-    onChange={(e) => setProjectName(e.target.value)}
-    placeholder="Project Name"
-  />
+ <input
+  type="text"
+  className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+  value={projectName || ""}
+  onChange={(e) => setProjectName(e.target.value)}
+  placeholder="Project Name"
+  required
+/>
+
 </div>
 <div className="flex flex-col w-full sm:w-1/2">
   <label className="text-sm font-poppins font-medium text-gray-700 mb-1">
