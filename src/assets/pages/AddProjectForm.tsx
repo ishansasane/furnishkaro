@@ -1624,7 +1624,7 @@ const finalGrandTotal =
         fetchAndDispatch(
           getItemsData,
           setItemData,
-          "itemsData",
+          "itemData",
           setSingleItems
         ),
         fetchAndDispatch(
