@@ -197,7 +197,7 @@ const ProductFormPage: React.FC = () => {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block font-medium">MRP</label>
+            <label className="block font-medium">MRP</label> <span className="text-red-500">*</span>
             <input
               type="text"
               name="mrp"

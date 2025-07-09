@@ -2028,9 +2028,9 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
             ← Back
           </button>
         </div>
-        <div className="flex flex-col sm:flex-row w-full max-w-full justify-between mb-2 sm:mb-3 bg-sky-50 px-1 sm:!px-4 py-1 sm:!py-4  !rounded-lg">
+        <div className="flex flex-wrap gap-1 flex-col md:flex-row w-full max-w-full justify-between mb-2 sm:mb-3 bg-sky-50 px-1 sm:!px-4 py-1 sm:!py-4  !rounded-lg">
           <button
-            className={`w-full sm:w-auto text-sm sm:text-base ${
+            className={`w-full bg-blue-200 !rounded-md p-2 sm:w-auto text-sm sm:text-base ${
               navState === "Overview" ? "text-sky-700 font-semibold" : ""
             }`}
             onClick={() => setNavState("Overview")}
@@ -2038,7 +2038,7 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
             Overview
           </button>
           <button
-            className={`w-full sm:w-auto text-sm sm:text-base ${
+            className={`w-full p-2  bg-blue-200 !rounded-md sm:w-auto text-sm sm:text-base ${
               navState === "Customer & Project Details"
                 ? "text-sky-700 font-semibold"
                 : ""
@@ -2048,7 +2048,7 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
             Customer & Project Details
           </button>
           <button
-            className={`w-full sm:w-auto text-sm sm:text-base ${
+            className={`w-full  bg-blue-200 p-2 !rounded-md sm:w-auto text-sm sm:text-base ${
               navState === "Material Selection"
                 ? "text-sky-700 font-semibold"
                 : ""
@@ -2058,7 +2058,7 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
             Material Selection
           </button>
           <button
-            className={`w-full sm:w-auto text-sm sm:text-base ${
+            className={`w-full  bg-blue-200 p-2 !rounded-md sm:w-auto text-sm sm:text-base ${
               navState === "Measurement" ? "text-sky-700 font-semibold" : ""
             }`}
             onClick={() => setNavState("Measurement")}
@@ -2066,7 +2066,7 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
             Measurement
           </button>
           <button
-            className={`w-full sm:w-auto text-sm sm:text-base ${
+            className={`w-full  bg-blue-200 p-2 !rounded-md sm:w-auto text-sm sm:text-base ${
               navState === "Quotation" ? "text-sky-700 font-semibold" : ""
             }`}
             onClick={() => setNavState("Quotation")}
@@ -2074,7 +2074,7 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
             Quotation
           </button>
           <button
-            className={`w-full sm:w-auto text-sm sm:text-base ${
+            className={`w-full  bg-blue-200 p-2 !rounded-md sm:w-auto text-sm sm:text-base ${
               navState === "Goods" ? "text-sky-700 font-semibold" : ""
             }`}
             onClick={() => setNavState("Goods")}
@@ -2082,7 +2082,7 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
             Goods
           </button>
           <button
-            className={`w-full sm:w-auto text-sm sm:text-base ${
+            className={`w-full  bg-blue-200 p-2 !rounded-md sm:w-auto text-sm sm:text-base ${
               navState === "Tailors" ? "text-sky-700 font-semibold" : ""
             }`}
             onClick={() => setNavState("Tailors")}
@@ -2090,7 +2090,7 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
             Tailors
           </button>
           <button
-            className={`w-full sm:w-auto text-sm sm:text-base ${
+            className={`w-full bg-blue-200 p-2 !rounded-md sm:w-auto text-sm sm:text-base ${
               navState === "Payments" ? "text-sky-700 font-semibold" : ""
             }`}
             onClick={() => setNavState("Payments")}
@@ -2098,7 +2098,7 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
             Payments
           </button>
           <button
-            className={`w-full sm:w-auto text-sm sm:text-base ${
+            className={`w-full bg-blue-200 !rounded-md p-2 sm:w-auto text-sm sm:text-base ${
               navState === "Tasks" ? "text-sky-700 font-semibold" : ""
             }`}
             onClick={() => setNavState("Tasks")}

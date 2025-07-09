@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Card from "./CardPage";
 import DeadlineCard from "../compoonents/DeadlineCard.tsx";
 import TaskCard from "../compoonents/TaskCard.tsx";
-import InquiryCard from "../compoonents/InquiryCard.tsx"; // Corrected import path
+import InquiryCard from "../compoonents/InquiryCard.tsx";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store.ts";
@@ -13,7 +13,6 @@ import {
   setProjectFlag,
   setInquiryData,
 } from "../Redux/dataSlice.ts";
-
 import TaskDialog from "../compoonents/TaskDialog.tsx";
 import { AnimatePresence, motion } from "framer-motion";
 import EditProjects from "./EditProjects.tsx";
@@ -67,7 +66,6 @@ const Dashboard: React.FC = () => {
     const customer = inquiryForm.customer.trim();
     const phonenumber = inquiryForm.phonenumber.trim();
 
-    // ✅ Check required fields
     if (!projectName || !customer || !phonenumber || !inquiryDate) {
       alert(
         "Please fill in project name, customer name, phone number, and inquiry date."
@@ -75,7 +73,6 @@ const Dashboard: React.FC = () => {
       return;
     }
 
-    // ✅ Check if project name already exists in inquiries (case-insensitive)
     const isDuplicate = inquiries.some(
       (inquiry) => inquiry[0]?.toLowerCase() === projectName.toLowerCase()
     );
@@ -85,7 +82,6 @@ const Dashboard: React.FC = () => {
       return;
     }
 
-    // ✅ Proceed to send the inquiry
     const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/sendInquiry",
       {
@@ -190,39 +186,37 @@ const Dashboard: React.FC = () => {
     }
   };
 
-useEffect(() => {
-  const fetchAndCacheInquiries = async () => {
-    const now = Date.now();
-    const cacheExpiry = 5 * 60 * 1000; // 5 minutes
-    const cached = localStorage.getItem("inquiryData");
+  useEffect(() => {
+    const fetchAndCacheInquiries = async () => {
+      const now = Date.now();
+      const cacheExpiry = 5 * 60 * 1000;
+      const cached = localStorage.getItem("inquiryData");
 
-    try {
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        const timeDiff = now - parsed.time;
+      try {
+        if (cached) {
+          const parsed = JSON.parse(cached);
+          const timeDiff = now - parsed.time;
 
-        if (Array.isArray(parsed.data) && timeDiff < cacheExpiry) {
-          dispatch(setInquiryData(parsed.data));
-          return;
+          if (Array.isArray(parsed.data) && timeDiff < cacheExpiry) {
+            dispatch(setInquiryData(parsed.data));
+            return;
+          }
         }
+
+        const data = await fetchInquiryData();
+        if (Array.isArray(data)) {
+          dispatch(setInquiryData(data));
+          localStorage.setItem("inquiryData", JSON.stringify({ data, time: now }));
+        } else {
+          console.error("Invalid inquiry data format:", data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch inquiries:", err);
       }
+    };
 
-      const data = await fetchInquiryData();
-      if (Array.isArray(data)) {
-        dispatch(setInquiryData(data));
-        localStorage.setItem("inquiryData", JSON.stringify({ data, time: now }));
-      } else {
-        console.error("Invalid inquiry data format:", data);
-      }
-    } catch (err) {
-      console.error("Failed to fetch inquiries:", err);
-    }
-  };
-
-  fetchAndCacheInquiries();
-}, [dispatch, refresh]);  // ✅ No need to use inquiries as dependency
-
-
+    fetchAndCacheInquiries();
+  }, [dispatch, refresh]);
 
   useEffect(() => {
     let isMounted = true;
@@ -372,7 +366,7 @@ useEffect(() => {
             };
           } catch (error) {
             console.error(
-              `Error processing project row ${rowIndex}:`,
+              `Error processing project row ${ rowIndex }:`,
               row,
               error
             );
@@ -394,7 +388,7 @@ useEffect(() => {
         "https://sheeladecor.netlify.app/.netlify/functions/server/getPayments"
       );
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        throw new Error(`HTTP error! Status: ${ response.status }`);
       }
       const data = await response.json();
       return Array.isArray(data.message) ? data.message : [];
@@ -607,6 +601,7 @@ useEffect(() => {
       followUpDate: "",
     });
   };
+
   const handleDeleteInquiry = async (projectName) => {
     const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/deleteInquiry",
@@ -652,6 +647,17 @@ useEffect(() => {
     }
   };
 
+  const [discountType, setDiscountType] = useState(null);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (isInquiryFormOpen) {
+        sendInquiry();
+      }
+    }
+  };
+
   const handleStatusChange = async (projectName, status) => {
     const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/updateInquiry",
@@ -676,17 +682,6 @@ useEffect(() => {
       alert("Error");
     }
   };
-
-  const [discountType, setDiscountType] = useState(null);
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-  if (e.key === "Enter" && !e.shiftKey) {
-    e.preventDefault();
-    if (isInquiryFormOpen) {
-      sendInquiry();
-    }
-  }
-};
 
   return (
     <div className="p-6 md:mt-0 mt-20 bg-gray-100 min-h-screen">
@@ -738,7 +733,6 @@ useEffect(() => {
           >
             Project Deadlines
           </p>
-
           <div className="space-y-4 overflow-y-auto max-h-[500px] pr-2">
             {projects &&
               projects.map((project, index) => (
@@ -779,8 +773,7 @@ useEffect(() => {
               ))}
           </div>
         </div>
-
-        <div className="bg-white shadow-md !rounded-xl p-3 col-span-2  overflow-y-auto max-h-[650px] pr-2">
+        <div className="bg-white shadow-md !rounded-xl p-3 col-span-2 pr-2">
           <div className="flex flex-row w-full justify-between items-center mb-4">
             <Link to="/tasks" className="!no-underline">
               <p
@@ -792,34 +785,14 @@ useEffect(() => {
             </Link>
             <button
               onClick={() => setTaskDialog(true)}
-              className="relative group  mb-2 px-2 py-1.5 !text-sm  text-white hover:bg-sky-700 !rounded-lg shadow-sm bg-sky-600 "
+              className="relative group mb-2 px-2 py-1.5 !text-sm text-white hover:bg-sky-700 !rounded-lg shadow-sm bg-sky-600"
             >
-              {/* Animated background elements */}
-             
-
-              {/* Button content with icon */}
               <div className="relative flex items-center justify-center space-x-2">
-                {/* <svg
-                  className="w-5 h-5 text-white transition-transform group-hover:scale-110"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                  />
-                </svg> */}
-                <span className=" tracking-wide">Add Task</span>
+                <span className="tracking-wide">Add Task</span>
               </div>
-
-              {/* Ripple effect (optional) */}
-    
             </button>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto max-h-[90vh] pr-2">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto max-h-[650px] pr-2">
             {filteredTasks &&
               filteredTasks.map((task, index) => (
                 <div
@@ -835,207 +808,205 @@ useEffect(() => {
           </div>
         </div>
       </div>
-
       <AnimatePresence>
-       {taskDialogOpen && (
-  <>
-    <motion.div
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      onClick={() => setTaskDialog(false)}
-    />
-    <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.3 }}
-    >
-      <TaskDialog
-        onClose={() => setTaskDialog(false)}
-        projectData={projects}
-        setTaskDialogOpen={setTaskDialog}
-        taskDialogOpen={taskDialogOpen}
-        setProjectFlag={setProjectFlag}
-        dashboard={true}
-        setediting={setediting}
-        setrefresh={setRefresh}
-        refresh={refresh}
-      />
-    </motion.div>
-  </>
-)}
-
+        {taskDialogOpen && (
+          <>
+            <motion.div
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setTaskDialog(false)}
+            />
+            <motion.div
+              className="fixed inset-0 z-50 flex items-center justify-center"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3 }}
+            >
+              <TaskDialog
+                onClose={() => setTaskDialog(false)}
+                projectData={projects}
+                setTaskDialogOpen={setTaskDialog}
+                taskDialogOpen={taskDialogOpen}
+                setProjectFlag={setProjectFlag}
+                dashboard={true}
+                setediting={setediting}
+                setrefresh={setRefresh}
+                refresh={refresh}
+              />
+            </motion.div>
+          </>
+        )}
         {isInquiryFormOpen && (
-  <>
-    <motion.div
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      onClick={() => setInquiryFormOpen(false)}
-    />
-    <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.3 }}
-    >
-      <div className="bg-white !rounded-lg shadow-md p-6 w-full max-w-md relative border border-gray-200">
-        <button
-          onClick={() => setInquiryFormOpen(false)}
-          className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 transition-colors"
-        >
-          ✕
-        </button>
-        <h2 className="relative !text-sm font-bold mb-6 text-gray-800 after:absolute after:bottom-[-8px] after:left-0 after:w-12 after:h-1 after:bg-blue-500 after:!rounded-full">
-          Add Inquiry
-        </h2>
-        <form onSubmit={handleInquirySubmit} className="space-y-4" onKeyDown={handleKeyDown}>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Project <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={inquiryForm.project}
-              onChange={(e) =>
-                setInquiryForm({
-                  ...inquiryForm,
-                  project: e.target.value,
-                })
-              }
-              className="mt-1 block w-full border border-gray-300 !rounded-md px-3 py-2 text-sm"
-              placeholder="Enter project name"
-              required
+          <>
+            <motion.div
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setInquiryFormOpen(false)}
             />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Customer Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={inquiryForm.customer}
-              onChange={(e) =>
-                setInquiryForm({
-                  ...inquiryForm,
-                  customer: e.target.value,
-                })
-              }
-              className="mt-1 block w-full border border-gray-300 !rounded-md px-3 py-2 text-sm"
-              placeholder="Enter customer name"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Phone Number <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={inquiryForm.phonenumber}
-              onChange={(e) =>
-                setInquiryForm({
-                  ...inquiryForm,
-                  phonenumber: e.target.value,
-                })
-              }
-              className="mt-1 block w-full border border-gray-300 !rounded-md px-3 py-2 text-sm"
-              placeholder="Enter Phone Number"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Comments
-            </label>
-            <textarea
-              value={inquiryForm.comments}
-              onChange={(e) =>
-                setInquiryForm({
-                  ...inquiryForm,
-                  comments: e.target.value,
-                })
-              }
-              className="mt-1 block w-full border border-gray-300 !rounded-md px-3 py-2 text-sm"
-              placeholder="Enter comments"
-              rows={4}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Inquiry Date <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="date"
-              value={inquiryForm.inquiryDate}
-              onChange={(e) =>
-                setInquiryForm({
-                  ...inquiryForm,
-                  inquiryDate: e.target.value,
-                })
-              }
-              className="mt-1 block w-full border border-gray-300 !rounded-md px-3 py-2 text-sm"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Follow-Up Date <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="date"
-              value={inquiryForm.followUpDate}
-              onChange={(e) =>
-                setInquiryForm({
-                  ...inquiryForm,
-                  followUpDate: e.target.value,
-                })
-              }
-              className="mt-1 block w-full border border-gray-300 !rounded-md px-3 py-2 text-sm"
-              required
-            />
-          </div>
-          <div className="flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                setInquiryForm({
-                  project: "",
-                  comments: "",
-                  inquiryDate: "",
-                  followUpDate: "",
-                  customer: "",
-                  phonenumber: "",
-                });
-                setInquiryFormOpen(false);
-              }}
-              className="bg-gray-200 text-gray-700 px-4 py-2 !rounded-lg hover:bg-gray-300 transition-colors"
+            <motion.div
+              className="fixed inset-0 z-50 flex items-center justify-center"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.3 }}
             >
-              Cancel
-            </button>
-            <button
-              type="submit"
-        className="bg-sky-600 text-white px-4 py-2 !rounded-lg hover:bg-sky-700 transition-colors"
-            >
-              Submit
-            </button>
-          </div>
-        </form>
-      </div>
-    </motion.div>
-  </>
-)}
+              <div className="bg-white !rounded-lg shadow-md p-6 w-full max-w-md relative border border-gray-200">
+                <button
+                  onClick={() => setInquiryFormOpen(false)}
+                  className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 transition-colors"
+                >
+                  ✕
+                </button>
+                <h2 className="relative !text-sm font-bold mb-6 text-gray-800 after:absolute after:bottom-[-8px] after:left-0 after:w-12 after:h-1 after:bg-blue-500 after:!rounded-full">
+                  Add Inquiry
+                </h2>
+                <form onSubmit={handleInquirySubmit} className="space-y-4" onKeyDown={handleKeyDown}>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Project <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={inquiryForm.project}
+                      onChange={(e) =>
+                        setInquiryForm({
+                          ...inquiryForm,
+                          project: e.target.value,
+                        })
+                      }
+                      className="mt-1 block w-full border border-gray-300 !rounded-md px-3 py-2 text-sm"
+                      placeholder="Enter project name"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Customer Name <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={inquiryForm.customer}
+                      onChange={(e) =>
+                        setInquiryForm({
+                          ...inquiryForm,
+                          customer: e.target.value,
+                        })
+                      }
+                      className="mt-1 block w-full border border-gray-300 !rounded-md px-3 py-2 text-sm"
+                      placeholder="Enter customer name"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Phone Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={inquiryForm.phonenumber}
+                      onChange={(e) =>
+                        setInquiryForm({
+                          ...inquiryForm,
+                          phonenumber: e.target.value,
+                        })
+                      }
+                      className="mt-1 block w-full border border-gray-300 !rounded-md px-3 py-2 text-sm"
+                      placeholder="Enter Phone Number"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Comments
+                    </label>
+                    <textarea
+                      value={inquiryForm.comments}
+                      onChange={(e) =>
+                        setInquiryForm({
+                          ...inquiryForm,
+                          comments: e.target.value,
+                        })
+                      }
+                      className="mt-1 block w-full border border-gray-300 !rounded-md px-3 py-2 text-sm"
+                      placeholder="Enter comments"
+                      rows={4}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Inquiry Date <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={inquiryForm.inquiryDate}
+                      onChange={(e) =>
+                        setInquiryForm({
+                          ...inquiryForm,
+                          inquiryDate: e.target.value,
+                        })
+                      }
+                      className="mt-1 block w-full border border-gray-300 !rounded-md px-3 py-2 text-sm"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">
+                      Follow-Up Date <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={inquiryForm.followUpDate}
+                      onChange={(e) =>
+                        setInquiryForm({
+                          ...inquiryForm,
+                          followUpDate: e.target.value,
+                        })
+                      }
+                      className="mt-1 block w-full border border-gray-300 !rounded-md px-3 py-2 text-sm"
+                      required
+                    />
+                  </div>
+                  <div className="flex justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setInquiryForm({
+                          project: "",
+                          comments: "",
+                          inquiryDate: "",
+                          followUpDate: "",
+                          customer: "",
+                          phonenumber: "",
+                        });
+                        setInquiryFormOpen(false);
+                      }}
+                      className="bg-gray-200 text-gray-700 px-4 py-2 !rounded-lg hover:bg-gray-300 transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="bg-sky-600 text-white px-4 py-2 !rounded-lg hover:bg-sky-700 transition-colors"
+                    >
+                      Submit
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </motion.div>
+          </>
+        )}
         {isInquiryDialogOpen && selectedInquiry && (
           <div className="fixed inset-0 backdrop-blur-sm bg-black/50 bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white !rounded-lg shadow-md p-6 w-full max-w-md relative border border-gray-200">
               <button
                 onClick={() => setInquiryDialogOpen(false)}
-                className="absolute top-3 right-3 text-gray-500 hover:text-gray-700 transition-colors"
+                className="absolute top-3 право-3 text-gray-500 hover:text-gray-700 transition-colors"
               >
                 ✕
               </button>
@@ -1111,7 +1082,6 @@ useEffect(() => {
           </div>
         )}
       </AnimatePresence>
-
       <div
         className={`bg-white shadow-md !rounded-xl p-6 mt-2 ${
           flag ? "hidden" : ""
@@ -1153,7 +1123,6 @@ useEffect(() => {
           ))}
         </div>
       </div>
-
       {isTaskDialogOpen && selectedTask && (
         <div className="fixed inset-0 backdrop-blur-sm bg-black/50 bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white !rounded-lg shadow-md p-6 w-full max-w-md relative border border-gray-200">
