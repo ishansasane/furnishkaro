@@ -80,7 +80,6 @@ const SearchableSelect = ({
       {option[0] !== "➕ Add New Space" && onDeleteOption && (
         <button
           onClick={(e) => {
-            e.stopPropagation();
             onDeleteOption(option[0]);
           }}
           className="ml-2 text-red-500 hover:text-red-700"
@@ -167,7 +166,6 @@ const MaterialSelectionComponent = ({
       return [];
     }
   };
-
   const companyData = useSelector((state: RootState) => state.data.companyData);
   const designData = useSelector((state: RootState) => state.data.designData);
 
@@ -248,6 +246,25 @@ const MaterialSelectionComponent = ({
       alert("Error");
     }
   };
+
+  const deleteArea = async (name) => {
+      const response = await fetchWithLoading("https://sheeladecor.netlify.app/.netlify/functions/server/deleteArea", {
+        method : "POST",
+        headers : {
+          "content-type" : "application/json"
+        },
+        body : JSON.stringify({ name })
+      });
+      if(response.ok){
+      const newAreas = availableAreas.filter((a) => a[0] !== name);
+      setAvailableAreas(newAreas);
+      alert(`"${name}" deleted from dropdown.`);
+        alert("Area Deleted");
+      }else{
+        alert("Error in Deleting Area");
+      }
+  }
+
 
   const [catalogueName, setCatalogueName] = useState("");
   const [catalogueDescription, setCatalogueDescription] = useState("");
@@ -375,7 +392,7 @@ const MaterialSelectionComponent = ({
       handleAreaChange(mainindex, selectedOption[0]);
     }
   }}
-  onDeleteOption={handleDeleteArea}
+  onDeleteOption={deleteArea}
 />
 
 

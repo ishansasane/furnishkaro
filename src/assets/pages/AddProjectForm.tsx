@@ -2017,10 +2017,28 @@ const handleMRPChange = (
 ) => {
   const updatedSelections = [...selections];
   const measurementQty = 1;
-  const newMRP = parseFloat(value.toString() || "0");
+  const newMRP = Math.round(parseInt(value.toString() || "0"));
+ // shallow copy of selections
+const areaCollectionCopy = [...updatedSelections[mainIndex].areacollection]; // shallow copy of areacollection
+const itemsCopy = updatedSelections[mainIndex].areacollection[collectionIndex].items.map(item => [...item]); // deep copy items
 
-  const areaCollection = updatedSelections[mainIndex].areacollection[collectionIndex];
-  areaCollection.items[0][4] = newMRP;
+// Update safely
+itemsCopy[0][4] = newMRP;
+
+// Put back updated copies
+areaCollectionCopy[collectionIndex] = {
+  ...areaCollectionCopy[collectionIndex],
+  items: itemsCopy,
+};
+
+updatedSelections[mainIndex] = {
+  ...updatedSelections[mainIndex],
+  areacollection: areaCollectionCopy,
+};
+
+// Finally update the state
+setSelections(updatedSelections);
+
 
   // Calculate original subtotal (before discount and tax)
   const subtotal = newMRP * qty;
@@ -2039,8 +2057,8 @@ const handleMRPChange = (
   const taxAmount = (discountedSubtotal * parseFloat(taxRate.toString() || "0")) / 100;
   const totalWithTax = discountedSubtotal + taxAmount;
 
-  areaCollection.totalTax[0] = parseFloat(taxAmount.toFixed(2));
-  areaCollection.totalAmount[0] = parseFloat(totalWithTax.toFixed(2));
+  areaCollectionCopy.totalTax[0] = parseFloat(taxAmount.toFixed(2));
+  areaCollectionCopy.totalAmount[0] = parseFloat(totalWithTax.toFixed(2));
 
   setSelections(updatedSelections);
 
