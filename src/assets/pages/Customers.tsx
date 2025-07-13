@@ -180,8 +180,8 @@ export default function Customers() {
                   key={index}
                   className="hover:bg-sky-50"
                   onClick={() => {
-                    setCustomerDashboard(true);
                     setCustomerDashboardData(customer);
+                    setCustomerDashboard(true);
                   }}
                 >
                   <td className="px-4 py-2">{customer[0]}</td>

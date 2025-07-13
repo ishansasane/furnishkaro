@@ -391,13 +391,15 @@ const CustomerDashboard = ({ customerDashboardData, setCustomerDashboardData, se
           console.error("Failed to fetch projects:", error);
         }
       }
-
       // Filter & Calculate Project Stats
       let filteredProjects = [];
       if (customerDashboardData[0]) {
-        filteredProjects = projectList.filter(
-          (p) => p.customerLink[0] === customerDashboardData[0]
-        );
+filteredProjects = projectList.filter(
+  (p) =>
+    p?.customerLink?.[0]?.toString().trim() ===
+    customerDashboardData[0]?.toString().trim()
+);
+
         setProjectData(filteredProjects);
         setActiveOrders(filteredProjects.length);
 
@@ -586,13 +588,13 @@ const CustomerDashboard = ({ customerDashboardData, setCustomerDashboardData, se
                   <td className="py-3 px-4 text-sm">{project.projectName}</td>
                   <td className="py-3 px-4 text-sm">{project.status}</td>
                   <td className="py-3 px-4 text-sm">
-                    ₹{Math.round(project.totalAmount).toLocaleString("en-IN")}
+                    ₹{Math.round(project.grandTotal).toLocaleString("en-IN")}
                   </td>
                   <td className="py-3 px-4 text-sm">
                     ₹{perProjectPayment != null && Math.round(perProjectPayment[index]).toLocaleString("en-IN")}
                   </td>
                   <td className="py-3 px-4 text-sm">
-                    ₹{Math.round(project.totalAmount - perProjectPayment[index]).toLocaleString("en-IN")}
+                    ₹{Math.round(project.grandTotal - perProjectPayment[index]).toLocaleString("en-IN")}
                   </td>
                   <td className="py-3 px-4 text-sm">{project.projectDate}</td>
                   <td className="py-3 px-4 text-sm">
