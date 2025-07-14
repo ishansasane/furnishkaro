@@ -2158,6 +2158,7 @@ const formatNumber = (num) => {
  
 
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" />
+const [editableMRP, setEditableMRP] = useState({});
 
 return (
   <div className="flex mt-5 md:!mt-1 flex-col gap-8 p-8 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen w-full font-inter">
@@ -2462,143 +2463,161 @@ return (
 </div>
 
       {/* Quotation Section */}
-     <div className="bg-white p-8 !rounded-2xl shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-xl">
+  <div className="bg-white p-8 !rounded-2xl shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-xl">
   <h2 className="text-2xl md:text-3xl font-poppins font-semibold text-gray-900 mb-6 tracking-tight pl-0">
     Quotation
   </h2>
   <div className="overflow-x-auto !rounded-lg border border-gray-100">
     <table className="w-full bg-white min-w-[800px]">
-  <thead>
-    <tr className="bg-indigo-50 text-gray-800 text-sm font-poppins font-semibold">
-      <th className="py-4 px-6 text-center">SR</th>
-      <th className="py-4 px-6">Area</th>
-      <th className="py-4 px-6">Product Name</th>
-      <th className="py-4 px-6">Size</th>
-      <th className="py-4 px-6">MRP</th>
-      <th className="py-4 px-6">Quantity</th>
-      <th className="py-4 px-6">Subtotal</th>
-      <th className="py-4 px-6">Tax Rate(%)</th>
-      <th className="py-4 px-6">Tax Amount</th>
-      <th className="py-4 px-6">Total</th>
-    </tr>
-  </thead>
-  <tbody>
-    {selections.flatMap((selection, mainIndex) =>
-      selection.areacollection?.flatMap((collection, collectionIndex) => {
-        if (!collection.items || collection.items.length === 0) return null;
+      <thead>
+        <tr className="bg-indigo-50 text-gray-800 text-sm font-poppins font-semibold">
+          <th className="py-4 px-6 text-center">SR</th>
+          <th className="py-4 px-6">Area</th>
+          <th className="py-4 px-6">Product Name</th>
+          <th className="py-4 px-6">Size</th>
+          <th className="py-4 px-6">MRP</th>
+          <th className="py-4 px-6">Quantity</th>
+          <th className="py-4 px-6">Subtotal</th>
+          <th className="py-4 px-6">Tax Rate(%)</th>
+          <th className="py-4 px-6">Tax Amount</th>
+          <th className="py-4 px-6">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {selections.flatMap((selection, mainIndex) =>
+          selection.areacollection?.flatMap((collection, collectionIndex) => {
+            if (!collection.items || collection.items.length === 0) return null;
 
-        return collection.items.map((item, itemIndex) => {
-          const qty = parseFloat(collection.quantities?.[itemIndex] || "0");
-          const measurementQty = parseFloat(collection.measurement?.quantity || "0") || 1;
-          const rate = parseFloat(item[4]) || 0;
-          const taxRate = parseFloat(item[5]) || 0;
+            return collection.items.map((item, itemIndex) => {
+              const qty = parseFloat(collection.quantities?.[itemIndex] || "0");
+              const measurementQty = parseFloat(collection.measurement?.quantity || "0") || 1;
+              const rate = parseFloat(item[4]) || 0;
+              const taxRate = parseFloat(item[5]) || 0;
 
-          const subtotal = rate * measurementQty * qty;
-          const taxAmount = subtotal * (taxRate / 100);
-          const total = subtotal + taxAmount;
+              const subtotal = rate * measurementQty * qty;
+              const taxAmount = subtotal * (taxRate / 100);
+              const total = subtotal + taxAmount;
 
-          return (
-            <tr
-              key={`${mainIndex}-${collectionIndex}-${itemIndex}`}
-              className="border-b border-gray-100 hover:bg-indigo-50/50 transition-colors duration-200"
-            >
-              <td className="py-4 px-6 text-center text-sm font-inter">
-                {itemIndex + 1}
-              </td>
-              <td className="py-4 px-6 text-sm font-inter">
-                {selection.area}
-              </td>
-              <td className="py-4 px-6 text-sm font-inter">
-                {item[0] || "N/A"}
-              </td>
-              <td className="py-4 px-6 text-sm font-inter">
-                {collection.measurement.width && collection.measurement.height
-                  ? `${collection.measurement.width} x ${collection.measurement.height} ${collection.measurement.unit || ""}`
-                  : "N/A"}
-              </td>
-              <td className="py-4 px-6 text-sm">
-                <input
-                  type="number"
-                  className="w-[140px] border border-gray-200 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-                  value={rate === 0 ? "" : rate}
-                    onChange={(e) => {
-                      const parsedValue = parseFloat(e.target.value || "0");
-                      handleMRPChange(
-                        mainIndex,
-                        collectionIndex,
-                        parsedValue,
-                        collection.measurement.quantity,
-                        parseFloat(item[5]),
-                        qty,
-                        itemIndex // ✅ pass the index
-                      );
-                    }}
+              return (
+                <tr
+                  key={`${mainIndex}-${collectionIndex}-${itemIndex}`}
+                  className="border-b border-gray-100 hover:bg-indigo-50/50 transition-colors duration-200"
+                >
+                  <td className="py-4 px-6 text-center text-sm font-inter">
+                    {itemIndex + 1}
+                  </td>
+                  <td className="py-4 px-6 text-sm font-inter">
+                    {selection.area}
+                  </td>
+                  <td className="py-4 px-6 text-sm font-inter">
+                    {item[0] || "N/A"}
+                  </td>
+                  <td className="py-4 px-6 text-sm font-inter">
+                    {collection.measurement.width && collection.measurement.height
+                      ? `${collection.measurement.width} x ${collection.measurement.height} ${collection.measurement.unit || ""}`
+                      : "N/A"}
+                  </td>
+                  <td className="py-4 px-6 text-sm">
+                    <input
+  type="text"
+  className="w-[140px] border border-gray-200 !rounded-lg px-4 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+  value={
+    editableMRP?.[`${mainIndex}-${collectionIndex}-${itemIndex}`] ??
+    (rate === 0 ? "" : Math.round(rate).toLocaleString("en-IN"))
+  }
+  onChange={(e) => {
+    const raw = e.target.value.replace(/,/g, ""); // remove commas
+    const parsedValue = parseFloat(raw) || 0;
 
-                />
-              </td>
-              <td className="py-4 px-2 text-sm">
-                <input
-                  type="number"
-                  min="0"
-                  step="any"
-                  className="w-full border border-gray-200 !rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-                  value={qty}
-                  onChange={(e) => {
-                    let value = e.target.value;
-                    if (value.length > 1 && value[0] === "0" && value[1] !== ".") {
-                      value = value.replace(/^0+/, "");
-                    }
-                    const parsedQty = parseFloat(value) || 0;
+    // Save formatted MRP for input display
+    setEditableMRP((prev) => ({
+      ...prev,
+      [`${mainIndex}-${collectionIndex}-${itemIndex}`]: parsedValue.toLocaleString("en-IN"),
+    }));
 
-                    handleQuantityChange(
-                      `${mainIndex}-${collectionIndex}`,
-                      parsedQty,
-                      mainIndex,
-                      collectionIndex,
-                      measurementQty,
-                      rate,
-                      taxRate,
-                      itemIndex
-                    );
-                  }}
-                />
-              </td>
-              <td className="py-4 px-6 text-sm font-inter">
-                {formatNumber(subtotal)}
-              </td>
-              <td className="py-4 px-2 text-sm">
-                <input
-                  type="number"
-                  className="w-full border border-gray-200 !rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
-                  value={taxRate}
-                  onChange={(e) =>
-                    handleTaxChange(
-                      mainIndex,
-                      collectionIndex,
-                      parseFloat(e.target.value),
-                      parseFloat(item[4]),                    // rate
-                      parseFloat(collection.measurement.quantity || "1"), // measurementQty
-                      qty,
-                      itemIndex                               // ✅ pass index
-                    )
-                  }
+    handleMRPChange(
+      mainIndex,
+      collectionIndex,
+      parsedValue,
+      collection.measurement.quantity,
+      parseFloat(item[5]),
+      qty,
+      itemIndex
+    );
+  }}
+  onBlur={() => {
+    setEditableMRP((prev) => {
+      const newState = { ...prev };
+      delete newState[`${mainIndex}-${collectionIndex}-${itemIndex}`];
+      return newState;
+    });
+  }}
+  onWheel={(e) => e.currentTarget.blur()}
+/>
 
-                />
-              </td>
-              <td className="py-4 px-6 text-sm font-inter">
-                {formatNumber(taxAmount)}
-              </td>
-              <td className="py-4 px-6 text-sm font-inter">
-                {formatNumber(total)}
-              </td>
-            </tr>
-          );
-        });
-      })
-    )}
-  </tbody>
-</table>
-
+                  </td>
+                  <td className="py-4 px-2 text-sm">
+                    <input
+                      type="number"
+                      min="0"
+                      step="any"
+                      className="w-full border border-gray-200 !rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+                      value={qty === 0 ? "" : qty}
+                      onChange={(e) => {
+                        let value = e.target.value;
+                        if (value.length > 1 && value[0] === "0" && value[1] !== ".") {
+                          value = value.replace(/^0+/, "");
+                        }
+                        const parsedQty = parseFloat(value) || 0;
+                        handleQuantityChange(
+                          `${mainIndex}-${collectionIndex}`,
+                          parsedQty,
+                          mainIndex,
+                          collectionIndex,
+                          measurementQty,
+                          rate,
+                          taxRate,
+                          itemIndex
+                        );
+                      }}
+                      onWheel={(e) => e.currentTarget.blur()}
+                    />
+                  </td>
+                  <td className="py-4 px-6 text-sm font-inter">
+                    {formatNumber(subtotal)}
+                  </td>
+                  <td className="py-4 px-2 text-sm">
+                    <input
+                      type="number"
+                      className="w-full border border-gray-200 !rounded-lg px-2 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter"
+                      value={taxRate === 0 ? "" : taxRate}
+                      onChange={(e) =>
+                        handleTaxChange(
+                          mainIndex,
+                          collectionIndex,
+                          parseFloat(e.target.value),
+                          parseFloat(item[4]),
+                          parseFloat(collection.measurement.quantity || "1"),
+                          qty,
+                          itemIndex
+                        )
+                      }
+                      onWheel={(e) => e.currentTarget.blur()}
+                    />
+                  </td>
+                  <td className="py-4 px-6 text-sm font-inter">
+                    {formatNumber(taxAmount)}
+                  </td>
+                  <td className="py-4 px-6 text-sm font-inter">
+                    {formatNumber(total)}
+                  </td>
+                </tr>
+              );
+            });
+          })
+        )}
+      </tbody>
+    </table>
   </div>
 </div>
 

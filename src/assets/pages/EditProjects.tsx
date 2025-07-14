@@ -1968,54 +1968,53 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
       alert("Error: Network issue or server not responding");
     }
   };
+const [editableMRP, setEditableMRP] = useState({});
 
-  const handleMRPChange = (
+const handleMRPChange = (
   mainIndex,
   collectionIndex,
   value,
   measurementQuantity,
   taxRate,
-  qty
+  qty,
+  itemIndex
 ) => {
-  const updatedSelections = [...selections];
-  const measurementQty = 1;
+  const updatedSelections = structuredClone(selections);
   const newMRP = parseFloat(value.toString() || "0");
 
-  const areaCollection = updatedSelections[mainIndex].areacollection[collectionIndex];
-  areaCollection.items[0][4] = newMRP;
+  const collection = updatedSelections[mainIndex].areacollection[collectionIndex];
+  collection.items[itemIndex][4] = newMRP;
 
-  // Calculate original subtotal (before discount and tax)
   const subtotal = newMRP * qty;
 
   // Apply discount
   let effectiveDiscountPercent = 0;
   if (discountType === "percent") {
-    effectiveDiscountPercent = discount;
+    effectiveDiscountPercent = Discount;
   } else if (discountType === "cash") {
-    effectiveDiscountPercent = subtotal > 0 ? (discount / subtotal) * 100 : 0;
+    effectiveDiscountPercent = subtotal > 0 ? (Discount / subtotal) * 100 : 0;
   }
 
   const discountAmount = (subtotal * effectiveDiscountPercent) / 100;
   const discountedSubtotal = subtotal - discountAmount;
 
-  const taxAmount = (discountedSubtotal * parseFloat(taxRate.toString() || "0")) / 100;
+  const taxAmount = (discountedSubtotal * parseFloat(taxRate || 0)) / 100;
   const totalWithTax = discountedSubtotal + taxAmount;
 
-  areaCollection.totalTax[0] = parseFloat(taxAmount.toFixed(2));
-  areaCollection.totalAmount[0] = parseFloat(totalWithTax.toFixed(2));
+  collection.totalTax[itemIndex] = parseFloat(taxAmount.toFixed(2));
+  collection.totalAmount[itemIndex] = parseFloat(totalWithTax.toFixed(2));
 
   setSelections(updatedSelections);
 
-  // ===== Recalculate Totals =====
+  // Recalculate overall summary
   const selectionAmountArray = updatedSelections.flatMap(selection =>
-    selection.areacollection.flatMap(col => {
-      return col.items?.reduce((acc, item, idx) => {
-        const itemQty = parseFloat(col.quantities?.[idx]) || 0;
-        const itemRate = parseFloat(item[4]) || 0;
-        const areaQty = 1;
-        return acc + areaQty * itemQty * itemRate;
-      }, 0) || 0;
-    })
+    selection.areacollection.flatMap(col =>
+      col.items.reduce((acc, item, idx) => {
+        const itemQty = parseFloat(col.quantities?.[idx] || 0);
+        const itemRate = parseFloat(item[4] || 0);
+        return acc + itemQty * itemRate;
+      }, 0)
+    )
   );
 
   const additionalAmountArray = additionalItems.map(item => item.quantity * item.rate);
@@ -2023,12 +2022,16 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
   const subTotalOnly = [...selectionAmountArray, ...additionalAmountArray]
     .reduce((acc, val) => acc + val, 0);
 
-  setAmount(Math.round(subTotalOnly)); // ✅ This is your subtotal (no tax)
+  setAmount(Math.round(subTotalOnly));
 
   const { totalTax, totalAmount } = recalculateTotals(updatedSelections, additionalItems);
   setTax(Math.round(totalTax));
-  setGrandTotal(Math.round(totalAmount));  // ✅ This is total including tax
+  setGrandTotal(Math.round(totalAmount));
 };
+
+
+
+
 
   return (
     <div className="p-6">
@@ -2320,7 +2323,7 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
                       return collection.items.map((item, itemIndex) => {
                         const key = `${mainindex}-${collectionIndex}-${itemIndex}`;
                         const qty = collection.quantities?.[itemIndex] || 0;
-
+                        
                         return (
                           <tr
                             key={key}
@@ -2335,9 +2338,54 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
                             <td className="w-full sm:w-[45%] text-xs sm:text-sm py-2 before:content-['Size:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
                               {collection.measurement.width + " x " + collection.measurement.height + " " + collection.measurement.unit}
                             </td>
-                            <td className="w-full sm:w-[20%] text-xs sm:text-sm py-2 sm:text-center before:content-['MRP:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
-                              {(Math.round(item[4])).toLocaleString("en-IN")}
-                            </td>
+                              <td
+                                className="w-full sm:w-[20%] py-2 sm:text-center
+                                          before:content-['MRP:_'] sm:before:content-none
+                                          before:font-semibold before:pr-2"
+                              >
+                               <input
+  type="text"
+  inputMode="decimal"
+  value={
+    editableMRP[`${mainindex}-${collectionIndex}-${itemIndex}`] ??
+    (item[4] !== undefined ? Math.round(item[4]).toLocaleString("en-IN") : "")
+  }
+  onChange={(e) => {
+    const formattedVal = e.target.value.replace(/,/g, ""); // Remove commas
+    const num = parseFloat(formattedVal) || 0;
+
+    setEditableMRP((prev) => ({
+      ...prev,
+      [`${mainindex}-${collectionIndex}-${itemIndex}`]: num.toLocaleString("en-IN"),
+    }));
+
+    handleMRPChange(
+      mainindex,
+      collectionIndex,
+      num,
+      collection.measurement.quantity,
+      item[5],
+      collection.quantities?.[itemIndex] || 0,
+      itemIndex
+    );
+  }}
+  onBlur={() => {
+    setEditableMRP((prev) => {
+      const newState = { ...prev };
+      delete newState[`${mainindex}-${collectionIndex}-${itemIndex}`];
+      return newState;
+    });
+  }}
+  className="border border-gray-200 w-max sm:w-4/5 px-3 py-2 !rounded-lg text-xs sm:text-sm bg-gray-50
+             focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
+  onWheel={(e) => e.currentTarget.blur()}
+/>
+
+
+                              </td>
+
+
+
                             <td className="w-full sm:w-[20%] py-2 before:content-['Quantity:_'] sm:before:content-none before:font-semibold before:pr-2">
                               <div className="flex flex-col">
                                 <input

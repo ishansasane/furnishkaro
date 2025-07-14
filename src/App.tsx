@@ -1,4 +1,6 @@
 import "./App.css";
+import { useEffect } from "react";
+
 import {
   BrowserRouter as Router,
   Routes,
@@ -60,6 +62,22 @@ import { RootState } from "./Redux/Store";
 function App() {
   const [expanded, setExpanded] = useState(true);
   const loading = useSelector((state: RootState) => state.data.loading); // 🔽 track loading state
+
+
+ useEffect(() => {
+    const handleWheel = (event: WheelEvent) => {
+      const active = document.activeElement;
+      if (active && active.tagName === "INPUT" && (active as HTMLInputElement).type === "number") {
+        (active as HTMLInputElement).blur(); // Unfocus to prevent scroll increment
+      }
+    };
+
+    window.addEventListener("wheel", handleWheel, { passive: true });
+
+    return () => {
+      window.removeEventListener("wheel", handleWheel);
+    };
+  }, []);
 
   return (
     <SidebarContext.Provider

@@ -240,42 +240,82 @@ const CustomerDetails = ({
       {isOpen && (
   <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/60">
     <div className="bg-white w-full max-w-md p-8 !rounded-2xl shadow-2xl border border-gray-100 transition-all duration-300">
-      <h2 className="text-2xl font-poppins font-bold text-gray-900 mb-6 tracking-tight">
-        Add Customer
-      </h2>
-      <form onSubmit={(e) => { e.preventDefault(); sendcustomerData(); }}>
-        <div className="space-y-4">
-          <input
-            className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-            placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          <input
-            className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-            placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-            placeholder="Mobile Number"
-            value={mobile}
-            onChange={(e) => setMobile(e.target.value)}
-          />
-          <input
-            className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-            placeholder="Address"
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-          />
-          <input
-            className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-            placeholder="Alternate Number"
-            value={alternateNumber}
-            onChange={(e) => setAlternateNumber(e.target.value)}
-          />
-        </div>
+<h2 className="text-2xl font-poppins font-bold text-gray-900 mb-6 tracking-tight">
+  Add Customer
+</h2>
+<form onSubmit={(e) => { e.preventDefault(); sendcustomerData(); }}>
+  <div className="space-y-4">
+
+    {/* Name (required) */}
+    <div className="flex flex-col">
+      <label className="text-sm font-poppins font-medium text-gray-700 mb-1">
+        Name <span className="text-red-500">*</span>
+      </label>
+      <input
+        className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+        placeholder="Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        required
+      />
+    </div>
+
+    {/* Email (optional) */}
+    <div className="flex flex-col">
+      <label className="text-sm font-poppins font-medium text-gray-700 mb-1">
+        Email
+      </label>
+      <input
+        className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+        placeholder="Email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+    </div>
+
+    {/* Mobile (required) */}
+    <div className="flex flex-col">
+      <label className="text-sm font-poppins font-medium text-gray-700 mb-1">
+        Mobile Number <span className="text-red-500">*</span>
+      </label>
+      <input
+        className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+        placeholder="Mobile Number"
+        value={mobile}
+        onChange={(e) => setMobile(e.target.value)}
+        required
+      />
+    </div>
+
+    {/* Address (required) */}
+    <div className="flex flex-col">
+      <label className="text-sm font-poppins font-medium text-gray-700 mb-1">
+        Address <span className="text-red-500">*</span>
+      </label>
+      <input
+        className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+        placeholder="Address"
+        value={address}
+        onChange={(e) => setAddress(e.target.value)}
+        required
+      />
+    </div>
+
+    {/* Alternate Number (optional) */}
+    <div className="flex flex-col">
+      <label className="text-sm font-poppins font-medium text-gray-700 mb-1">
+        Alternate Number
+      </label>
+      <input
+        className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+        placeholder="Alternate Number"
+        value={alternateNumber}
+        onChange={(e) => setAlternateNumber(e.target.value)}
+      />
+    </div>
+
+  </div>
+
         <div className="flex justify-end gap-3 mt-6">
           <button
             type="button"
