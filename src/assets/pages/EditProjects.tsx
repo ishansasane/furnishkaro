@@ -1970,6 +1970,31 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
   };
 const [editableMRP, setEditableMRP] = useState({});
 
+
+const calculateSummary = (updatedSelections) => {
+  let newSubtotal = 0;
+  let newTax = 0;
+  let newTotal = 0;
+
+  updatedSelections.forEach((selection) => {
+    selection.areacollection.forEach((collection) => {
+      const taxArr = collection.totalTax || [];
+      const totalArr = collection.totalAmount || [];
+
+      newTax += taxArr.reduce((sum, val) => sum + (val || 0), 0);
+      newTotal += totalArr.reduce((sum, val) => sum + (val || 0), 0);
+    });
+  });
+
+  newSubtotal = newTotal - newTax;
+
+  setAmount(newSubtotal);
+  setTax(newTax);
+  setGrandTotal(newTotal);
+};
+
+
+
 const handleMRPChange = (
   mainIndex,
   collectionIndex,
@@ -2411,9 +2436,38 @@ const handleMRPChange = (
                             <td className="w-full sm:w-[20%] text-xs sm:text-sm py-2 sm:text-center before:content-['Subtotal:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
                               {(Math.round(item[4] * qty)).toLocaleString("en-IN")}
                             </td>
-                            <td className="w-full sm:w-[20%] text-xs sm:text-sm py-2 sm:text-center before:content-['Tax_Rate_(%):_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
-                              {item[5]}
-                            </td>
+                            <td className="w-full sm:w-[20%] py-2 sm:text-center before:content-['Tax_Rate_(%):_'] sm:before:content-none before:font-semibold before:pr-2">
+  <input
+    type="text"
+    value={item[5] || ""}
+    onChange={(e) => {
+  const newTaxRate = parseFloat(e.target.value) || 0;
+
+  const updatedSelections = [...selections];
+  const areaCollection = updatedSelections[mainindex].areacollection[collectionIndex];
+
+  areaCollection.items[itemIndex][5] = newTaxRate;
+
+  const mrp = areaCollection.items[itemIndex][4] || 0;
+  const quantity = areaCollection.quantities?.[itemIndex] || 0;
+  const subtotal = mrp * quantity;
+  const taxAmount = (subtotal * newTaxRate) / 100;
+  const totalAmount = subtotal + taxAmount;
+
+  areaCollection.totalTax[itemIndex] = taxAmount;
+  areaCollection.totalAmount[itemIndex] = totalAmount;
+
+  setSelections(updatedSelections);
+
+  // ✅ ADD THIS TO UPDATE SUMMARY
+  calculateSummary(updatedSelections);
+}}
+
+    className="border border-gray-200 w-max sm:w-4/5 px-3 py-2 !rounded-lg text-xs sm:text-sm bg-gray-50
+      focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
+  />
+</td>
+
                             <td className="w-full sm:w-[20%] text-xs sm:text-sm py-2 sm:text-center before:content-['Tax_Amount:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
                               {collection.totalTax[itemIndex] ? (Math.round(collection.totalTax[itemIndex])).toLocaleString("en-IN") : "0"}
                             </td>
