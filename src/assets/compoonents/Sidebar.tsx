@@ -175,7 +175,7 @@ function SidebarContent({
     },
 
     { text: "Interiors", path: "/masters/interiors", icon: <Home size={20} /> },
-    // { text: "Tailors", path: "/masters/tailors", icon: <Scissors size={20} /> },
+    { text: "Tailors", path: "/masters/tailors", icon: <Scissors size={20} /> },
     {
       text: "Sales Associate",
       path: "/masters/sales-associate",
