@@ -208,6 +208,12 @@ const Payments = () => {
     );
 
     if (response.status === 200) {
+      const latestPayments = await fetchPaymentData();
+      dispatch(setPaymentData(latestPayments));
+      localStorage.setItem(
+      "paymentData",
+      JSON.stringify({ data: latestPayments, time: Date.now() })
+      );
       alert("Deleted");
       setDeleted(!deleted);
     } else {
@@ -216,9 +222,9 @@ const Payments = () => {
   };
 
   const addPaymentFunction = async () => {
-    const isEdit = typeof editPayments !== "undefined";
+    const isEdit = editPayments != undefined;
     const url = isEdit
-      ? "https://sheeladecor.netlify.app/.netlify/functions/server/updateProjects"
+      ? "https://sheeladecor.netlify.app/.netlify/functions/server/updatePayments"
       : "https://sheeladecor.netlify.app/.netlify/functions/server/addPayment";
 
     const payload = {
@@ -241,6 +247,12 @@ const Payments = () => {
       });
 
       if (response.status === 200) {
+        const latestPayments = await fetchPaymentData();
+        dispatch(setPaymentData(latestPayments));
+        localStorage.setItem(
+        "paymentData",
+        JSON.stringify({ data: latestPayments, time: Date.now() })
+        );
         alert(isEdit ? "Payment updated" : "Payment added");
         setAddPayment(false);
         setPayment(0);
