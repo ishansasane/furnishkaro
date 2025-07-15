@@ -2681,13 +2681,17 @@ const handleMRPChange = (
                 </>
               )}
             </select>
-            <input
-              className="w-20 sm:w-24 border border-gray-200 !rounded-lg px-3 py-2 text-xs sm:text-sm text-right bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
-              value={Math.round(Discount).toLocaleString("en-IN")}
-              onChange={(e) => handleDiscountChange(e.target.value, discountType)}
-              type="number"
-              min="0"
-            />
+           <input
+  className="w-20 sm:w-24 border border-gray-200 !rounded-lg px-3 py-2 text-xs sm:text-sm text-right bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
+  value={Discount === 0 ? '' : Discount}
+  onChange={(e) => {
+    const newValue = e.target.value === '' ? 0 : parseFloat(e.target.value);
+    handleDiscountChange(newValue, discountType);
+  }}
+  type="number"
+  min="0"
+/>
+
           </div>
         </div>
         <div className="border-t border-gray-200 my-3"></div>
