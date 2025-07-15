@@ -168,11 +168,11 @@ function SidebarContent({
       icon: <Layers size={20} />,
     },
     { text: "Brands", path: "/masters/brands", icon: <Star size={20} /> },
-    // {
-    //   text: "Colours",
-    //   path: "/masters/colors",
-    //   icon: <PaintBucket size={20} />,
-    // },
+    {
+      text: "Catalogues",
+      path: "/masters/catalogues",
+      icon: <BookOpen size={20} />,
+    },
 
     { text: "Interiors", path: "/masters/interiors", icon: <Home size={20} /> },
     // { text: "Tailors", path: "/masters/tailors", icon: <Scissors size={20} /> },
@@ -218,46 +218,49 @@ function SidebarContent({
         {/* Masters Section */}
         <li className="relative">
           <button
-            onClick={() => setMastersOpen(!mastersOpen)}
-            className="flex items-center w-full py-2 px-3 my-1 font-medium rounded-md transition-all text-gray-600 hover:bg-gray-200"
-          >
-            <ClipboardList size={20} />
-            <span
-              className={`transition-all ${
-                expanded ? "ml-3 w-10" : "w-0 overflow-hidden"
-              }`}
-            >
-              Masters
-            </span>
-            <ChevronDown
-              className={`ml-auto transform transition-transform duration-300 ${
-                mastersOpen ? "rotate-180" : "rotate-0"
-              }`}
-            />
-          </button>
+  onClick={() => setMastersOpen(!mastersOpen)}
+  className="flex items-center w-full py-2 px-3 my-1 font-medium rounded-md transition-all text-gray-600 hover:bg-gray-200"
+>
+  <span className="min-w-[20px] flex justify-center">
+    <ClipboardList size={20} />
+  </span>
+  <span
+    className={`transition-all ${
+      expanded ? "ml-3 w-10" : "w-0 overflow-hidden"
+    }`}
+  >
+    Masters
+  </span>
+  <ChevronDown
+    className={`ml-auto transform transition-transform duration-300 ${
+      mastersOpen ? "rotate-180" : "rotate-0"
+    }`}
+  />
+</button>
+
 
           {/* Masters Dropdown */}
           <div
-            className={`transition-all duration-300 overflow-hidden ${
-              mastersOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
-            } ${expanded ? "ml-8" : "ml-0"}`}
-          >
-            <ul
-              className={`mt-1 space-y-1 mb-3 ${
-                expanded ? "" : "flex flex-col items-center"
-              }`}
-            >
-              {mastersItems.map(({ text, path, icon }) => (
-                <SidebarItem
-                  key={path}
-                  icon={expanded ? null : icon}
-                  text={expanded ? text : ""}
-                  path={path}
-                  setMobileMenuOpen={setMobileMenuOpen}
-                />
-              ))}
-            </ul>
-          </div>
+  className={`transition-all duration-300 overflow-hidden ${
+    mastersOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
+  }`}
+>
+  <ul
+    className={`mt-1 space-y-1 mb-3 ${
+      expanded ? "" : "flex !mr-10 flex-col items-center"
+    }`}
+  >
+    {mastersItems.map(({ text, path, icon }) => (
+      <SidebarItem
+        key={path}
+        icon={icon} // Always pass the icon, as it will be displayed in both expanded and collapsed states
+        text={expanded ? text : ""}
+        path={path}
+        setMobileMenuOpen={setMobileMenuOpen}
+      />
+    ))}
+  </ul>
+</div>
         </li>
 
         {/* <SidebarItem
