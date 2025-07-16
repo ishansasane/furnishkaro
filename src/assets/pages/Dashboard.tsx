@@ -1114,6 +1114,7 @@ const Dashboard: React.FC = () => {
                 customer={inquiry[6]}
                 inquiryData={inquiry}
                 handlestatuschange={handleStatusChange}
+                handleDeleteInquiry={handleDeleteInquiry}
                 onCardClick={() => {
                   setSelectedInquiry(inquiry);
                   setInquiryDialogOpen(true);
