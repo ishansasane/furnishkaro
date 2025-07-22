@@ -1463,54 +1463,85 @@ const handleItemTaxChange = (i: number, tax: string) => {
 
   const hasFetchedPayments = useRef(false);
   const [added, setAdded] = useState(false);
-  useEffect(() => {
-    let isMounted = true; // To avoid state updates on unmounted component
+useEffect(() => {
+  let isMounted = true;
 
-    const fetchAndStoreData = async () => {
-      try {
-        // Parallel fetch
-        const [paymentData, tailorData] = await Promise.all([
-          fetchPaymentData(),
-          fetchTailorData(),
-        ]);
+  const fetchAndStoreData = async () => {
+    const now = Date.now();
+    const cacheExpiry = 5 * 60 * 1000; // 5 minutes
 
-        // --- PAYMENT DATA ---
-        if (paymentData && isMounted) {
-          dispatch(setPaymentData(paymentData));
+    try {
+      // === PAYMENT DATA ===
+      let paymentData = [];
+      const cachedPayments = localStorage.getItem("paymentData");
 
-          // Compute total payment for this project
-          const totalReceived = paymentData.reduce((sum, record) => {
-            if (record[1] === projectData.projectName) {
-              const amount = parseFloat(record[2]);
-              return sum + (isNaN(amount) ? 0 : amount);
-            }
-            return sum;
-          }, 0);
-
-          setReceived(totalReceived);
+      if (cachedPayments) {
+        const parsed = JSON.parse(cachedPayments);
+        if (now - parsed.time < cacheExpiry && parsed.data?.length > 0) {
+          paymentData = parsed.data;
+        } else {
+          const fresh = await fetchPaymentData();
+          paymentData = fresh;
+          localStorage.setItem("paymentData", JSON.stringify({ data: fresh, time: now }));
         }
-
-        // --- TAILOR DATA ---
-        if (tailorData && isMounted) {
-          dispatch(setTailorData(tailorData));
-        }
-
-        // Prevent re-fetching
-        if (isMounted) setAdded(true);
-      } catch (error) {
-        console.error("❌ Failed to fetch payment or tailor data:", error);
-        // Optional: showToast("Error loading data")
+      } else {
+        const fresh = await fetchPaymentData();
+        paymentData = fresh;
+        localStorage.setItem("paymentData", JSON.stringify({ data: fresh, time: now }));
       }
-    };
 
-    if (!added) {
-      fetchAndStoreData();
+      if (isMounted && Array.isArray(paymentData)) {
+        dispatch(setPaymentData(paymentData));
+
+        const totalReceived = paymentData.reduce((sum, record) => {
+          if (record[1] === projectData.projectName) {
+            const amount = parseFloat(record[2]);
+            return sum + (isNaN(amount) ? 0 : amount);
+          }
+          return sum;
+        }, 0);
+
+        setReceived(totalReceived);
+      }
+
+      // === TAILOR DATA ===
+      let tailorData = [];
+      const cachedTailors = localStorage.getItem("tailorData");
+
+      if (cachedTailors) {
+        const parsed = JSON.parse(cachedTailors);
+        if (now - parsed.time < cacheExpiry && parsed.data?.length > 0) {
+          tailorData = parsed.data;
+        } else {
+          const fresh = await fetchTailorData();
+          tailorData = fresh;
+          localStorage.setItem("tailorData", JSON.stringify({ data: fresh, time: now }));
+        }
+      } else {
+        const fresh = await fetchTailorData();
+        tailorData = fresh;
+        localStorage.setItem("tailorData", JSON.stringify({ data: fresh, time: now }));
+      }
+
+      if (isMounted && Array.isArray(tailorData)) {
+        dispatch(setTailorData(tailorData));
+      }
+
+      if (isMounted) setAdded(true);
+    } catch (error) {
+      console.error("❌ Failed to fetch payment or tailor data:", error);
     }
+  };
 
-    return () => {
-      isMounted = false; // Cleanup for async calls
-    };
-  }, [added, dispatch, projectData.projectName]);
+  if (!added) {
+    fetchAndStoreData();
+  }
+
+  return () => {
+    isMounted = false;
+  };
+}, [added, dispatch, projectData.projectName]);
+
 
 useEffect(() => {
   const getAreas = async () => {
@@ -1532,7 +1563,9 @@ useEffect(() => {
  // Only re-run when availableAreas length changes
 
   const addPaymentFunction = async () => {
-    const isEdit = typeof editProjects !== "undefined";
+    const isEdit = editPayments != null;
+
+    console.log(isEdit);
 
     const url = isEdit
       ? "https://sheeladecor.netlify.app/.netlify/functions/server/updatePayments"
