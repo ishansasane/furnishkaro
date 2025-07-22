@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { FaTrash } from "react-icons/fa";
 import { Edit } from "lucide-react";
+import { setProjects } from "../Redux/dataSlice";
+import { useDispatch } from "react-redux";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 // 🔧 SAME CLEANING LOGIC as your ProtectedRoute
 const normalizePath = (path: string) => {
@@ -63,6 +66,8 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
 
   const [paymentReceived, setPaymentReceived] = useState(0);
 
+  const dispatch = useDispatch();
+
   useEffect(() => {
     if (!projectData?.projectName || !paymentData?.length) return;
 
@@ -101,6 +106,123 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
     setEditPayments(data);
     setAddPayment(true);
   };
+    const fetchProjectData = async () => {
+    const response = await fetchWithLoading(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
+      {
+        credentials: "include",
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    if (!data.body || !Array.isArray(data.body)) {
+      throw new Error("Invalid data format: Expected an array in data.body");
+    }
+
+    const parseSafely = (value: any, fallback: any) => {
+      try {
+        return typeof value === "string" ? JSON.parse(value) : value || fallback;
+      } catch (error) {
+        console.warn("Invalid JSON:", value, error);
+        return fallback;
+      }
+    };
+
+    const deepClone = (obj: any) => JSON.parse(JSON.stringify(obj));
+
+    const fixBrokenArray = (input: any): string[] => {
+      if (Array.isArray(input)) return input;
+      if (typeof input !== "string") return [];
+
+      try {
+        const fixed = JSON.parse(input);
+        if (Array.isArray(fixed)) return fixed;
+        return [];
+      } catch {
+        try {
+          const cleaned = input
+            .replace(/^\[|\]$/g, "")
+            .split(",")
+            .map((item: string) => item.trim().replace(/^"+|"+$/g, ""));
+          return cleaned;
+        } catch {
+          return [];
+        }
+      }
+    };
+
+    const projects = data.body.map((row: any[]) => ({
+      projectName: row[0],
+      customerLink: parseSafely(row[1], []),
+      projectReference: row[2] || "",
+      status: row[3] || "",
+      totalAmount: parseFloat(row[4]) || 0,
+      totalTax: parseFloat(row[5]) || 0,
+      paid: parseFloat(row[6]) || 0,
+      discount: parseFloat(row[7]) || 0,
+      createdBy: row[8] || "",
+      allData: deepClone(parseSafely(row[9], [])),
+      projectDate: row[10] || "",
+      additionalRequests: parseSafely(row[11], []),
+      interiorArray: fixBrokenArray(row[12]),
+      salesAssociateArray: fixBrokenArray(row[13]),
+      additionalItems: deepClone(parseSafely(row[14], [])),
+      goodsArray: deepClone(parseSafely(row[15], [])),
+      tailorsArray: deepClone(parseSafely(row[16], [])),
+      projectAddress: row[17],
+      date: row[18],
+      grandTotal: row[19],
+      discountType: row[20],
+      bankDetails: deepClone(parseSafely(row[21], [])),
+      termsConditions: deepClone(parseSafely(row[22], [])),
+    }));
+
+    return projects;
+  };
+
+  const markAsDefaulter = async () => {
+    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/updateprojectdata", {
+      method : "POST",
+      headers : {
+        "content-type" : "application/json",
+      },
+      body : JSON.stringify({ projectName : projectData.projectName ,defaulter : true })
+    });
+    if(response.ok){
+      const updatedData = await fetchProjectData();
+      dispatch(setProjects(updatedData));
+      localStorage.setItem(
+        "projectData",
+        JSON.stringify({ data: updatedData, time: Date.now() })
+      );
+      alert("Project marked as Defaulter");
+    }
+  }
+    const removeAsDefaulter = async () => {
+    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/updateprojectdata", {
+      method : "POST",
+      headers : {
+        "content-type" : "application/json",
+      },
+      body : JSON.stringify({ projectName : projectData.projectName ,defaulter : false })
+    });
+
+    if(response.ok){
+      const updatedData = await fetchProjectData();
+      dispatch(setProjects(updatedData));
+      localStorage.setItem(
+        "projectData",
+        JSON.stringify({ data: updatedData, time: Date.now() })
+      );
+      alert("Project marked as Defaulter");
+      alert("Project removed as Defaulter");
+    }
+  }
 
   return (
     <div
