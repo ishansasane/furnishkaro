@@ -219,7 +219,7 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
         "projectData",
         JSON.stringify({ data: updatedData, time: Date.now() })
       );
-      alert("Project marked as Defaulter");
+      
       alert("Project removed as Defaulter");
     }
   }
