@@ -363,6 +363,7 @@ const Dashboard: React.FC = () => {
               discountType: row[20],
               bankDetails: deepClone(parseSafely(row[21], [])),
               termsConditions: deepClone(parseSafely(row[22], [])),
+              defaulter : deepClone(row[23])
             };
           } catch (error) {
             console.error(
@@ -413,18 +414,20 @@ const Dashboard: React.FC = () => {
         let discount = 0;
 
         projects.forEach((project) => {
-          totalTax += parseFloat(project.totalTax) || 0;
-          totalAmount += parseFloat(project.totalAmount) || 0;
-          discount += parseFloat(project.discount) || 0;
+          if(project.defaulter == "FALSE"){
+            totalTax += parseFloat(project.totalTax) || 0;
+            totalAmount += parseFloat(project.totalAmount) || 0;
+            discount += parseFloat(project.discount) || 0;
+          }
         });
 
         setTotalPayment(totalAmount + totalTax);
         setDiscount(discount);
-
         const validProjectNames = new Set(
-          projects.map((project) => project.projectName)
+          projects
+            .filter((project) => project.defaulter == "FALSE")
+            .map((project) => project.projectName)
         );
-
         const cached = localStorage.getItem("paymentData");
         const now = Date.now();
 
@@ -435,13 +438,14 @@ const Dashboard: React.FC = () => {
           if (timeDiff < 5 * 60 * 1000 && parsed.data?.length) {
             dispatch(setPaymentData(parsed.data));
 
-            const totalReceived = parsed.data.reduce((acc, payment) => {
-              const projectName = payment[1];
-              const amount = parseFloat(payment[2]);
-              return validProjectNames.has(projectName)
-                ? acc + (isNaN(amount) ? 0 : amount)
-                : acc;
-            }, 0);
+          const totalReceived = parsed.data.reduce((acc, payment) => {
+            const projectName = payment[1];
+            const amount = parseFloat(payment[2]);
+            return validProjectNames.has(projectName)
+              ? acc + (isNaN(amount) ? 0 : amount)
+              : acc;
+          }, 0);
+
 
             setReceived(totalReceived);
             return;
