@@ -863,7 +863,7 @@ const handleQuantityChange = async (
   const discountedCost = baseCost - discountAmount;
 
   // Step 3: Calculate Tax
-  const taxAmount = parseFloat(((discountedCost * taxPercent) / 100).toFixed(2));
+  const taxAmount = parseFloat(((discountedCost * (taxPercent || 0)) / 100).toFixed(2));
   const totalWithTax = parseFloat((discountedCost + taxAmount).toFixed(2));
 
   // Ensure arrays exist
@@ -938,7 +938,7 @@ const handleTaxChange = (
 
   // ✅ Update the specific item's tax rate
   if (itemsCopy[itemIndex]) {
-    itemsCopy[itemIndex][5] = newTaxRate;
+    itemsCopy[itemIndex][5] = newTaxRate || 0;
 
     const subtotal = rate * measurementQty * qty;
 
@@ -951,7 +951,7 @@ const handleTaxChange = (
 
     const discountedSubtotal = subtotal - discountAmount;
 
-    const taxAmount = discountedSubtotal * (newTaxRate / 100);
+    const taxAmount = discountedSubtotal * ((newTaxRate || 0) / 100);
     const total = discountedSubtotal + taxAmount;
 
     totalTaxCopy[itemIndex] = parseFloat(taxAmount.toFixed(2));

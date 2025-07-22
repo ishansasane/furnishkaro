@@ -563,7 +563,7 @@ export default function Projects() {
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...primaryColor);
-  doc.text("Quotation Items", 15, yOffset);
+  // doc.text("Quotation Items", 15, yOffset);
   yOffset += 8;
 
   autoTable(doc, {
