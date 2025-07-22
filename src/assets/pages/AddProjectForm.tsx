@@ -1721,12 +1721,11 @@ useEffect(() => {
   const termsConditions = ["sadsdsad", "Adasdad"];
 
 const generatePDF = () => {
- const formatNumber = (value: number): string =>
-  Math.round(value).toLocaleString("en-IN", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  });
-
+  const formatNumber = (value: number): string =>
+    Math.round(value).toLocaleString("en-IN", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    });
 
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -1768,7 +1767,6 @@ const generatePDF = () => {
   doc.line(15, yOffset, pageWidth - 15, yOffset);
   yOffset += 8;
 
-  // === PROJECT & CUSTOMER DETAILS ===
   const cleanAddress = typeof projectAddress === "string"
     ? projectAddress.replace(/^"(.*)"$/, '$1')
     : "N/A";
@@ -1811,7 +1809,6 @@ const generatePDF = () => {
   selections.forEach((selection) => {
     const areaName = selection.area || "Unnamed Area";
 
-    // Always push the area name row
     tableData.push([
       {
         content: areaName,
@@ -1871,7 +1868,6 @@ const generatePDF = () => {
       });
     });
 
-    // If no product rows added under this area, add placeholder row
     if (!addedItem) {
       tableData.push([
         {
@@ -1883,7 +1879,6 @@ const generatePDF = () => {
     }
   });
 
-  // Add Miscellaneous Section
   if (additionalItems.length > 0) {
     tableData.push([
       {
@@ -1979,19 +1974,59 @@ const generatePDF = () => {
   const summaryBoxHeight = 50;
   const footerHeight = 25;
   const bottomMargin = footerHeight + 10;
+  const summaryY = tableEndY + 10;
 
-  yOffset = tableEndY + summaryBoxHeight + bottomMargin > pageHeight
-    ? (doc.addPage(), 15)
-    : tableEndY + 10;
+  if (summaryY + summaryBoxHeight + bottomMargin > pageHeight) {
+    doc.addPage();
+    yOffset = 15;
+  } else {
+    yOffset = summaryY;
+  }
 
+  const bankBoxWidth = 80;
+  const summaryBoxWidth = 75;
+  const boxTop = yOffset;
+  const boxHeight = 50;
+
+  // === Bank Details ===
+  if (bank && bank[0] !== "NA") {
+    doc.setFillColor(...lightGray);
+    doc.roundedRect(15, boxTop - 5, bankBoxWidth, boxHeight, 2, 2, "F");
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...primaryColor);
+    doc.text("Bank Details", 18, boxTop);
+
+    const bankLabels = ["Bank", "Account Name", "Account Number", "IFSC Code", "Branch", "Pincode"];
+    const bankValues = [bank[1], bank[0], bank[4], bank[5], bank[2], bank[3]];
+
+    let bankYOffset = boxTop + 5;
+    for (let i = 0; i < bankLabels.length; i++) {
+      if (!bankValues[i] || bankValues[i] === "N/A") continue;
+      const label = `${bankLabels[i]}: `;
+      const value = `${bankValues[i]}`;
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(...primaryColor);
+      doc.text(label, 18, bankYOffset += 6);
+      const labelWidth = doc.getTextWidth(label);
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(...secondaryColor);
+      doc.text(value, 18 + labelWidth + 1, bankYOffset);
+    }
+  }
+
+  // === Summary Box ===
   doc.setFillColor(...lightGray);
-  doc.roundedRect(pageWidth - 90, yOffset - 5, 75, 50, 2, 2, "F");
-  yOffset += 8;
+  doc.roundedRect(pageWidth - summaryBoxWidth - 15, boxTop - 5, summaryBoxWidth, boxHeight, 2, 2, "F");
 
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...primaryColor);
-  doc.text("Summary", pageWidth - 85, yOffset - 8);
+  doc.text("Summary", pageWidth - summaryBoxWidth - 12, boxTop);
+
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...secondaryColor);
@@ -2000,21 +2035,28 @@ const generatePDF = () => {
   const numericTax = Number(tax) || 0;
   const numericDiscount = Number(discount) || 0;
   const summaryItems = [
-    { label: "Total Amount", value: `  ${formatNumber(numericAmount)}` },
-    { label: "Discount", value: `  ${formatNumber(numericDiscount)}` },
-    { label: "Total Tax", value: `  ${formatNumber(numericTax)}` },
-    { label: "Grand Total", value: `  ${formatNumber(numericAmount + numericTax - numericDiscount)}` },
+    { label: "Total Amount", value: formatNumber(numericAmount) },
+    { label: "Discount", value: formatNumber(numericDiscount) },
+    { label: "Total Tax", value: formatNumber(numericTax) },
+    { label: "Grand Total", value: formatNumber(numericAmount + numericTax - numericDiscount) },
   ];
 
+  let summaryYOffset = boxTop + 5;
   summaryItems.forEach((item) => {
+    doc.setFontSize(8);
     doc.setFont("helvetica", "bold");
-    doc.text(item.label, pageWidth - 85, yOffset);
+    doc.setTextColor(...primaryColor);
+    doc.text(item.label, pageWidth - summaryBoxWidth - 12, summaryYOffset += 6);
+    doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
-    doc.text(item.value, pageWidth - 20, yOffset, { align: "right" });
-    yOffset += 8;
+    doc.setTextColor(...secondaryColor);
+    doc.text(item.value, pageWidth - 20, summaryYOffset, { align: "right" });
   });
 
-  if (termsAndConditions.trim()) {
+  yOffset = Math.max(summaryYOffset, boxTop + boxHeight) + 10;
+
+  // === Terms & Conditions ===
+  if (terms && terms[0] !== "NA" && terms[0]) {
     if (yOffset + 30 > pageHeight - footerHeight - 10) {
       doc.addPage();
       yOffset = 15;
@@ -2028,8 +2070,9 @@ const generatePDF = () => {
     doc.setFont("helvetica", "normal");
     doc.setTextColor(...secondaryColor);
 
-    const terms = doc.splitTextToSize(termsAndConditions, pageWidth - 30);
-    terms.forEach((term: string) => {
+    const termsText = typeof terms === "string" ? terms : terms[0] || "";
+    const termsLines = doc.splitTextToSize(termsText, pageWidth - 30);
+    termsLines.forEach((term: string) => {
       if (yOffset + 5 > pageHeight - footerHeight - 10) {
         doc.addPage();
         yOffset = 15;
@@ -2051,6 +2094,7 @@ const generatePDF = () => {
 
   doc.save(`Invoice_${projectName || "Project"}_${projectDate || new Date().toLocaleDateString()}.pdf`);
 };
+
 
 
 

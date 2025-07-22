@@ -1,5 +1,4 @@
-import { EditIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../Redux/store";
 import { setCustomerData } from "../Redux/dataSlice";
@@ -65,10 +64,6 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
       date = now.toISOString().slice(0, 16);
     }
 
-    if (editing) {
-      setName(editing[0]);
-    }
-
     const api = editing
       ? "https://sheeladecor.netlify.app/.netlify/functions/server/updatecustomerdata"
       : "https://sheeladecor.netlify.app/.netlify/functions/server/sendcustomerdata";
@@ -91,24 +86,18 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
 
     if (response.status === 200) {
       const data = await fetchCustomers();
-
-      // 1. Update Redux store
       dispatch(setCustomerData(data));
-
-      // 3. Update localStorage cache
       localStorage.setItem(
         "customerData",
         JSON.stringify({ data, time: Date.now() })
       );
 
-      // 4. Clear form
       setName("");
       setAddress("");
       setMobile("");
       setEmail("");
       setAlternateNumber("");
 
-      // 5. Show success
       alert(
         editing
           ? "Customer Updated Successfully"
@@ -133,58 +122,88 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
         <h2 className="text-xl font-bold mb-4">
           {editing ? "Edit Customer" : "Add Customer"}
         </h2>
-        <input
-          className={`${
-            editing ? "hidden" : ""
-          } border p-2 rounded w-full mb-2`}
-          placeholder="Name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <input
-          className="border p-2 rounded w-full mb-2"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          className="border p-2 rounded w-full mb-2"
-          placeholder="Mobile Number"
-          value={mobile}
-          onChange={(e) => setMobile(e.target.value)}
-        />
-        <input
-          className="border p-2 rounded w-full mb-2"
-          placeholder="Address"
-          value={address}
-          onChange={(e) => setAddress(e.target.value)}
-        />
-        <input
-          className="border p-2 rounded w-full mb-2"
-          placeholder="Alternate Number"
-          value={alternateNumber}
-          onChange={(e) => setAlternateNumber(e.target.value)}
-        />
-        <div className="flex justify-end gap-2">
-          <button
-            className="bg-gray-500 text-white px-4 py-2 rounded"
-            onClick={() => {
-              if (!editing) {
-                navigate("/customers");
-              }
-              setEditing(null);
-              setDialogOpen(false);
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            className="bg-blue-500 text-white px-4 py-2 rounded"
-            onClick={sendcustomerData}
-          >
-            Save
-          </button>
-        </div>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            sendcustomerData();
+          }}
+          className="space-y-3"
+        >
+          {!editing && (
+            <label className="block w-full text-sm font-medium text-gray-700">
+              Name<span className="text-red-500 ml-1">*</span>
+              <input
+                className="border p-2 rounded w-full mt-1"
+                placeholder="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </label>
+          )}
+
+          <label className="block w-full text-sm font-medium text-gray-700">
+            Email
+            <input
+              className="border p-2 rounded w-full mt-1"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </label>
+
+          <label className="block w-full text-sm font-medium text-gray-700">
+            Mobile Number<span className="text-red-500 ml-1">*</span>
+            <input
+              className="border p-2 rounded w-full mt-1"
+              placeholder="Mobile Number"
+              value={mobile}
+              onChange={(e) => setMobile(e.target.value)}
+            />
+          </label>
+
+          <label className="block w-full text-sm font-medium text-gray-700">
+            Address<span className="text-red-500 ml-1">*</span>
+            <input
+              className="border p-2 rounded w-full mt-1"
+              placeholder="Address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+            />
+          </label>
+
+          <label className="block w-full text-sm font-medium text-gray-700">
+            Alternate Number
+            <input
+              className="border p-2 rounded w-full mt-1"
+              placeholder="Alternate Number"
+              value={alternateNumber}
+              onChange={(e) => setAlternateNumber(e.target.value)}
+            />
+          </label>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <button
+              type="button"
+              className="bg-gray-500 text-white px-4 py-2 rounded"
+              onClick={() => {
+                if (!editing) {
+                  navigate("/customers");
+                }
+                setEditing(null);
+                setDialogOpen(false);
+              }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="bg-blue-500 text-white px-4 py-2 rounded"
+            >
+              Save
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );

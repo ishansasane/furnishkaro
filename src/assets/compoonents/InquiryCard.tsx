@@ -8,7 +8,7 @@ const InquiryCard = ({
   followUpDate,
   status,
   handlestatuschange,
-  handleDelete,
+  handleDeleteInquiry,
   onCardClick,
   customer,
   inquiryData
@@ -27,7 +27,7 @@ const InquiryCard = ({
   };
 
   const confirmDelete = () => {
-    handleDelete(project);
+    handleDeleteInquiry(project);
     setShowDeletePopup(false);
   };
 

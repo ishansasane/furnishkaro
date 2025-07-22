@@ -1,4 +1,3 @@
-
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useState } from "react";
 import { Pencil, XCircle, Plus, Download } from "lucide-react";
@@ -21,7 +20,6 @@ const formatNumber = (num) => {
     minimumFractionDigits: 0,
   });
 };
-
 
 // Define the type for a project
 interface Project {
@@ -47,6 +45,9 @@ interface Project {
   salesAssociateArray: string[];
   grandTotal: number;
   discountType: string;
+  bankDetails: any[];
+  termsConditions: any[];
+  projectAddress: string;
 }
 
 // Status filter options
@@ -219,39 +220,38 @@ export default function Projects() {
   }, [dispatch, flag]);
 
   // --- Fetch Tasks ---
-useEffect(() => {
-  const fetchTasks = async () => {
-    try {
-      // Step 1: Check Redux state
-      if (tasks && tasks.length > 0 && !deleted) {
-        setTaskData(tasks);
-        return;
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        // Step 1: Check Redux state
+        if (tasks && tasks.length > 0 && !deleted) {
+          setTaskData(tasks);
+          return;
+        }
+
+        // Step 2: Check Local Storage
+        const storedTasks = localStorage.getItem("tasks");
+        if (storedTasks && !deleted) {
+          const parsedTasks = JSON.parse(storedTasks);
+          dispatch(setTasks(parsedTasks));
+          setTaskData(parsedTasks);
+          return;
+        }
+
+        // Step 3: Fetch from API
+        const data = await fetchTaskData();
+        dispatch(setTasks(data));
+        localStorage.setItem("tasks", JSON.stringify(data));
+        setTaskData(data);
+        setDeleted(false); // reset deleted after refreshing
+      } catch (error) {
+        console.error("Failed to fetch tasks:", error);
       }
+    };
 
-      // Step 2: Check Local Storage
-      const storedTasks = localStorage.getItem("tasks");
-      if (storedTasks && !deleted) {
-        const parsedTasks = JSON.parse(storedTasks);
-        dispatch(setTasks(parsedTasks));
-        setTaskData(parsedTasks);
-        return;
-      }
+    fetchTasks();
+  }, [dispatch, deleted]);
 
-      // Step 3: Fetch from API
-      const data = await fetchTaskData();
-      dispatch(setTasks(data));
-      localStorage.setItem("tasks", JSON.stringify(data));
-      setTaskData(data);
-      setDeleted(false); // reset deleted after refreshing
-    } catch (error) {
-      console.error("Failed to fetch tasks:", error);
-    }
-  };
-
-  fetchTasks();
-}, [dispatch, deleted]);
-
-  
   // --- Fetch Payments after Projects are available ---
   useEffect(() => {
     const fetchPayments = async () => {
@@ -278,7 +278,7 @@ useEffect(() => {
         console.error('Failed to fetch payments:', error);
       }
     };
-      fetchPayments();
+    fetchPayments();
   }, [dispatch, added, projectData]);
 
   // --- API fetching functions ---
@@ -389,7 +389,13 @@ useEffect(() => {
   };
 
   // PDF Generation Function
-const generatePDF = (project: any) => {
+ const generatePDF = (project: any) => {
+  const formatNumber = (value: number): string =>
+    Math.round(value).toLocaleString("en-IN", {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    });
+
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
   const pageHeight = doc.internal.pageSize.getHeight();
@@ -400,35 +406,25 @@ const generatePDF = (project: any) => {
   const accentColor = [0, 102, 204];
   const lightGray = [245, 245, 245];
 
-const formatNumber = (value: number) => {
-  if (value === undefined || value === null) return "0";
-  const number = Math.round(Number(value));
-  return number.toLocaleString('en-US', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  });
-};
-
-
   // === HEADER ===
+  doc.setFont("helvetica", "normal");
   doc.setFillColor(...primaryColor);
   doc.rect(0, 0, pageWidth, 30, "F");
   doc.setFillColor(...accentColor);
   doc.rect(0, 30, pageWidth, 1, "F");
-  doc.setFontSize(14);
+  doc.setFontSize(20);
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.text("Invoice", pageWidth / 2, 18, { align: "center" });
 
-  // === COMPANY INFO ===
   yOffset += 15;
 
+  // === COMPANY INFO ===
   doc.setFontSize(10);
   doc.setTextColor(...secondaryColor);
   doc.setFont("helvetica", "bold");
   doc.text("SHEELA DECOR", 15, yOffset);
   doc.setFont("helvetica", "normal");
-
   yOffset += 5;
   doc.text("2, Shivneri Heights, Nagar-Kalyan Road, Ahmednagar - 414001", 15, yOffset);
   yOffset += 5;
@@ -456,7 +452,6 @@ const formatNumber = (value: number) => {
 
   doc.setFillColor(...lightGray);
   doc.roundedRect(15, yOffset, pageWidth - 30, detailBoxHeight, 2, 2, "F");
-
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...primaryColor);
@@ -465,7 +460,6 @@ const formatNumber = (value: number) => {
   yOffset += 12;
 
   doc.setFont("helvetica", "normal");
-  doc.setFontSize(9);
   doc.setTextColor(...secondaryColor);
   doc.text(`Project Name: ${project.projectName || "N/A"}`, 20, yOffset);
   doc.text(
@@ -497,7 +491,13 @@ const formatNumber = (value: number) => {
           {
             content: selection.area || "Unknown Area",
             colSpan: 9,
-            styles: { fontStyle: "bold", fontSize: 9, fillColor: accentColor, textColor: [255, 255, 255] },
+            styles: {
+              fontStyle: "bold",
+              fontSize: 9,
+              fillColor: accentColor,
+              textColor: [255, 255, 255],
+              halign: "left",
+            },
           },
         ]);
         selection.areacollection.forEach((collection: any) => {
@@ -529,7 +529,13 @@ const formatNumber = (value: number) => {
       {
         content: "Miscellaneous Items",
         colSpan: 9,
-        styles: { fontStyle: "bold", fillColor: accentColor, textColor: [255, 255, 255], fontSize: 9 },
+        styles: {
+          fontStyle: "bold",
+          fontSize: 9,
+          fillColor: accentColor,
+          textColor: [255, 255, 255],
+          halign: "left",
+        },
       },
     ]);
     project.additionalItems.forEach((item: any, index: number) => {
@@ -562,6 +568,7 @@ const formatNumber = (value: number) => {
 
   autoTable(doc, {
     startY: yOffset,
+    margin: { left: 16.5 },
     head: [["Sr. No.", "Item Name", "Description", "Rate", "Qty", "Net Rate", "Tax Rate", "Tax Amount", "Total"]],
     body: tableData.length > 0 ? tableData : [[{ content: "No product data available.", colSpan: 9, styles: { halign: "center" } }]],
     theme: "grid",
@@ -580,14 +587,15 @@ const formatNumber = (value: number) => {
       fontStyle: "bold",
       fontSize: 8.5,
       halign: "center",
+      cellPadding: 1.5,
     },
     alternateRowStyles: {
       fillColor: lightGray,
     },
     columnStyles: {
       0: { cellWidth: 10, halign: "center" },
-      1: { cellWidth: 38 },
-      2: { cellWidth: 32 },
+      1: { cellWidth: 35 },
+      2: { cellWidth: 28 },
       3: { cellWidth: 22, halign: "center" },
       4: { cellWidth: 12, halign: "center" },
       5: { cellWidth: 22, halign: "center" },
@@ -606,85 +614,133 @@ const formatNumber = (value: number) => {
   });
 
   const tableEndY = (doc as any).lastAutoTable.finalY;
-  let yCursor = tableEndY + 10;
+  const summaryBoxHeight = 50;
+  const footerHeight = 25;
+  const bottomMargin = footerHeight + 10;
+  const summaryY = tableEndY + 10;
+
+  if (summaryY + summaryBoxHeight + bottomMargin > pageHeight) {
+    doc.addPage();
+    yOffset = 15;
+  } else {
+    yOffset = summaryY;
+  }
+
+  const bankBoxWidth = 80;
+  const summaryBoxWidth = 75;
+  const boxTop = yOffset;
 
   // === Summary Box ===
-  const summaryBoxHeight = 50;
   doc.setFillColor(...lightGray);
-  doc.roundedRect(pageWidth - 90, yCursor - 5, 75, summaryBoxHeight, 2, 2, "F");
+  doc.roundedRect(pageWidth - summaryBoxWidth - 15, boxTop - 5, summaryBoxWidth, summaryBoxHeight, 2, 2, "F");
   doc.setFontSize(10);
   doc.setFont("helvetica", "bold");
   doc.setTextColor(...primaryColor);
-  doc.text("Summary", pageWidth - 85, yCursor);
-  yCursor += 8;
+  doc.text("Summary", pageWidth - summaryBoxWidth - 12, boxTop);
 
-  doc.setFontSize(9);
+  let summaryYOffset = boxTop + 5;
+  doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
   doc.setTextColor(...secondaryColor);
+  const numericAmount = Number(project.totalAmount) || 0;
+  const numericTax = Number(project.totalTax) || 0;
+  const numericDiscount = Number(project.discount) || 0;
   const summaryItems = [
-    { label: "Total Amount", value: ` ${formatNumber(project.totalAmount || 0)}` },
-    { label: "Discount", value: ` ${formatNumber(project.discount || 0)}` },
-    { label: "Total Tax", value: ` ${formatNumber(project.totalTax || 0)}` },
-    { label: "Grand Total", value: ` ${formatNumber(project.grandTotal || 0)}` },
+    { label: "Total Amount", value: formatNumber(numericAmount) },
+    { label: "Discount", value: formatNumber(numericDiscount) },
+    { label: "Total Tax", value: formatNumber(numericTax) },
+    { label: "Grand Total", value: formatNumber(numericAmount + numericTax - numericDiscount) },
   ];
   summaryItems.forEach((item) => {
+    doc.setFontSize(8);
     doc.setFont("helvetica", "bold");
-    doc.text(item.label, pageWidth - 85, yCursor);
+    doc.setTextColor(...primaryColor);
+    doc.text(item.label, pageWidth - summaryBoxWidth - 12, summaryYOffset += 6);
+    doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
-    doc.text(item.value, pageWidth - 20, yCursor, { align: "right" });
-    yCursor += 8;
+    doc.setTextColor(...secondaryColor);
+    doc.text(item.value, pageWidth - 20, summaryYOffset, { align: "right" });
   });
 
-  // === Terms & Conditions ===
-  const termsText = typeof project.additionalRequests === "string" ? project.additionalRequests.trim() : "";
-  const termsLines = termsText ? doc.splitTextToSize(termsText, pageWidth - 30) : [];
-
-  if (termsLines.length > 0) {
-    if (yCursor + termsLines.length * 5 + 10 > pageHeight - 25) {
-      doc.addPage();
-      yCursor = 20;
-    }
-    doc.setFont("helvetica", "bold");
+  // === Bank Details ===
+  let bankYOffset = boxTop;
+  if (project.bankDetails && project.bankDetails[0] !== "NA") {
+    doc.setFillColor(...lightGray);
+    doc.roundedRect(15, boxTop - 5, bankBoxWidth, summaryBoxHeight, 2, 2, "F");
     doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
     doc.setTextColor(...primaryColor);
-    doc.text("Terms & Conditions", 15, yCursor);
-    yCursor += 5;
+    doc.text("Bank Details", 18, boxTop);
+
+    bankYOffset += 5;
+    doc.setFontSize(8);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
     doc.setTextColor(...secondaryColor);
 
-    const datePattern = /^\s*\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}\s*$/;
-    termsLines.forEach((term) => {
-      if (datePattern.test(term.trim())) return;
-      if (yCursor + 5 > pageHeight - 25) {
+    const bankLabels = ["Bank", "Account Name", "Account Number", "IFSC Code", "Branch", "Pincode"];
+    const bankValues = [project.bankDetails[1], project.bankDetails[0], project.bankDetails[4], project.bankDetails[5], project.bankDetails[2], project.bankDetails[3]];
+
+    for (let i = 0; i < bankLabels.length; i++) {
+      if (!bankValues[i] || bankValues[i] === "N/A") continue;
+      const label = `${bankLabels[i]}: `;
+      const value = `${bankValues[i]}`;
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "bold");
+      doc.setTextColor(...primaryColor);
+      doc.text(label, 18, bankYOffset += 6);
+      const labelWidth = doc.getTextWidth(label);
+      doc.setFontSize(8);
+      doc.setFont("helvetica", "normal");
+      doc.setTextColor(...secondaryColor);
+      doc.text(value, 18 + labelWidth + 1, bankYOffset);
+    }
+  }
+
+  // Update yOffset to account for both boxes
+  yOffset = Math.max(summaryYOffset, bankYOffset) + 10;
+
+  // === Terms and Conditions ===
+  if (project.termsConditions && project.termsConditions[0] !== "NA" && project.termsConditions[0]) {
+    if (yOffset + 30 > pageHeight - footerHeight - 10) {
+      doc.addPage();
+      yOffset = 15;
+    }
+    yOffset += 5;
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...primaryColor);
+    doc.text("Terms & Conditions", 15, yOffset);
+    yOffset += 5;
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...secondaryColor);
+
+    const termsText = typeof project.termsConditions === "string" ? project.termsConditions : project.termsConditions[0] || "";
+    const termsLines = doc.splitTextToSize(termsText, pageWidth - 30);
+    termsLines.forEach((term: string) => {
+      if (yOffset + 5 > pageHeight - footerHeight - 10) {
         doc.addPage();
-        yCursor = 20;
+        yOffset = 15;
       }
-      doc.text(`• ${term}`, 15, yCursor);
-      yCursor += 5;
+      doc.text(`• ${term}`, 15, yOffset);
+      yOffset += 5;
     });
   }
 
   // === FOOTER ===
-  if (yCursor + 15 > pageHeight - 10) {
-    doc.addPage();
-    yCursor = 20;
-  }
+  const footerY = pageHeight - footerHeight;
   doc.setFillColor(...accentColor);
-  doc.rect(0, pageHeight - 25, pageWidth, 1, "F");
-  doc.setFontSize(9);
+  doc.rect(0, footerY, pageWidth, 1, "F");
+  doc.setFontSize(8);
   doc.setTextColor(100, 100, 100);
   doc.setFont("helvetica", "italic");
-  doc.text("Thank you for choosing Sheela Decor!", pageWidth / 2, pageHeight - 15, { align: "center" });
+  doc.text("Thank you for choosing Sheela Decor!", pageWidth / 2, footerY + 10, { align: "center" });
   doc.setFont("helvetica", "normal");
-  doc.text("Sheela Decor - All Rights Reserved", pageWidth / 2, pageHeight - 8, { align: "center" });
+  doc.text("Sheela Decor - All Rights Reserved", pageWidth / 2, footerY + 17, { align: "center" });
 
   const safeProjectName = (project.projectName || "Project").replace(/[^a-zA-Z0-9]/g, "_");
   const safeDate = (project.projectDate || new Date().toLocaleDateString()).replace(/[^a-zA-Z0-9]/g, "_");
   doc.save(`Invoice_${safeProjectName}_${safeDate}.pdf`);
 };
-
-
   const [paidAmount, setPaidAmount] = useState(0);
 
   return (
