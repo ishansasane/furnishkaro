@@ -83,72 +83,93 @@ const InteriorPage = ({ interiorData, setInteriorOpen }) => {
       tailorsArray: deepClone(parseSafely(row[16], [])),
       projectAddress: row[17],
       date: row[18],
+      grandTotal: row[19],
+      discountType: row[20],
+      bankDetails: deepClone(parseSafely(row[21], [])),
+      termsConditions: deepClone(parseSafely(row[22], [])),
     }));
 
     return projects;
   };
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const cached = localStorage.getItem("projectData");
-        const now = Date.now();
-        const cacheExpiry = 5 * 60 * 1000; // 5 minutes
+useEffect(() => {
+  let timeoutId;
 
-        let finalData = [];
+  const fetchProjects = async () => {
+    try {
+      const cached = localStorage.getItem("projectData");
+      const now = Date.now();
+      const cacheExpiry = 5 * 60 * 1000; // 5 minutes
 
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          const isCacheValid =
-            parsed?.data?.length > 0 && now - parsed.time < cacheExpiry;
+      let finalData = [];
 
-          if (isCacheValid) {
-            finalData = parsed.data;
-            dispatch(setProjects(finalData));
-          }
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        const isCacheValid =
+          parsed?.data?.length > 0 && now - parsed.time < cacheExpiry;
+
+        if (isCacheValid) {
+          finalData = parsed.data;
+          dispatch(setProjects(finalData));
         }
+      }
 
-        if (finalData.length === 0) {
-          const freshData = await fetchProjectData();
-          if (Array.isArray(freshData)) {
-            finalData = freshData;
-            dispatch(setProjects(finalData));
-            localStorage.setItem(
-              "projectData",
-              JSON.stringify({ data: freshData, time: now })
-            );
-          } else {
-            console.warn("Fetched project data is not an array:", freshData);
-          }
-        }
-
-        if (finalData.length > 0 && interiorData?.[0]) {
-          const filtered = finalData.filter(
-            (project) => project?.interiorArray?.[0] === interiorData[0]
+        const freshData = await fetchProjectData();
+        if (Array.isArray(freshData)) {
+          finalData = freshData;
+          dispatch(setProjects(finalData));
+          localStorage.setItem(
+            "projectData",
+            JSON.stringify({ data: freshData, time: now })
           );
-          setTotalProjects(filtered.length);
-          setInteriorProjects(filtered);
+        } else {
+          console.warn("Fetched project data is not an array:", freshData);
         }
-      } catch (error) {
-        console.error("Failed to fetch projects:", error);
-        const fallbackCache = localStorage.getItem("projectData");
-        if (fallbackCache) {
-          const parsed = JSON.parse(fallbackCache);
-          if (parsed?.data?.length > 0) {
-            dispatch(setProjects(parsed.data));
-            if (interiorData?.[0]) {
-              const filtered = parsed.data.filter(
-                (project) => project?.interiorArray?.[0] === interiorData[0]
-              );
-              setInteriorProjects(filtered);
-            }
+      
+
+      if (finalData.length > 0 && interiorData?.[0]) {
+        const filtered = finalData.filter(
+          (project) => project?.interiorArray?.[0] === interiorData[0]
+        );
+        setTotalProjects(filtered.length);
+        setInteriorProjects(filtered);
+      }
+    } catch (error) {
+      console.error("Failed to fetch projects:", error);
+      const fallbackCache = localStorage.getItem("projectData");
+      if (fallbackCache) {
+        const parsed = JSON.parse(fallbackCache);
+        if (parsed?.data?.length > 0) {
+          dispatch(setProjects(parsed.data));
+          if (interiorData?.[0]) {
+            const filtered = parsed.data.filter(
+              (project) => project?.interiorArray?.[0] === interiorData[0]
+            );
+            setInteriorProjects(filtered);
           }
         }
       }
-    };
+    }
+  };
 
-    fetchProjects();
-  }, [dispatch, interiorData, setInteriorProjects]);
+  // Initial fetch
+  fetchProjects();
+
+  // 👇 Listen to tab visibility changes (like coming back to this page)
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === "visible") {
+      timeoutId = setTimeout(fetchProjects, 100); // Delay to allow transition
+    }
+  };
+
+  document.addEventListener("visibilitychange", handleVisibilityChange);
+
+  return () => {
+    document.removeEventListener("visibilitychange", handleVisibilityChange);
+    clearTimeout(timeoutId);
+  };
+}, [dispatch, interiorData]);
+
 
   return (
     <div className="flex flex-col gap-4 w-full p-4 sm:p-6 md:p-8 lg:p-10 min-h-screen bg-gray-50">
