@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { FaTrash } from "react-icons/fa";
 import { Edit } from "lucide-react";
+import { MoreVertical } from "lucide-react"; 
 
 // 🔧 SAME CLEANING LOGIC as your ProtectedRoute
 const normalizePath = (path: string) => {
@@ -102,6 +103,8 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
     setAddPayment(true);
   };
 
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
   return (
     <div
       className={`${
@@ -132,13 +135,37 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
       <div className="flex flex-col w-full">
         <div className="flex flex-col sm:flex-row justify-between mt-2 gap-2">
           <p className="text-base sm:text-lg font-semibold">Received Payments</p>
+          <div className="flex items-center gap-5 flex-wrap">
           <button
             onClick={() => setAddPayment(true)}
             className="shadow-xl hover:bg-sky-700 bg-sky-600 text-white px-2 h-8 !rounded-lg text-xs sm:text-sm"
           >
             Add Payment
           </button>
+           <div className="relative">
+        <button
+          onClick={() => setDropdownOpen(!dropdownOpen)}
+          className="text-gray-600 hover:text-gray-900"
+        >
+          <MoreVertical className="w-5 h-5" />
+        </button>
+
+        {dropdownOpen && (
+          <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-200 rounded-md shadow-lg z-50 text-sm">
+            <button onClick={()=>{}} className="w-full px-4 py-2 text-left hover:bg-gray-100">
+              Mark As Defaulter
+            </button>
+            <button className="w-full px-4 py-2 text-left hover:bg-gray-100">
+              Remove As Defaulter
+            </button>
+           
+          </div>
+        )}
+      </div>
+      </div>
         </div>
+
+        
 
         <table className="w-full border border-gray-300 mt-2">
           <thead>
