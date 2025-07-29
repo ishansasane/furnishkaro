@@ -120,7 +120,7 @@ const OverviewPage = ({
   }, [projectData.projectName, paymentData]);
 
   return (
-    <div className="flex flex-col gap-6 p-4 sm:p-6 md:p-8 bg-gray-50 min-h-screen">
+    <div className="flex flex-col gap-6  bg-gray-50 min-h-screen">
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 bg-white p-4 !rounded-xl shadow-sm">
         <p className="text-xl sm:text-2xl md:text-3xl font-bold text-gray-800">Project: {projectData.projectName}</p>

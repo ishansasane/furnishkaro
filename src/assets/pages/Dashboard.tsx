@@ -688,7 +688,7 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <div className="p-6 md:mt-0 mt-20 bg-gray-100 min-h-screen">
+    <div className="pt-6 pb-6 md:p-6 md:mt-0 mt-20 bg-gray-100 min-h-screen">
       <div
         className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 ${
           flag ? "hidden" : ""

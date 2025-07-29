@@ -66,7 +66,7 @@ const MeasurementSection: React.FC<MeasurementSectionProps> = ({
     : "";
 
   return (
-    <div className="flex flex-col gap-6 p-6 bg-white !rounded-2xl shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-xl font-inter">
+    <div className="flex flex-col gap-6 md:p-6 p-2 bg-white !rounded-2xl shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-xl font-inter">
       <h2 className="text-2xl md:text-3xl font-poppins font-semibold text-gray-900 tracking-tight mb-4">
         Measurements
       </h2>
@@ -98,7 +98,7 @@ const MeasurementSection: React.FC<MeasurementSectionProps> = ({
         </div>
 
         {/* Right Column: Measurement Details */}
-        <div className="w-full lg:w-3/4 border border-gray-100 !rounded-lg p-4 bg-gray-50 shadow-sm transition-all duration-300 hover:shadow-md">
+        <div className="w-full lg:w-3/4 border border-gray-100 !rounded-lg md:p-4 p-1 bg-gray-50 shadow-sm transition-all duration-300 hover:shadow-md">
           <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 mb-4">
             <p className="text-sm font-poppins font-medium text-gray-700">Default Unit</p>
             <select

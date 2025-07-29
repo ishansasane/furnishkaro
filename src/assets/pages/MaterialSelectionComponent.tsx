@@ -356,7 +356,7 @@ const MaterialSelectionComponent = ({
 
 
   return (
-    <div className="flex flex-col gap-6 p-6 bg-white !rounded-2xl shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-xl font-inter">
+    <div className="flex flex-col gap-6 p-2 md:!p-6 bg-white !rounded-2xl shadow-lg border border-gray-100 transition-all duration-300 hover:shadow-xl font-inter">
       <h2 className="text-2xl md:text-3xl font-poppins font-semibold text-gray-900 tracking-tight mb-4">
         Material Selection
       </h2>
@@ -428,7 +428,7 @@ const MaterialSelectionComponent = ({
           {selections.map((selection, mainindex) => (
             <div
               key={mainindex}
-              className="mb-4 border border-gray-100 p-4 !rounded-lg shadow-sm bg-gray-50 transition-all duration-300 hover:shadow-md"
+              className="mb-4 border border-gray-100 md:p-4 !rounded-lg shadow-sm bg-gray-50 transition-all duration-300 hover:shadow-md"
             >
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-3">
                 <p className="text-base font-poppins font-medium text-gray-900">

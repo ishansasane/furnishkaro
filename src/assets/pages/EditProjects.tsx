@@ -2067,7 +2067,7 @@ const handleMRPChange = (
 
 
   return (
-    <div className="p-6">
+    <div className="md:p-6 ">
       <div className="flex flex-col">
         <div className="flex flex-row justify-between items-center">
           <p className=" font-semibold">Order Overview</p>
@@ -2506,107 +2506,107 @@ onChange={(e) => {
           </div>
         ))}
       </div>
-      <div className="border border-gray-100 p-6 sm:p-8 !rounded-2xl w-full flex flex-col mt-6 bg-white shadow-md transition-all duration-300 hover:shadow-lg">
-        <p className="text-base sm:text-lg font-bold text-gray-700 mb-4">Miscellaneous</p>
-        <div className="flex w-full flex-col">
-          <div className="flex flex-row justify-between items-center mb-4">
-            <button
-              className="flex flex-row gap-2 !rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-500 text-indigo-600 px-4 py-2 text-sm font-medium transition-all duration-200"
-              onClick={handleAddMiscItem}
+  <div className="border border-gray-100 p-4 sm:p-6 md:p-8 rounded-2xl w-full flex flex-col mt-4 bg-white shadow-md transition-all duration-300 hover:shadow-lg">
+  <p className="text-sm sm:text-base md:text-lg font-bold text-gray-700 mb-3 sm:mb-4">Miscellaneous</p>
+  <div className="flex w-full flex-col">
+    <div className="flex flex-row justify-between items-center mb-3 sm:mb-4">
+      <button
+        className="flex flex-row gap-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-500 text-indigo-600 px-3 py-2 text-xs sm:text-sm font-medium transition-all duration-200"
+        onClick={handleAddMiscItem}
+      >
+        <FaPlus className="text-indigo-600 w-4 h-4" />
+        Add Item
+      </button>
+    </div>
+    <div className="w-full overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+      <table className="w-full bg-white text-xs min-w-[800px]">
+        <thead>
+          <tr className="bg-gray-50 text-gray-600 text-xs sm:text-sm font-semibold border-b border-gray-200">
+            <th className="py-2 sm:py-3 px-2 sm:px-4 text-center">SR</th>
+            <th className="py-2 sm:py-3 px-2 sm:px-4">Item Name</th>
+            <th className="py-2 sm:py-3 px-2 sm:px-4 text-center">Quantity</th>
+            <th className="py-2 sm:py-3 px-2 sm:px-4 text-center">Rate</th>
+            <th className="py-2 sm:py-3 px-2 sm:px-4 text-center">Net Rate</th>
+            <th className="py-2 sm:py-3 px-2 sm:px-4 text-center">Tax (%)</th>
+            <th className="py-2 sm:py-3 px-2 sm:px-4 text-center">Tax Amount</th>
+            <th className="py-2 sm:py-3 px-2 sm:px-4 text-center">Total Amount</th>
+            <th className="py-2 sm:py-3 px-2 sm:px-4">Remark</th>
+            <th className="py-2 sm:py-3 px-2 sm:px-4 text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="w-full">
+          {additionalItems.map((item, i) => (
+            <tr
+              key={i}
+              className="border-b border-gray-100 hover:bg-gray-50 transition-colors duration-150"
             >
-              <FaPlus className="text-indigo-600" />
-              Add Item
-            </button>
-          </div>
-          <div className="w-full overflow-x-auto">
-            <table className="w-full bg-white text-xs sm:text-sm min-w-[600px] sm:min-w-full">
-              <thead className="hidden sm:table-header-group">
-                <tr className="bg-gray-50 text-gray-600 text-sm font-semibold border-b border-gray-200">
-                  <th className="py-3 px-4 text-center">SR</th>
-                  <th className="py-3 px-4">Item Name</th>
-                  <th className="py-3 px-4 text-center">Quantity</th>
-                  <th className="py-3 px-4 text-center">Rate</th>
-                  <th className="py-3 px-4 text-center">Net Rate</th>
-                  <th className="py-3 px-4 text-center">Tax (%)</th>
-                  <th className="py-3 px-4 text-center">Tax Amount</th>
-                  <th className="py-3 px-4 text-center">Total Amount</th>
-                  <th className="py-3 px-4">Remark</th>
-                  <th className="py-3 px-4 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="w-full">
-                {additionalItems.map((item, i) => (
-                  <tr
-                    key={i}
-                    className="flex flex-col sm:table-row w-full border-b border-gray-100 hover:bg-gray-50 transition-colors duration-150"
-                  >
-                    <td className="py-3 px-4 text-center text-xs sm:text-sm before:content-['SR:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
-                      {i + 1}
-                    </td>
-                    <td className="py-3 px-4 before:content-['Item_Name:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
-                      <input
-                        onChange={(e) => handleItemNameChange(i, e.target.value)}
-                        className="w-[100px] border border-gray-200 !rounded-lg px-3 py-2 text-xs sm:text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
-                        value={item.name || ""}
-                        type="text"
-                      />
-                    </td>
-                    <td className="py-3 px-4 text-center before:content-['Quantity:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
-                      <input
-                        onChange={(e) => handleItemQuantityChange(i, e.target.value)}
-                        className="w-full border border-gray-200 !rounded-lg px-3 py-2 text-xs sm:text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
-                        value={item.quantity || ""}
-                        type="number"
-                        min="0"
-                      />
-                    </td>
-                    <td className="py-3 px-4 text-center before:content-['Rate:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
-                      <input
-                        onChange={(e) => handleItemRateChange(i, e.target.value)}
-                        className="w-[130px] border border-gray-200 !rounded-lg px-3 py-2 text-xs sm:text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
-                        value={(Math.round(item.rate)).toLocaleString("en-IN") || ""}
-                        type="number"
-                        min="0"
-                      />
-                    </td>
-                    <td className="py-3 px-4 text-center text-xs sm:text-sm before:content-['Net_Rate:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
-                      {(Math.round(item.netRate)).toLocaleString("en-IN") || "0"}
-                    </td>
-                    <td className="py-3 px-4 text-center before:content-['Tax_(%):_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
-                      <input
-                        onChange={(e) => handleItemTaxChange(i, e.target.value)}
-                        className="w-[70px] border border-gray-200 !rounded-lg px-3 py-2 text-xs sm:text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
-                        value={item.tax || ""}
-                        type="number"
-                        min="0"
-                      />
-                    </td>
-                    <td className="py-3 px-4 text-center text-xs sm:text-sm before:content-['Tax_Amount:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
-                      {(Math.round(item.taxAmount)).toLocaleString("en-IN") || "0"}
-                    </td>
-                    <td className="py-3 px-4 text-center text-xs sm:text-sm before:content-['Total_Amount:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
-                      {(Math.round(item.totalAmount)).toLocaleString("en-IN") || "0"}
-                    </td>
-                    <td className="py-3 px-4 before:content-['Remark:_'] sm:before:content-none before:font-semibold before:pr-2 text-gray-700">
-                      <input
-                        onChange={(e) => handleItemRemarkChange(i, e.target.value)}
-                        className="w-[100px] border border-gray-200 !rounded-lg px-3 py-2 text-xs sm:text-sm bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
-                        value={item.remark || ""}
-                        type="text"
-                      />
-                    </td>
-                    <td className="py-3 px-4 text-center before:content-['Actions:_'] sm:before:content-none before:font-semibold before:pr-2">
-                      <button onClick={() => handleDeleteMiscItem(i)}>
-                        <FaTrash className="text-red-500 hover:text-red-600 w-4 h-4 transition-colors duration-200" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+              <td className="py-2 sm:py-3 px-2 sm:px-4 text-center text-xs sm:text-sm text-gray-700">
+                {i + 1}
+              </td>
+              <td className="py-2 sm:py-3 px-2 sm:px-4 text-gray-700">
+                <input
+                  onChange={(e) => handleItemNameChange(i, e.target.value)}
+                  className="w-full min-w-[120px] border border-gray-200 rounded-lg px-2 sm:px-3 py-2 text-xs bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
+                  value={item.name || ""}
+                  type="text"
+                />
+              </td>
+              <td className="py-2 sm:py-3 px-2 sm:px-4 text-center text-gray-700">
+                <input
+                  onChange={(e) => handleItemQuantityChange(i, e.target.value)}
+                  className="w-full min-w-[60px] border border-gray-200 rounded-lg px-2 sm:px-3 py-2 text-xs bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
+                  value={item.quantity || ""}
+                  type="number"
+                  min="0"
+                />
+              </td>
+              <td className="py-2 sm:py-3 px-2 sm:px-4 text-center text-gray-700">
+                <input
+                  onChange={(e) => handleItemRateChange(i, e.target.value)}
+                  className="w-full min-w-[80px] border border-gray-200 rounded-lg px-2 sm:px-3 py-2 text-xs bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
+                  value={(Math.round(item.rate)).toLocaleString("en-IN") || ""}
+                  type="number"
+                  min="0"
+                />
+              </td>
+              <td className="py-2 sm:py-3 px-2 sm:px-4 text-center text-xs sm:text-sm text-gray-700">
+                {(Math.round(item.netRate)).toLocaleString("en-IN") || "0"}
+              </td>
+              <td className="py-2 sm:py-3 px-2 sm:px-4 text-center text-gray-700">
+                <input
+                  onChange={(e) => handleItemTaxChange(i, e.target.value)}
+                  className="w-full min-w-[50px] border border-gray-200 rounded-lg px-2 sm:px-3 py-2 text-xs bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
+                  value={item.tax || ""}
+                  type="number"
+                  min="0"
+                />
+              </td>
+              <td className="py-2 sm:py-3 px-2 sm:px-4 text-center text-xs sm:text-sm text-gray-700">
+                {(Math.round(item.taxAmount)).toLocaleString("en-IN") || "0"}
+              </td>
+              <td className="py-2 sm:py-3 px-2 sm:px-4 text-center text-xs sm:text-sm text-gray-700">
+                {(Math.round(item.totalAmount)).toLocaleString("en-IN") || "0"}
+              </td>
+              <td className="py-2 sm:py-3 px-2 sm:px-4 text-gray-700">
+                <input
+                  onChange={(e) => handleItemRemarkChange(i, e.target.value)}
+                  className="w-full min-w-[120px] border border-gray-200 rounded-lg px-2 sm:px-3 py-2 text-xs bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent transition-all duration-200"
+                  value={item.remark || ""}
+                  type="text"
+                />
+              </td>
+              <td className="py-2 sm:py-3 px-2 sm:px-4 text-center">
+                <button onClick={() => handleDeleteMiscItem(i)}>
+                  <FaTrash className="text-red-500 hover:text-red-600 w-4 h-4 transition-colors duration-200" />
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
     </div>
     <div className="flex flex-col sm:flex-row gap-6 justify-between w-full">
       <div className="bg-white p-6 sm:p-8 !rounded-2xl shadow-lg border border-gray-100 w-full sm:w-1/2 transition-all duration-300 hover:shadow-xl">

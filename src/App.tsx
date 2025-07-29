@@ -113,7 +113,8 @@ function App() {
               <ProtectedRoute>
                 <div className="flex h-screen">
                   <Sidebar />
-                  <div className="flex-1 overflow-y-auto h-screen p-6 transition-all">
+                  <div className="flex-1 overflow-y-auto h-[100vh] sm:h-[100vh] md:h-auto lg:h-auto transition-all
+">
                     <Routes>
                       <Route path="/" element={<Dashboard />} />
                       <Route path="/projects" element={<Projects />} />
