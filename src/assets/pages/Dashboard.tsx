@@ -1092,12 +1092,12 @@ const Dashboard: React.FC = () => {
         }`}
       >
         <div className="flex justify-between items-center">
-          <h2
-            className="text-xl font-bold text-gray-800 mb-4"
+          <p
             style={{ fontFamily: "Poppins, sans-serif" }}
+                className="md:text-[1.7vw] font-semibold mb-4 text-gray-800"
           >
             Inquiries
-          </h2>
+          </p>
           <button
             style={{ borderRadius: "6px" }}
             className="mb-2 bg-sky-600 text-white hover:bg-sky-700 px-2 md:text-[1.7vw] py-1"

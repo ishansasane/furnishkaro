@@ -21,7 +21,7 @@ function Store() {
   };
 
   return (
-    <div className="p-4">
+    <div className="md:!p-4 pt-30">
       <h1 className="text-xl font-bold mb-4">Available Stores</h1>
       <table className="w-full border border-gray-300">
         <thead className="bg-gray-100">

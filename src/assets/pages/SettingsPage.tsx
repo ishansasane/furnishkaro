@@ -124,7 +124,7 @@ const SettingsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen pt-20 md:p-1 bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-8">Settings</h1>
         <div className="bg-white !rounded-lg shadow overflow-hidden">
@@ -554,7 +554,7 @@ const sendBankDetails = async () => {
 
 
   return (
-    <div>
+    <div className="">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-semibold text-gray-800">
           Bank Account Management

@@ -170,7 +170,7 @@ export default function ProductGroups() {
   };
 
   return (
-    <div className="md:p-6 h-full pt-20 bg-gray-50">
+    <div className="md:p-6 h-full pt-30 bg-gray-50">
       <div className="flex justify-between flex-wrap items-center mb-4">
         <h1 className="text-2xl font-bold">Product Groups</h1>
         <button

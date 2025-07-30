@@ -126,7 +126,7 @@ export default function Interiors() {
   );
 
   return (
-    <div className="md:p-6 pt-20 h-full bg-gray-50">
+    <div className="md:p-6 pt-30 h-full bg-gray-50">
       <div
         className={`flex flex-wrap justify-between items-center mb-4 ${
           interiorOpen ? "hidden" : ""
