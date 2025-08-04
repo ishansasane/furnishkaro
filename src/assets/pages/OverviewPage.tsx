@@ -143,23 +143,23 @@ const OverviewPage = ({
           <div className="flex flex-col gap-3 text-sm">
             <div className="flex justify-between items-center">
               <p className="text-gray-500 font-medium">Name</p>
-              <p className="max-w-[60%] text-gray-800 break-words">{projectData.customerLink[0]}</p>
+              <p className="max-w-[60%] text-gray-800 break-words">{projectData.customerLink ? projectData.customerLink[0] : "NA"}</p>
             </div>
             <div className="flex justify-between items-center">
               <p className="text-gray-500 font-medium">Phone</p>
-              <p className="max-w-[60%] text-gray-800 break-words">{projectData.customerLink[1]}</p>
+              <p className="max-w-[60%] text-gray-800 break-words">{projectData.customerLink ? projectData.customerLink[1] : "NA"}</p>
             </div>
             <div className="flex justify-between items-center">
               <p className="text-gray-500 font-medium">Alternate Phone</p>
-              <p className="max-w-[60%] text-gray-800 break-words">{projectData.customerLink[4]}</p>
+              <p className="max-w-[60%] text-gray-800 break-words">{projectData.customerLink ? projectData.customerLink[4] : "NA"}</p>
             </div>
             <div className="flex justify-between items-center">
               <p className="text-gray-500 font-medium">Email</p>
-              <p className="max-w-[60%] text-gray-800 break-words">{projectData.customerLink[2]}</p>
+              <p className="max-w-[60%] text-gray-800 break-words">{projectData.customerLink ? projectData.customerLink[2] : "NA"}</p>
             </div>
             <div className="flex justify-between items-center">
               <p className="text-gray-500 font-medium">Address</p>
-              <p className="max-w-[60%] text-gray-800 break-words">{projectData.customerLink[3]}</p>
+              <p className="max-w-[60%] text-gray-800 break-words">{projectData.customerLink ? projectData.customerLink[3] : "NA"}</p>
             </div>
             <div className="flex justify-between items-center">
               <p className="text-gray-500 font-medium">Additional Requests</p>
