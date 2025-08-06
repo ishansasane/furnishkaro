@@ -33,6 +33,21 @@ async function fetchCatalogues(): Promise<Catalogue[]> {
   }
 }
 
+export default function Catalogues() {
+  const [catalogues, setCatalogues] = useState<Catalogue[]>([]);
+  const [search, setSearch] = useState("");
+  const [isDialogOpen, setDialogOpen] = useState(false);
+  const [editingCatalogue, setEditingCatalogue] = useState<Catalogue | null>(
+    null
+  );
+  const [refresh, setRefresh] = useState(false);
+
+  const dispatch = useDispatch();
+  const catalogueData = useSelector(
+    (state: RootState) => state.data.catalogues
+  );
+
+
 // Delete a catalogue
 async function deleteCatalogue(
   catalogueName: string,
@@ -50,6 +65,12 @@ async function deleteCatalogue(
     );
 
     if (response.ok) {
+      const data = await fetchCatalogues();
+      dispatch(setCatalogs(data));
+      localStorage.setItem(
+        "catalogueData",
+         JSON.stringify({ data, time: Date.now() })
+      );
       alert("Catalogue deleted");
       setRefresh(true);
     } else {
@@ -61,20 +82,6 @@ async function deleteCatalogue(
     alert("Network or server error while deleting catalogue");
   }
 }
-
-export default function Catalogues() {
-  const [catalogues, setCatalogues] = useState<Catalogue[]>([]);
-  const [search, setSearch] = useState("");
-  const [isDialogOpen, setDialogOpen] = useState(false);
-  const [editingCatalogue, setEditingCatalogue] = useState<Catalogue | null>(
-    null
-  );
-  const [refresh, setRefresh] = useState(false);
-
-  const dispatch = useDispatch();
-  const catalogueData = useSelector(
-    (state: RootState) => state.data.catalogues
-  );
 
   useEffect(() => {
     const fetchAndSetData = async () => {
@@ -110,7 +117,7 @@ export default function Catalogues() {
 
     fetchAndSetData();
     setRefresh(false);
-  }, [dispatch, refresh]);
+  }, [dispatch]);
 
   const filteredCatalogues = catalogues.filter((catalogue) =>
     [catalogue[0], catalogue[1]]

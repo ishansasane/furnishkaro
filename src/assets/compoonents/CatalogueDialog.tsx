@@ -1,6 +1,29 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchWithLoading } from "../Redux/fetchWithLoading";
+import { useDispatch } from "react-redux";
+import { setCatalogs } from "../Redux/dataSlice";
+
+async function fetchCatalogues() {
+  try {
+    const response = await fetchWithLoading(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/getcatalogues",
+      {
+        credentials: "include",
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return Array.isArray(data.body) ? data.body : [];
+  } catch (error) {
+    console.error("Error fetching catalogues:", error);
+    return [];
+  }
+}
 
 interface CatalogueDialogProps {
   setDialogOpen: (open: boolean) => void;
@@ -26,6 +49,8 @@ const CatalogueDialog: React.FC<CatalogueDialogProps> = ({
   const [description, setDescription] = useState(
     editingCatalogue ? data[1] : ""
   );
+
+  const dispatch = useDispatch();
 
   const handleSubmit = async () => {
     // ✅ Duplicate check for Add mode
@@ -61,6 +86,12 @@ const CatalogueDialog: React.FC<CatalogueDialogProps> = ({
         editingCatalogue
           ? "Catalogue updated successfully"
           : "Catalogue added successfully"
+      );
+      const data = await fetchCatalogues();
+      dispatch(setCatalogs(data));
+      localStorage.setItem(
+        "catalogueData",
+         JSON.stringify({ data, time: Date.now() })
       );
       setRefresh(!refresh);
       setEditingCatalogue(null);

@@ -111,7 +111,7 @@ export default function Brands() {
 
     fetchAndSetBrands();
     setRefresh(false);
-  }, [dispatch, refresh]);
+  }, [dispatch]);
 
   const filteredBrands = brands.filter((brand) =>
     [brand[0], brand[1]]

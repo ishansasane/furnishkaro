@@ -48,18 +48,39 @@ const CustomerDetails: React.FC<CustomerDetailsProps> = ({
     }
   }
 
-  useEffect(() => {
-    async function fetchData() {
+useEffect(() => {
+  const fetchAndSetCustomers = async () => {
+    try {
+      const cached = localStorage.getItem("customerData");
+      const now = Date.now();
+      const cacheExpiry = 5 * 60 * 1000; // 5 minutes
+
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.data?.length > 0 && now - parsed.time < cacheExpiry) {
+          dispatch(setCustomerData(parsed.data));
+          setcustomers(parsed.data);
+          return;
+        }
+      }
+
       const data = await fetchCustomers();
-      dispatch(setCustomerData(data));
-      setcustomers(customerData);
+      if (Array.isArray(data)) {
+        dispatch(setCustomerData(data));
+        setcustomers(data);
+        localStorage.setItem(
+          "customerData",
+          JSON.stringify({ data, time: now })
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching customers:", error);
     }
-    if (customerData.length == 0) {
-      fetchData();
-    } else {
-      setcustomers(customerData);
-    }
-  }, [customerData, dispatch]);
+  };
+
+  fetchAndSetCustomers();
+}, [dispatch]);
+
 
   return (
     <div className="mb-6 bg-white p-4 rounded shadow">
