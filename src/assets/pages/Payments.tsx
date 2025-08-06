@@ -280,7 +280,7 @@ const Payments = () => {
   };
 
   return (
-    <div className="w-full p-4 sm:p-6 flex flex-col min-h-screen">
+    <div className="w-full md:p-6 px-4 pt-12 flex flex-col min-h-screen">
       <div className="flex mt-5 flex-wrap flex-row justify-between items-center mb-6">
         <h1 className="text-lg sm:text-2xl font-semibold">Payments</h1>
         <button

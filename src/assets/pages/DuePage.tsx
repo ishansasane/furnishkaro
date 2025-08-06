@@ -193,7 +193,7 @@ const DuePage = () => {
   }, [dispatch, added, reduxPaymentData, reduxProjects]);
 
   return (
-    <div className="flex mt-2 flex-col items-center w-full min-h-screen p-4 sm:p-6">
+    <div className="flex mt-2 flex-col items-center w-full min-h-screen md:p-4 pt-15">
       <div className="w-full max-w-7xl bg-white border rounded-xl p-4 sm:p-6">
         <div className="flex flex-wrap mt-2 flex-row justify-between items-center mb-4 sm:mb-6">
           <h1 className="text-lg sm:text-2xl font-semibold">Due Payments</h1>

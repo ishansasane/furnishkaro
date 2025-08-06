@@ -1,4 +1,7 @@
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap" />
+<link
+  rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap"
+/>;
 
 import { Target } from "lucide-react";
 import React, { useState, useEffect } from "react";
@@ -221,43 +224,61 @@ const ProjectDetails = ({
       <div className="flex flex-col sm:flex-row w-full gap-4">
         <div className="flex flex-col w-full sm:w-1/2">
           <label className="text-sm font-poppins font-medium text-gray-700 mb-1">
-            Project Name <span className="text-gray-500 text-xs"> <span className="text-red-500">*</span>{" "}(unique name)</span>
-  </label>
- <input
-  type="text"
-  className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-  value={projectName || ""}
-  onChange={(e) => setProjectName(e.target.value)}
-  placeholder="Project Name"
-  required
-/>
-
-</div>
-<div className="flex flex-col w-full sm:w-1/2">
-  <label className="text-sm font-poppins font-medium text-gray-700 mb-1">
-    Reference <span className="text-gray-500 text-xs">(optional)</span>
-  </label>
-  <input
-    type="text"
-    className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-    value={projectReference || ""}
-    onChange={(e) => setProjectReference(e.target.value)}
-    placeholder="Reference"
-  />
-</div>
-</div>
+            Project Name{" "}
+            <span className="text-gray-500 text-xs">
+              {" "}
+              <span className="text-red-500">*</span> (unique name)
+            </span>
+          </label>
+          <input
+            type="text"
+            className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+            value={projectName}
+            onChange={(e) => setProjectName(e.target.value)}
+            onBlur={() => {
+              if (!projectName.trim()) {
+                setProjectName("NA");
+              }
+            }}
+            placeholder="Project Name"
+          />
+        </div>
+        <div className="flex flex-col w-full sm:w-1/2">
+          <label className="text-sm font-poppins font-medium text-gray-700 mb-1">
+            Reference <span className="text-gray-500 text-xs">(optional)</span>
+          </label>
+          <input
+            type="text"
+            className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+            value={projectReference}
+            onChange={(e) => setProjectReference(e.target.value)}
+            onBlur={() => {
+              if (!projectReference.trim()) {
+                setProjectReference("NA");
+              }
+            }}
+            placeholder="Reference"
+          />
+        </div>
+      </div>
 
       {/* Address */}
       {selectedCustomer && (
         <div className="flex flex-col w-full gap-2">
           <div className="flex flex-col w-full">
-            <label className="text-sm font-poppins font-medium text-gray-700 mb-1">Address</label>
-            <input
-              type="text"
+            <label className="text-sm font-poppins font-medium text-gray-700 mb-1">
+              Address
+            </label>
+            <textarea
               className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-              value={projectAddress || ""}
+              value={projectAddress}
               onChange={(e) => setProjectAddress(e.target.value)}
-              placeholder="Address"
+              onBlur={() => {
+                if (!projectAddress.trim()) {
+                  setProjectAddress("NA");
+                }
+              }}
+              placeholder="Project Address"
             />
           </div>
         </div>
@@ -268,13 +289,19 @@ const ProjectDetails = ({
         <div className="flex flex-col w-full gap-2">
           <div className="flex flex-col w-full">
             <label className="text-sm font-poppins font-medium text-gray-700 mb-1">
-              Any Additional Requests <span className="text-gray-500 text-xs">(optional)</span>
+              Any Additional Requests{" "}
+              <span className="text-gray-500 text-xs">(optional)</span>
             </label>
             <textarea
-              placeholder="Additional Requests"
-              value={additionalRequests || ""}
+              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+              value={additionalRequests}
               onChange={(e) => setAdditionalRequests(e.target.value)}
-              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50 resize-y min-h-[100px]"
+              onBlur={() => {
+                if (!additionalRequests.trim()) {
+                  setAdditionalRequests("NA");
+                }
+              }}
+              placeholder="Additional Requests"
             />
           </div>
         </div>
@@ -284,7 +311,9 @@ const ProjectDetails = ({
       <div className="flex flex-col sm:flex-row w-full gap-4">
         <div className="flex flex-col w-full sm:w-1/2">
           <div className="flex flex-wrap flex-row gap-4 items-center mb-3">
-            <label className="text-sm font-poppins font-medium text-gray-700">Select Interior</label>
+            <label className="text-sm font-poppins font-medium text-gray-700">
+              Select Interior
+            </label>
             <button
               className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-indigo-700 transition-colors duration-200"
               onClick={() => setIsOpen(true)}
@@ -295,7 +324,11 @@ const ProjectDetails = ({
           </div>
           <Select
             options={interiorOptions}
-            value={interiorOptions.find(option => option.value === interiorArray) || null}
+            value={
+              interiorOptions.find(
+                (option) => option.value === interiorArray
+              ) || null
+            }
             onChange={handleInteriorChange}
             placeholder="Select Interior Name (optional)"
             className="w-full text-sm font-inter"
@@ -322,7 +355,11 @@ const ProjectDetails = ({
                 ...provided,
                 fontFamily: "'Inter', sans-serif",
                 fontSize: "0.875rem",
-                backgroundColor: state.isSelected ? "#6366f1" : state.isFocused ? "#f3f4f6" : "white",
+                backgroundColor: state.isSelected
+                  ? "#6366f1"
+                  : state.isFocused
+                  ? "#f3f4f6"
+                  : "white",
                 color: state.isSelected ? "white" : "#1f2937",
                 "&:hover": {
                   backgroundColor: "#f3f4f6",
@@ -343,7 +380,9 @@ const ProjectDetails = ({
 
         <div className="flex flex-col w-full sm:w-1/2">
           <div className="flex flex-wrap flex-row gap-4 items-center mb-3">
-            <label className="text-sm font-poppins font-medium text-gray-700">Select Sales Associate</label>
+            <label className="text-sm font-poppins font-medium text-gray-700">
+              Select Sales Associate
+            </label>
             <button
               onClick={() => setIsSalesOpen(true)}
               className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-indigo-700 transition-colors duration-200"
@@ -354,7 +393,11 @@ const ProjectDetails = ({
           </div>
           <Select
             options={salesAssociateOptions}
-            value={salesAssociateOptions.find(option => option.value === salesAssociateArray) || null}
+            value={
+              salesAssociateOptions.find(
+                (option) => option.value === salesAssociateArray
+              ) || null
+            }
             onChange={handleSalesAssociateChange}
             placeholder="Select Sales Associate (optional)"
             className="w-full text-sm font-inter"
@@ -381,7 +424,11 @@ const ProjectDetails = ({
                 ...provided,
                 fontFamily: "'Inter', sans-serif",
                 fontSize: "0.875rem",
-                backgroundColor: state.isSelected ? "#6366f1" : state.isFocused ? "#f3f4f6" : "white",
+                backgroundColor: state.isSelected
+                  ? "#6366f1"
+                  : state.isFocused
+                  ? "#f3f4f6"
+                  : "white",
                 color: state.isSelected ? "white" : "#1f2937",
                 "&:hover": {
                   backgroundColor: "#f3f4f6",
@@ -404,211 +451,232 @@ const ProjectDetails = ({
       {/* Select User */}
       <div className="flex flex-col sm:flex-row w-full gap-4">
         <div className="flex flex-col w-full sm:w-1/2">
-          <label className="text-sm font-poppins font-medium text-gray-700 mb-1">Select User</label>
+          <label className="text-sm font-poppins font-medium text-gray-700 mb-1">
+            Select User
+          </label>
           <input
             type="text"
             className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-            value={user || ""}
+            value={user}
             onChange={(e) => setUser(e.target.value)}
-            placeholder="User Name"
+            onBlur={() => {
+              if (!user.trim()) {
+                setUser("NA");
+              }
+            }}
+            placeholder="Customer Name"
           />
         </div>
         <div className="flex flex-col w-full sm:w-1/2">
-          <label className="text-sm font-poppins font-medium text-gray-700 mb-1">Project Deadline</label>
+          <label className="text-sm font-poppins font-medium text-gray-700 mb-1">
+            Project Deadline
+          </label>
           <input
             type="date"
             className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-            value={projectDate || ""}
+            value={projectDate}
             onChange={(e) => setProjectDate(e.target.value)}
+            onBlur={() => {
+              if (!projectDate.trim()) {
+                setProjectDate("NA");
+              }
+            }}
           />
         </div>
       </div>
 
       {/* Add Interior Dialog */}
       {isOpen && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/60">
-    <div className="bg-white p-8 !rounded-2xl shadow-2xl border border-gray-100 w-[90%] sm:w-[80%] md:w-[500px] transition-all duration-300">
-      <h2 className="text-2xl font-poppins font-bold text-gray-900 mb-6 tracking-tight">
-        Add Interior
-      </h2>
-      <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }}>
-        <div className="space-y-4">
-          
-          {/* Name (Required) */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              required
-              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-              placeholder="Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/60">
+          <div className="bg-white p-8 !rounded-2xl shadow-2xl border border-gray-100 w-[90%] sm:w-[80%] md:w-[500px] transition-all duration-300">
+            <h2 className="text-2xl font-poppins font-bold text-gray-900 mb-6 tracking-tight">
+              Add Interior
+            </h2>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSubmit();
+              }}
+            >
+              <div className="space-y-4">
+                {/* Name (Required) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    required
+                    className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+                    placeholder="Name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </div>
 
-          {/* Email (Optional) */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <input
-              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-          </div>
+                {/* Email (Optional) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <input
+                    className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+                    placeholder="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
+                </div>
 
-          {/* Phone Number (Required) */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Phone Number <span className="text-red-500">*</span>
-            </label>
-            <input
-              required
-              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-              placeholder="Phone Number"
-              value={phonenumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-            />
-          </div>
+                {/* Phone Number (Required) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    required
+                    className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+                    placeholder="Phone Number"
+                    value={phonenumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                  />
+                </div>
 
-          {/* Address (Required) */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Address <span className="text-red-500">*</span>
-            </label>
-            <input
-              required
-              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-              placeholder="Address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-            />
+                {/* Address (Required) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Address <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    required
+                    className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+                    placeholder="Address"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  type="button"
+                  className="px-5 py-2.5 bg-gray-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-gray-700 transition-colors duration-200"
+                  onClick={() => {
+                    setName("");
+                    setEmail("");
+                    setPhoneNumber("");
+                    setAddress("");
+                    setIsOpen(false);
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-indigo-700 transition-colors duration-200"
+                >
+                  Save
+                </button>
+              </div>
+            </form>
           </div>
         </div>
-
-        {/* Buttons */}
-        <div className="flex justify-end gap-3 mt-6">
-          <button
-            type="button"
-            className="px-5 py-2.5 bg-gray-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-gray-700 transition-colors duration-200"
-            onClick={() => {
-              setName("");
-              setEmail("");
-              setPhoneNumber("");
-              setAddress("");
-              setIsOpen(false);
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-indigo-700 transition-colors duration-200"
-          >
-            Save
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-)}
-
+      )}
 
       {/* Add Sales Associate Dialog */}
-     {isSalesOpen && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/60">
-    <div className="bg-white p-8 !rounded-2xl shadow-2xl border border-gray-100 w-[90%] sm:w-[80%] md:w-[500px] transition-all duration-300">
-      <h2 className="text-2xl font-poppins font-bold text-gray-900 mb-6 tracking-tight">
-        Add Sales Associate
-      </h2>
-      <form onSubmit={(e) => { e.preventDefault(); handleSalesSubmit(); }}>
-        <div className="space-y-4">
-          {/* Name */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              required
-              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-              placeholder="Name"
-              value={salesname}
-              onChange={(e) => salesSetName(e.target.value)}
-            />
-          </div>
+      {isSalesOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-md bg-black/60">
+          <div className="bg-white p-8 !rounded-2xl shadow-2xl border border-gray-100 w-[90%] sm:w-[80%] md:w-[500px] transition-all duration-300">
+            <h2 className="text-2xl font-poppins font-bold text-gray-900 mb-6 tracking-tight">
+              Add Sales Associate
+            </h2>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSalesSubmit();
+              }}
+            >
+              <div className="space-y-4">
+                {/* Name */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Name <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    required
+                    className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+                    placeholder="Name"
+                    value={salesname}
+                    onChange={(e) => salesSetName(e.target.value)}
+                  />
+                </div>
 
-          {/* Email (Optional) */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <input
-              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-              placeholder="Email"
-              value={salesemail}
-              onChange={(e) => salesSetEmail(e.target.value)}
-            />
-          </div>
+                {/* Email (Optional) */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <input
+                    className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+                    placeholder="Email"
+                    value={salesemail}
+                    onChange={(e) => salesSetEmail(e.target.value)}
+                  />
+                </div>
 
-          {/* Phone Number */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Phone Number <span className="text-red-500">*</span>
-            </label>
-            <input
-              required
-              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-              placeholder="Phone Number"
-              value={salesphonenumber}
-              onChange={(e) => salesSetPhoneNumber(e.target.value)}
-            />
-          </div>
+                {/* Phone Number */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Phone Number <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    required
+                    className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+                    placeholder="Phone Number"
+                    value={salesphonenumber}
+                    onChange={(e) => salesSetPhoneNumber(e.target.value)}
+                  />
+                </div>
 
-          {/* Address */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Address <span className="text-red-500">*</span>
-            </label>
-            <input
-              required
-              className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
-              placeholder="Address"
-              value={salesaddress}
-              onChange={(e) => salesSetAddress(e.target.value)}
-            />
+                {/* Address */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Address <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    required
+                    className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
+                    placeholder="Address"
+                    value={salesaddress}
+                    onChange={(e) => salesSetAddress(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 mt-6">
+                <button
+                  type="button"
+                  className="px-5 py-2.5 bg-gray-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-gray-700 transition-colors duration-200"
+                  onClick={() => {
+                    salesSetName("");
+                    salesSetEmail("");
+                    salesSetPhoneNumber("");
+                    salesSetAddress("");
+                    setIsSalesOpen(false);
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-indigo-700 transition-colors duration-200"
+                >
+                  Save
+                </button>
+              </div>
+            </form>
           </div>
         </div>
-
-        <div className="flex justify-end gap-3 mt-6">
-          <button
-            type="button"
-            className="px-5 py-2.5 bg-gray-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-gray-700 transition-colors duration-200"
-            onClick={() => {
-              salesSetName("");
-              salesSetEmail("");
-              salesSetPhoneNumber("");
-              salesSetAddress("");
-              setIsSalesOpen(false);
-            }}
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-indigo-700 transition-colors duration-200"
-          >
-            Save
-          </button>
-        </div>
-      </form>
-    </div>
-  </div>
-)}
-
+      )}
     </div>
   );
 };
@@ -625,7 +693,9 @@ class ProjectDetailsErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <div className="p-6 text-red-500 bg-white !rounded-2xl shadow-lg border border-gray-100 font-inter">
-          <h2 className="text-2xl font-poppins font-bold text-gray-900 mb-4">Something went wrong in Project Details.</h2>
+          <h2 className="text-2xl font-poppins font-bold text-gray-900 mb-4">
+            Something went wrong in Project Details.
+          </h2>
           <p className="text-sm mb-4">{this.state.error?.toString()}</p>
           <button
             className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-poppins font-medium !rounded-lg hover:bg-indigo-700 transition-colors duration-200"
@@ -646,4 +716,4 @@ const WrappedProjectDetails = (props) => (
   </ProjectDetailsErrorBoundary>
 );
 
-export default WrappedProjectDetails; 
+export default WrappedProjectDetails;
