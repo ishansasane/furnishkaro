@@ -594,17 +594,39 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const handleInquirySubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setInquiries([...inquiries, { ...inquiryForm, status: "New Inquiry" }]);
-    setInquiryFormOpen(false);
-    setInquiryForm({
-      project: "",
-      comments: "",
-      inquiryDate: "",
-      followUpDate: "",
+  const handleInquirySubmit = async () => {
+    const projectName = inquiryForm.project;
+    const customerName = inquiryForm.customer;
+    const comment = inquiryForm.comments;
+    const phonenumber = inquiryForm.phonenumber;
+    const inquiryDate = inquiryForm.inquiryDate;
+    const followUpDate = inquiryForm.followUpDate;
+
+    const response = await fetchWithLoading("https://sheeladecor.netlify.app/.netlify/functions/server/sendInquiry", {
+      method : "POST",
+      headers : {
+        "content-type" : "application/json"
+      },
+      body : JSON.stringify({ projectName, phonenumber, comment, inquiryDate, projectDate : followUpDate, customer : customerName, status : "New Inquiry" })
     });
-  };
+
+    if(response.status == 200){
+      const data = await fetchInquiryData();
+      dispatch(setInquiryData(data));
+      alert("Inquiry Added");
+      setInquiryDialogOpen(false);
+      setInquiryForm({
+        project: "",
+        comments: "",
+        inquiryDate: "",
+        followUpDate: "",
+        customer: "",
+        phonenumber: "",
+      })
+    }else{
+      alert("Error in Adding Inquiry");
+    }
+  }
 
   const handleDeleteInquiry = async (projectName) => {
     const response = await fetchWithLoading(
@@ -869,7 +891,7 @@ const Dashboard: React.FC = () => {
                 <h2 className="relative !text-sm font-bold mb-6 text-gray-800 after:absolute after:bottom-[-8px] after:left-0 after:w-12 after:h-1 after:bg-blue-500 after:!rounded-full">
                   Add Inquiry
                 </h2>
-                <form onSubmit={handleInquirySubmit} className="space-y-4" onKeyDown={handleKeyDown}>
+                <form onSubmit={(e) => e.preventDefault()} className="space-y-4" onKeyDown={handleKeyDown}>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
                       Project <span className="text-red-500">*</span>
@@ -994,6 +1016,7 @@ const Dashboard: React.FC = () => {
                       Cancel
                     </button>
                     <button
+                    onClick={handleInquirySubmit}
                       type="submit"
                       className="bg-sky-600 text-white px-4 py-2 !rounded-lg hover:bg-sky-700 transition-colors"
                     >

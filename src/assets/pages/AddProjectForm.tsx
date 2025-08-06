@@ -1599,6 +1599,7 @@ const finalGrandTotal =
             discountType,
             bankDetails: JSON.stringify(bank),
             termsConditions: JSON.stringify(terms),
+            defaulter : "FALSE"
           }),
         }
       );
