@@ -113,7 +113,7 @@ export default function Customers() {
     };
 
     fetchData();
-  }, [reset, dispatch, customerDashboard]);
+  }, [dispatch]);
 
   // Filter customers based on search term
   const filteredCustomers = customers.filter((customer) =>

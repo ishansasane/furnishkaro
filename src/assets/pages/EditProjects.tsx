@@ -2774,85 +2774,81 @@ onChange={(e) => {
                     </th>
                   </tr>
                 </thead>
-                <tbody>
-                  {goodsArray != undefined &&
-                    goodsArray.map((goods, index) => {
-                      const selection = selections[goods.mainindex];
-                      const collection =
-                        selection?.areacollection?.[goods.groupIndex];
-                      return (
-                        <tr
-                          key={index}
-                          className="flex flex-col sm:flex-row text-center border-b sm:border-b-0"
-                        >
-                          <td className="w-full sm:w-[10%] py-1 text-xs sm:text-sm before:content-['Sr.No.:_'] sm:before:content-none before:font-bold before:pr-2">
-                            {index + 1}
-                          </td>
-                          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Area:_'] sm:before:content-none before:font-bold before:pr-2">
-                            {selection?.area || ""}
-                          </td>
-                          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Product_Group:_'] sm:before:content-none before:font-bold before:pr-2">
-                            {goods?.item?.[0] || ""}
-                          </td>
-                          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Company:_'] sm:before:content-none before:font-bold before:pr-2">
-                            {collection.company[0] || ""}
-                          </td>
-                          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Catalogue:_'] sm:before:content-none before:font-bold before:pr-2">
-                            {collection?.catalogue || ""}
-                          </td>
-                          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Design_No:_'] sm:before:content-none before:font-bold before:pr-2">
-                            {collection?.designNo || ""}
-                          </td>
-                          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Date:_'] sm:before:content-none before:font-bold before:pr-2">
-                            <input
-                              type="date"
-                              className="border !rounded-lg w-full px-2 py-1 text-xs sm:text-sm text-center sm:min-w-[100px]"
-                              value={goods?.date || ""}
-                              onChange={(e) =>
-                                setGoodsDate(index, e.target.value)
-                              }
-                            />
-                          </td>
-                          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Status:_'] sm:before:content-none before:font-bold before:pr-2">
-                            <select
-                              className="border !rounded-lg w-full px-2 py-1 text-xs sm:text-sm sm:min-w-[100px]"
-                              value={goods?.status || ""}
-                              onChange={(e) =>
-                                setGoodsStatus(index, e.target.value)
-                              }
-                            >
-                              <option value="">Pending</option>
-                              {statusArray.map((data, i) => (
-                                <option key={i} value={data}>
-                                  {data}
-                                </option>
-                              ))}
-                            </select>
-                          </td>
-                          <td className="w-full sm:w-[10%] py-1 text-xs sm:text-sm before:content-['Order_ID:_'] sm:before:content-none before:font-bold before:pr-2">
-                            <input
-                              type="text"
-                              className="border !rounded-lg w-full px-2 py-1 text-xs sm:text-sm text-center sm:min-w-[80px]"
-                              value={goods?.orderID || ""}
-                              onChange={(e) =>
-                                setGoodsOrderID(index, e.target.value)
-                              }
-                            />
-                          </td>
-                          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Remark:_'] sm:before:content-none before:font-bold before:pr-2">
-                            <input
-                              type="text"
-                              className="border !rounded-lg w-full px-2 py-1 text-xs sm:text-sm sm:min-w-[100px]"
-                              value={goods?.remark || ""}
-                              onChange={(e) =>
-                                setGoodsRemark(index, e.target.value)
-                              }
-                            />
-                          </td>
-                        </tr>
-                      );
-                    })}
-                </tbody>
+<tbody>
+  {goodsArray !== undefined &&
+    goodsArray.map((goods, index) => {
+      const selection = selections[goods.mainindex];
+      const collection = selection?.areacollection?.[goods.groupIndex];
+
+      // ✅ Skip this row if collection is undefined
+      if (!collection) return null;
+
+      return (
+        <tr
+          key={index}
+          className="flex flex-col sm:flex-row text-center border-b sm:border-b-0"
+        >
+          <td className="w-full sm:w-[10%] py-1 text-xs sm:text-sm before:content-['Sr.No.:_'] sm:before:content-none before:font-bold before:pr-2">
+            {index + 1}
+          </td>
+          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Area:_'] sm:before:content-none before:font-bold before:pr-2">
+            {selection?.area || ""}
+          </td>
+          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Product_Group:_'] sm:before:content-none before:font-bold before:pr-2">
+            {goods?.item?.[0] || ""}
+          </td>
+          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Company:_'] sm:before:content-none before:font-bold before:pr-2">
+            {collection.company ? collection.company[0] : "NA"}
+          </td>
+          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Catalogue:_'] sm:before:content-none before:font-bold before:pr-2">
+            {collection?.catalogue || ""}
+          </td>
+          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Design_No:_'] sm:before:content-none before:font-bold before:pr-2">
+            {collection?.designNo || ""}
+          </td>
+          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Date:_'] sm:before:content-none before:font-bold before:pr-2">
+            <input
+              type="date"
+              className="border !rounded-lg w-full px-2 py-1 text-xs sm:text-sm text-center sm:min-w-[100px]"
+              value={goods?.date || ""}
+              onChange={(e) => setGoodsDate(index, e.target.value)}
+            />
+          </td>
+          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Status:_'] sm:before:content-none before:font-bold before:pr-2">
+            <select
+              className="border !rounded-lg w-full px-2 py-1 text-xs sm:text-sm sm:min-w-[100px]"
+              value={goods?.status || ""}
+              onChange={(e) => setGoodsStatus(index, e.target.value)}
+            >
+              <option value="">Pending</option>
+              {statusArray.map((data, i) => (
+                <option key={i} value={data}>
+                  {data}
+                </option>
+              ))}
+            </select>
+          </td>
+          <td className="w-full sm:w-[10%] py-1 text-xs sm:text-sm before:content-['Order_ID:_'] sm:before:content-none before:font-bold before:pr-2">
+            <input
+              type="text"
+              className="border !rounded-lg w-full px-2 py-1 text-xs sm:text-sm text-center sm:min-w-[80px]"
+              value={goods?.orderID || ""}
+              onChange={(e) => setGoodsOrderID(index, e.target.value)}
+            />
+          </td>
+          <td className="w-full sm:w-[15%] py-1 text-xs sm:text-sm before:content-['Remark:_'] sm:before:content-none before:font-bold before:pr-2">
+            <input
+              type="text"
+              className="border !rounded-lg w-full px-2 py-1 text-xs sm:text-sm sm:min-w-[100px]"
+              value={goods?.remark || ""}
+              onChange={(e) => setGoodsRemark(index, e.target.value)}
+            />
+          </td>
+        </tr>
+      );
+    })}
+</tbody>
+
               </table>
             </div>
             <div className="flex flex-row justify-between">
