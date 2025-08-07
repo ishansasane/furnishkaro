@@ -67,6 +67,12 @@ const SalesAssociateDialog: React.FC<SalesAssociateDialogProps> = ({
       ? "https://sheeladecor.netlify.app/.netlify/functions/server/updatesalesassociatedata"
       : "https://sheeladecor.netlify.app/.netlify/functions/server/sendsalesassociatedata";
 
+      if(!editingSalesAssociate){
+        setEmail(email ? email : "NA");
+        setAddress(address ? address : "NA");
+        setPhoneNumber(phonenumber ? phonenumber : "NA");
+      }
+
     try {
       const response = await fetchWithLoading(url, {
         method: "POST",

@@ -57,8 +57,9 @@ const OverviewPage = ({
     let tailorPendingCount = 0;
     let tailorOrderedCount = 0;
     let tailorReceivedCount = 0;
-
+    console.log(goodsArray);
     goodsArray.forEach(item => {
+
       switch (item.status) {
         case "Pending":
           pendingCount++;

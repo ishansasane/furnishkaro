@@ -34,13 +34,6 @@ const ProjectDetails = ({
   setSalesData,
   setInterior,
 }) => {
-  // Debugging logs for props
-  console.log("Props received:", {
-    salesdata,
-    interior,
-    salesAssociateArray,
-    interiorArray,
-  });
 
   useEffect(() => {
     const loadInitialData = async () => {

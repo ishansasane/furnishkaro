@@ -329,10 +329,28 @@ function AddProjectForm() {
     setSelections([...selections, { area: "", areacollection: [] }]);
   };
 
-  const handleRemoveArea = (index: number) => {
-    const updatedSelections = selections.filter((_, i) => i !== index);
-    setSelections(updatedSelections);
-  };
+const handleRemoveArea = (index: number) => {
+  // Remove area from selections
+  const updatedSelections = selections.filter((_, i) => i !== index);
+  setSelections(updatedSelections);
+
+  // Remove related goods and tailors
+  const updatedGoodsArray = goodsArray.filter(g => g.mainindex !== index);
+  const updatedTailorsArray = tailorsArray.filter(t => t.mainindex !== index);
+
+  // Decrement mainindex for all entries after the removed index
+  const normalizedGoods = updatedGoodsArray.map(g =>
+    g.mainindex > index ? { ...g, mainindex: g.mainindex - 1 } : g
+  );
+
+  const normalizedTailors = updatedTailorsArray.map(t =>
+    t.mainindex > index ? { ...t, mainindex: t.mainindex - 1 } : t
+  );
+
+  setGoodsArray(normalizedGoods);
+  setTailorsArray(normalizedTailors);
+};
+
 
   const handleAreaChange = (mainindex: number, newArea: string) => {
     const updatedSelections = [...selections];
@@ -436,6 +454,8 @@ const handleProductGroupChange = (
   }));
 
   setGoodsArray([...filteredGoods, ...newGoods]);
+
+  console.log("Goods Array :",goodsArray);
 
   // === Update tailorsArray
   const filteredTailors = tailorsArray.filter(
@@ -664,13 +684,26 @@ const handleProductGroupChange = (
     setTailorsArray((prev) => [...prev, ...newTailors]);
   };
 
-  const handleGroupDelete = (mainindex: number, index: number) => {
-    const updatedSelection = [...selections];
-    if (updatedSelection[mainindex].areacollection[index]) {
-      updatedSelection[mainindex].areacollection.splice(index, 1);
-    }
-    setSelections(updatedSelection);
-  };
+const handleGroupDelete = (mainindex: number, groupIndex: number) => {
+  // 1. Remove the group from selections
+  const updatedSelection = [...selections];
+  if (updatedSelection[mainindex].areacollection[groupIndex]) {
+    updatedSelection[mainindex].areacollection.splice(groupIndex, 1);
+  }
+  setSelections(updatedSelection);
+
+  // 2. Remove matching entries from goodsArray
+  const updatedGoods = goodsArray.filter(
+    (g) => !(g.mainindex === mainindex && g.groupIndex === groupIndex)
+  );
+  setGoodsArray(updatedGoods);
+
+  // 3. Remove matching entries from tailorsArray
+  const updatedTailors = tailorsArray.filter(
+    (t) => !(t.mainindex === mainindex && t.groupIndex === groupIndex)
+  );
+  setTailorsArray(updatedTailors);
+};
 
   const units = ["Inches (in)", "Centimeter (cm)", "Meters (m)", "Feet (ft)"];
   const getSubtotal = (

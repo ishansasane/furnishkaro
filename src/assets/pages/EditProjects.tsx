@@ -849,47 +849,53 @@ const handleProductGroupChange = (
   };
 
 
-  const handleGroupDelete = (mainindex: number, index: number) => {
-    const updatedSelection = [...selections];
-    if (updatedSelection[mainindex].areacollection[index]) {
-      updatedSelection[mainindex].areacollection.splice(index, 1);
-    }
-    setSelections(updatedSelection);
-  };
+const handleGroupDelete = (mainindex: number, groupIndex: number) => {
+  // 1. Remove the group from selections
+  const updatedSelection = [...selections];
+  if (updatedSelection[mainindex].areacollection[groupIndex]) {
+    updatedSelection[mainindex].areacollection.splice(groupIndex, 1);
+  }
+  setSelections(updatedSelection);
+
+  // 2. Remove matching entries from goodsArray
+  const updatedGoods = goodsArray.filter(
+    (g) => !(g.mainindex === mainindex && g.groupIndex === groupIndex)
+  );
+  setGoodsArray(updatedGoods);
+
+  // 3. Remove matching entries from tailorsArray
+  const updatedTailors = tailorsArray.filter(
+    (t) => !(t.mainindex === mainindex && t.groupIndex === groupIndex)
+  );
+  setTailorsArray(updatedTailors);
+};
 
   const handleAddArea = () => {
     setSelections([...selections, { area: "", areacollection: [] }]);
   };
 
-  const handleRemoveArea = (index: number) => {
-    const updatedSelections = [...selections];
-    const removedArea = updatedSelections[index];
+const handleRemoveArea = (index: number) => {
+  // Remove area from selections
+  const updatedSelections = selections.filter((_, i) => i !== index);
+  setSelections(updatedSelections);
 
-    // Count how many product groups (areacollection) are in the removed area
-    let productGroupCount = 0;
-    removedArea.areacollection.forEach((collection) => {
-      productGroupCount += collection.items.length;
-    });
+  // Remove related goods and tailors
+  const updatedGoodsArray = goodsArray.filter(g => g.mainindex !== index);
+  const updatedTailorsArray = tailorsArray.filter(t => t.mainindex !== index);
 
-    // Calculate the starting index in goodsArray and tailorsArray for this area
-    let startIndex = 0;
-    for (let i = 0; i < index; i++) {
-      selections[i].areacollection.forEach((collection) => {
-        startIndex += collection.items.length;
-      });
-    }
+  // Decrement mainindex for all entries after the removed index
+  const normalizedGoods = updatedGoodsArray.map(g =>
+    g.mainindex > index ? { ...g, mainindex: g.mainindex - 1 } : g
+  );
 
-    // Remove corresponding items from goodsArray and tailorsArray
-    const updatedGoodsArray = [...goodsArray];
-    const updatedTailorsArray = [...tailorsArray];
-    updatedGoodsArray.splice(startIndex, productGroupCount);
-    updatedTailorsArray.splice(startIndex, productGroupCount);
+  const normalizedTailors = updatedTailorsArray.map(t =>
+    t.mainindex > index ? { ...t, mainindex: t.mainindex - 1 } : t
+  );
 
-    // Update state
-    setGoodsArray(updatedGoodsArray);
-    setTailorsArray(updatedTailorsArray);
-    setSelections(updatedSelections.filter((_, i) => i !== index));
-  };
+  setGoodsArray(normalizedGoods);
+  setTailorsArray(normalizedTailors);
+};
+
 
   const handlewidthchange = (mainindex: number, index: number, width) => {
     const updatedSelection = [...selections];
@@ -2295,6 +2301,7 @@ const handleMRPChange = (
               handlewidthchange={handlewidthchange}
               handleheightchange={handleheightchange}
               handlequantitychange={handlequantitychange}
+              handleGroupDelete={handleGroupDelete}
             />
             <div className="flex flex-row justify-between">
               <button
@@ -2820,7 +2827,6 @@ onChange={(e) => {
               value={goods?.status || ""}
               onChange={(e) => setGoodsStatus(index, e.target.value)}
             >
-              <option value="">Pending</option>
               {statusArray.map((data, i) => (
                 <option key={i} value={data}>
                   {data}
