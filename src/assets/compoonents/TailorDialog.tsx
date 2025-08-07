@@ -29,7 +29,11 @@ const TailorDialog: React.FC<TailorDialogProps> = ({
       ? "https://sheeladecor.netlify.app/.netlify/functions/server/updatetailor"
       : "https://sheeladecor.netlify.app/.netlify/functions/server/addtailor";
     const method = "POST";
-
+    if(!editingTailor){
+      setPhoneNumber(phoneNumber ? phoneNumber : "NA");
+      setEmail(email ? email : "NA");
+      setAddress(address ? address : "NA");
+    }
     const response = await fetchWithLoading(url, {
       method,
       headers: { "Content-Type": "application/json" },
