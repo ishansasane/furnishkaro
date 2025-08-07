@@ -1524,104 +1524,103 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
     }
   };
 
-  const sendProjectData = async () => {
-    try {
-      let allProjects = projects;
+ const sendProjectData = async () => {
+  try {
+    let allProjects = projects;
 
-      if (!allProjects || allProjects.length === 0) {
-        allProjects = await fetchProjectData();
-        dispatch(setProjects(allProjects));
-      }
-
-      const isDuplicate = allProjects.some(
-        (project) =>
-          project.projectName?.toLowerCase().trim() ===
-          projectName?.toLowerCase().trim()
-      );
-
-      if (isDuplicate) {
-        alert(`Project "${projectName}" already exists.`);
-        return;
-      }
-
-      let date = new Date();
-      const day = date.getDay();
-      const month = date.getMonth();
-      const year = date.getFullYear();
-
-      const newdate = day + "/" + month + "/" + year;
-
-      const finalAmount =
-  typeof amount !== "undefined" && !isNaN(amount)
-    ? amount
-    : parseFloat(paymentData?.totalValue || "0");
-
-const finalPaid =
-  typeof paid !== "undefined" && !isNaN(paid)
-    ? paid
-    : parseFloat(paymentData?.paid || "0");
-
-const finalGrandTotal =
-  typeof grandTotal !== "undefined" && !isNaN(grandTotal)
-    ? grandTotal
-    : finalAmount;
-
-
-      const response = await fetchWithLoading(
-        "https://sheeladecor.netlify.app/.netlify/functions/server/sendprojectdata",
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "content-type": "application/json",
-          },
-          body: JSON.stringify({
-            projectName,
-            customerLink: JSON.stringify(selectedCustomer),
-            projectReference,
-            status,
-            totalAmount: finalAmount,
-            totalTax: tax,
-            paid,
-            discount,
-            createdBy: user,
-            allData: JSON.stringify(selections),
-            projectDate,
-            additionalRequests,
-            interiorArray: JSON.stringify(interiorArray),
-            salesAssociateArray: JSON.stringify(salesAssociateArray),
-            additionalItems: JSON.stringify(additionalItems),
-            goodsArray: JSON.stringify(goodsArray),
-            tailorsArray: JSON.stringify(tailorsArray),
-            projectAddress: JSON.stringify(projectAddress),
-            date: newdate,
-            grandTotal,
-            discountType,
-            bankDetails: JSON.stringify(bank),
-            termsConditions: JSON.stringify(terms),
-            defaulter : "FALSE"
-          }),
-        }
-      );
-
-      if (response.status === 200) {
-        alert("Project Added");
-        const updatedData = await fetchProjectData();
-        dispatch(setProjects(updatedData));
-        localStorage.setItem(
-          "projectData",
-          JSON.stringify({ data: updatedData, time: Date.now() })
-        );
-      } else {
-        const errorText = await response.text();
-        console.error("Error response:", errorText);
-        alert("Error: Failed to add project");
-      }
-    } catch (error) {
-      console.error("Fetch error:", error);
-      alert("Error: Network issue or server not responding");
+    if (!allProjects || allProjects.length === 0) {
+      allProjects = await fetchProjectData();
+      dispatch(setProjects(allProjects));
     }
-  };
+
+    const isDuplicate = allProjects.some(
+      (project) =>
+        project.projectName?.toLowerCase().trim() ===
+        projectName?.toLowerCase().trim()
+    );
+
+    if (isDuplicate) {
+      alert(`Project "${projectName}" already exists.`);
+      return;
+    }
+
+    let date = new Date();
+    const day = date.getDay();
+    const month = date.getMonth();
+    const year = date.getFullYear();
+
+    const newdate = day + "/" + month + "/" + year;
+
+    const finalAmount =
+      typeof amount !== "undefined" && !isNaN(amount)
+        ? amount
+        : parseFloat(paymentData?.totalValue || "0");
+
+    const finalPaid =
+      typeof paid !== "undefined" && !isNaN(paid)
+        ? paid
+        : parseFloat(paymentData?.paid || "0");
+
+    const finalGrandTotal =
+      typeof grandTotal !== "undefined" && !isNaN(grandTotal)
+        ? grandTotal
+        : finalAmount;
+
+    const response = await fetchWithLoading(
+      "https://sheeladecor.netlify.app/.netlify/functions/server/sendprojectdata",
+      {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "content-type": "application/json",
+        },
+        body: JSON.stringify({
+          projectName: projectName ? projectName : "NA",
+          customerLink: selectedCustomer ? JSON.stringify(selectedCustomer) : "NA",
+          projectReference: projectReference ? projectReference : "NA",
+          status: status ? status : "NA",
+          totalAmount: finalAmount,
+          totalTax: tax ? tax : "NA",
+          paid: finalPaid,
+          discount: discount ? discount : "NA",
+          createdBy: user ? user : "NA",
+          allData: selections ? JSON.stringify(selections) : "NA",
+          projectDate: projectDate ? projectDate : "NA",
+          additionalRequests: additionalRequests ? additionalRequests : "NA",
+          interiorArray: interiorArray ? JSON.stringify(interiorArray) : "NA",
+          salesAssociateArray: salesAssociateArray ? JSON.stringify(salesAssociateArray) : "NA",
+          additionalItems: additionalItems ? JSON.stringify(additionalItems) : "NA",
+          goodsArray: goodsArray ? JSON.stringify(goodsArray) : "NA",
+          tailorsArray: tailorsArray ? JSON.stringify(tailorsArray) : "NA",
+          projectAddress: projectAddress ? JSON.stringify(projectAddress) : "NA",
+          date: newdate,
+          grandTotal: finalGrandTotal,
+          discountType: discountType ? discountType : "NA",
+          bankDetails: bank ? JSON.stringify(bank) : "NA",
+          termsConditions: terms ? JSON.stringify(terms) : "NA",
+          defaulter: "FALSE"
+        }),
+      }
+    );
+
+    if (response.status === 200) {
+      alert("Project Added");
+      const updatedData = await fetchProjectData();
+      dispatch(setProjects(updatedData));
+      localStorage.setItem(
+        "projectData",
+        JSON.stringify({ data: updatedData, time: Date.now() })
+      );
+    } else {
+      const errorText = await response.text();
+      console.error("Error response:", errorText);
+      alert("Error: Failed to add project");
+    }
+  } catch (error) {
+    console.error("Fetch error:", error);
+    alert("Error: Network issue or server not responding");
+  }
+};
 
   useEffect(() => {
     const fetchAndDispatch = async (
