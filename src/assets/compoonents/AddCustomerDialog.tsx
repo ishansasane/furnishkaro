@@ -63,6 +63,7 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
       const now = new Date();
       date = now.toISOString().slice(0, 16);
     }
+    
 
     const api = editing
       ? "https://sheeladecor.netlify.app/.netlify/functions/server/updatecustomerdata"
@@ -76,10 +77,10 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
       credentials: "include",
       body: JSON.stringify({
         name,
-        phonenumber,
-        email,
-        address,
-        alternatenumber: alternateNumber,
+        phonenumber : (phonenumber ? phonenumber : "NA"),
+        email : (email ? email : "NA"),
+        address : (address ? address : "NA"),
+        alternatenumber: (alternateNumber ? alternateNumber : "NA"),
         addedDate: date,
       }),
     });
