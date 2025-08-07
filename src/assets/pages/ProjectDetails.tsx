@@ -235,11 +235,6 @@ const ProjectDetails = ({
             className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
             value={projectName}
             onChange={(e) => setProjectName(e.target.value)}
-            onBlur={() => {
-              if (!projectName.trim()) {
-                setProjectName("NA");
-              }
-            }}
             placeholder="Project Name"
           />
         </div>
@@ -252,11 +247,6 @@ const ProjectDetails = ({
             className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
             value={projectReference}
             onChange={(e) => setProjectReference(e.target.value)}
-            onBlur={() => {
-              if (!projectReference.trim()) {
-                setProjectReference("NA");
-              }
-            }}
             placeholder="Reference"
           />
         </div>
@@ -273,11 +263,6 @@ const ProjectDetails = ({
               className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
               value={projectAddress}
               onChange={(e) => setProjectAddress(e.target.value)}
-              onBlur={() => {
-                if (!projectAddress.trim()) {
-                  setProjectAddress("NA");
-                }
-              }}
               placeholder="Project Address"
             />
           </div>
@@ -296,11 +281,6 @@ const ProjectDetails = ({
               className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
               value={additionalRequests}
               onChange={(e) => setAdditionalRequests(e.target.value)}
-              onBlur={() => {
-                if (!additionalRequests.trim()) {
-                  setAdditionalRequests("NA");
-                }
-              }}
               placeholder="Additional Requests"
             />
           </div>
@@ -459,11 +439,6 @@ const ProjectDetails = ({
             className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
             value={user}
             onChange={(e) => setUser(e.target.value)}
-            onBlur={() => {
-              if (!user.trim()) {
-                setUser("NA");
-              }
-            }}
             placeholder="Customer Name"
           />
         </div>
@@ -476,11 +451,6 @@ const ProjectDetails = ({
             className="w-full border border-gray-200 !rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 font-inter bg-gray-50"
             value={projectDate}
             onChange={(e) => setProjectDate(e.target.value)}
-            onBlur={() => {
-              if (!projectDate.trim()) {
-                setProjectDate("NA");
-              }
-            }}
           />
         </div>
       </div>
