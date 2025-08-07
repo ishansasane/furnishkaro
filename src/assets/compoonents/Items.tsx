@@ -74,7 +74,12 @@ const Items = () => {
     setSellingUnit(item[3]);
     setMrp(item[4]);
     setTaxRate(item[5]);
-    setNeedsTailoring(item[7]);
+    if(item[7] == "TRUE"){
+      setNeedsTailoring(true);
+    }else{
+      setNeedsTailoring(false);
+    }
+    
   };
 
   // Close dropdown when clicking outside
