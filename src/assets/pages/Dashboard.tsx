@@ -216,7 +216,7 @@ const Dashboard: React.FC = () => {
     };
 
     fetchAndCacheInquiries();
-  }, [dispatch, refresh]);
+  }, [dispatch]);
 
   useEffect(() => {
     let isMounted = true;
@@ -275,7 +275,7 @@ const Dashboard: React.FC = () => {
     return () => {
       isMounted = false;
     };
-  }, [dispatch, refresh]);
+  }, [dispatch]);
 
   const fetchProjectData = async () => {
     try {
@@ -401,42 +401,77 @@ const Dashboard: React.FC = () => {
 
   const [received, setReceived] = useState(0);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const projectRes = await fetchProjectData();
-        const projects = Array.isArray(projectRes) ? projectRes : [];
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      let projectsToUse = [];
 
-        dispatch(setProjects(projects));
-
-        let totalTax = 0;
-        let totalAmount = 0;
-        let discount = 0;
-
-        projects.forEach((project) => {
-          if(project.defaulter == "FALSE"){
-            totalTax += parseFloat(project.totalTax) || 0;
-            totalAmount += parseFloat(project.totalAmount) || 0;
-            discount += parseFloat(project.discount) || 0;
-          }
-        });
-
-        setTotalPayment(totalAmount + totalTax);
-        setDiscount(discount);
-        const validProjectNames = new Set(
-          projects
-            .filter((project) => project.defaulter == "FALSE")
-            .map((project) => project.projectName)
-        );
-        const cached = localStorage.getItem("paymentData");
+      // Step 1: Check Redux
+      if (projects.length > 0) {
+        projectsToUse = projects;
+      } else {
+        // Step 2: Check localStorage
+        const cachedProjects = localStorage.getItem("projectData");
         const now = Date.now();
 
-        if (cached) {
-          const parsed = JSON.parse(cached);
+        if (cachedProjects) {
+          const parsed = JSON.parse(cachedProjects);
           const timeDiff = now - parsed.time;
 
-          if (timeDiff < 5 * 60 * 1000 && parsed.data?.length) {
-            dispatch(setPaymentData(parsed.data));
+          if (timeDiff < 5 * 60 * 1000 && Array.isArray(parsed.data)) {
+            dispatch(setProjects(parsed.data));
+            projectsToUse = parsed.data;
+          }
+        }
+
+        // Step 3: If still not found, fetch from backend
+        if (projectsToUse.length === 0) {
+          const projectRes = await fetchProjectData();
+          const fetchedProjects = Array.isArray(projectRes) ? projectRes : [];
+
+          dispatch(setProjects(fetchedProjects));
+          localStorage.setItem(
+            "projectData",
+            JSON.stringify({ data: fetchedProjects, time: now })
+          );
+
+          projectsToUse = fetchedProjects;
+        }
+      }
+
+      // Now, use projectsToUse
+      let totalTax = 0;
+      let totalAmount = 0;
+      let discount = 0;
+
+      projectsToUse.forEach((project) => {
+        if (project.defaulter === "FALSE") {
+          totalTax += parseFloat(project.totalTax) || 0;
+          totalAmount += parseFloat(project.totalAmount) || 0;
+          discount += parseFloat(project.discount) || 0;
+        }
+      });
+
+      setTotalPayment(totalAmount + totalTax);
+      setDiscount(discount);
+
+      // Build list of valid project names
+      const validProjectNames = new Set(
+        projectsToUse
+          .filter((project) => project.defaulter === "FALSE")
+          .map((project) => project.projectName)
+      );
+
+      // Step 4: Check paymentData from localStorage
+      const cachedPayments = localStorage.getItem("paymentData");
+      const now2 = Date.now();
+
+      if (cachedPayments) {
+        const parsed = JSON.parse(cachedPayments);
+        const timeDiff = now2 - parsed.time;
+
+        if (timeDiff < 5 * 60 * 1000 && parsed.data?.length) {
+          dispatch(setPaymentData(parsed.data));
 
           const totalReceived = parsed.data.reduce((acc, payment) => {
             const projectName = payment[1];
@@ -446,22 +481,22 @@ const Dashboard: React.FC = () => {
               : acc;
           }, 0);
 
-
-            setReceived(totalReceived);
-            return;
-          }
+          setReceived(totalReceived);
+          return;
         }
+      }
 
-        const paymentData = await fetchPaymentData();
-
-        if (paymentData) {
-          dispatch(setPaymentData(paymentData));
+      // Step 5: Fallback to fetching paymentData
+      if (!paymentData.length) {
+        const fetchedPayments = await fetchPaymentData();
+        if (fetchedPayments) {
+          dispatch(setPaymentData(fetchedPayments));
           localStorage.setItem(
             "paymentData",
-            JSON.stringify({ data: paymentData, time: now })
+            JSON.stringify({ data: fetchedPayments, time: now2 })
           );
 
-          const totalReceived = paymentData.reduce((acc, payment) => {
+          const totalReceived = fetchedPayments.reduce((acc, payment) => {
             const projectName = payment[1];
             const amount = parseFloat(payment[2]);
             return validProjectNames.has(projectName)
@@ -471,13 +506,15 @@ const Dashboard: React.FC = () => {
 
           setReceived(totalReceived);
         }
-      } catch (error) {
-        console.error("Error fetching data:", error);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
 
-    fetchData();
-  }, [dispatch]);
+  fetchData();
+}, [dispatch]);
+
 
   const [taskDialogOpen, setTaskDialog] = useState(false);
 
