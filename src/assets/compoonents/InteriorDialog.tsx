@@ -65,6 +65,11 @@ const InteriorDialog: React.FC<InteriorDialogProps> = ({
       : "https://sheeladecor.netlify.app/.netlify/functions/server/sendinteriordata";
 
     try {
+      if(!editingInterior){
+        setAddress(address ? address : "NA");
+        setPhoneNumber(phonenumber ? phonenumber : "NA");
+        setEmail(email ? email : "NA");
+      }
       const response = await fetchWithLoading(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

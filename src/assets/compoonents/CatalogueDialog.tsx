@@ -74,6 +74,10 @@ const CatalogueDialog: React.FC<CatalogueDialogProps> = ({
       ? "https://sheeladecor.netlify.app/.netlify/functions/server/updatecatalogue"
       : "https://sheeladecor.netlify.app/.netlify/functions/server/addcatalogue";
 
+      if(!editingCatalogue){
+        setDescription(description ? description : "NA");
+      }
+
     const response = await fetchWithLoading(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

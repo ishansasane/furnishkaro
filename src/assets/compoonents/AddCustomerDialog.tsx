@@ -56,7 +56,6 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
   const customerData = useSelector((state: RootState) => state.data.customers);
 
   async function sendcustomerData() {
-    const phonenumber = mobile;
     let date = undefined;
 
     if (!editing) {
@@ -69,6 +68,13 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
       ? "https://sheeladecor.netlify.app/.netlify/functions/server/updatecustomerdata"
       : "https://sheeladecor.netlify.app/.netlify/functions/server/sendcustomerdata";
 
+      if(!editing){
+        setMobile(mobile ? mobile : "NA");
+        setAddress(address ? address : "NA");
+        setAlternateNumber(alternateNumber ? alternateNumber : "NA");
+        setEmail(email ? email : "NA");
+      }
+      const phonenumber = mobile;
     const response = await fetchWithLoading(api, {
       method: "POST",
       headers: {
@@ -77,10 +83,10 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
       credentials: "include",
       body: JSON.stringify({
         name,
-        phonenumber : (phonenumber ? phonenumber : "NA"),
-        email : (email ? email : "NA"),
-        address : (address ? address : "NA"),
-        alternatenumber: (alternateNumber ? alternateNumber : "NA"),
+        phonenumber,
+        email,
+        address,
+        alternatenumber : alternateNumber,
         addedDate: date,
       }),
     });
