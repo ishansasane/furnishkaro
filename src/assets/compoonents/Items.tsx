@@ -61,6 +61,8 @@ const Items = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [fileError, setFileError] = useState<string | null>(null);
 
+  const [oldProductName, setOldProductName] = useState("");
+
   const toggleMenu = (index: number) => {
     setOpenMenu(openMenu === index ? -1 : index);
   };
@@ -69,6 +71,7 @@ const Items = () => {
     setIsFormOpen(true);
     setEditing(true);
     setProductName(item[0]);
+    setOldProductName(item[0]);
     setDescription(item[1]);
     setSelectedGroupType(item[2]);
     setSellingUnit(item[3]);
@@ -312,6 +315,7 @@ const Items = () => {
           },
           credentials: "include",
           body: JSON.stringify({
+            oldProductName,
             productName,
             description,
             groupTypes: selectedGroupType,
@@ -805,7 +809,9 @@ const Items = () => {
                   name="productName"
                   value={productName}
                   placeholder="Enter Product Name"
-                  onChange={(e) => setProductName(e.target.value)}
+                  onChange={(e) => {
+
+                    setProductName(e.target.value)}}
                   className="w-full p-2 border rounded-md"
                   required
                 />

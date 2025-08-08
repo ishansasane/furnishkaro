@@ -17,6 +17,7 @@ const ProductGroupDialog: React.FC<ProductGroupDialogProps> = ({
 }) => {
   const data = editingGroup;
   const [groupName, setGroupName] = useState(editingGroup ? data[0] : "");
+  const [oldName, setOldName] = useState(editingGroup ? data[0] : "");
   const [mainProducts, setMainProducts] = useState(editingGroup ? data[1] : "");
   const [addonProducts, setAddonProducts] = useState(
     editingGroup ? data[2] : ""
@@ -39,6 +40,7 @@ const ProductGroupDialog: React.FC<ProductGroupDialogProps> = ({
       headers: { "Content-Type": "application/json" },
       credentials: "include",
       body: JSON.stringify({
+        oldName,
         groupName,
         mainProducts,
         addonProducts,
@@ -68,9 +70,8 @@ const ProductGroupDialog: React.FC<ProductGroupDialogProps> = ({
           {editingGroup ? "Edit Product Group" : "Add Product Group"}
         </h2>
         <input
-          className={`${
-            editingGroup ? "hidden" : "none"
-          } border p-2 rounded w-full mb-2`}
+          className={`
+          border p-2 rounded w-full mb-2`}
           placeholder="Product Name"
           value={groupName}
           onChange={(e) => setGroupName(e.target.value)}

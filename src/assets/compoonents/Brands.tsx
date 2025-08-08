@@ -203,6 +203,7 @@ export default function Brands() {
           refresh={refresh}
           editingBrand={editingBrand}
           setEditingBrand={setEditingBrand}
+          setBrands={ setBrands }
           brandData={brands} // ✅ Pass brand list for duplicate checking
         />
       )}

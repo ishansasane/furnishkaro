@@ -45,83 +45,82 @@ const AddCustomerDialog: React.FC<AddCustomerDialogProps> = ({
 }) => {
   const navigate = useNavigate();
   const [name, setName] = useState(editing ? editing[0] : "");
-  const [mobile, setMobile] = useState(editing ? editing[1] : "");
-  const [address, setAddress] = useState(editing ? editing[3] : "");
+  const [mobile, setMobile] = useState(editing ? editing[1] : null);
+  const [address, setAddress] = useState(editing ? editing[3] : null);
   const [alternateNumber, setAlternateNumber] = useState(
-    editing ? editing[4] : ""
+    editing ? editing[4] : null
   );
-  const [email, setEmail] = useState(editing ? editing[2] : "");
+  const [email, setEmail] = useState(editing ? editing[2] : null);
 
   const dispatch = useDispatch();
   const customerData = useSelector((state: RootState) => state.data.customers);
 
-  async function sendcustomerData() {
-    let date = undefined;
+async function sendcustomerData() {
+  let date = undefined;
 
-    if (!editing) {
-      const now = new Date();
-      date = now.toISOString().slice(0, 16);
-    }
-    
-
-    const api = editing
-      ? "https://sheeladecor.netlify.app/.netlify/functions/server/updatecustomerdata"
-      : "https://sheeladecor.netlify.app/.netlify/functions/server/sendcustomerdata";
-
-      if(!editing){
-        setMobile(mobile ? mobile : "NA");
-        setAddress(address ? address : "NA");
-        setAlternateNumber(alternateNumber ? alternateNumber : "NA");
-        setEmail(email ? email : "NA");
-      }
-      const phonenumber = mobile;
-    const response = await fetchWithLoading(api, {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        name,
-        phonenumber,
-        email,
-        address,
-        alternatenumber : alternateNumber,
-        addedDate: date,
-      }),
-    });
-
-    if (response.status === 200) {
-      const data = await fetchCustomers();
-      dispatch(setCustomerData(data));
-      localStorage.setItem(
-        "customerData",
-        JSON.stringify({ data, time: Date.now() })
-      );
-
-      setName("");
-      setAddress("");
-      setMobile("");
-      setEmail("");
-      setAlternateNumber("");
-
-      alert(
-        editing
-          ? "Customer Updated Successfully"
-          : "Customer added successfully"
-      );
-    } else {
-      alert(
-        editing ? "Error in updating customer" : "Error in adding customer"
-      );
-    }
-
-    if (!editing) {
-      navigate("/customers");
-    }
-    setEditing(null);
-    setDialogOpen(false);
+  if (!editing) {
+    const now = new Date();
+    date = now.toISOString().slice(0, 16);
   }
+
+  const api = editing
+    ? "https://sheeladecor.netlify.app/.netlify/functions/server/updatecustomerdata"
+    : "https://sheeladecor.netlify.app/.netlify/functions/server/sendcustomerdata";
+
+  // Prepare safe values without relying on async setState
+  const phonenumber = mobile && mobile.trim() !== "" ? mobile : "NA";
+  const safeAddress = address && address.trim() !== "" ? address : "NA";
+  const safeAlternate = alternateNumber && alternateNumber.trim() !== "" ? alternateNumber : "NA";
+  const safeEmail = email && email.trim() !== "" ? email : "NA";
+
+  const response = await fetchWithLoading(api, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    credentials: "include",
+    body: JSON.stringify({
+      name,
+      phonenumber,
+      email: safeEmail,
+      address: safeAddress,
+      alternatenumber: safeAlternate,
+      addedDate: date,
+    }),
+  });
+
+  if (response.status === 200) {
+    const data = await fetchCustomers();
+    dispatch(setCustomerData(data));
+    localStorage.setItem(
+      "customerData",
+      JSON.stringify({ data, time: Date.now() })
+    );
+
+    setName("");
+    setAddress("");
+    setMobile("");
+    setEmail("");
+    setAlternateNumber("");
+
+    alert(
+      editing
+        ? "Customer Updated Successfully"
+        : "Customer added successfully"
+    );
+  } else {
+    alert(
+      editing ? "Error in updating customer" : "Error in adding customer"
+    );
+  }
+
+  if (!editing) {
+    navigate("/customers");
+  }
+  setEditing(null);
+  setDialogOpen(false);
+}
+
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-30 z-50">

@@ -48,6 +48,7 @@ export default function Customers() {
   const [openDropdown, setOpenDropdown] = useState<number | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const [customerDashboard, setCustomerDashboard] = useState(false);
 
   let count = 0;
 
@@ -68,16 +69,20 @@ export default function Customers() {
     );
 
     if (response.status === 200) {
+      setCustomerDashboard(false);
       const data = await fetchCustomers();
       dispatch(setCustomerData(data));
+      setCustomers(data);
+      localStorage.setItem(
+        "customerData",
+        JSON.stringify({ data, time: Date.now() })
+      );
       alert("Customer deleted");
       setreset(!reset);
     } else {
       alert("Error in customer deletion");
     }
   }
-
-  const [customerDashboard, setCustomerDashboard] = useState(false);
 
   const [customerDashboardData, setCustomerDashboardData] =
     useState<Customer>(null);
@@ -179,16 +184,13 @@ export default function Customers() {
                 <tr
                   key={index}
                   className="hover:bg-sky-50"
-                  onClick={() => {
-                    setCustomerDashboardData(customer);
-                    setCustomerDashboard(true);
-                  }}
+                  
                 >
-                  <td className="px-4 py-2">{customer[0]}</td>
-                  <td className="px-4 py-2">{customer[1]}</td>
-                  <td className="px-6 py-2">{customer[4]}</td>
-                  <td className="px-4 py-2">{customer[2]}</td>
-                  <td className="px-4 py-2">{customer[3]}</td>
+                  <td onClick={() => {setCustomerDashboardData(customer); setCustomerDashboard(true);}} className="px-4 py-2">{customer[0]}</td>
+                  <td onClick={() => {setCustomerDashboardData(customer); setCustomerDashboard(true);}} className="px-4 py-2">{customer[1]}</td>
+                  <td onClick={() => {setCustomerDashboardData(customer); setCustomerDashboard(true);}} className="px-6 py-2">{customer[4]}</td>
+                  <td onClick={() => {setCustomerDashboardData(customer); setCustomerDashboard(true);}} className="px-4 py-2">{customer[2]}</td>
+                  <td onClick={() => {setCustomerDashboardData(customer); setCustomerDashboard(true);}} className="px-4 py-2">{customer[3]}</td>
                   <td className="px-4 py-2 relative">
                     <button
                       className="p-2 hover:bg-gray-200 rounded-full"
@@ -196,6 +198,7 @@ export default function Customers() {
                         e.stopPropagation();
                         setOpenDropdown(openDropdown === index ? null : index);
                       }}
+                      
                     >
                       <MoreVertical size={18} />
                     </button>
@@ -210,13 +213,14 @@ export default function Customers() {
                           onClick={() => {
                             setEditing(customer);
                             setDialogOpen(true);
+                            setCustomerDashboard(false);
                           }}
                         >
                           <Edit size={16} /> edit
                         </button>
                         <button
                           className="w-full text-left px-3 py-2 hover:bg-red-100 text-red-600 flex items-center gap-2"
-                          onClick={() => deleteCustomer(customer[0])}
+                          onClick={() => {setCustomerDashboard(false); deleteCustomer(customer[0]);}}
                         >
                           <Trash2 size={16} /> delete
                         </button>

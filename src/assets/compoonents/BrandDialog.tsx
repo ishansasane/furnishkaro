@@ -28,18 +28,20 @@ async function fetchBrands() {
   }
 }
 
-const BrandDialog: React.FC<BrandDialogProps> = ({
+const BrandDialog = ({
   setDialogOpen,
   setRefresh,
   refresh,
   editingBrand,
   setEditingBrand,
   brandData,
+  setBrands
 }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const data = editingBrand;
+  const [oldName, setOldName] = useState(editingBrand ? data[0] : "");
   const [brandName, setBrandName] = useState(editingBrand ? data[0] : "");
   const [description, setDescription] = useState(editingBrand ? data[1] : "");
 
@@ -69,7 +71,7 @@ const BrandDialog: React.FC<BrandDialogProps> = ({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ brandName, description }),
+        body: JSON.stringify({ oldName, brandName, description }),
       });
 
       if (response.status === 200) {
@@ -80,6 +82,7 @@ const BrandDialog: React.FC<BrandDialogProps> = ({
 
         if (Array.isArray(updatedData)) {
           dispatch(setBrandData(updatedData));
+          setBrands(updatedData);
           localStorage.setItem("brandData", JSON.stringify({ data: updatedData, time: now }));
         }
 
