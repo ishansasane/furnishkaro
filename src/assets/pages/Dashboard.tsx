@@ -564,51 +564,6 @@ useEffect(() => {
   const [editing, setediting] = useState(null);
   const [newrefresh, setrefresh] = useState(false);
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const cached = localStorage.getItem("projectData");
-        const now = Date.now();
-        const cacheExpiry = 5 * 60 * 1000;
-
-        if (cached) {
-          const parsed = JSON.parse(cached);
-
-          const isCacheValid =
-            parsed?.data?.length > 0 && now - parsed.time < cacheExpiry;
-
-          if (isCacheValid) {
-            dispatch(setProjects(parsed.data));
-            return;
-          }
-        }
-
-        const freshData = await fetchProjectData();
-
-        if (Array.isArray(freshData)) {
-          dispatch(setProjects(freshData));
-          localStorage.setItem(
-            "projectData",
-            JSON.stringify({ data: freshData, time: now })
-          );
-        } else {
-          console.warn("Fetched project data is not an array:", freshData);
-        }
-      } catch (error) {
-        console.error("Failed to fetch projects:", error);
-
-        const fallbackCache = localStorage.getItem("projectData");
-        if (fallbackCache) {
-          const parsed = JSON.parse(fallbackCache);
-          if (parsed?.data?.length > 0) {
-            dispatch(setProjects(parsed.data));
-          }
-        }
-      }
-    };
-
-    fetchProjects();
-  }, [dispatch]);
 
   const openProject = (selectedTask) => {
     const name = selectedTask[5];

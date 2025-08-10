@@ -2677,7 +2677,7 @@ onChange={(e) => {
         </div>
         <div className="flex flex-row justify-between w-full text-xs sm:text-sm text-gray-600 mb-3">
           <p>Total Amount</p>
-          <p>{grandTotal.toLocaleString("en-IN")}</p>
+          <p>{(Math.round(Amount + Tax)).toLocaleString("en-IN")}</p>
         </div>
         <div className="border-t border-gray-200 my-3"></div>
         <div className="flex justify-between w-full text-xs sm:text-sm text-gray-600 mb-3">

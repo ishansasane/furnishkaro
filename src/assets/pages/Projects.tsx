@@ -170,54 +170,69 @@ export default function Projects() {
 
   const [deleted, setDeleted] = useState(false);
 
-  // --- Fetch Projects ---
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const cached = localStorage.getItem("projectData");
-        const now = Date.now();
-        const cacheExpiry = 5 * 60 * 1000; // 5 minutes
+useEffect(() => {
+  const fetchProjectsAndPayments = async () => {
+    try {
+      // ---- Step 1: Fetch Projects with Cache ----
+      let projects = [];
+      const cachedProjects = localStorage.getItem("projectData");
+      const now = Date.now();
+      const cacheExpiry = 5 * 60 * 1000; // 5 min
 
-        if (cached) {
-          const parsed = JSON.parse(cached);
+      if (cachedProjects) {
+        const parsed = JSON.parse(cachedProjects);
+        const isCacheValid =
+          parsed?.data?.length > 0 && now - parsed.time < cacheExpiry;
 
-          const isCacheValid = parsed?.data?.length > 0 && (now - parsed.time) < cacheExpiry;
-
-          if (isCacheValid) {
-            dispatch(setProjects(parsed.data));
-            setprojects(parsed.data);
-            return;
-          }
+        if (isCacheValid) {
+          projects = parsed.data;
+          dispatch(setProjects(projects));
+          setprojects(projects);
         }
+      }
 
-        // If no valid cache, fetch fresh data
+      // If no valid cached projects, fetch fresh
+      if (projects.length === 0) {
         const freshData = await fetchProjectData();
-
         if (Array.isArray(freshData)) {
+          projects = freshData;
           dispatch(setProjects(freshData));
           setprojects(freshData);
-          localStorage.setItem("projectData", JSON.stringify({ data: freshData, time: now }));
+          localStorage.setItem(
+            "projectData",
+            JSON.stringify({ data: freshData, time: now })
+          );
         } else {
           console.warn("Fetched project data is not an array:", freshData);
         }
-
-      } catch (error) {
-        console.error("Failed to fetch projects:", error);
-
-        // Optional fallback to stale cache if fetch fails
-        const fallbackCache = localStorage.getItem("projectData");
-        if (fallbackCache) {
-          const parsed = JSON.parse(fallbackCache);
-          if (parsed?.data?.length > 0) {
-            dispatch(setProjects(parsed.data));
-            setprojects(parsed.data);
-          }
-        }
       }
-    };
 
-    fetchProjects();
-  }, [dispatch, flag]);
+      // ---- Step 2: Fetch Payments (only if projects exist) ----
+      if (projects.length > 0) {
+        const paymentData = await fetchPaymentData();
+        dispatch(setPaymentData(paymentData));
+
+        const projectWisePayments = projects.map((project) => {
+          const total = paymentData
+            .filter((item) => item[1] === project.projectName)
+            .reduce((acc, curr) => {
+              const amount = parseFloat(curr[2]);
+              return acc + (isNaN(amount) ? 0 : amount);
+            }, 0);
+          return total;
+        });
+
+        setProjectPayments(projectWisePayments);
+        setAdded(true);
+      }
+    } catch (error) {
+      console.error("Error fetching projects and payments:", error);
+    }
+  };
+
+  fetchProjectsAndPayments();
+}, [dispatch, flag]);
+
 
   // --- Fetch Tasks ---
   useEffect(() => {
@@ -252,34 +267,6 @@ export default function Projects() {
     fetchTasks();
   }, [dispatch, deleted]);
 
-  // --- Fetch Payments after Projects are available ---
-  useEffect(() => {
-    const fetchPayments = async () => {
-      try {
-        const data = await fetchPaymentData();
-        dispatch(setPaymentData(data));
-
-        if (data && projectData?.length) {
-          const projectWisePayments = projectData.map((project) => {
-            const total = data
-              .filter((item) => item[1] === project.projectName)
-              .reduce((acc, curr) => {
-                const amount = parseFloat(curr[2]);
-                return acc + (isNaN(amount) ? 0 : amount);
-              }, 0);
-            return total;
-          });
-
-          setProjectPayments(projectWisePayments);
-        }
-
-        setAdded(true);
-      } catch (error) {
-        console.error('Failed to fetch payments:', error);
-      }
-    };
-    fetchPayments();
-  }, [dispatch, added, projectData]);
 
   // --- API fetching functions ---
   const fetchTaskData = async () => {
