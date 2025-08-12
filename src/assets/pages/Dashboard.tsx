@@ -165,7 +165,6 @@ const Dashboard: React.FC = () => {
         const sortedTasks = updatedTasks.sort(
           (a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime()
         );
-
         dispatch(setTasks(sortedTasks));
 
         localStorage.setItem(
@@ -188,17 +187,11 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     const fetchAndCacheInquiries = async () => {
-      const now = Date.now();
-      const cacheExpiry = 5 * 60 * 1000;
-      const cached = localStorage.getItem("inquiryData");
 
       try {
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          const timeDiff = now - parsed.time;
+        if (inquiries.length != 0) {
 
-          if (Array.isArray(parsed.data) && timeDiff < cacheExpiry) {
-            dispatch(setInquiryData(parsed.data));
+          if (Array.isArray(inquiries)) {
             return;
           }
         }
@@ -206,7 +199,6 @@ const Dashboard: React.FC = () => {
         const data = await fetchInquiryData();
         if (Array.isArray(data)) {
           dispatch(setInquiryData(data));
-          localStorage.setItem("inquiryData", JSON.stringify({ data, time: now }));
         } else {
           console.error("Invalid inquiry data format:", data);
         }
@@ -218,28 +210,18 @@ const Dashboard: React.FC = () => {
     fetchAndCacheInquiries();
   }, [dispatch]);
 
-  useEffect(() => {
-    let isMounted = true;
+  const [taskDialogOpen, setTaskDialog] = useState(false);
 
+  useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const cached = localStorage.getItem("taskData");
-        const now = Date.now();
 
-        if (cached && !refresh) {
-          const parsed = JSON.parse(cached);
-          const timeDiff = now - parsed.time;
-
-          if (timeDiff < 5 * 60 * 1000 && parsed.data?.length > 0) {
-            if (isMounted) {
-              const filtered = parsed.data.filter(
+        if (tasks.length != 0) {
+              const filtered = tasks.filter(
                 (task) => task[7] !== "Completed"
               );
-              dispatch(setTasks(parsed.data));
               setFilteredTasks(filtered);
-            }
             return;
-          }
         }
 
         const taskRes = await fetchWithLoading(
@@ -256,26 +238,16 @@ const Dashboard: React.FC = () => {
         const taskData = await taskRes.json();
         const tasksList = Array.isArray(taskData.body) ? taskData.body : [];
 
-        if (isMounted) {
           const filtered = tasksList.filter((task) => task[7] !== "Completed");
           dispatch(setTasks(tasksList));
           setFilteredTasks(filtered);
-          localStorage.setItem(
-            "taskData",
-            JSON.stringify({ data: tasksList, time: now })
-          );
-        }
       } catch (error) {
         console.error("Error fetching tasks:", error);
       }
     };
 
     fetchTasks();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [dispatch]);
+  }, [dispatch, taskDialogOpen, refresh]);
 
   const fetchProjectData = async () => {
     try {
@@ -404,109 +376,48 @@ const Dashboard: React.FC = () => {
 useEffect(() => {
   const fetchData = async () => {
     try {
-      let projectsToUse = [];
+      const fetchedProjects = await fetchProjectData(); 
+      dispatch(setProjects(fetchedProjects));
+      
 
-      // Step 1: Check Redux
-      if (projects.length > 0) {
-        projectsToUse = projects;
-      } else {
-        // Step 2: Check localStorage
-        const cachedProjects = localStorage.getItem("projectData");
-        const now = Date.now();
+      const projectsToUse = Array.isArray(fetchedProjects) ? fetchedProjects : [];
 
-        if (cachedProjects) {
-          const parsed = JSON.parse(cachedProjects);
-          const timeDiff = now - parsed.time;
-
-          if (timeDiff < 5 * 60 * 1000 && Array.isArray(parsed.data)) {
-            dispatch(setProjects(parsed.data));
-            projectsToUse = parsed.data;
-          }
-        }
-
-        // Step 3: If still not found, fetch from backend
-        if (projectsToUse.length === 0) {
-          const projectRes = await fetchProjectData();
-          const fetchedProjects = Array.isArray(projectRes) ? projectRes : [];
-
-          dispatch(setProjects(fetchedProjects));
-          localStorage.setItem(
-            "projectData",
-            JSON.stringify({ data: fetchedProjects, time: now })
-          );
-
-          projectsToUse = fetchedProjects;
-        }
-      }
-
-      // Now, use projectsToUse
-      let totalTax = 0;
+      // Step 2: Calculate totals (only for non-defaulters)
       let totalAmount = 0;
       let discount = 0;
-
       projectsToUse.forEach((project) => {
         if (project.defaulter === "FALSE") {
-          totalTax += parseFloat(project.totalTax) || 0;
-          totalAmount += parseFloat(project.totalAmount) || 0;
-          discount += parseFloat(project.discount) || 0;
+          totalAmount += parseFloat(project.grandTotal) || 0;
         }
       });
 
-      setTotalPayment(totalAmount + totalTax);
+      setTotalPayment(totalAmount);
       setDiscount(discount);
 
-      // Build list of valid project names
+      // Step 3: Build valid project names
       const validProjectNames = new Set(
         projectsToUse
           .filter((project) => project.defaulter === "FALSE")
           .map((project) => project.projectName)
       );
 
-      // Step 4: Check paymentData from localStorage
-      const cachedPayments = localStorage.getItem("paymentData");
-      const now2 = Date.now();
+      // Step 4: Fetch payments
+      const fetchedPayments = await fetchPaymentData();
+      const paymentDataToUse = Array.isArray(fetchedPayments) ? fetchedPayments : [];
 
-      if (cachedPayments) {
-        const parsed = JSON.parse(cachedPayments);
-        const timeDiff = now2 - parsed.time;
+      // Step 5: Calculate total received
+      const totalReceived = paymentDataToUse.reduce((acc, payment) => {
+        const projectName = payment?.[1];
+        const amount = parseFloat(payment?.[2]);
+        return validProjectNames.has(projectName)
+          ? acc + (isNaN(amount) ? 0 : amount)
+          : acc;
+      }, 0);
 
-        if (timeDiff < 5 * 60 * 1000 && parsed.data?.length) {
-          dispatch(setPaymentData(parsed.data));
+      setReceived(totalReceived);
 
-          const totalReceived = parsed.data.reduce((acc, payment) => {
-            const projectName = payment[1];
-            const amount = parseFloat(payment[2]);
-            return validProjectNames.has(projectName)
-              ? acc + (isNaN(amount) ? 0 : amount)
-              : acc;
-          }, 0);
-
-          setReceived(totalReceived);
-          return;
-        }
-      }
-
-      // Step 5: Fallback to fetching paymentData
-      if (!paymentData.length) {
-        const fetchedPayments = await fetchPaymentData();
-        if (fetchedPayments) {
-          dispatch(setPaymentData(fetchedPayments));
-          localStorage.setItem(
-            "paymentData",
-            JSON.stringify({ data: fetchedPayments, time: now2 })
-          );
-
-          const totalReceived = fetchedPayments.reduce((acc, payment) => {
-            const projectName = payment[1];
-            const amount = parseFloat(payment[2]);
-            return validProjectNames.has(projectName)
-              ? acc + (isNaN(amount) ? 0 : amount)
-              : acc;
-          }, 0);
-
-          setReceived(totalReceived);
-        }
-      }
+      console.log("Received : "+totalReceived);
+      console.log("Total Amount : " + totalAmount);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -515,8 +426,6 @@ useEffect(() => {
   fetchData();
 }, [dispatch]);
 
-
-  const [taskDialogOpen, setTaskDialog] = useState(false);
 
   const handleMarkAsCompleted = async (status, name) => {
     try {
@@ -718,7 +627,7 @@ useEffect(() => {
         </div>
         <Card
           title="Total Value"
-          value={Math.round(totalPayment - Discount)}
+          value={Math.round(totalPayment)}
           color="bg-purple-500"
           isCurrency
         />
@@ -733,7 +642,7 @@ useEffect(() => {
         <div className="flex" onClick={() => navigate("/duePage")}>
           <Card
             title="Payment Due"
-            value={Math.round(totalPayment - received - Discount)}
+            value={Math.round(totalPayment - received)}
             color="bg-red-500"
             isCurrency
           />

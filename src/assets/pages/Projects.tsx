@@ -10,6 +10,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import ConfirmBox from "./ConfirmBox";
 import BankDetails from "./BankDetails";
+import { fetchWithLoading } from "../Redux/fetchWithLoading";
 
 // Utility function to format numbers
 const formatNumber = (num) => {
@@ -82,7 +83,7 @@ export default function Projects() {
   const [grandTotal, setGrandTotal] = useState(0);
 
   const fetchProjectData = async () => {
-    const response = await fetch(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/getprojectdata",
       {
         credentials: "include",
@@ -163,7 +164,7 @@ export default function Projects() {
   const [added, setAdded] = useState(false);
 
   const fetchPaymentData = async () => {
-    const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/getPayments");
+    const response = await fetchWithLoading("https://sheeladecor.netlify.app/.netlify/functions/server/getPayments");
     const data = await response.json();
     return data.message;
   };
@@ -173,47 +174,42 @@ export default function Projects() {
 useEffect(() => {
   const fetchProjectsAndPayments = async () => {
     try {
-      // ---- Step 1: Fetch Projects with Cache ----
-      let projects = [];
-      const cachedProjects = localStorage.getItem("projectData");
-      const now = Date.now();
-      const cacheExpiry = 5 * 60 * 1000; // 5 min
+      let projectsToUse = projects;
 
-      if (cachedProjects) {
-        const parsed = JSON.parse(cachedProjects);
-        const isCacheValid =
-          parsed?.data?.length > 0 && now - parsed.time < cacheExpiry;
-
-        if (isCacheValid) {
-          projects = parsed.data;
-          dispatch(setProjects(projects));
-          setprojects(projects);
-        }
-      }
-
-      // If no valid cached projects, fetch fresh
-      if (projects.length === 0) {
-        const freshData = await fetchProjectData();
-        if (Array.isArray(freshData)) {
-          projects = freshData;
-          dispatch(setProjects(freshData));
-          setprojects(freshData);
-          localStorage.setItem(
-            "projectData",
-            JSON.stringify({ data: freshData, time: now })
-          );
+      // --- Step 1: Fetch projects if Redux is empty ---
+      if (!projectsToUse || projectsToUse.length === 0) {
+        const freshProjects = await fetchProjectData();
+        if (Array.isArray(freshProjects)) {
+          projectsToUse = freshProjects;
+          dispatch(setProjects(freshProjects));
         } else {
-          console.warn("Fetched project data is not an array:", freshData);
+          projectsToUse = [];
         }
       }
 
-      // ---- Step 2: Fetch Payments (only if projects exist) ----
-      if (projects.length > 0) {
-        const paymentData = await fetchPaymentData();
-        dispatch(setPaymentData(paymentData));
+      // --- Step 2: Build valid project names ---
+      const validProjectNames = new Set(
+        projectsToUse.map((project) => project.projectName)
+      );
 
-        const projectWisePayments = projects.map((project) => {
-          const total = paymentData
+      // --- Step 3: Prepare payment data ---
+      let paymentDataToUse = paymentData;
+
+      // --- Step 4: Fetch payments if Redux is empty ---
+      if (!paymentDataToUse || paymentDataToUse.length === 0) {
+        const freshPayments = await fetchPaymentData();
+        if (Array.isArray(freshPayments)) {
+          paymentDataToUse = freshPayments;
+          dispatch(setPaymentData(freshPayments));
+        } else {
+          paymentDataToUse = [];
+        }
+      }
+
+      // --- Step 5: Calculate project-wise payments ---
+      if (projectsToUse.length > 0 && paymentDataToUse.length > 0) {
+        const projectWisePayments = projectsToUse.map((project) => {
+          const total = paymentDataToUse
             .filter((item) => item[1] === project.projectName)
             .reduce((acc, curr) => {
               const amount = parseFloat(curr[2]);
@@ -231,7 +227,9 @@ useEffect(() => {
   };
 
   fetchProjectsAndPayments();
-}, [dispatch, flag]);
+}, [dispatch, projects, paymentData, flag]);
+
+
 
 
   // --- Fetch Tasks ---
@@ -304,7 +302,7 @@ useEffect(() => {
 
   const deleteProject = async (name) => {
     try {
-      const response = await fetch("https://sheeladecor.netlify.app/.netlify/functions/server/deleteprojectdata", {
+      const response = await fetchWithLoading("https://sheeladecor.netlify.app/.netlify/functions/server/deleteprojectdata", {
         method: "POST",
         headers: {
           "content-type": "application/json",
