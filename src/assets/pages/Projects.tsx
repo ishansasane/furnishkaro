@@ -156,6 +156,7 @@ export default function Projects() {
       discountType: row[20],
       bankDetails: deepClone(parseSafely(row[21], [])),
       termsConditions: deepClone(parseSafely(row[22], [])),
+      defaulter : deepClone(row[23])
     }));
 
     return projects;
@@ -174,10 +175,9 @@ export default function Projects() {
 useEffect(() => {
   const fetchProjectsAndPayments = async () => {
     try {
-      let projectsToUse = projects;
-
+      let projectsToUse = [];
       // --- Step 1: Fetch projects if Redux is empty ---
-      if (!projectsToUse || projectsToUse.length === 0) {
+      if (projectData.length == 0) {
         const freshProjects = await fetchProjectData();
         if (Array.isArray(freshProjects)) {
           projectsToUse = freshProjects;
@@ -185,6 +185,8 @@ useEffect(() => {
         } else {
           projectsToUse = [];
         }
+      }else{
+        projectsToUse = projectData;
       }
 
       // --- Step 2: Build valid project names ---
@@ -324,31 +326,11 @@ useEffect(() => {
       }
 
       if (response.status === 200) {
-        alert("Project Deleted");
-
-        // 1. Get current cache
-        const cached = localStorage.getItem("projectData");
-        let currentProjects = [];
-
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (Array.isArray(parsed.data)) {
-            currentProjects = parsed.data;
-          }
-        }
-
-        // 2. Remove deleted project from cache
-        const updatedProjects = currentProjects.filter(p => p.projectName !== name);
-
-        // 3. Update Redux and state
+        const updatedProjects = await fetchProjectData();
         dispatch(setProjects(updatedProjects));
         setprojects(updatedProjects);
 
-        // 4. Update localStorage
-        localStorage.setItem("projectData", JSON.stringify({
-          data: updatedProjects,
-          time: Date.now()
-        }));
+        alert("Project Deleted")
       } else {
         alert("Error");
       }

@@ -376,16 +376,23 @@ const Dashboard: React.FC = () => {
 useEffect(() => {
   const fetchData = async () => {
     try {
-      const fetchedProjects = await fetchProjectData(); 
-      dispatch(setProjects(fetchedProjects));
-      
 
-      const projectsToUse = Array.isArray(fetchedProjects) ? fetchedProjects : [];
+      let fetchedProjects = [];
+
+      if(projectsData.length == 0){
+        fetchedProjects = await fetchProjectData(); 
+        dispatch(setProjects(fetchedProjects));
+      }else{
+        fetchedProjects = projectsData;
+      }
+
+      console.log(fetchedProjects);
+    
 
       // Step 2: Calculate totals (only for non-defaulters)
       let totalAmount = 0;
       let discount = 0;
-      projectsToUse.forEach((project) => {
+      fetchedProjects.forEach((project) => {
         if (project.defaulter === "FALSE") {
           totalAmount += parseFloat(project.grandTotal) || 0;
         }
@@ -396,13 +403,17 @@ useEffect(() => {
 
       // Step 3: Build valid project names
       const validProjectNames = new Set(
-        projectsToUse
+        fetchedProjects
           .filter((project) => project.defaulter === "FALSE")
           .map((project) => project.projectName)
       );
-
+      let fetchedPayments = [];
       // Step 4: Fetch payments
-      const fetchedPayments = await fetchPaymentData();
+      if(paymentData.length == 0){
+        fetchedPayments = await fetchPaymentData();
+      }else{
+        fetchedPayments = paymentData;
+      }
       const paymentDataToUse = Array.isArray(fetchedPayments) ? fetchedPayments : [];
 
       // Step 5: Calculate total received

@@ -1394,6 +1394,7 @@ const fetchProjectData = async () => {
       discountType: row[20] || "cash",
       bankDetails: deepClone(parseSafely(row[21], [])),
       termsConditions: deepClone(parseSafely(row[22], [])),
+      defaulter : deepClone(row[23])
     }));
 
     return projects;
