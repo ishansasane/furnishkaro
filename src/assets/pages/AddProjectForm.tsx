@@ -157,21 +157,6 @@ function AddProjectForm() {
     return data.body;
   };
 
-  useEffect(() => {
-    const loadCustomers = async () => {
-      const response = await fetch(
-        "https://sheeladecor.netlify.app/.netlify/functions/server/getcustomerdata",
-        { credentials: "include" }
-      );
-      const data = await response.json();
-      const parsed = Array.isArray(data.body) ? data.body : [];
-      setCustomers(parsed);
-    };
-
-    loadCustomers();
-  }, []); // fetch only once on mount
-
-
   const fetchCustomers = async () => {
     try {
       const response = await fetchWithLoading(
@@ -282,21 +267,12 @@ function AddProjectForm() {
   };
   useEffect(() => {
     const fetchAndCacheBankData = async () => {
-      const now = Date.now();
-      const cached = localStorage.getItem("bankData");
-
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        const timeDiff = now - parsed.time;
-        if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
-          dispatch(setBankData(parsed.data));
-          return;
-        }
+      if (bankData.length > 0) {
+        return;
+      }else{
+        const data = await fetchBankData();
+        dispatch(setBankData(data));
       }
-
-      const data = await fetchBankData();
-      dispatch(setBankData(data));
-      localStorage.setItem("bankData", JSON.stringify({ data, time: now }));
     };
 
     fetchAndCacheBankData();
@@ -304,22 +280,13 @@ function AddProjectForm() {
 
   useEffect(() => {
     const fetchAndCacheTermData = async () => {
-      const now = Date.now();
-      const cached = localStorage.getItem("termData");
 
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        const timeDiff = now - parsed.time;
-
-        if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
-          dispatch(setTermsData(parsed.data));
-          return;
-        }
+      if (termData.length > 0) {
+        return;
+      }else{
+        const data = await fetchTermsData();
+        dispatch(setTermsData(data));
       }
-
-      const data = await fetchTermsData();
-      dispatch(setTermsData(data));
-      localStorage.setItem("termData", JSON.stringify({ data, time: now }));
     };
 
     fetchAndCacheTermData();
@@ -1656,82 +1623,90 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
   }
 };
 
-  useEffect(() => {
-    const fetchAndDispatch = async (
-      fetchFn: () => Promise<any>,
-      dispatchFn: (data: any) => void,
-      key: string,
-      setStateFn?: (data: any) => void
-    ) => {
-      try {
-        const oneHour = 3600 * 1000;
-        let shouldFetch = true;
+// interior data
+useEffect(() => {
+  const loadData = async () => {
+    if (interiorData.length > 0) {
+      setInteriorArray(interiorData);
+    } else {
+      const data = await fetchInteriors();
+      dispatch(setInteriorData(data));
+      setInteriorArray(data);
+    }
+  };
+  loadData();
+}, [dispatch]);
 
-        const cached = localStorage.getItem(key);
-        if (cached) {
-          const { data, time } = JSON.parse(cached);
+// items
+useEffect(() => {
+  const loadData = async () => {
+    if (items.length > 0) {
+      setSingleItems(items);
+    } else {
+      const data = await getItemsData();
+      dispatch(setItemData(data));
+      setSingleItems(data);
+    }
+  };
+  loadData();
+}, [dispatch]);
 
-          if (Date.now() - time < oneHour) {
-            dispatch(dispatchFn(data));
-            setStateFn?.(data);
-            shouldFetch = false;
-          } else {
-            localStorage.removeItem(key);
-          }
-        }
+// product groups
+useEffect(() => {
+  const loadData = async () => {
+    if (products.length > 0) {
+      setProductGroups(products);
+    } else {
+      const data = await fetchProductGroups();
+      setProductGroups(data);
+      dispatch(setProducts(data));
+    }
+  };
+  loadData();
+}, [dispatch]);
 
-        if (shouldFetch) {
-          const freshData = await fetchFn();
-          dispatch(dispatchFn(freshData));
-          setStateFn?.(freshData);
-          localStorage.setItem(
-            key,
-            JSON.stringify({ data: freshData, time: Date.now() })
-          );
-        }
-      } catch (error) {
-        console.error(`Error fetching ${key}:`, error);
-      }
-    };
+// catalogues
+useEffect(() => {
+  const loadData = async () => {
+    if (catalogueData.length > 0) {
+      return;
+    } else {
+      const data = await fetchCatalogues();
+      dispatch(setCatalogs(data));
+    }
+  };
+  loadData();
+}, [dispatch]);
 
-    const fetchAllData = async () => {
-      await Promise.all([
-        fetchAndDispatch(
-          fetchInteriors,
-          setInteriorData,
-          "interiorData",
-          setInterior
-        ),
-        fetchAndDispatch(
-          getItemsData,
-          setItemData,
-          "itemData",
-          setSingleItems
-        ),
-        fetchAndDispatch(
-          fetchSalesAssociates,
-          setSalesAssociateData,
-          "salesAssociateData",
-          setSalesData
-        ),
-        fetchAndDispatch(
-          fetchProductGroups,
-          setProducts,
-          "productsData",
-          setAvailableProductGroups
-        ),
-        fetchAndDispatch(fetchCatalogues, setCatalogs, "catalogueData"),
-        fetchAndDispatch(
-          fetchCustomers,
-          setCustomerData,
-          "customerData",
-          setCustomers
-        ),
-      ]);
-    };
+// sales associates
+useEffect(() => {
+  const loadData = async () => {
+    if (salesAssociateData.length > 0) {
+      setSalesData(salesAssociateData);
+    } else {
+      const data = await fetchSalesAssociates();  
+      setSalesData(data);
+      dispatch(setSalesAssociateData(data));
+    }
+  };
+  loadData();
+}, [dispatch]);
 
-    fetchAllData();
-  }, [dispatch]);
+// customers
+useEffect(() => {
+  const loadData = async () => {
+    if (customerData.length > 0) {
+      setCustomers(customerData);
+    } else {
+      const data = await fetchCustomers();
+      setCustomers(data);
+      dispatch(setCustomerData(data));
+    }
+  };
+  loadData();
+}, [dispatch]);
+
+
 
 useEffect(() => {
   const getAreas = async () => {

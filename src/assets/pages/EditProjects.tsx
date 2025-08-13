@@ -337,21 +337,13 @@ const EditProjects = ({
   };
   useEffect(() => {
     const fetchAndCacheBankData = async () => {
-      const now = Date.now();
-      const cached = localStorage.getItem("bankData");
 
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        const timeDiff = now - parsed.time;
-        if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
-          dispatch(setBankData(parsed.data));
-          return;
-        }
+      if (bankData.length > 0) {
+        return;
+      }else{
+        const data = await fetchBankData();
+        dispatch(setBankData(data));
       }
-
-      const data = await fetchBankData();
-      dispatch(setBankData(data));
-      localStorage.setItem("bankData", JSON.stringify({ data, time: now }));
     };
 
     fetchAndCacheBankData();
@@ -359,22 +351,13 @@ const EditProjects = ({
 
   useEffect(() => {
     const fetchAndCacheTermData = async () => {
-      const now = Date.now();
-      const cached = localStorage.getItem("termData");
 
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        const timeDiff = now - parsed.time;
-
-        if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
-          dispatch(setTermsData(parsed.data));
-          return;
-        }
+      if (termData.length > 0) {
+        return;
+      }else{
+        const data = await fetchTermsData();
+        dispatch(setTermsData(data));
       }
-
-      const data = await fetchTermsData();
-      dispatch(setTermsData(data));
-      localStorage.setItem("termData", JSON.stringify({ data, time: now }));
     };
 
     fetchAndCacheTermData();
@@ -405,116 +388,89 @@ const EditProjects = ({
     }
   }, [projectData]);
 
-  const useFetchData = () => {
-    const fetchAndSetData = useCallback(
-      async (
-        fetchFn,
-        dispatchFn,
-        localStateSetter,
-        storeData,
-        keyName = ""
-      ) => {
-        try {
-          const oneHour = 3600 * 1000; // 1 hour in ms
-          let shouldFetch = true;
-
-          if (keyName) {
-            const cached = localStorage.getItem(keyName);
-            if (cached) {
-              const { data, time } = JSON.parse(cached);
-
-              // If cache is valid
-              if (Date.now() - time < oneHour) {
-                dispatch(dispatchFn(data));
-                if (localStateSetter) localStateSetter(data);
-                shouldFetch = false; // No need to fetch from server
-              } else {
-                localStorage.removeItem(keyName); // expired cache
-              }
-            }
-          }
-
-          // If store is empty or cache expired, fetch fresh
-          if (shouldFetch || storeData.length === 0) {
-            const data = await fetchFn();
-            dispatch(dispatchFn(data));
-            if (localStateSetter) localStateSetter(data);
-
-            if (keyName) {
-              localStorage.setItem(
-                keyName,
-                JSON.stringify({ data, time: Date.now() })
-              );
-            }
-          }
-        } catch (error) {
-          console.error(`Error fetching ${keyName || "data"}:`, error);
-        }
-      },
-      [dispatch]
-    );
-
-    useEffect(() => {
-      fetchAndSetData(
-        fetchInteriors,
-        setInteriorData,
-        setinterior,
-        interiorData,
-        "interiorData"
-      );
-
-      fetchAndSetData(
-        async () => {
-          const response = await fetchWithLoading(
-            "https://sheeladecor.netlify.app/.netlify/functions/server/getsingleproducts",
-            { credentials: "include" }
-          );
-          const data = await response.json();
-          return data.body || [];
-        },
-        setItemData,
-        setsingleitems,
-        items,
-        "itemsData"
-      );
-
-      fetchAndSetData(
-        fetchSalesAssociates,
-        setSalesAssociateData,
-        setsalesdata,
-        salesAssociateData,
-        "salesAssociateData"
-      );
-
-      fetchAndSetData(
-        fetchProductGroups,
-        setProducts,
-        setAvailableProductGroups,
-        products,
-        "productsData"
-      );
-
-      fetchAndSetData(
-        fetchCatalogues,
-        setCatalogs,
-        null,
-        catalogueData,
-        "catalogueData"
-      );
-
-      fetchAndSetData(
-        fetchCustomers,
-        setCustomerData,
-        setcustomers,
-        customerData,
-        "customerData"
-      );
-    }, [
-      dispatch
-    ]);
+// interior data
+useEffect(() => {
+  const loadData = async () => {
+    if (interiorData.length > 0) {
+      setinterior(interiorData);
+      return;
+    } else {
+      const data = await fetchInteriors();
+      dispatch(setInteriorData(data));
+      setinterior(data);
+    }
   };
+  loadData();
+}, [dispatch]);
 
-  useFetchData();
+// items
+useEffect(() => {
+  const loadData = async () => {
+    if (items.length > 0) {
+      setsingleitems(items);
+    } else {
+      const data = await getItemsData();
+      dispatch(setItemData(data));
+      setsingleitems(data);
+    }
+  };
+  loadData();
+}, [dispatch]);
+
+// product groups
+useEffect(() => {
+  const loadData = async () => {
+    if (products.length > 0) {
+      setProductGroups(products);
+    } else {
+      const data = await fetchProductGroups();
+      setProductGroups(data);
+      dispatch(setProducts(data));
+    }
+  };
+  loadData();
+}, [dispatch]);
+
+// catalogues
+useEffect(() => {
+  const loadData = async () => {
+    if (catalogueData.length > 0) {
+      return;
+    } else {
+      const data = await fetchCatalogues();
+      dispatch(setCatalogs(data));
+    }
+  };
+  loadData();
+}, [dispatch]);
+
+// sales associates
+useEffect(() => {
+  const loadData = async () => {
+    if (salesAssociateData.length > 0) {
+      setsalesdata(salesAssociateData);
+    } else {
+      const data = await fetchSalesAssociates();  
+      setsalesdata(data);
+      dispatch(setSalesAssociateData(data));
+    }
+  };
+  loadData();
+}, [dispatch]);
+
+// customers
+useEffect(() => {
+  const loadData = async () => {
+    if (customerData.length > 0) {
+      setcustomers(customerData);
+    } else {
+      const data = await fetchCustomers();
+      setcustomers(data);
+      dispatch(setCustomerData(data));
+    }
+  };
+  loadData();
+}, [dispatch]);
 
   const handleAreaChange = (mainindex, newArea) => {
     // Clone the selections array to avoid direct mutation of state
@@ -1444,36 +1400,21 @@ const handleItemTaxChange = (i: number, tax: string) => {
 
   const hasFetchedPayments = useRef(false);
   const [added, setAdded] = useState(false);
+
+  // === PAYMENT DATA ===
 useEffect(() => {
   let isMounted = true;
-
-  const fetchAndStoreData = async () => {
-    const now = Date.now();
-    const cacheExpiry = 5 * 60 * 1000; // 5 minutes
-
+  const fetchPayment = async () => {
     try {
-      // === PAYMENT DATA ===
-      let paymentData = [];
-      const cachedPayments = localStorage.getItem("paymentData");
+      const cachedPayments = paymentData;
 
-      if (cachedPayments) {
-        const parsed = JSON.parse(cachedPayments);
-        if (now - parsed.time < cacheExpiry && parsed.data?.length > 0) {
-          paymentData = parsed.data;
-        } else {
-          const fresh = await fetchPaymentData();
-          paymentData = fresh;
-          localStorage.setItem("paymentData", JSON.stringify({ data: fresh, time: now }));
-        }
+      if (cachedPayments.length > 0) {
+        setPayment(paymentData);
       } else {
-        const fresh = await fetchPaymentData();
-        paymentData = fresh;
-        localStorage.setItem("paymentData", JSON.stringify({ data: fresh, time: now }));
-      }
-
-      if (isMounted && Array.isArray(paymentData)) {
-        dispatch(setPaymentData(paymentData));
-
+          const fresh = await fetchPaymentData();
+          dispatch(setPaymentData(fresh));
+          setPayment(fresh);
+        }
         const totalReceived = paymentData.reduce((sum, record) => {
           if (record[1] === projectData.projectName) {
             const amount = parseFloat(record[2]);
@@ -1483,46 +1424,39 @@ useEffect(() => {
         }, 0);
 
         setReceived(totalReceived);
-      }
-
-      // === TAILOR DATA ===
-      let tailorData = [];
-      const cachedTailors = localStorage.getItem("tailorData");
-
-      if (cachedTailors) {
-        const parsed = JSON.parse(cachedTailors);
-        if (now - parsed.time < cacheExpiry && parsed.data?.length > 0) {
-          tailorData = parsed.data;
-        } else {
-          const fresh = await fetchTailorData();
-          tailorData = fresh;
-          localStorage.setItem("tailorData", JSON.stringify({ data: fresh, time: now }));
-        }
-      } else {
-        const fresh = await fetchTailorData();
-        tailorData = fresh;
-        localStorage.setItem("tailorData", JSON.stringify({ data: fresh, time: now }));
-      }
-
-      if (isMounted && Array.isArray(tailorData)) {
-        dispatch(setTailorData(tailorData));
-      }
-
-      if (isMounted) setAdded(true);
+      
     } catch (error) {
-      console.error("❌ Failed to fetch payment or tailor data:", error);
+      console.error("❌ Failed to fetch payment data:", error);
     }
   };
 
-  if (!added) {
-    fetchAndStoreData();
-  }
+  if (!added) fetchPayment();
 
   return () => {
     isMounted = false;
   };
 }, [added, dispatch, projectData.projectName]);
 
+// === TAILOR DATA ===
+useEffect(() => {
+
+
+  const fetchTailors = async () => {
+    try {
+      if (tailors.length > 0) {
+        setTailorsArray(tailors);
+      } else {
+          const fresh = await fetchTailorData();
+          dispatch(setTailorData(fresh));
+          setTailorsArray(fresh);
+        }
+    } catch (error) {
+      console.error("❌ Failed to fetch tailor data:", error);
+    }
+  };
+
+  fetchTailors();
+}, [dispatch, tailors]);
 
 useEffect(() => {
   const getAreas = async () => {
@@ -1585,10 +1519,6 @@ useEffect(() => {
         // ✅ Refresh payment data
         const latestPayments = await fetchPaymentData();
         dispatch(setPaymentData(latestPayments));
-        localStorage.setItem(
-          "paymentData",
-          JSON.stringify({ data: latestPayments, time: Date.now() })
-        );
       } else {
         alert("Error submitting payment");
       }
@@ -1621,10 +1551,6 @@ useEffect(() => {
     if (response.status == 200) {
         const latestPayments = await fetchPaymentData();
         dispatch(setPaymentData(latestPayments));
-        localStorage.setItem(
-          "paymentData",
-          JSON.stringify({ data: latestPayments, time: Date.now() })
-        )
       alert("Deleted");
       if (added) {
         setAdded(false);
@@ -1665,17 +1591,17 @@ useEffect(() => {
 
   useEffect(() => {
     async function taskData() {
-      const data = await fetchTaskData();
-      dispatch(setTasks(data));
-      setAdded(true);
+      if(Tasks.length == 0){
+        const data = await fetchTaskData();
+        dispatch(setTasks(data));
+      }
     }
-    if (!added) {
       taskData();
-    }
-  }, [dispatch, taskDialogOpen, added]);
+    
+  }, [dispatch, taskDialogOpen]);
 
   const deleteTask = async (name: string) => {
-    await fetchWithLoading(
+    const response = await fetchWithLoading(
       "https://sheeladecor.netlify.app/.netlify/functions/server/deletetask",
       {
         method: "POST",
@@ -1686,8 +1612,14 @@ useEffect(() => {
         body: JSON.stringify({ title: name }),
       }
     );
-
-    setAdded(false);
+    if(response.ok){
+      const data = await fetchTaskData();
+      dispatch(setTasks(data));
+      alert("Task Deleted");
+    }else{
+      alert("Error in Deleting Task");
+    }
+    
   };
 
   const bankDetails = ["123123", "!23123", "!2312331"];

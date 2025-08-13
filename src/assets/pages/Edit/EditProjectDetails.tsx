@@ -121,10 +121,6 @@ const EditProjectDetails = ({
       const data = await fetchInteriors();
       dispatch(setInteriorData(data));
       setInterior(data);
-      localStorage.setItem(
-        "interiorData",
-        JSON.stringify({ data, time: Date.now() })
-      );
       setName("");
       setEmail("");
       setPhoneNumber("");
@@ -155,10 +151,6 @@ const EditProjectDetails = ({
       const data = await fetchSalesAssociates();
       dispatch(setSalesAssociateData(data));
       setsalesdata(data);
-      localStorage.setItem(
-        "salesAssociateData",
-        JSON.stringify({ data, time: Date.now() })
-      );
       salesSetName("");
       salesSetEmail("");
       salesSetPhoneNumber("");

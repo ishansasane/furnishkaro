@@ -6,10 +6,11 @@
 import { Target } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { FaPlus } from "react-icons/fa";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setInteriorData, setSalesAssociateData } from "../Redux/dataSlice";
 import { fetchWithLoading } from "../Redux/fetchWithLoading";
 import Select from "react-select";
+import { RootState } from "../Redux/store";
 
 const ProjectDetails = ({
   selectedCustomer,
@@ -35,20 +36,10 @@ const ProjectDetails = ({
   setInterior,
 }) => {
 
-  useEffect(() => {
-    const loadInitialData = async () => {
-      try {
-        const interiors = await fetchInteriors();
-        const sales = await fetchSalesAssociates();
-        setInterior(interiors);
-        setSalesData(sales);
-      } catch (error) {
-        console.error("Failed to load initial interior/sales data:", error);
-      }
-    };
+  const dispatch = useDispatch();
+  const interiorData = useSelector((state: RootState) => state.data.interiors);
+  const salesAssociateData = useSelector((state : RootState) => state.data.salesAssociates);
 
-    loadInitialData();
-  }, []);
 
   async function fetchInteriors() {
     try {
@@ -70,7 +61,6 @@ const ProjectDetails = ({
   }
 
   const [isOpen, setIsOpen] = useState(false);
-  const dispatch = useDispatch();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phonenumber, setPhoneNumber] = useState("");
@@ -90,10 +80,6 @@ const ProjectDetails = ({
       const data = await fetchInteriors();
       dispatch(setInteriorData(data));
       setInterior(data);
-      localStorage.setItem(
-        "interiorData",
-        JSON.stringify({ data, time: Date.now() })
-      );
       setIsOpen(false);
       setName("");
       setEmail("");
@@ -106,6 +92,32 @@ const ProjectDetails = ({
   };
 
   const [isSalesOpen, setIsSalesOpen] = useState(false);
+
+  useEffect(() => {
+  const loadData = async () => {
+    if (interiorData.length > 0) {
+      setInteriorArray(interiorData);
+    } else {
+      const data = await fetchInteriors();
+      dispatch(setInteriorData(data));
+      setInteriorArray(data);
+    }
+  };
+  loadData();
+}, [dispatch]);
+
+useEffect(() => {
+  const loadData = async () => {
+    if (salesAssociateData.length > 0) {
+      setSalesData(salesAssociateData);
+    } else {
+      const data = await fetchSalesAssociates();  
+      setSalesData(data);
+      dispatch(setSalesAssociateData(data));
+    }
+  };
+  loadData();
+}, [dispatch]);
 
   async function fetchSalesAssociates() {
     try {
@@ -150,10 +162,6 @@ const ProjectDetails = ({
       const data = await fetchSalesAssociates();
       dispatch(setSalesAssociateData(data));
       setSalesData(data);
-      localStorage.setItem(
-        "salesAssociateData",
-        JSON.stringify({ data, time: Date.now() })
-      );
       setIsSalesOpen(false);
       salesSetName("");
       salesSetEmail("");

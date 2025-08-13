@@ -46,10 +46,6 @@ const OverviewPage = ({
   const [tailorreceived, setTailorReceived] = useState(0);
 
   useEffect(() => {
-    console.log(status)
-  })
-
-  useEffect(() => {
     let pendingCount = 0;
     let orderedCount = 0;
     let receivedCount = 0;
@@ -57,7 +53,6 @@ const OverviewPage = ({
     let tailorPendingCount = 0;
     let tailorOrderedCount = 0;
     let tailorReceivedCount = 0;
-    console.log(goodsArray);
     goodsArray.forEach(item => {
 
       switch (item.status) {
@@ -279,39 +274,62 @@ const OverviewPage = ({
           <div className="flex flex-col gap-3 max-h-48 overflow-y-auto">
             {tailorsArray && tailorsArray.map((tailor, index) => (
               <div key={index} className="flex flex-col border border-gray-200 !rounded-lg p-3 bg-gray-50">
-                <p className="text-sm font-semibold text-blue-600">{tailor.tailorData[0]}</p>
-                <p className="text-sm text-gray-600">{tailor.tailorData[1]}</p>
+                <p className="text-sm font-semibold text-blue-600">{tailor[0] ?? "NA"}</p>
+                <p className="text-sm text-gray-600">{tailor[1] ?? "NA"}</p>
               </div>
             ))}
           </div>
         </div>
 
         {/* Interior & Sales */}
-        <div className="flex flex-col gap-6">
-          {[{
-            title: "Interior Information",
-            data: interiorArray
-          }, {
-            title: "Sales Associate Information",
-            data: salesAssociateArray
-          }].map((section, idx) => (
-            <div key={idx} className="flex flex-col bg-white p-6 !rounded-xl shadow-sm">
-              <div className="flex flex-wrap flex-row justify-between items-center mb-4">
-                <p className="text-lg md:text-xl font-semibold text-gray-800">{section.title}</p>
-                <button
-                  onClick={() => setNavState("Customer & Project Details")}
-                  className="text-white bg-blue-600 !rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700 transition"
-                >
-                  View
-                </button>
-              </div>
-              <div className="flex flex-col sm:flex-row justify-between gap-3">
-                <p className="text-sm text-gray-800 max-w-[50%] break-words">{section.data[0]}</p>
-                <p className="text-sm text-gray-800 max-w-[50%] break-words">{section.data[2]}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+<div className="flex flex-col gap-6">
+  {/* Interior Information */}
+  <div className="flex flex-col bg-white p-6 !rounded-xl shadow-sm">
+    <div className="flex flex-wrap flex-row justify-between items-center mb-4">
+      <p className="text-lg md:text-xl font-semibold text-gray-800">
+        Interior Information
+      </p>
+      <button
+        onClick={() => setNavState("Customer & Project Details")}
+        className="text-white bg-blue-600 !rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700 transition"
+      >
+        View
+      </button>
+    </div>
+    <div className="flex flex-col sm:flex-row justify-between gap-3">
+      <p className="text-sm text-gray-800 max-w-[50%] break-words">
+        {interiorArray[0]}
+      </p>
+      <p className="text-sm text-gray-800 max-w-[50%] break-words">
+        {interiorArray[2]}
+      </p>
+    </div>
+  </div>
+
+  {/* Sales Associate Information */}
+  <div className="flex flex-col bg-white p-6 !rounded-xl shadow-sm">
+    <div className="flex flex-wrap flex-row justify-between items-center mb-4">
+      <p className="text-lg md:text-xl font-semibold text-gray-800">
+        Sales Associate Information
+      </p>
+      <button
+        onClick={() => setNavState("Customer & Project Details")}
+        className="text-white bg-blue-600 !rounded-lg px-4 py-2 text-sm font-medium hover:bg-blue-700 transition"
+      >
+        View
+      </button>
+    </div>
+    <div className="flex flex-col sm:flex-row justify-between gap-3">
+      <p className="text-sm text-gray-800 max-w-[50%] break-words">
+        {salesAssociateArray[0]}
+      </p>
+      <p className="text-sm text-gray-800 max-w-[50%] break-words">
+        {salesAssociateArray[2]}
+      </p>
+    </div>
+  </div>
+</div>
+
 
         {/* Tasks */}
         <div className="flex flex-col bg-white p-6 !rounded-xl shadow-sm">

@@ -113,11 +113,6 @@ const TaskDialog = forwardRef<{ submit: () => void }, TaskDialogProps>(
           );
 
           dispatch(setTasks(sortedTasks));
-          localStorage.setItem(
-            "taskData",
-            JSON.stringify({ data: sortedTasks, time: Date.now() })
-          );
-
           setediting(null);
           setrefresh(!refresh);
           onClose();
@@ -162,11 +157,6 @@ const TaskDialog = forwardRef<{ submit: () => void }, TaskDialogProps>(
           );
 
           dispatch(setTasks(sortedTasks));
-          localStorage.setItem(
-            "taskData",
-            JSON.stringify({ data: sortedTasks, time: Date.now() })
-          );
-
           setediting(null);
           setrefresh(true);
           onClose();
