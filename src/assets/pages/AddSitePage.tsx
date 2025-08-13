@@ -4,8 +4,11 @@ import React, { useState, useEffect } from "react";
 import CustomerDetails from "./CustomerDetails";
 import ProjectDetails from "./ProjectDetails";
 import { fetchWithLoading } from "../Redux/fetchWithLoading";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setPaymentData, setProjects } from "../Redux/dataSlice";
+import { RootState } from "../Redux/store";
+import { setCustomerData, setInteriorData, setSalesAssociateData } from "../Redux/dataSlice";
+import { Root } from "react-dom/client";
 
 // Utility function to format numbers
 const formatNumber = (num) => {
@@ -38,38 +41,57 @@ function AddSitePage() {
     due: 0,
   });
 
+  const customerData = useSelector((state : RootState) => state.data.customers);
+  const interiorData = useSelector((state : RootState) => state.data.interiors);
+  const salesAssociateData = useSelector((state : RootState) => state.data.salesAssociates);
+
   // Fetch dropdown data on first load
   useEffect(() => {
     async function fetchInitialData() {
       try {
         // Fetch Customers
-        const customerResponse = await fetchWithLoading(
-          "https://sheeladecor.netlify.app/.netlify/functions/server/getcustomerdata",
-          { credentials: "include" }
-        );
-        const customerJson = await customerResponse.json();
-        if (Array.isArray(customerJson.body)) {
-          setCustomers(customerJson.body);
+        if(customerData.length > 0){
+          setCustomers(customerData)
+        }else{
+          const customerResponse = await fetchWithLoading(
+            "https://sheeladecor.netlify.app/.netlify/functions/server/getcustomerdata",
+            { credentials: "include" }
+          );
+          const customerJson = await customerResponse.json();
+          if (Array.isArray(customerJson.body)) {
+            setCustomers(customerJson.body);
+          }
+          dispatch(setCustomerData(customerJson));
         }
 
         // Fetch Interiors
-        const interiorResponse = await fetchWithLoading(
-          "https://sheeladecor.netlify.app/.netlify/functions/server/getinteriordata",
-          { credentials: "include" }
-        );
-        const interiorJson = await interiorResponse.json();
-        if (Array.isArray(interiorJson.body)) {
-          setInterior(interiorJson.body);
+        if(interiorData.length > 0){
+          setInterior(interiorData);
+        }else{
+          const interiorResponse = await fetchWithLoading(
+            "https://sheeladecor.netlify.app/.netlify/functions/server/getinteriordata",
+            { credentials: "include" }
+          );
+          const interiorJson = await interiorResponse.json();
+          if (Array.isArray(interiorJson.body)) {
+            setInterior(interiorJson.body);
+          }
+          dispatch(setInteriorData(interiorJson));
         }
 
         // Fetch Sales Associates
-        const salesResponse = await fetchWithLoading(
-          "https://sheeladecor.netlify.app/.netlify/functions/server/getsalesassociatedata",
-          { credentials: "include" }
-        );
-        const salesJson = await salesResponse.json();
-        if (Array.isArray(salesJson.body)) {
-          setSalesData(salesJson.body);
+        if(salesAssociateData.length > 0){
+          salesData(salesAssociateData);
+        }else{
+          const salesResponse = await fetchWithLoading(
+            "https://sheeladecor.netlify.app/.netlify/functions/server/getsalesassociatedata",
+            { credentials: "include" }
+          );
+          const salesJson = await salesResponse.json();
+          if (Array.isArray(salesJson.body)) {
+            setSalesData(salesJson.body);
+          }
+          dispatch(setSalesAssociateData(salesJson));
         }
       } catch (error) {
         console.error("❌ Error fetching initial dropdown data:", error);
@@ -184,6 +206,7 @@ function AddSitePage() {
       discountType: row[20],
       bankDetails: deepClone(parseSafely(row[21], [])),
       termsConditions: deepClone(parseSafely(row[22], [])),
+      defaulter : deepClone(row[23])
     }));
 
     return projects;
@@ -225,6 +248,7 @@ function AddSitePage() {
         discountType: "",
         bankDetails: JSON.stringify({}),
         termsConditions: JSON.stringify([]),
+        defaulter : "FALSE"
       };
 
       const projectResponse = await fetchWithLoading(
@@ -243,11 +267,6 @@ function AddSitePage() {
         alert("✅ Project saved successfully");
         const updatedData = await fetchProjectData();
         dispatch(setProjects(updatedData));
-        localStorage.setItem(
-          "projectData",
-          JSON.stringify({ data: updatedData, time: Date.now() })
-        );
-
         const customerName = selectedCustomer?.Name || "NA";
         const project = projectName || "NA";
         const received = paidAmount || 0;
@@ -281,10 +300,6 @@ function AddSitePage() {
         if (paymentResponse.ok) {
           const latestPayments = await fetchPaymentData();
           dispatch(setPaymentData(latestPayments));
-          localStorage.setItem(
-            "paymentData",
-            JSON.stringify({ data: latestPayments, time: Date.now() })
-          );
           alert("✅ Payment Created Successfully");
         } else {
           const errorText = await paymentResponse.text();
