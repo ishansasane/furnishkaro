@@ -245,7 +245,6 @@ function Reports() {
             });
 
             setProjectPayments(paymentSums);
-            console.log(paymentSums);
           }
         } else {
           console.error("Failed to fetch payment data:", paymentRes.status);

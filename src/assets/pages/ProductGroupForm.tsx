@@ -96,7 +96,6 @@ const ProductGroupForm: React.FC = () => {
       }
 
       const result = await response.json();
-      console.log("Saved Group:", result);
 
       const data = await fetchProductGroups();
       dispatch(setProducts(data));

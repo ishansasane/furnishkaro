@@ -282,9 +282,6 @@ function AddSitePage() {
           PaymentMode: paymentMode,
           Remarks: remarks,
         };
-
-        console.log("➡️ Sending Payment Payload:", paymentPayload);
-
         const paymentResponse = await fetchWithLoading(
           "https://sheeladecor.netlify.app/.netlify/functions/server/addPayment",
           {

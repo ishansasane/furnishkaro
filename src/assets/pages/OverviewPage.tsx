@@ -103,8 +103,6 @@ const OverviewPage = ({
   useEffect(() => {
     if (!projectData?.projectName || !paymentData?.length) return;
 
-    console.log(paymentData);
-
     const total = paymentData
       .filter(payment => payment[1] == projectData.projectName)
       .reduce((sum, payment) => {

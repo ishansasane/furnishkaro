@@ -176,29 +176,14 @@ useEffect(() => {
   // Handle sales associate selection
   const handleSalesAssociateChange = (selectedOption) => {
     const selectedValue = selectedOption ? selectedOption.value : "";
-    console.log("Selected Sales Associate:", selectedValue);
-    console.log("Previous salesAssociateArray:", salesAssociateArray);
     setSalesAssociateArray(selectedValue);
-    console.log("New salesAssociateArray:", selectedValue);
   };
 
   // Handle interior selection
   const handleInteriorChange = (selectedOption) => {
     const selectedValue = selectedOption ? selectedOption.value : "";
-    console.log("Selected Interior:", selectedValue);
-    console.log("Previous interiorArray:", interiorArray);
     setInteriorArray(selectedValue);
-    console.log("New interiorArray:", selectedValue);
   };
-
-  // Debug state changes
-  useEffect(() => {
-    console.log("salesAssociateArray updated:", salesAssociateArray);
-  }, [salesAssociateArray]);
-
-  useEffect(() => {
-    console.log("interiorArray updated:", interiorArray);
-  }, [interiorArray]);
 
   // Prepare options for react-select
   const interiorOptions = Array.isArray(interior)

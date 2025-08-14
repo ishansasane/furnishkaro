@@ -399,8 +399,6 @@ const handleProductGroupChange = (
     newMatchedItems = [product];
   }
 
-  console.log(newMatchedItems);
-
   updatedSelections[mainindex].areacollection[i].items = newMatchedItems;
   setSelections(updatedSelections);
 
@@ -421,8 +419,6 @@ const handleProductGroupChange = (
   }));
 
   setGoodsArray([...filteredGoods, ...newGoods]);
-
-  console.log("Goods Array :",goodsArray);
 
   // === Update tailorsArray
   const filteredTailors = tailorsArray.filter(

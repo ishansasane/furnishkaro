@@ -22,7 +22,6 @@ const EditCustomerDetails = ({
   };
 
   useEffect(() => {
-    console.log(selectedCustomer);
     setSearchTerm(selectedCustomer ? selectedCustomer[0] : "");
   }, [selectedCustomer]);
 

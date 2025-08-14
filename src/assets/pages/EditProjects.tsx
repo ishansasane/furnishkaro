@@ -97,8 +97,6 @@ const EditProjects = ({
     setDiscountType(discountType);
     setBank(projectData.bankDetails || "NA");
     setTerms(projectData.termsCondiditions || "NA");
-    console.log(projectData.bankDetails);
-    console.log(projectData.termsCondiditions);
     changeStatus(projectData.status || "Approved");
   }, []);
 
@@ -383,9 +381,6 @@ const EditProjects = ({
     setProjectAddress(projectData.projectAddres);
     setProjectName(projectData.projectName);
     setProjectReference(projectData.projectReference);
-    if (Object.isFrozen(additionalItems)) {
-      console.log("frozen");
-    }
   }, [projectData]);
 
 // interior data
@@ -557,8 +552,6 @@ const handleProductGroupChange = (
     newMatchedItems = [product];
   }
 
-  console.log(newMatchedItems);
-
   updatedSelections[mainindex].areacollection[i].items = newMatchedItems;
   setSelections(updatedSelections);
 
@@ -633,7 +626,6 @@ const handleProductGroupChange = (
       .filter((item) => item);
 
     setSelections(updatedSelections);
-    console.log(updatedSelections[mainindex].areacollection[i].catalogue);
   };
 
   const handleCompanyChange = (
@@ -700,8 +692,6 @@ const handleProductGroupChange = (
 
     updatedSelections[mainindex].areacollection[i].designNo = designNo;
     setSelections(updatedSelections);
-
-    console.log(updatedSelections);
   };
 
   const handleReferenceChange = (mainindex: number, i: number, reference) => {
@@ -1346,7 +1336,6 @@ const handleItemTaxChange = (i: number, tax: string) => {
     setAdditionaItems(deepClone(projectData.additionalItems));
     setGoodsArray(deepClone(projectData.goodsArray));
     setTailorsArray(deepClone(projectData.tailorsArray));
-    console.log(projectData.goodsArray);
   }, [projectData]);
 
   const [selectedMainIndex, setSelectedMainIndex] = useState(null);
@@ -1479,8 +1468,6 @@ useEffect(() => {
 
   const addPaymentFunction = async () => {
     const isEdit = editPayments != null;
-
-    console.log(isEdit);
 
     const url = isEdit
       ? "https://sheeladecor.netlify.app/.netlify/functions/server/updatePayments"
@@ -1629,7 +1616,6 @@ useEffect(() => {
     const formattedData = data.split(",").map((item) => item.trim()); // split and trim spaces
     const newtailors = [...tailorsArray];
     newtailors[index].tailorData = formattedData;
-    console.log(newtailors[index]);
     setTailorsArray(newtailors);
   };
 

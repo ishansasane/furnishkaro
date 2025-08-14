@@ -386,9 +386,6 @@ useEffect(() => {
         fetchedProjects = projectsData;
       }
 
-      console.log(fetchedProjects);
-    
-
       // Step 2: Calculate totals (only for non-defaulters)
       let totalAmount = 0;
       let discount = 0;
@@ -427,8 +424,6 @@ useEffect(() => {
 
       setReceived(totalReceived);
 
-      console.log("Received : "+totalReceived);
-      console.log("Total Amount : " + totalAmount);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -440,7 +435,7 @@ useEffect(() => {
 
   const handleMarkAsCompleted = async (status, name) => {
     try {
-      const response = await fetch(
+      const response = await fetchWithLoading(
         "https://sheeladecor.netlify.app/.netlify/functions/server/updatetask",
         {
           method: "POST",

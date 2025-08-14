@@ -33,8 +33,6 @@ const ProductGroupDialog: React.FC<ProductGroupDialogProps> = ({
       : "https://sheeladecor.netlify.app/.netlify/functions/server/addproductgroup";
     const method = editingGroup ? "POST" : "POST";
 
-    console.log(needsTailoring);
-
     const response = await fetchWithLoading(url, {
       method,
       headers: { "Content-Type": "application/json" },

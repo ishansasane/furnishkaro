@@ -102,7 +102,6 @@ const ProductFormPage: React.FC = () => {
       }
 
       const result = await response.json();
-      console.log("Saved to backend:", result);
 
       const data = await getItemsData();
       dispatch(setItemData(data));
