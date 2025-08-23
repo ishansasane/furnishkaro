@@ -73,10 +73,6 @@ export default function Customers() {
       const data = await fetchCustomers();
       dispatch(setCustomerData(data));
       setCustomers(data);
-      localStorage.setItem(
-        "customerData",
-        JSON.stringify({ data, time: Date.now() })
-      );
       alert("Customer deleted");
       setreset(!reset);
     } else {
@@ -89,27 +85,16 @@ export default function Customers() {
 
   useEffect(() => {
     const fetchData = async () => {
-      // Check localStorage first
-      const cached = localStorage.getItem("customerData");
-      const now = Date.now();
 
-      if (cached && !reset) {
-        const parsed = JSON.parse(cached);
-        const timeDiff = now - parsed.time;
-
-        // Use cached data if it's fresh (e.g., within 5 minutes)
-        if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
-          dispatch(setCustomerData(parsed.data));
-          setCustomers(parsed.data);
+      if (customerData.length != 0) {
+          setCustomers(customerData);
           return;
-        }
+      }else{
+        // If no cached data or reset triggered, fetch from server
+        const data = await fetchCustomers();
+        dispatch(setCustomerData(data));
+        setCustomers(data);
       }
-
-      // If no cached data or reset triggered, fetch from server
-      const data = await fetchCustomers();
-      dispatch(setCustomerData(data));
-      setCustomers(data);
-      localStorage.setItem("customerData", JSON.stringify({ data, time: now }));
 
       if (reset) {
         setDialogOpen(false);
@@ -118,7 +103,7 @@ export default function Customers() {
     };
 
     fetchData();
-  }, [dispatch]);
+  }, [customerData, dispatch, reset]);
 
   // Filter customers based on search term
   const filteredCustomers = customers.filter((customer) =>

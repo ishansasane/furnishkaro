@@ -181,6 +181,7 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
       discountType: row[20],
       bankDetails: deepClone(parseSafely(row[21], [])),
       termsConditions: deepClone(parseSafely(row[22], [])),
+      defaulter : row[23]
     }));
 
     return projects;
@@ -197,10 +198,6 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
     if(response.ok){
       const updatedData = await fetchProjectData();
       dispatch(setProjects(updatedData));
-      localStorage.setItem(
-        "projectData",
-        JSON.stringify({ data: updatedData, time: Date.now() })
-      );
       alert("Project marked as Defaulter");
     }
   }
@@ -215,12 +212,7 @@ const PaymentsSection: React.FC<PaymentsSectionProps> = ({
 
     if(response.ok){
       const updatedData = await fetchProjectData();
-      dispatch(setProjects(updatedData));
-      localStorage.setItem(
-        "projectData",
-        JSON.stringify({ data: updatedData, time: Date.now() })
-      );
-      
+      dispatch(setProjects(updatedData));      
       alert("Project removed as Defaulter");
     }
   }
