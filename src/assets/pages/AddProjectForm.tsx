@@ -1623,11 +1623,11 @@ const handleDiscountChange = (newDiscount: number, newDiscountType: string) => {
 useEffect(() => {
   const loadData = async () => {
     if (interiorData.length > 0) {
-      setInteriorArray(interiorData);
+      setInterior(interiorData);
     } else {
       const data = await fetchInteriors();
       dispatch(setInteriorData(data));
-      setInteriorArray(data);
+      setInterior(data);
     }
   };
   loadData();
