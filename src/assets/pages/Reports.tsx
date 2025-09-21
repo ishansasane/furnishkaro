@@ -102,6 +102,9 @@ function Reports() {
       date: row[18],
       grandTotal: row[19],
       discountType: row[20],
+      bankDetails: deepClone(parseSafely(row[21], [])),
+      termsConditions: deepClone(parseSafely(row[22], [])),
+      defaulter : deepClone(row[23])
     }));
 
     return projects;
@@ -147,31 +150,13 @@ function Reports() {
   useEffect(() => {
     const fetchAndSetTasks = async () => {
       try {
-        const cached = localStorage.getItem("taskData");
-        const now = Date.now();
 
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          const timeDiff = now - parsed.time;
-
-          if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
-            const sortedTasks = parsed.data.sort(
-              (a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime()
-            );
-            dispatch(setTasks(sortedTasks));
-            return;
-          }
+        if (taskData.length != 0) {
+          return;
+        }else{
+          const data = await fetchTaskData();
+          dispatch(setTasks(sorted));
         }
-
-        const data = await fetchTaskData();
-        const sorted = data.sort(
-          (a, b) => new Date(a[2]).getTime() - new Date(b[2]).getTime()
-        );
-        dispatch(setTasks(sorted));
-        localStorage.setItem(
-          "taskData",
-          JSON.stringify({ data: sorted, time: now })
-        );
       } catch (error) {
         console.error("Failed to fetch tasks:", error);
       }
@@ -184,42 +169,21 @@ function Reports() {
 
   useEffect(() => {
     const fetchData = async () => {
-      const now = Date.now();
 
-      // ---------- Handle Project Data ----------
-      const cachedProjects = localStorage.getItem("projectData");
-      let projects = [];
 
-      if (cachedProjects) {
-        const parsed = JSON.parse(cachedProjects);
-        const timeDiff = now - parsed.time;
-
-        if (timeDiff < 5 * 60 * 1000 && parsed.data.length > 0) {
-          dispatch(setProjects(parsed.data));
-          setProjectsData(parsed.data);
-          projects = parsed.data;
-        } else {
-          projects = await fetchProjectData();
-          dispatch(setProjects(projects));
-          setProjectsData(projects);
-          localStorage.setItem(
-            "projectData",
-            JSON.stringify({ data: projects, time: now })
-          );
-        }
-      } else {
-        projects = await fetchProjectData();
-        dispatch(setProjects(projects));
-        setProjectsData(projects);
-        localStorage.setItem(
-          "projectData",
-          JSON.stringify({ data: projects, time: now })
-        );
+      if (projectData.length != 0) {
+          setProjectsData(projectData);
       }
-
+      else{
+          const data = await fetchProjectData();
+          dispatch(setProjects(data));
+          setProjectsData(data);
+      }
+    
       // ---------- Handle Payments ----------
       try {
-        const paymentRes = await fetchWithLoading(
+        if(paymentsData.length == 0){
+                  const paymentRes = await fetchWithLoading(
           "https://sheeladecor.netlify.app/.netlify/functions/server/getPayments",
           {
             credentials: "include",
@@ -233,7 +197,7 @@ function Reports() {
             setPayments(paymentData.message);
 
             // Group payments by project name
-            const paymentSums = projects.map((project) => {
+            const paymentSums = projectData.map((project) => {
               const totalPaid = paymentData.message
                 .filter((payment: any[]) => payment[1] == project.projectName)
                 .reduce(
@@ -248,6 +212,22 @@ function Reports() {
           }
         } else {
           console.error("Failed to fetch payment data:", paymentRes.status);
+        }
+        }else{
+          const paymentSums = projectData.map((project) => {
+          const totalPaid = paymentsData
+            .filter((payment: any[]) => payment[1] == project.projectName)
+            .reduce(
+              (acc: number, payment: any[]) =>
+                acc + (parseFloat(payment[2]) || 0),
+                0
+              );
+            return totalPaid;
+          });
+
+          setProjectPayments(paymentSums);
+          console.log(paymentSums);
+          setPayments(paymentsData);
         }
       } catch (error) {
         console.error("Error fetching payments:", error);
