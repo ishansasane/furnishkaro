@@ -42,7 +42,13 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     if (!token) {
-      window.location.href = "https://sheeladecor.free.nf/";
+      // In development mode, navigate to login instead of external redirect
+      if (import.meta.env.DEV) {
+        console.warn("No auth token found - redirecting to /login");
+        window.location.href = "/login";
+      } else {
+        window.location.href = "https://sheeladecor.free.nf/";
+      }
     } else if (!isAllowed) {
       alert("🚫 You do not have permission to access this page.");
       window.location.href = "/";
